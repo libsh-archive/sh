@@ -21,21 +21,21 @@
 #define SHCONCRETEREGULAROPIMPL_HPP
 #include <numeric>
 #include <cmath>
-#include "ShEval.hpp"
-#include "ShDebug.hpp"
-#include "ShError.hpp"
-#include "ShTypeInfo.hpp"
-#include "ShVariant.hpp"
+#include "Eval.hpp"
+#include "Debug.hpp"
+#include "Error.hpp"
+#include "TypeInfo.hpp"
+#include "Variant.hpp"
 
 namespace SH {
 
 /* Partial specialization for different operations */ 
 /* The operators that depend on cmath different library functions
- * are specialized for float and double types in ShEval.cpp 
+ * are specialized for float and double types in Eval.cpp 
  * right now
  */
 // TODO make this cleaner?
-// TODO use the information from sdt's ShOperationInfo to decide
+// TODO use the information from sdt's OperationInfo to decide
 // whether to do the ao/bo/co special case for scalar
 // ops where we step through the destination tuple but always
 // use the same element from the scalar src tuple. 
@@ -43,17 +43,17 @@ namespace SH {
 // do a partial specialization on the class
 // and define the doop function
 //
-#define SHCRO_UNARY_OP(op, opsrc)\
+#define CRO_UNARY_OP(op, opsrc)\
 template<typename T>\
-struct ShConcreteRegularOp<op, T>\
+struct ConcreteRegularOp<op, T>\
 { \
-  typedef ShDataVariant<T, SH_HOST> Variant; \
+  typedef DataVariant<T, HOST> Variant; \
   typedef Variant* DataPtr; \
   typedef const Variant* DataCPtr; \
 \
   static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) \
   {\
-    SH_DEBUG_ASSERT(dest && a);\
+    DEBUG_ASSERT(dest && a);\
     int ao = a->size() > 1;\
   \
     typename Variant::iterator D = dest->begin();\
@@ -64,17 +64,17 @@ struct ShConcreteRegularOp<op, T>\
   } \
 };
 
-#define SHCRO_BINARY_OP(op, opsrc)\
+#define CRO_BINARY_OP(op, opsrc)\
 template<typename T>\
-struct ShConcreteRegularOp<op, T>\
+struct ConcreteRegularOp<op, T>\
 { \
-  typedef ShDataVariant<T, SH_HOST> Variant; \
+  typedef DataVariant<T, HOST> Variant; \
   typedef Variant* DataPtr; \
   typedef const Variant* DataCPtr; \
 \
   static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) \
   {\
-    SH_DEBUG_ASSERT(dest && a && b);\
+    DEBUG_ASSERT(dest && a && b);\
     int ao = a->size() > 1;\
     int bo = b->size() > 1;\
   \
@@ -88,17 +88,17 @@ struct ShConcreteRegularOp<op, T>\
   } \
 };
 
-#define SHCRO_TERNARY_OP(op, opsrc)\
+#define CRO_TERNARY_OP(op, opsrc)\
 template<typename T>\
-struct ShConcreteRegularOp<op, T>\
+struct ConcreteRegularOp<op, T>\
 { \
-  typedef ShDataVariant<T, SH_HOST> Variant; \
+  typedef DataVariant<T, HOST> Variant; \
   typedef Variant* DataPtr; \
   typedef const Variant* DataCPtr; \
 \
   static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) \
   {\
-    SH_DEBUG_ASSERT(dest && a && b && c);\
+    DEBUG_ASSERT(dest && a && b && c);\
     int ao = a->size() > 1;\
     int bo = b->size() > 1;\
     int co = c->size() > 1;\
@@ -115,28 +115,28 @@ struct ShConcreteRegularOp<op, T>\
 };
 
 // Unary ops
-SHCRO_UNARY_OP(SH_OP_ABS, abs(*A));
-SHCRO_UNARY_OP(SH_OP_ACOS, acos(*A));
-SHCRO_UNARY_OP(SH_OP_ASIN, asin(*A));
-SHCRO_UNARY_OP(SH_OP_ASN, (*A));
-SHCRO_UNARY_OP(SH_OP_ATAN, atan(*A));
-SHCRO_UNARY_OP(SH_OP_CBRT, cbrt(*A));
-SHCRO_UNARY_OP(SH_OP_CEIL, ceil(*A));
+CRO_UNARY_OP(OP_ABS, abs(*A));
+CRO_UNARY_OP(OP_ACOS, acos(*A));
+CRO_UNARY_OP(OP_ASIN, asin(*A));
+CRO_UNARY_OP(OP_ASN, (*A));
+CRO_UNARY_OP(OP_ATAN, atan(*A));
+CRO_UNARY_OP(OP_CBRT, cbrt(*A));
+CRO_UNARY_OP(OP_CEIL, ceil(*A));
 
 #ifdef _WIN32
-SHCRO_UNARY_OP(SH_OP_ACOSH, log((*A) + sqrt((*A) * (*A) - 1)));
-SHCRO_UNARY_OP(SH_OP_ASINH, log((*A) + sqrt((*A) * (*A) + 1)));
-SHCRO_UNARY_OP(SH_OP_ATANH, log((1.0 + (*A))/(1.0 - (*A)))/2.0);
+CRO_UNARY_OP(OP_ACOSH, log((*A) + sqrt((*A) * (*A) - 1)));
+CRO_UNARY_OP(OP_ASINH, log((*A) + sqrt((*A) * (*A) + 1)));
+CRO_UNARY_OP(OP_ATANH, log((1.0 + (*A))/(1.0 - (*A)))/2.0);
 #else
-SHCRO_UNARY_OP(SH_OP_ACOSH, acosh(*A));
-SHCRO_UNARY_OP(SH_OP_ASINH, asinh(*A));
-SHCRO_UNARY_OP(SH_OP_ATANH, atanh(*A));
+CRO_UNARY_OP(OP_ACOSH, acosh(*A));
+CRO_UNARY_OP(OP_ASINH, asinh(*A));
+CRO_UNARY_OP(OP_ATANH, atanh(*A));
 #endif
 
 template<typename T>
-struct ShConcreteRegularOp<SH_OP_CMUL, T>
+struct ConcreteRegularOp<OP_CMUL, T>
 {
-  typedef ShDataVariant<T, SH_HOST> Variant; 
+  typedef DataVariant<T, HOST> Variant; 
   typedef Variant* DataPtr; 
   typedef const Variant* DataCPtr; 
 
@@ -144,18 +144,18 @@ struct ShConcreteRegularOp<SH_OP_CMUL, T>
   {
     // dest->size should be 1 and a->size == b->size
     (*dest)[0] = std::accumulate(a->begin(), a->end(), 
-                      ShDataTypeInfo<T, SH_HOST>::One, 
+                      DataTypeInfo<T, HOST>::One, 
                       std::multiplies<typename Variant::DataType>());
   }
 };
 
-SHCRO_UNARY_OP(SH_OP_COS, cos(*A));
-SHCRO_UNARY_OP(SH_OP_COSH, cosh(*A));
+CRO_UNARY_OP(OP_COS, cos(*A));
+CRO_UNARY_OP(OP_COSH, cosh(*A));
 
 template<typename T>
-struct ShConcreteRegularOp<SH_OP_CSUM, T>
+struct ConcreteRegularOp<OP_CSUM, T>
 {
-  typedef ShDataVariant<T, SH_HOST> Variant; 
+  typedef DataVariant<T, HOST> Variant; 
   typedef Variant* DataPtr; 
   typedef const Variant* DataCPtr; 
 
@@ -163,24 +163,24 @@ struct ShConcreteRegularOp<SH_OP_CSUM, T>
   {
     // dest->size should be 1 and a->size == b->size
     (*dest)[0] = std::accumulate(a->begin(), a->end(), 
-                      ShDataTypeInfo<T, SH_HOST>::Zero, 
+                      DataTypeInfo<T, HOST>::Zero, 
                       std::plus<typename Variant::DataType>());
   }
 };
 
-SHCRO_UNARY_OP(SH_OP_EXP, exp(*A));
-SHCRO_UNARY_OP(SH_OP_EXP2, exp2(*A));
-SHCRO_UNARY_OP(SH_OP_EXP10, exp10(*A));
-SHCRO_UNARY_OP(SH_OP_FLR, floor(*A));
-SHCRO_UNARY_OP(SH_OP_FRAC, frac(*A));
-SHCRO_UNARY_OP(SH_OP_LOG, log(*A));
-SHCRO_UNARY_OP(SH_OP_LOG2, log(*A));
-SHCRO_UNARY_OP(SH_OP_LOG10, log10(*A));
+CRO_UNARY_OP(OP_EXP, exp(*A));
+CRO_UNARY_OP(OP_EXP2, exp2(*A));
+CRO_UNARY_OP(OP_EXP10, exp10(*A));
+CRO_UNARY_OP(OP_FLR, floor(*A));
+CRO_UNARY_OP(OP_FRAC, frac(*A));
+CRO_UNARY_OP(OP_LOG, log(*A));
+CRO_UNARY_OP(OP_LOG2, log(*A));
+CRO_UNARY_OP(OP_LOG10, log10(*A));
 
 template<typename T>
-struct ShConcreteRegularOp<SH_OP_LIT, T>
+struct ConcreteRegularOp<OP_LIT, T>
 {
-  typedef ShDataVariant<T, SH_HOST> Variant; 
+  typedef DataVariant<T, HOST> Variant; 
   typedef Variant* DataPtr; 
   typedef const Variant* DataCPtr; 
   typedef typename Variant::DataType DataType;
@@ -201,15 +201,15 @@ struct ShConcreteRegularOp<SH_OP_LIT, T>
 };
 
 template<typename T>
-struct ShConcreteRegularOp<SH_OP_HASH, T>
+struct ConcreteRegularOp<OP_HASH, T>
 {
-  typedef ShDataVariant<T, SH_HOST> Variant; 
+  typedef DataVariant<T, HOST> Variant; 
   typedef Variant* DataPtr; 
   typedef const Variant* DataCPtr; 
 
   static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) 
   {
-    SH_DEBUG_ASSERT(dest && a);
+    DEBUG_ASSERT(dest && a);
     typename Variant::iterator D = dest->begin();
     typename Variant::const_iterator A = a->begin();
     for(; D != dest->end(); ++A, ++D) (*D) = (*A);
@@ -218,15 +218,15 @@ struct ShConcreteRegularOp<SH_OP_HASH, T>
 };
 
 template<typename T>
-struct ShConcreteRegularOp<SH_OP_NOISE, T>
+struct ConcreteRegularOp<OP_NOISE, T>
 {
-  typedef ShDataVariant<T, SH_HOST> Variant; 
+  typedef DataVariant<T, HOST> Variant; 
   typedef Variant* DataPtr; 
   typedef const Variant* DataCPtr; 
 
   static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) 
   {
-    SH_DEBUG_ASSERT(dest && a);
+    DEBUG_ASSERT(dest && a);
     typename Variant::iterator D = dest->begin();
     typename Variant::const_iterator A = a->begin();
     for(; D != dest->end(); ++A, ++D) (*D) = (*A);
@@ -235,17 +235,17 @@ struct ShConcreteRegularOp<SH_OP_NOISE, T>
 };
 
 template<typename T>
-struct ShConcreteRegularOp<SH_OP_NORM, T>
+struct ConcreteRegularOp<OP_NORM, T>
 {
-  typedef ShDataVariant<T, SH_HOST> Variant; 
+  typedef DataVariant<T, HOST> Variant; 
   typedef Variant* DataPtr; 
   typedef const Variant* DataCPtr; 
 
   static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) 
   {
-    SH_DEBUG_ASSERT(dest && a);
+    DEBUG_ASSERT(dest && a);
     typename Variant::DataType m = sqrt(std::inner_product(a->begin(), a->end(), 
-          a->begin(), ShDataTypeInfo<T, SH_HOST>::Zero));
+          a->begin(), DataTypeInfo<T, HOST>::Zero));
 
     typename Variant::iterator D = dest->begin();
     typename Variant::const_iterator A = a->begin();
@@ -253,30 +253,30 @@ struct ShConcreteRegularOp<SH_OP_NORM, T>
   }
 };
 
-SHCRO_UNARY_OP(SH_OP_RCP, rcp(*A));
-SHCRO_UNARY_OP(SH_OP_RND, rnd(*A));
-SHCRO_UNARY_OP(SH_OP_RSQ, rsq(*A));
-SHCRO_UNARY_OP(SH_OP_SIN, sin(*A));
-SHCRO_UNARY_OP(SH_OP_SINH, sinh(*A));
-SHCRO_UNARY_OP(SH_OP_SGN, sgn(*A));
-SHCRO_UNARY_OP(SH_OP_SQRT, sqrt(*A));
-SHCRO_UNARY_OP(SH_OP_TAN, tan(*A));
-SHCRO_UNARY_OP(SH_OP_TANH, tan(*A));
+CRO_UNARY_OP(OP_RCP, rcp(*A));
+CRO_UNARY_OP(OP_RND, rnd(*A));
+CRO_UNARY_OP(OP_RSQ, rsq(*A));
+CRO_UNARY_OP(OP_SIN, sin(*A));
+CRO_UNARY_OP(OP_SINH, sinh(*A));
+CRO_UNARY_OP(OP_SGN, sgn(*A));
+CRO_UNARY_OP(OP_SQRT, sqrt(*A));
+CRO_UNARY_OP(OP_TAN, tan(*A));
+CRO_UNARY_OP(OP_TANH, tan(*A));
 
 // Binary ops
-SHCRO_BINARY_OP(SH_OP_ADD, (*A) + (*B));
-SHCRO_BINARY_OP(SH_OP_ATAN2, atan2((*A), (*B)));
-SHCRO_BINARY_OP(SH_OP_DIV, (*A) / (*B));
-SHCRO_BINARY_OP(SH_OP_MAX, max((*A), (*B))); 
-SHCRO_BINARY_OP(SH_OP_MIN, min((*A), (*B))); 
-SHCRO_BINARY_OP(SH_OP_MOD, (*A) % (*B)); 
-SHCRO_BINARY_OP(SH_OP_MUL, (*A) * (*B));
-SHCRO_BINARY_OP(SH_OP_POW, pow((*A), (*B)));
+CRO_BINARY_OP(OP_ADD, (*A) + (*B));
+CRO_BINARY_OP(OP_ATAN2, atan2((*A), (*B)));
+CRO_BINARY_OP(OP_DIV, (*A) / (*B));
+CRO_BINARY_OP(OP_MAX, max((*A), (*B))); 
+CRO_BINARY_OP(OP_MIN, min((*A), (*B))); 
+CRO_BINARY_OP(OP_MOD, (*A) % (*B)); 
+CRO_BINARY_OP(OP_MUL, (*A) * (*B));
+CRO_BINARY_OP(OP_POW, pow((*A), (*B)));
 
 template<typename T>
-struct ShConcreteRegularOp<SH_OP_DOT, T>
+struct ConcreteRegularOp<OP_DOT, T>
 {
-  typedef ShDataVariant<T, SH_HOST> Variant; 
+  typedef DataVariant<T, HOST> Variant; 
   typedef Variant* DataPtr; 
   typedef const Variant* DataCPtr; 
 
@@ -284,21 +284,21 @@ struct ShConcreteRegularOp<SH_OP_DOT, T>
   {
     // dest->size should be 1 and a->size == b->size
     (*dest)[0] = std::inner_product(a->begin(), a->end(), b->begin(), 
-                      ShDataTypeInfo<T, SH_HOST>::Zero);
+                      DataTypeInfo<T, HOST>::Zero);
   }
 };
 
-SHCRO_BINARY_OP(SH_OP_SEQ, (*A) == (*B));
-SHCRO_BINARY_OP(SH_OP_SGE, (*A) >= (*B));
-SHCRO_BINARY_OP(SH_OP_SGT, (*A) > (*B));
-SHCRO_BINARY_OP(SH_OP_SLE, (*A) <= (*B));
-SHCRO_BINARY_OP(SH_OP_SLT, (*A) < (*B));
-SHCRO_BINARY_OP(SH_OP_SNE, (*A) != (*B));
+CRO_BINARY_OP(OP_SEQ, (*A) == (*B));
+CRO_BINARY_OP(OP_SGE, (*A) >= (*B));
+CRO_BINARY_OP(OP_SGT, (*A) > (*B));
+CRO_BINARY_OP(OP_SLE, (*A) <= (*B));
+CRO_BINARY_OP(OP_SLT, (*A) < (*B));
+CRO_BINARY_OP(OP_SNE, (*A) != (*B));
 
 template<typename T>
-struct ShConcreteRegularOp<SH_OP_XPD, T>
+struct ConcreteRegularOp<OP_XPD, T>
 {
-  typedef ShDataVariant<T, SH_HOST> Variant; 
+  typedef DataVariant<T, HOST> Variant; 
   typedef Variant* DataPtr; 
   typedef const Variant* DataCPtr; 
 
@@ -311,9 +311,9 @@ struct ShConcreteRegularOp<SH_OP_XPD, T>
 };
 
 // Ternary Ops
-SHCRO_TERNARY_OP(SH_OP_COND, cond(*A, *B, *C)); 
-SHCRO_TERNARY_OP(SH_OP_LRP, lerp(*A, *B, *C));
-SHCRO_TERNARY_OP(SH_OP_MAD, (*A) * (*B) + (*C));
+CRO_TERNARY_OP(OP_COND, cond(*A, *B, *C)); 
+CRO_TERNARY_OP(OP_LRP, lerp(*A, *B, *C));
+CRO_TERNARY_OP(OP_MAD, (*A) * (*B) + (*C));
 
 }
 #endif

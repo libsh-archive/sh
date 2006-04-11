@@ -17,43 +17,43 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#include "ShPngImage.hpp"
+#include "PngImage.hpp"
 #include <png.h>
 #include <sstream>
-#include "sh/ShException.hpp"
-#include "sh/ShError.hpp"
+#include "sh/Exception.hpp"
+#include "sh/Error.hpp"
 
 namespace ShUtil {
 
 using namespace std;
 
-float* ShPngImage::read_PNG(const string& filename, int& width, int& height, int& elements)
+float* PngImage::read_PNG(const string& filename, int& width, int& height, int& elements)
 {
   // check that the file is a png file
   png_byte buf[8];
 
   FILE* in = fopen(filename.c_str(), "rb");
 
-  if (!in) shError( ShImageException("Unable to open " + filename) );
+  if (!in) error( ImageException("Unable to open " + filename) );
   
   for (int i = 0; i < 8; i++) {
-    if (!(buf[i] = fgetc(in))) shError( ShImageException("Not a PNG file") );
+    if (!(buf[i] = fgetc(in))) error( ImageException("Not a PNG file") );
   }
-  if (png_sig_cmp(buf, 0, 8)) shError( ShImageException("Not a PNG file") );
+  if (png_sig_cmp(buf, 0, 8)) error( ImageException("Not a PNG file") );
 
   png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING,
                                      0, 0, 0); // FIXME: use error handlers
-  if (!png_ptr) shError( ShImageException("Error initialising libpng (png_ptr)") );
+  if (!png_ptr) error( ImageException("Error initialising libpng (png_ptr)") );
 
   png_infop info_ptr = png_create_info_struct(png_ptr);
   if (!info_ptr) {
     png_destroy_read_struct(&png_ptr, 0, 0);
-    shError( ShImageException("Error initialising libpng (info_ptr)") );
+    error( ImageException("Error initialising libpng (info_ptr)") );
   }
 
   if (setjmp(png_jmpbuf(png_ptr))) {
     png_destroy_read_struct(&png_ptr, 0, 0);
-    shError( ShImageException("Error initialising libpng (setjmp/lngjmp)") );    
+    error( ImageException("Error initialising libpng (setjmp/lngjmp)") );    
   }
   
   //  png_set_read_fn(png_ptr, reinterpret_cast<void*>(&in), my_istream_read_data);
@@ -68,7 +68,7 @@ float* ShPngImage::read_PNG(const string& filename, int& width, int& height, int
     png_destroy_read_struct(&png_ptr, 0, 0);
     ostringstream os;
     os << "Invalid bit elements " << bit_depth;
-    shError( ShImageException(os.str()) );
+    error( ImageException(os.str()) );
   }
 
   int colour_type = png_get_color_type(png_ptr, info_ptr);
@@ -86,7 +86,7 @@ float* ShPngImage::read_PNG(const string& filename, int& width, int& height, int
       colour_type != PNG_COLOR_TYPE_GRAY &&
       colour_type != PNG_COLOR_TYPE_RGBA) {
     png_destroy_read_struct(&png_ptr, 0, 0);
-    shError( ShImageException("Invalid colour type") );
+    error( ImageException("Invalid colour type") );
   }
 
   width = png_get_image_width(png_ptr, info_ptr);
@@ -128,7 +128,7 @@ float* ShPngImage::read_PNG(const string& filename, int& width, int& height, int
   return data;
 }
 
-void ShPngImage::write_PNG(const string& filename, const float* data, int inverse_alpha, 
+void PngImage::write_PNG(const string& filename, const float* data, int inverse_alpha, 
                                   int width, int height, int elements)
 {
   FILE* fout = fopen(filename.c_str(), "wb");
@@ -165,7 +165,7 @@ void ShPngImage::write_PNG(const string& filename, const float* data, int invers
     color_type = PNG_COLOR_TYPE_RGBA;
     break;
   default:
-    throw ShImageException("Invalid element size");
+    throw ImageException("Invalid element size");
   }
    
   png_set_IHDR(png_ptr, info_ptr,
@@ -202,7 +202,7 @@ void ShPngImage::write_PNG(const string& filename, const float* data, int invers
   fclose(fout);
 }
 
-void ShPngImage::write_PNG16(const string& filename, const float* data, int inverse_alpha,
+void PngImage::write_PNG16(const string& filename, const float* data, int inverse_alpha,
                                     int width, int height, int elements)
 {
   FILE* fout = fopen(filename.c_str(), "w");
@@ -239,7 +239,7 @@ void ShPngImage::write_PNG16(const string& filename, const float* data, int inve
     color_type = PNG_COLOR_TYPE_RGBA;
     break;
   default:
-    throw ShImageException("Invalid element size");
+    throw ImageException("Invalid element size");
   }
    
   png_set_IHDR(png_ptr, info_ptr,

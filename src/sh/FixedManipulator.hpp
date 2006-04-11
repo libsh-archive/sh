@@ -21,131 +21,131 @@
 #define SHFIXEDMANIPULATOR_HPP
 
 #include <vector>
-#include "ShDllExport.hpp"
-#include "ShProgram.hpp"
+#include "DllExport.hpp"
+#include "Program.hpp"
 
 namespace SH {
 
-typedef ShProgramNode::VarList::const_iterator ShManipVarIterator;
+typedef ProgramNode::VarList::const_iterator ManipVarIterator;
 
-/** A ShFixedManipulator is a ShProgram output manipulator. 
+/** A FixedManipulator is a Program output manipulator. 
  * Fixed size manipulators can be combined with each other
  * to give "wider" fixed size manipulators that handle more 
- * ShProgram outputs.
+ * Program outputs.
  */
 class
-SH_DLLEXPORT ShFixedManipulatorNode: public ShRefCountable { 
+DLLEXPORT FixedManipulatorNode: public RefCountable { 
   public:
-    ShFixedManipulatorNode();
-    virtual ~ShFixedManipulatorNode(); 
+    FixedManipulatorNode();
+    virtual ~FixedManipulatorNode(); 
 
     /** Define the manipulator's behaviour on inputs.
      * Consumes a number of inputs in the variable list, changing finger.
      * This function must ensure that it doesn't pass the end iterator.
-     * If it does, it must throw an ShAlgebraException
+     * If it does, it must throw an AlgebraException
      */
-    virtual ShProgram applyToInputs(ShManipVarIterator &finger, ShManipVarIterator end) const = 0;
+    virtual Program applyToInputs(ManipVarIterator &finger, ManipVarIterator end) const = 0;
 
     /** Defines the manipulator's behaviour on outputs. 
      * Consumes a number of outputs in the variable list, changing finger.
      * This function must ensure that it doesn't pass the end iterator.
-     * If it does, it must throw an ShAlgebraException
+     * If it does, it must throw an AlgebraException
      */
-    virtual ShProgram applyToOutputs(ShManipVarIterator &finger, ShManipVarIterator end) const = 0;
+    virtual Program applyToOutputs(ManipVarIterator &finger, ManipVarIterator end) const = 0;
 };
-typedef ShPointer<ShFixedManipulatorNode> ShFixedManipulator;
+typedef Pointer<FixedManipulatorNode> FixedManipulator;
 
 class
-SH_DLLEXPORT ShKeepNode: public ShFixedManipulatorNode {
+DLLEXPORT KeepNode: public FixedManipulatorNode {
   public:
-    ShKeepNode(int numChannels); 
-    ShProgram applyToInputs(ShManipVarIterator &finger, ShManipVarIterator end) const;
-    ShProgram applyToOutputs(ShManipVarIterator &finger, ShManipVarIterator end) const;
+    KeepNode(int numChannels); 
+    Program applyToInputs(ManipVarIterator &finger, ManipVarIterator end) const;
+    Program applyToOutputs(ManipVarIterator &finger, ManipVarIterator end) const;
 
   private:
     int m_numChannels;
 };
-SH_DLLEXPORT
-ShFixedManipulator shKeep(int numChannels = 1);
+DLLEXPORT
+FixedManipulator keep(int numChannels = 1);
 
 class
-SH_DLLEXPORT ShLoseNode: public ShFixedManipulatorNode {
+DLLEXPORT LoseNode: public FixedManipulatorNode {
   public:
-    ShLoseNode(int numChannels); 
-    ShProgram applyToInputs(ShManipVarIterator &finger, ShManipVarIterator end) const;
-    ShProgram applyToOutputs(ShManipVarIterator &finger, ShManipVarIterator end) const;
+    LoseNode(int numChannels); 
+    Program applyToInputs(ManipVarIterator &finger, ManipVarIterator end) const;
+    Program applyToOutputs(ManipVarIterator &finger, ManipVarIterator end) const;
 
   private:
     int m_numChannels;
 };
-SH_DLLEXPORT
-ShFixedManipulator shLose(int numChannels = 1);
+DLLEXPORT
+FixedManipulator lose(int numChannels = 1);
 
 class
-SH_DLLEXPORT ShDupNode: public ShFixedManipulatorNode {
+DLLEXPORT DupNode: public FixedManipulatorNode {
   public:
-    ShDupNode(int numDups);
-    ShProgram applyToInputs(ShManipVarIterator &finger, ShManipVarIterator end) const;
-    ShProgram applyToOutputs(ShManipVarIterator &finger, ShManipVarIterator end) const;
+    DupNode(int numDups);
+    Program applyToInputs(ManipVarIterator &finger, ManipVarIterator end) const;
+    Program applyToOutputs(ManipVarIterator &finger, ManipVarIterator end) const;
 
   private:
     int m_numDups;
 };
-SH_DLLEXPORT
-ShFixedManipulator shDup(int numDups = 2);
+DLLEXPORT
+FixedManipulator dup(int numDups = 2);
 
 // TODO make class names less clunky
 // This node can only be created by using the & operator with another fixed manipulator
 //
 // This is the only manip node that allows number of channels
-// not to match when connected to a ShProgram. (extras are handled in the
+// not to match when connected to a Program. (extras are handled in the
 // default connect way when inputs != outpus)
 //
 class
-SH_DLLEXPORT ShProgramManipNode: public ShFixedManipulatorNode {
+DLLEXPORT ProgramManipNode: public FixedManipulatorNode {
   public:
-    ShProgram applyToInputs(ShManipVarIterator &finger, ShManipVarIterator end) const;
-    ShProgram applyToOutputs(ShManipVarIterator &finger, ShManipVarIterator end) const;
+    Program applyToInputs(ManipVarIterator &finger, ManipVarIterator end) const;
+    Program applyToOutputs(ManipVarIterator &finger, ManipVarIterator end) const;
 
   private:
-    ShProgram p;
+    Program p;
 
-    ShProgramManipNode(const ShProgram &p);
+    ProgramManipNode(const Program &p);
 
-  friend SH_DLLEXPORT
-  ShFixedManipulator operator&(const ShFixedManipulator &m, const ShProgram &p );
-  friend SH_DLLEXPORT
-  ShFixedManipulator operator&( const ShProgram &p, const ShFixedManipulator &m);
+  friend DLLEXPORT
+  FixedManipulator operator&(const FixedManipulator &m, const Program &p );
+  friend DLLEXPORT
+  FixedManipulator operator&( const Program &p, const FixedManipulator &m);
 };
 
 // This node can only be created using the & operator with another fixed manipulator
-class ShTreeManipNode: public ShFixedManipulatorNode {
+class TreeManipNode: public FixedManipulatorNode {
   public:
-    ShProgram applyToInputs(ShManipVarIterator &finger, ShManipVarIterator end) const;
-    ShProgram applyToOutputs(ShManipVarIterator &finger, ShManipVarIterator end) const;
+    Program applyToInputs(ManipVarIterator &finger, ManipVarIterator end) const;
+    Program applyToOutputs(ManipVarIterator &finger, ManipVarIterator end) const;
   private:
-    ShFixedManipulator a, b;
+    FixedManipulator a, b;
 
-    ShTreeManipNode(const ShFixedManipulator &a, const ShFixedManipulator &b); 
+    TreeManipNode(const FixedManipulator &a, const FixedManipulator &b); 
 
-    friend SH_DLLEXPORT
+    friend DLLEXPORT
 
-    ShFixedManipulator operator&(const ShFixedManipulator &m, const ShFixedManipulator &n);
+    FixedManipulator operator&(const FixedManipulator &m, const FixedManipulator &n);
 };
 
-SH_DLLEXPORT
-ShProgram operator<<(const ShProgram &p, const ShFixedManipulator &m); 
-SH_DLLEXPORT
-ShProgram operator<<(const ShFixedManipulator &m, const ShProgram &p);
-SH_DLLEXPORT
-ShFixedManipulator operator&(const ShFixedManipulator &m, 
-			     const ShFixedManipulator &n);
-SH_DLLEXPORT
-ShFixedManipulator operator&(const ShFixedManipulator &m, 
-			     const ShProgram &p );
-SH_DLLEXPORT
-ShFixedManipulator operator&(const ShProgram &p, 
-			     const ShFixedManipulator &m);
+DLLEXPORT
+Program operator<<(const Program &p, const FixedManipulator &m); 
+DLLEXPORT
+Program operator<<(const FixedManipulator &m, const Program &p);
+DLLEXPORT
+FixedManipulator operator&(const FixedManipulator &m, 
+			     const FixedManipulator &n);
+DLLEXPORT
+FixedManipulator operator&(const FixedManipulator &m, 
+			     const Program &p );
+DLLEXPORT
+FixedManipulator operator&(const Program &p, 
+			     const FixedManipulator &m);
 
 }
 

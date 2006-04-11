@@ -3,10 +3,10 @@ import common, semantic
 common.header()
 
 common.guard("SHPOINT_HPP")
-common.inprint('#include "ShAttrib.hpp"')
+common.inprint('#include "Attrib.hpp"')
 common.namespace()
 
-decl = semantic.Class("Point", "point", "SH_POINT",
+decl = semantic.Class("Point", "point", "POINT",
                       """An n-point.
 """)
 

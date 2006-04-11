@@ -21,62 +21,62 @@
 #define SHTOKEN_HPP
 
 #include <vector>
-#include "ShDllExport.hpp"
-#include "ShRefCount.hpp"
-#include "ShBlock.hpp"
+#include "DllExport.hpp"
+#include "RefCount.hpp"
+#include "Block.hpp"
 
 namespace SH {
 
-struct ShTokenArgument;
+struct TokenArgument;
   
 /** Possible types a token can have.
  * If you add to this list or change it, be sure to change tokenNames in
- * ShToken.cpp.
+ * Token.cpp.
  */
-enum ShTokenType {
-  SH_TOKEN_IF,
-  SH_TOKEN_ELSE,
-  SH_TOKEN_ENDIF,
-  SH_TOKEN_WHILE,
-  SH_TOKEN_ENDWHILE,
-  SH_TOKEN_DO,
-  SH_TOKEN_UNTIL,
-  SH_TOKEN_FOR,
-  SH_TOKEN_ENDFOR,
-  SH_TOKEN_BREAK,
-  SH_TOKEN_CONTINUE,
-  SH_TOKEN_STARTSEC,
-  SH_TOKEN_ENDSEC,
-  SH_TOKEN_STARTSWITCH,
-  SH_TOKEN_ENDSWITCH,
-  SH_TOKEN_CASE
+enum TokenType {
+  TOKEN_IF,
+  TOKEN_ELSE,
+  TOKEN_ENDIF,
+  TOKEN_WHILE,
+  TOKEN_ENDWHILE,
+  TOKEN_DO,
+  TOKEN_UNTIL,
+  TOKEN_FOR,
+  TOKEN_ENDFOR,
+  TOKEN_BREAK,
+  TOKEN_CONTINUE,
+  TOKEN_STARTSEC,
+  TOKEN_ENDSEC,
+  TOKEN_STARTSWITCH,
+  TOKEN_ENDSWITCH,
+  TOKEN_CASE
 };
 
 /** A token in the (unparsed) parse tree.
  * This represents a token such as SH_IF. The token can optionally
- * have some arguments, see ShTokenArgument. Later these tokens
+ * have some arguments, see TokenArgument. Later these tokens
  * will be parsed into real control structures by the parser.
  */
 class 
-SH_DLLEXPORT ShToken : public ShBlock {
+DLLEXPORT Token : public Block {
 public:
-  ShToken(ShTokenType type);
-  ~ShToken();
+  Token(TokenType type);
+  ~Token();
 
   /// Return the type of this token.
-  ShTokenType type();
+  TokenType type();
   
   void print(std::ostream& out, int indent) const;
 
   /// Any arguments bound to the token. May be empty.
-  std::vector<ShTokenArgument> arguments;
+  std::vector<TokenArgument> arguments;
   
 private:
-  ShTokenType m_type;
+  TokenType m_type;
 };
 
-typedef ShPointer<ShToken> ShTokenPtr;
-typedef ShPointer<const ShToken> ShTokenCPtr;
+typedef Pointer<Token> TokenPtr;
+typedef Pointer<const Token> TokenCPtr;
 
 
 }

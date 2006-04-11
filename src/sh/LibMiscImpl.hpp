@@ -20,17 +20,17 @@
 #ifndef SHLIBMISCIMPL_HPP
 #define SHLIBMISCIMPL_HPP
 
-#include "ShLibMisc.hpp"
-#include "ShInstructions.hpp"
-#include "ShProgram.hpp"
+#include "LibMisc.hpp"
+#include "Instructions.hpp"
+#include "Program.hpp"
 
 namespace SH {
 
 template<int M, int N, typename T> 
-ShGeneric<M, T> cast(const ShGeneric<N, T>& a)
+Generic<M, T> cast(const Generic<N, T>& a)
 {
   int copySize = std::min(M, N);
-  ShAttrib<M, SH_TEMP, T> result;
+  Attrib<M, TEMP, T> result;
 
   int* indices = new int[copySize];
   for(int i = 0; i < copySize; ++i) indices[i] = i;
@@ -50,13 +50,13 @@ ShGeneric<M, T> cast(const ShGeneric<N, T>& a)
 
 template<int M> 
 inline
-ShGeneric<M, double> cast(double a)
+Generic<M, double> cast(double a)
 {
-  return cast<M>(ShAttrib<1, SH_CONST, double>(a));
+  return cast<M>(Attrib<1, CONST, double>(a));
 }
 
 template<int M, int N, typename T> 
-ShGeneric<M, T> fillcast(const ShGeneric<N, T>& a)
+Generic<M, T> fillcast(const Generic<N, T>& a)
 {
   if( M <= N ) return cast<M>(a);
   int indices[M];
@@ -66,42 +66,42 @@ ShGeneric<M, T> fillcast(const ShGeneric<N, T>& a)
 
 template<int M> 
 inline
-ShGeneric<M, double> fillcast(double a)
+Generic<M, double> fillcast(double a)
 {
-  return fillcast<M>(ShAttrib<1, SH_CONST, double>(a));
+  return fillcast<M>(Attrib<1, CONST, double>(a));
 }
 
 template<int M, int N, typename T1, typename T2> 
-ShGeneric<M+N, CT1T2> join(const ShGeneric<M, T1>& a, const ShGeneric<N, T2>& b)
+Generic<M+N, CT1T2> join(const Generic<M, T1>& a, const Generic<N, T2>& b)
 {
   int indices[M+N];
   for(int i = 0; i < M+N; ++i) indices[i] = i; 
-  ShAttrib<M+N, SH_TEMP, CT1T2> result;
+  Attrib<M+N, TEMP, CT1T2> result;
   result.template swiz<M>(indices) = a;
   result.template swiz<N>(indices + M) = b;
   return result;
 }
 
 template<int M, typename T> 
-ShGeneric<M+1, T> join(const T& a, const ShGeneric<M, T>& b)
+Generic<M+1, T> join(const T& a, const Generic<M, T>& b)
 {
-  return join(ShAttrib<1, SH_CONST, T>(a), b);
+  return join(Attrib<1, CONST, T>(a), b);
 }
 
 template<int M, typename T> 
-ShGeneric<M+1, T> join(const ShGeneric<M, T>& a, const T& b)
+Generic<M+1, T> join(const Generic<M, T>& a, const T& b)
 {
-  return join(a, ShAttrib<1, SH_CONST, T>(b));
+  return join(a, Attrib<1, CONST, T>(b));
 }
 
 template<int M, int N, int O, typename T1, typename T2, typename T3> 
-ShGeneric<M+N+O, CT1T2T3> join(const ShGeneric<M, T1>& a, 
-			       const ShGeneric<N, T2> &b, 
-			       const ShGeneric<O, T3> &c)
+Generic<M+N+O, CT1T2T3> join(const Generic<M, T1>& a, 
+			       const Generic<N, T2> &b, 
+			       const Generic<O, T3> &c)
 {
   int indices[M+N+O];
   for(int i = 0; i < M+N+O; ++i) indices[i] = i; 
-  ShAttrib<M+N+O, SH_TEMP, CT1T2T3> result;
+  Attrib<M+N+O, TEMP, CT1T2T3> result;
   result.template swiz<M>(indices) = a;
   result.template swiz<N>(indices + M) = b;
   result.template swiz<N>(indices + M + N) = c;
@@ -109,14 +109,14 @@ ShGeneric<M+N+O, CT1T2T3> join(const ShGeneric<M, T1>& a,
 }
 
 template<int M, int N, int O, int P, typename T1, typename T2, typename T3, typename T4> 
-ShGeneric<M+N+O+P, CT1T2T3T4> join(const ShGeneric<M, T1>& a, 
-				   const ShGeneric<N, T2> &b, 
-				   const ShGeneric<O, T3> &c, 
-				   const ShGeneric<P, T4> &d)
+Generic<M+N+O+P, CT1T2T3T4> join(const Generic<M, T1>& a, 
+				   const Generic<N, T2> &b, 
+				   const Generic<O, T3> &c, 
+				   const Generic<P, T4> &d)
 {
   int indices[M+N+O+P];
   for(int i = 0; i < M+N+O+P; ++i) indices[i] = i; 
-  ShAttrib<M+N+O+P, SH_TEMP, CT1T2T3T4> result;
+  Attrib<M+N+O+P, TEMP, CT1T2T3T4> result;
   result.template swiz<M>(indices) = a;
   result.template swiz<N>(indices + M) = b;
   result.template swiz<N>(indices + M + N) = c;
@@ -126,14 +126,14 @@ ShGeneric<M+N+O+P, CT1T2T3T4> join(const ShGeneric<M, T1>& a,
 
 template<int N, typename T>
 inline
-void discard(const ShGeneric<N, T>& c)
+void discard(const Generic<N, T>& c)
 {
   shKIL(c);
 }
 
 template<int N, typename T>
 inline
-void kill(const ShGeneric<N, T>& c)
+void kill(const Generic<N, T>& c)
 {
   discard(c);
 }
@@ -152,8 +152,8 @@ void groupsort(VarType v[])
   int i, j;
   // hold even/odd temps and condition code for (2i, 2i+1) "up" and (2i, 2i-1) "down" comparisons 
 
-  ShAttrib<NU, SH_TEMP, T> eu, ou, ccu; 
-  ShAttrib<ND, SH_TEMP, T> ed, od, ccd; 
+  Attrib<NU, TEMP, T> eu, ou, ccu; 
+  Attrib<ND, TEMP, T> ed, od, ccd; 
 
   // even and odd swizzle (elms 0..NE-1 are the "even" subsequence, NE..N-1 "odd")
   int eswiz[NE], oswiz[NO]; 
@@ -195,32 +195,32 @@ void groupsort(VarType v[])
   for(i = 0; i < NE; ++i) resultEswiz[i] = i * 2;
   for(i = 0; i < NO; ++i) resultOswiz[i] = i * 2 + 1; 
   for(i = 0; i < S; ++i) {
-    ShAttrib<NE, SH_TEMP, T> evens = v[i].template swiz<NE>(eswiz);
+    Attrib<NE, TEMP, T> evens = v[i].template swiz<NE>(eswiz);
     v[i].template swiz<NO>(resultOswiz) = v[i].template swiz<NO>(oswiz);
     v[i].template swiz<NE>(resultEswiz) = evens;
   }
 }
 
 template<int N, typename T> 
-ShGeneric<N, T> sort(const ShGeneric<N, T>& a)
+Generic<N, T> sort(const Generic<N, T>& a)
 {
-  ShAttrib<N, SH_TEMP, T> result(a);
+  Attrib<N, TEMP, T> result(a);
   groupsort<1>(&result);
   return result;
 }
 
 template<typename T>
 inline
-ShProgram freeze(const ShProgram& p,
+Program freeze(const Program& p,
                  const T& uniform)
 {
   return (p >> uniform) << (T::ConstType)(uniform);
 }
 
 template<int N, int M, typename T1, typename T2>
-ShGeneric<N, CT1T2> poly(const ShGeneric<N, T1>& a, const ShGeneric<M, T2>& b)
+Generic<N, CT1T2> poly(const Generic<N, T1>& a, const Generic<M, T2>& b)
 {
-  ShAttrib<N, SH_TEMP, CT1T2> t;
+  Attrib<N, TEMP, CT1T2> t;
   for (int i=0; i < N; i++) {
     // Uses Horner's rule
     t[i] = b[M - 1];

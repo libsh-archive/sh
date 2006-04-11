@@ -21,29 +21,29 @@
 #define SHSECTIONIMPL_HPP
 
 #include <sstream>
-#include "ShSection.hpp"
+#include "Section.hpp"
 
-/** @file ShSectionImpl.hpp
+/** @file SectionImpl.hpp
  */
 
 namespace SH {
 
 template<class F>
-void ShSectionTree::dfs(F& functor) {
+void SectionTree::dfs(F& functor) {
   realDfs(root, functor);
 }
 
 template<class F>
-void ShSectionTree::realDfs(const ShSectionNodePtr& node, F& functor)
+void SectionTree::realDfs(const SectionNodePtr& node, F& functor)
 {
-  for(ShSectionNode::iterator I = node->begin(); I != node->end(); ++I) {
+  for(SectionNode::iterator I = node->begin(); I != node->end(); ++I) {
     realDfs(*I, functor);
   }
   functor(node);
 }
 
 template<class F>
-std::ostream& ShSectionTree::dump(std::ostream& out, F& functor)
+std::ostream& SectionTree::dump(std::ostream& out, F& functor)
 {
   std::ostringstream cfgout;
   out << "digraph sectiontree {" << std::endl;
@@ -54,19 +54,19 @@ std::ostream& ShSectionTree::dump(std::ostream& out, F& functor)
 }
 
 template<class F>
-void ShSectionTree::realDump(std::ostream& out, std::ostream& cfgout, 
-                             const ShSectionNodePtr& node, F& functor)
+void SectionTree::realDump(std::ostream& out, std::ostream& cfgout, 
+                             const SectionNodePtr& node, F& functor)
 {
   out << "subgraph " << "cluster_" << node.object() << " {" << std::endl; 
     functor(out, node);
-    for(ShSectionNode::cfg_iterator C = node->cfgBegin(); C != node->cfgEnd(); ++C) {
-      ShCtrlGraphNodePtr c = (*C);
+    for(SectionNode::cfg_iterator C = node->cfgBegin(); C != node->cfgEnd(); ++C) {
+      CtrlGraphNodePtr c = (*C);
       
       out << "\"cfg_" << c.object() << "\""; 
       functor(out, c);
 #if 0
       if(c->block) {
-        for(ShBasicBlock::iterator I = c->block->begin(); I != c->block->end(); ++I) {
+        for(BasicBlock::iterator I = c->block->begin(); I != c->block->end(); ++I) {
           functor(out, *I); 
           out << "\n";
         }
@@ -78,7 +78,7 @@ void ShSectionTree::realDump(std::ostream& out, std::ostream& cfgout,
       out << ";" << std::endl;
 
       // @todo this is copied from CtrlGraph.cpp...
-      for (ShCtrlGraphNode::SuccessorList::const_iterator I = c->successors.begin();
+      for (CtrlGraphNode::SuccessorList::const_iterator I = c->successors.begin();
            I != c->successors.end(); ++I) {
         std::ostream& curout = contains(node, I->node) ? out : cfgout; 
         curout << "\"cfg_" << c.object() << "\" ";
@@ -97,7 +97,7 @@ void ShSectionTree::realDump(std::ostream& out, std::ostream& cfgout,
       }
     }
 
-    for(ShSectionNode::iterator S = node->begin(); S != node->end(); ++S) {
+    for(SectionNode::iterator S = node->begin(); S != node->end(); ++S) {
       realDump(out, cfgout, *S, functor);
     }
   out << "}" << std::endl; 

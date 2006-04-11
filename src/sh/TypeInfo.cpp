@@ -17,37 +17,37 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#include "ShTypeInfo.hpp"
-#include "ShContext.hpp"
-#include "ShEval.hpp"
-#include "ShCastManager.hpp"
-#include "ShVariantCast.hpp"
+#include "TypeInfo.hpp"
+#include "Context.hpp"
+#include "Eval.hpp"
+#include "CastManager.hpp"
+#include "VariantCast.hpp"
 
 namespace {
 using namespace SH;
 
 // sets up m_valueType entries for host & memory type for the given value type
 template<typename T>
-void setTypeInfo(ShTypeInfo::TypeInfoMap &valueTypes) {
-  ShValueType V = ShStorageTypeInfo<T>::value_type;
-  valueTypes(V, SH_HOST) = ShDataTypeInfo<T, SH_HOST>::instance();
-  valueTypes(V, SH_MEM) = ShDataTypeInfo<T, SH_MEM>::instance();
+void setTypeInfo(TypeInfo::TypeInfoMap &valueTypes) {
+  ValueType V = StorageTypeInfo<T>::value_type;
+  valueTypes(V, HOST) = DataTypeInfo<T, HOST>::instance();
+  valueTypes(V, MEM) = DataTypeInfo<T, MEM>::instance();
 }
 
 }
 
 namespace SH {
 
-ShTypeInfo::TypeInfoMap* ShTypeInfo::m_valueTypes;
+TypeInfo::TypeInfoMap* TypeInfo::m_valueTypes;
 
-void ShTypeInfo::init()
+void TypeInfo::init()
 {
   if(m_valueTypes) return;
   m_valueTypes = new TypeInfoMap();
 
   setTypeInfo<double>(*m_valueTypes);
   setTypeInfo<float>(*m_valueTypes);
-  setTypeInfo<ShHalf>(*m_valueTypes);
+  setTypeInfo<Half>(*m_valueTypes);
 
   setTypeInfo<int>(*m_valueTypes);
   setTypeInfo<short>(*m_valueTypes);
@@ -56,43 +56,43 @@ void ShTypeInfo::init()
   setTypeInfo<unsigned short>(*m_valueTypes);
   setTypeInfo<unsigned char>(*m_valueTypes);
 
-  setTypeInfo<ShFracInt> (*m_valueTypes);
-  setTypeInfo<ShFracShort> (*m_valueTypes);
-  setTypeInfo<ShFracByte> (*m_valueTypes);
-  setTypeInfo<ShFracUInt> (*m_valueTypes);
-  setTypeInfo<ShFracUShort> (*m_valueTypes);
-  setTypeInfo<ShFracUByte> (*m_valueTypes);
+  setTypeInfo<FracInt> (*m_valueTypes);
+  setTypeInfo<FracShort> (*m_valueTypes);
+  setTypeInfo<FracByte> (*m_valueTypes);
+  setTypeInfo<FracUInt> (*m_valueTypes);
+  setTypeInfo<FracUShort> (*m_valueTypes);
+  setTypeInfo<FracUByte> (*m_valueTypes);
 
   addOps();
 
-  /* DEBUG */ //SH_DEBUG_PRINT("ShEval ops: \n" << ShEval::instance()->availableOps());
+  /* DEBUG */ //DEBUG_PRINT("Eval ops: \n" << Eval::instance()->availableOps());
 
   addCasts();
 }
 
-const ShTypeInfo* ShTypeInfo::get(ShValueType valueType, ShDataType dataType)
+const TypeInfo* TypeInfo::get(ValueType valueType, DataType dataType)
 {
   init();
-  const ShTypeInfo* result = (*m_valueTypes)(valueType, dataType);
-  if(!result) SH_DEBUG_PRINT("Null ShTypeInfo");
+  const TypeInfo* result = (*m_valueTypes)(valueType, dataType);
+  if(!result) DEBUG_PRINT("Null TypeInfo");
   return result;
 }
 
-const ShTypeInfo* shTypeInfo(ShValueType valueType, ShDataType dataType)
+const TypeInfo* typeInfo(ValueType valueType, DataType dataType)
 {
-  return ShTypeInfo::get(valueType, dataType); 
+  return TypeInfo::get(valueType, dataType); 
 }
 
-const ShVariantFactory* shVariantFactory(ShValueType valueType, ShDataType dataType)
+const VariantFactory* variantFactory(ValueType valueType, DataType dataType)
 {
-  return shTypeInfo(valueType, dataType)->variantFactory();  
+  return typeInfo(valueType, dataType)->variantFactory();  
 }
 
-const char* shValueTypeName(ShValueType valueType)
+const char* valueTypeName(ValueType valueType)
 {
-  const ShTypeInfo* typeInfo = shTypeInfo(valueType, SH_HOST);
-  if(!typeInfo) return ShStorageTypeInfo<ShInvalidStorageType>::name; 
-  return typeInfo->name();
+  const TypeInfo* info = typeInfo(valueType, HOST);
+  if(!info) return StorageTypeInfo<InvalidStorageType>::name; 
+  return info->name();
 }
 
 }

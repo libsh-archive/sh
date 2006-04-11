@@ -20,172 +20,172 @@
 #ifndef SHBASETEXTUREIMPL_HPP
 #define SHBASETEXTUREIMPL_HPP
 
-#include "ShBaseTexture.hpp"
-#include "ShContext.hpp"
-#include "ShError.hpp"
+#include "BaseTexture.hpp"
+#include "Context.hpp"
+#include "Error.hpp"
 
 namespace SH {
 
 template<typename T>
-ShBaseTexture1D<T>::ShBaseTexture1D(int width, const ShTextureTraits& traits)
-  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_1D, T::typesize, T::value_type, traits, width))
+BaseTexture1D<T>::BaseTexture1D(int width, const TextureTraits& traits)
+  : BaseTexture(new TextureNode(TEXTURE_1D, T::typesize, T::value_type, traits, width))
 {
 }
 
 template<typename T>
-ShBaseTexture2D<T>::ShBaseTexture2D(int width, int height, const ShTextureTraits& traits)
-  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_2D, T::typesize, T::value_type, traits, width, height))
+BaseTexture2D<T>::BaseTexture2D(int width, int height, const TextureTraits& traits)
+  : BaseTexture(new TextureNode(TEXTURE_2D, T::typesize, T::value_type, traits, width, height))
 {
 }
 
 template<typename T>
-ShBaseTextureRect<T>::ShBaseTextureRect(int width, int height, const ShTextureTraits& traits)
-  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_RECT, T::typesize, T::value_type, traits, width, height))
+BaseTextureRect<T>::BaseTextureRect(int width, int height, const TextureTraits& traits)
+  : BaseTexture(new TextureNode(TEXTURE_RECT, T::typesize, T::value_type, traits, width, height))
 {
 }
 
 template<typename T>
-ShBaseTexture3D<T>::ShBaseTexture3D(int width, int height, int depth, const ShTextureTraits& traits)
-  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_3D, T::typesize, T::value_type, traits, width, height, depth))
+BaseTexture3D<T>::BaseTexture3D(int width, int height, int depth, const TextureTraits& traits)
+  : BaseTexture(new TextureNode(TEXTURE_3D, T::typesize, T::value_type, traits, width, height, depth))
 {
 }
 
 template<typename T>
-ShBaseTextureCube<T>::ShBaseTextureCube(int width, int height, const ShTextureTraits& traits)
-  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_CUBE, T::typesize, T::value_type, traits, width, height))
+BaseTextureCube<T>::BaseTextureCube(int width, int height, const TextureTraits& traits)
+  : BaseTexture(new TextureNode(TEXTURE_CUBE, T::typesize, T::value_type, traits, width, height))
 {
 }
 
 template<typename T>
-ShBaseTexture1D<T>::ShBaseTexture1D(const ShTextureTraits& traits)
-  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_1D, T::typesize, T::value_type, traits, 0))
+BaseTexture1D<T>::BaseTexture1D(const TextureTraits& traits)
+  : BaseTexture(new TextureNode(TEXTURE_1D, T::typesize, T::value_type, traits, 0))
 {
 }
 
 template<typename T>
-ShBaseTexture2D<T>::ShBaseTexture2D(const ShTextureTraits& traits)
-  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_2D, T::typesize, T::value_type, traits, 0, 0))
+BaseTexture2D<T>::BaseTexture2D(const TextureTraits& traits)
+  : BaseTexture(new TextureNode(TEXTURE_2D, T::typesize, T::value_type, traits, 0, 0))
 {
 }
 
 template<typename T>
-ShBaseTextureRect<T>::ShBaseTextureRect(const ShTextureTraits& traits)
-  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_RECT, T::typesize, T::value_type, traits, 0, 0))
+BaseTextureRect<T>::BaseTextureRect(const TextureTraits& traits)
+  : BaseTexture(new TextureNode(TEXTURE_RECT, T::typesize, T::value_type, traits, 0, 0))
 {
 }
 
 template<typename T>
-ShBaseTexture3D<T>::ShBaseTexture3D(const ShTextureTraits& traits)
-  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_3D, T::typesize, T::value_type, traits, 0, 0, 0))
+BaseTexture3D<T>::BaseTexture3D(const TextureTraits& traits)
+  : BaseTexture(new TextureNode(TEXTURE_3D, T::typesize, T::value_type, traits, 0, 0, 0))
 {
 }
 
 template<typename T>
-ShBaseTextureCube<T>::ShBaseTextureCube(const ShTextureTraits& traits)
-  : ShBaseTexture(new ShTextureNode(SH_TEXTURE_CUBE, T::typesize, T::value_type, traits, 0, 0))
+BaseTextureCube<T>::BaseTextureCube(const TextureTraits& traits)
+  : BaseTexture(new TextureNode(TEXTURE_CUBE, T::typesize, T::value_type, traits, 0, 0))
 {
 }
 
 template<typename T>
 template<typename T2>
-ShTexData<T, 1, T2> ShBaseTexture1D<T>::operator()(const ShGeneric<1, T2>& coords) const
+TexData<T, 1, T2> BaseTexture1D<T>::operator()(const Generic<1, T2>& coords) const
 {
-  return ShTexData<T, 1, T2>(m_node, coords, false);
+  return TexData<T, 1, T2>(m_node, coords, false);
 }
 
 template<typename T>
 template<typename T2> 
-ShTexData<T, 2, T2> ShBaseTexture2D<T>::operator()(const ShGeneric<2, T2>& coords) const
+TexData<T, 2, T2> BaseTexture2D<T>::operator()(const Generic<2, T2>& coords) const
 {
-  return ShTexData<T, 2, T2>(m_node, coords, false);
+  return TexData<T, 2, T2>(m_node, coords, false);
 }
 
 template<typename T>
 template<typename T2>
-ShTexData<T, 2, T2> ShBaseTexture2D<T>::operator()(const ShGeneric<2, T2>& coords,
-                                                   const ShGeneric<2, T2>& dx,
-                                                   const ShGeneric<2, T2>& dy) const
+TexData<T, 2, T2> BaseTexture2D<T>::operator()(const Generic<2, T2>& coords,
+                                                   const Generic<2, T2>& dx,
+                                                   const Generic<2, T2>& dy) const
 {
-  return ShTexData<T, 2, T2>(m_node, coords, dx, dy);
+  return TexData<T, 2, T2>(m_node, coords, dx, dy);
 }
 
 template<typename T>
 template<typename T2>
-ShTexData<T, 2, T2> ShBaseTextureRect<T>::operator()(const ShGeneric<2, T2>& coords) const
+TexData<T, 2, T2> BaseTextureRect<T>::operator()(const Generic<2, T2>& coords) const
 {
-  return ShTexData<T, 2, T2>(m_node, coords, false);
+  return TexData<T, 2, T2>(m_node, coords, false);
 }
 
 template<typename T>
 template<typename T2>
-ShTexData<T, 3, T2> ShBaseTexture3D<T>::operator()(const ShGeneric<3, T2>& coords) const
+TexData<T, 3, T2> BaseTexture3D<T>::operator()(const Generic<3, T2>& coords) const
 {
-  return ShTexData<T, 3, T2>(m_node, coords, false);
+  return TexData<T, 3, T2>(m_node, coords, false);
 } 
 
 template<typename T>
 template<typename T2>
-ShTexData<T, 3, T2> ShBaseTextureCube<T>::operator()(const ShGeneric<3, T2>& coords) const
+TexData<T, 3, T2> BaseTextureCube<T>::operator()(const Generic<3, T2>& coords) const
 {
-  return ShTexData<T, 3, T2>(m_node, coords, false);
+  return TexData<T, 3, T2>(m_node, coords, false);
 } 
 
 template<typename T>
 template<typename T2>
-ShTexData<T, 1, T2> ShBaseTexture1D<T>::operator[](const ShGeneric<1, T2>& coords) const
+TexData<T, 1, T2> BaseTexture1D<T>::operator[](const Generic<1, T2>& coords) const
 {
-  return ShTexData<T, 1, T2>(m_node, coords, true);
+  return TexData<T, 1, T2>(m_node, coords, true);
 }
 
 template<typename T>
 template<typename T2>
-ShTexData<T, 2, T2> ShBaseTexture2D<T>::operator[](const ShGeneric<2, T2>& coords) const
+TexData<T, 2, T2> BaseTexture2D<T>::operator[](const Generic<2, T2>& coords) const
 {
-  return ShTexData<T, 2, T2>(m_node, coords, true);
+  return TexData<T, 2, T2>(m_node, coords, true);
 }
 
 template<typename T>
 template<typename T2>
-ShTexData<T, 2, T2> ShBaseTextureRect<T>::operator[](const ShGeneric<2, T2>& coords) const
+TexData<T, 2, T2> BaseTextureRect<T>::operator[](const Generic<2, T2>& coords) const
 {
-  return ShTexData<T, 2, T2>(m_node, coords, true);
+  return TexData<T, 2, T2>(m_node, coords, true);
 }
 
 template<typename T>
 template<typename T2>
-ShTexData<T, 3, T2> ShBaseTexture3D<T>::operator[](const ShGeneric<3, T2>& coords) const
+TexData<T, 3, T2> BaseTexture3D<T>::operator[](const Generic<3, T2>& coords) const
 {
-  return ShTexData<T, 3, T2>(m_node, coords, true);
+  return TexData<T, 3, T2>(m_node, coords, true);
 }
 
 // setMemory
 
 template<typename T>
-void ShBaseTexture1D<T>::memory(const ShMemoryPtr& memory, int mipmap_level)
+void BaseTexture1D<T>::memory(const MemoryPtr& memory, int mipmap_level)
 {
   m_node->memory(memory, mipmap_level);
 }
 
 template<typename T>
-void ShBaseTexture2D<T>::memory(const ShMemoryPtr& memory, int mipmap_level)
+void BaseTexture2D<T>::memory(const MemoryPtr& memory, int mipmap_level)
 {
   m_node->memory(memory, mipmap_level);
 }
 
 template<typename T>
-void ShBaseTextureRect<T>::memory(const ShMemoryPtr& memory, int mipmap_level)
+void BaseTextureRect<T>::memory(const MemoryPtr& memory, int mipmap_level)
 {
   m_node->memory(memory, mipmap_level);
 }
 
 template<typename T>
-void ShBaseTexture3D<T>::memory(const ShMemoryPtr& memory, int mipmap_level)
+void BaseTexture3D<T>::memory(const MemoryPtr& memory, int mipmap_level)
 {
   m_node->memory(memory, mipmap_level);
 }
 
 template<typename T>
-void ShBaseTextureCube<T>::memory(const ShMemoryPtr& memory, ShCubeDirection face, 
+void BaseTextureCube<T>::memory(const MemoryPtr& memory, CubeDirection face, 
 				  int mipmap_level)
 {
   m_node->memory(memory, face, mipmap_level);
@@ -194,61 +194,61 @@ void ShBaseTextureCube<T>::memory(const ShMemoryPtr& memory, ShCubeDirection fac
 // get memory
 
 template<typename T>
-ShMemoryPtr ShBaseTexture1D<T>::memory(int mipmap_level)
+MemoryPtr BaseTexture1D<T>::memory(int mipmap_level)
 {
   return m_node->memory(mipmap_level);
 }
 
 template<typename T>
-ShMemoryPtr ShBaseTexture2D<T>::memory(int mipmap_level)
+MemoryPtr BaseTexture2D<T>::memory(int mipmap_level)
 {
   return m_node->memory(mipmap_level);
 }
 
 template<typename T>
-ShMemoryPtr ShBaseTextureRect<T>::memory(int mipmap_level)
+MemoryPtr BaseTextureRect<T>::memory(int mipmap_level)
 {
   return m_node->memory(mipmap_level);
 }
 
 template<typename T>
-ShMemoryPtr ShBaseTexture3D<T>::memory(int mipmap_level)
+MemoryPtr BaseTexture3D<T>::memory(int mipmap_level)
 {
   return m_node->memory(mipmap_level);
 }
 
 template<typename T>
-ShMemoryPtr ShBaseTextureCube<T>::memory(ShCubeDirection face, int mipmap_level)
+MemoryPtr BaseTextureCube<T>::memory(CubeDirection face, int mipmap_level)
 {
   return m_node->memory(face, mipmap_level);
 }
 
 template<typename T>
-ShMemoryCPtr ShBaseTexture1D<T>::memory(int mipmap_level) const
+MemoryCPtr BaseTexture1D<T>::memory(int mipmap_level) const
 {
   return m_node->memory(mipmap_level);
 }
 
 template<typename T>
-ShMemoryCPtr ShBaseTexture2D<T>::memory(int mipmap_level) const
+MemoryCPtr BaseTexture2D<T>::memory(int mipmap_level) const
 {
   return m_node->memory(mipmap_level);
 }
 
 template<typename T>
-ShMemoryCPtr ShBaseTextureRect<T>::memory(int mipmap_level) const
+MemoryCPtr BaseTextureRect<T>::memory(int mipmap_level) const
 {
   return m_node->memory(mipmap_level);
 }
 
 template<typename T>
-ShMemoryCPtr ShBaseTexture3D<T>::memory(int mipmap_level) const
+MemoryCPtr BaseTexture3D<T>::memory(int mipmap_level) const
 {
   return m_node->memory(mipmap_level);
 }
 
 template<typename T>
-ShMemoryCPtr ShBaseTextureCube<T>::memory(ShCubeDirection face, int mipmap_level) const
+MemoryCPtr BaseTextureCube<T>::memory(CubeDirection face, int mipmap_level) const
 {
   return m_node->memory(face, mipmap_level);
 }
@@ -256,68 +256,68 @@ ShMemoryCPtr ShBaseTextureCube<T>::memory(ShCubeDirection face, int mipmap_level
 // get size
 
 template<typename T>
-ShAttrib1f ShBaseTexture1D<T>::size() const
+Attrib1f BaseTexture1D<T>::size() const
 {
-  ShAttrib1f t(m_node->texSizeVar().node(), ShSwizzle(m_node->texSizeVar().size()), false);
+  Attrib1f t(m_node->texSizeVar().node(), Swizzle(m_node->texSizeVar().size()), false);
   return t;
 }
 
 template<typename T>
-ShAttrib2f ShBaseTexture2D<T>::size() const
+Attrib2f BaseTexture2D<T>::size() const
 {
-  ShAttrib2f t(m_node->texSizeVar().node(), ShSwizzle(m_node->texSizeVar().size()), false);
+  Attrib2f t(m_node->texSizeVar().node(), Swizzle(m_node->texSizeVar().size()), false);
   return t;
 }
 
 template<typename T>
-ShAttrib2f ShBaseTextureRect<T>::size() const
+Attrib2f BaseTextureRect<T>::size() const
 {
-  ShAttrib2f t(m_node->texSizeVar().node(), ShSwizzle(m_node->texSizeVar().size()), false);
+  Attrib2f t(m_node->texSizeVar().node(), Swizzle(m_node->texSizeVar().size()), false);
   return t;
 }
 
 template<typename T>
-ShAttrib3f ShBaseTexture3D<T>::size() const
+Attrib3f BaseTexture3D<T>::size() const
 {
-  ShAttrib3f t(m_node->texSizeVar().node(), ShSwizzle(m_node->texSizeVar().size()), false);
+  Attrib3f t(m_node->texSizeVar().node(), Swizzle(m_node->texSizeVar().size()), false);
   return t;
 }
 
 template<typename T>
-ShAttrib2f ShBaseTextureCube<T>::size() const
+Attrib2f BaseTextureCube<T>::size() const
 {
-  ShAttrib2f t(m_node->texSizeVar().node(), ShSwizzle(m_node->texSizeVar().size()), false);
+  Attrib2f t(m_node->texSizeVar().node(), Swizzle(m_node->texSizeVar().size()), false);
   return t;
 }
 
 // set size
 
 template<typename T>
-void ShBaseTexture1D<T>::size(int width)
+void BaseTexture1D<T>::size(int width)
 {
   m_node->setTexSize(width);
 }
 
 template<typename T>
-void ShBaseTexture2D<T>::size(int width, int height)
+void BaseTexture2D<T>::size(int width, int height)
 {
   m_node->setTexSize(width, height);
 }
 
 template<typename T>
-void ShBaseTextureRect<T>::size(int width, int height)
+void BaseTextureRect<T>::size(int width, int height)
 {
   m_node->setTexSize(width, height);
 }
 
 template<typename T>
-void ShBaseTexture3D<T>::size(int width, int height, int depth)
+void BaseTexture3D<T>::size(int width, int height, int depth)
 {
   m_node->setTexSize(width, height, depth);
 }
 
 template<typename T>
-void ShBaseTextureCube<T>::size(int width, int height)
+void BaseTextureCube<T>::size(int width, int height)
 {
   m_node->setTexSize(width, height);
 }

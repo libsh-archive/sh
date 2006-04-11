@@ -22,11 +22,11 @@
 
 #include <cmath>
 #include <numeric>
-#include "sh/ShAttrib.hpp"
-#include "sh/ShSwizzle.hpp" 
-#include "sh/ShVariable.hpp"
-#include "sh/ShLib.hpp"
-#include "ShFunc.hpp"
+#include "sh/Attrib.hpp"
+#include "sh/Swizzle.hpp" 
+#include "sh/Variable.hpp"
+#include "sh/Lib.hpp"
+#include "Func.hpp"
 
 namespace ShUtil {
 
@@ -36,10 +36,10 @@ using namespace SH;
  * this does a change of basis on a vector v in space C to the orthonormal basis
  */
 template<typename T>
-ShGeneric<3, T> changeBasis(const ShGeneric<3, T> &b0, const ShGeneric<3, T> &b1,
-                            const ShGeneric<3, T> &b2, const ShGeneric<3, T> &v)
+Generic<3, T> changeBasis(const Generic<3, T> &b0, const Generic<3, T> &b1,
+                            const Generic<3, T> &b2, const Generic<3, T> &v)
 {
-  ShAttrib<3, SH_TEMP, T> result;
+  Attrib<3, TEMP, T> result;
   result(0) = b0 | v;
   result(1) = b1 | v;
   result(2) = b2 | v;

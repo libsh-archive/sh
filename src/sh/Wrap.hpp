@@ -28,30 +28,30 @@ namespace SH {
  * used with any dimension of texture.
  */
 template<typename T>
-class ShWrapClamp : public T {
+class WrapClamp : public T {
 public:
-  ShWrapClamp()
+  WrapClamp()
     : T()
   {
-    this->m_node->traits().wrapping(ShTextureTraits::SH_WRAP_CLAMP);
+    this->m_node->traits().wrapping(TextureTraits::WRAP_CLAMP);
   }
-  ShWrapClamp(int width)
+  WrapClamp(int width)
     : T(width)
   {
-    this->m_node->traits().wrapping(ShTextureTraits::SH_WRAP_CLAMP);
+    this->m_node->traits().wrapping(TextureTraits::WRAP_CLAMP);
   }
-  ShWrapClamp(int width, int height)
+  WrapClamp(int width, int height)
     : T(width, height)
   {
-    this->m_node->traits().wrapping(ShTextureTraits::SH_WRAP_CLAMP);
+    this->m_node->traits().wrapping(TextureTraits::WRAP_CLAMP);
   }
-  ShWrapClamp(int width, int height, int depth)
+  WrapClamp(int width, int height, int depth)
     : T(width, height, depth)
   {
-    this->m_node->traits().wrapping(ShTextureTraits::SH_WRAP_CLAMP);
+    this->m_node->traits().wrapping(TextureTraits::WRAP_CLAMP);
   }
 
-  typedef ShWrapClamp<typename T::rectangular_type> rectangular_type;
+  typedef WrapClamp<typename T::rectangular_type> rectangular_type;
   typedef typename T::base_type base_type;
   typedef typename T::return_type return_type;
 };
@@ -62,30 +62,30 @@ public:
  * used with any dimension of texture.
  */
 template<typename T>
-class ShWrapClampToEdge : public T {
+class WrapClampToEdge : public T {
 public:
-  ShWrapClampToEdge()
+  WrapClampToEdge()
     : T()
   {
-    this->m_node->traits().wrapping(ShTextureTraits::SH_WRAP_CLAMP_TO_EDGE);
+    this->m_node->traits().wrapping(TextureTraits::WRAP_CLAMP_TO_EDGE);
   }
-  ShWrapClampToEdge(int width)
+  WrapClampToEdge(int width)
     : T(width)
   {
-    this->m_node->traits().wrapping(ShTextureTraits::SH_WRAP_CLAMP_TO_EDGE);
+    this->m_node->traits().wrapping(TextureTraits::WRAP_CLAMP_TO_EDGE);
   }
-  ShWrapClampToEdge(int width, int height)
+  WrapClampToEdge(int width, int height)
     : T(width, height)
   {
-    this->m_node->traits().wrapping(ShTextureTraits::SH_WRAP_CLAMP_TO_EDGE);
+    this->m_node->traits().wrapping(TextureTraits::WRAP_CLAMP_TO_EDGE);
   }
-  ShWrapClampToEdge(int width, int height, int depth)
+  WrapClampToEdge(int width, int height, int depth)
     : T(width, height, depth)
   {
-    this->m_node->traits().wrapping(ShTextureTraits::SH_WRAP_CLAMP_TO_EDGE);
+    this->m_node->traits().wrapping(TextureTraits::WRAP_CLAMP_TO_EDGE);
   }
 
-  typedef ShWrapClampToEdge<typename T::rectangular_type> rectangular_type;
+  typedef WrapClampToEdge<typename T::rectangular_type> rectangular_type;
   typedef typename T::base_type base_type;
   typedef typename T::return_type return_type;
 };
@@ -96,30 +96,30 @@ public:
  * used with any dimension of texture.
  */
 template<typename T>
-class ShWrapRepeat : public T {
+class WrapRepeat : public T {
 public:
-  ShWrapRepeat()
+  WrapRepeat()
     : T()
   {
-    this->m_node->traits().wrapping(ShTextureTraits::SH_WRAP_REPEAT);
+    this->m_node->traits().wrapping(TextureTraits::WRAP_REPEAT);
   }
-  ShWrapRepeat(int width)
+  WrapRepeat(int width)
     : T(width)
   {
-    this->m_node->traits().wrapping(ShTextureTraits::SH_WRAP_REPEAT);
+    this->m_node->traits().wrapping(TextureTraits::WRAP_REPEAT);
   }
-  ShWrapRepeat(int width, int height)
+  WrapRepeat(int width, int height)
     : T(width, height)
   {
-    this->m_node->traits().wrapping(ShTextureTraits::SH_WRAP_REPEAT);
+    this->m_node->traits().wrapping(TextureTraits::WRAP_REPEAT);
   }
-  ShWrapRepeat(int width, int height, int depth)
+  WrapRepeat(int width, int height, int depth)
     : T(width, height, depth)
   {
-    this->m_node->traits().wrapping(ShTextureTraits::SH_WRAP_REPEAT);
+    this->m_node->traits().wrapping(TextureTraits::WRAP_REPEAT);
   }
 
-  typedef ShWrapRepeat<typename T::rectangular_type> rectangular_type;
+  typedef WrapRepeat<typename T::rectangular_type> rectangular_type;
   typedef typename T::base_type base_type;
   typedef typename T::return_type return_type;
 };

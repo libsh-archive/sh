@@ -24,57 +24,57 @@
 #include <algorithm>
 #include <string>
 #include <sstream>
-#include "ShMatrix.hpp"
-#include "ShUtility.hpp"
-#include "ShLibMisc.hpp"
+#include "Matrix.hpp"
+#include "Utility.hpp"
+#include "LibMisc.hpp"
 
 namespace SH {
 
 //Constructors, destructors
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-ShMatrix<Rows, Cols, Binding, T>::ShMatrix()
+template<int Rows, int Cols, BindingType Binding, typename T>
+Matrix<Rows, Cols, Binding, T>::Matrix()
 { 
-  if (Binding != SH_INPUT) {
+  if (Binding != INPUT) {
     for (int i = 0; i < std::min(Rows, Cols); i++)
       m_data[i][i] = 1.0;
   }
 }
 
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-template<ShBindingType Binding2>
-ShMatrix<Rows, Cols, Binding, T>::ShMatrix(const ShMatrix<Rows, Cols, Binding2, T>& other)
+template<int Rows, int Cols, BindingType Binding, typename T>
+template<BindingType Binding2>
+Matrix<Rows, Cols, Binding, T>::Matrix(const Matrix<Rows, Cols, Binding2, T>& other)
 {
   for (int i = 0; i < Rows; i++)
     m_data[i] = other[i];
 }
 
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-ShMatrix<Rows, Cols, Binding, T>::~ShMatrix()
+template<int Rows, int Cols, BindingType Binding, typename T>
+Matrix<Rows, Cols, Binding, T>::~Matrix()
 {
 }
 
 //Operators
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-ShMatrix<Rows, Cols, Binding, T>&
-ShMatrix<Rows, Cols, Binding, T>::operator=(const ShMatrix<Rows, Cols, Binding, T>& other)
+template<int Rows, int Cols, BindingType Binding, typename T>
+Matrix<Rows, Cols, Binding, T>&
+Matrix<Rows, Cols, Binding, T>::operator=(const Matrix<Rows, Cols, Binding, T>& other)
 {
   for (int i = 0; i < Rows; i++)
     m_data[i] = other[i];
   return *this;
 }
 
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-template<ShBindingType Binding2>
-ShMatrix<Rows, Cols, Binding, T>&
-ShMatrix<Rows, Cols, Binding, T>::operator=(const ShMatrix<Rows, Cols, Binding2, T>& other)
+template<int Rows, int Cols, BindingType Binding, typename T>
+template<BindingType Binding2>
+Matrix<Rows, Cols, Binding, T>&
+Matrix<Rows, Cols, Binding, T>::operator=(const Matrix<Rows, Cols, Binding2, T>& other)
 {
   for (int i = 0; i < Rows; i++)
     m_data[i] = other[i];
   return *this;
 }
 
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-ShMatrix<Rows, Cols, Binding, T>& ShMatrix<Rows, Cols, Binding, T>::operator=(const T& scalar)
+template<int Rows, int Cols, BindingType Binding, typename T>
+Matrix<Rows, Cols, Binding, T>& Matrix<Rows, Cols, Binding, T>::operator=(const T& scalar)
 {
   for (int i = 0; i < Rows; i++) {
     m_data[i] = fillcast<Cols>(0.0);
@@ -85,8 +85,8 @@ ShMatrix<Rows, Cols, Binding, T>& ShMatrix<Rows, Cols, Binding, T>::operator=(co
   return *this;
 }
 
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-ShMatrix<Rows, Cols, Binding, T>& ShMatrix<Rows, Cols, Binding, T>::operator=(const ShGeneric<1, T>& scalar)
+template<int Rows, int Cols, BindingType Binding, typename T>
+Matrix<Rows, Cols, Binding, T>& Matrix<Rows, Cols, Binding, T>::operator=(const Generic<1, T>& scalar)
 {
   for (int i = 0; i < Rows; i++) {
     m_data[i] = fillcast<Cols>(0.0);
@@ -97,123 +97,123 @@ ShMatrix<Rows, Cols, Binding, T>& ShMatrix<Rows, Cols, Binding, T>::operator=(co
   return *this;
 }
 
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-ShAttrib<Cols, Binding, T>& ShMatrix<Rows, Cols, Binding, T>::operator[](int i)
+template<int Rows, int Cols, BindingType Binding, typename T>
+Attrib<Cols, Binding, T>& Matrix<Rows, Cols, Binding, T>::operator[](int i)
 {
   return m_data[i];
 }
 
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-const ShAttrib<Cols, Binding, T>& ShMatrix<Rows, Cols, Binding, T>::operator[](int i) const
+template<int Rows, int Cols, BindingType Binding, typename T>
+const Attrib<Cols, Binding, T>& Matrix<Rows, Cols, Binding, T>::operator[](int i) const
 {
   return m_data[i];
 }
 
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-template<ShBindingType Binding2>
-ShMatrix<Rows, Cols, Binding, T>&
-ShMatrix<Rows, Cols, Binding, T>::operator+=(const ShMatrix<Rows, Cols, Binding2, T>& other)
+template<int Rows, int Cols, BindingType Binding, typename T>
+template<BindingType Binding2>
+Matrix<Rows, Cols, Binding, T>&
+Matrix<Rows, Cols, Binding, T>::operator+=(const Matrix<Rows, Cols, Binding2, T>& other)
 {
   for (int i = 0; i < Rows; i++)
     m_data[i] += other[i];
   return *this;
 }
 
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-template<ShBindingType Binding2>
-ShMatrix<Rows, Cols, Binding, T>&
-ShMatrix<Rows, Cols, Binding, T>::operator-=(const ShMatrix<Rows, Cols, Binding2, T>& other)
+template<int Rows, int Cols, BindingType Binding, typename T>
+template<BindingType Binding2>
+Matrix<Rows, Cols, Binding, T>&
+Matrix<Rows, Cols, Binding, T>::operator-=(const Matrix<Rows, Cols, Binding2, T>& other)
 {
   for (int i = 0; i < Rows; i++)
     m_data[i] -= other[i];
   return *this;
 }
 
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-template<ShBindingType Binding2>
-ShMatrix<Rows, Cols, Binding, T>&
-ShMatrix<Rows, Cols, Binding, T>::operator/=(const ShMatrix<Rows, Cols, Binding2, T>& other)
+template<int Rows, int Cols, BindingType Binding, typename T>
+template<BindingType Binding2>
+Matrix<Rows, Cols, Binding, T>&
+Matrix<Rows, Cols, Binding, T>::operator/=(const Matrix<Rows, Cols, Binding2, T>& other)
 {
   for (int i = 0; i < Rows; i++)
     m_data[i] /= other[i];
   return *this;
 }
 
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-template<ShBindingType Binding2>
-ShMatrix<Rows, Cols, Binding, T>&
-ShMatrix<Rows, Cols, Binding, T>::operator*=(const ShMatrix<Rows, Cols, Binding2, T>& other)
+template<int Rows, int Cols, BindingType Binding, typename T>
+template<BindingType Binding2>
+Matrix<Rows, Cols, Binding, T>&
+Matrix<Rows, Cols, Binding, T>::operator*=(const Matrix<Rows, Cols, Binding2, T>& other)
 {
-  ShMatrix<Rows, Cols, SH_TEMP, T> r = *this * other;
+  Matrix<Rows, Cols, TEMP, T> r = *this * other;
   *this = r;
   return *this;
 }
 
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-ShMatrix<Rows, Cols, Binding, T>&
-ShMatrix<Rows, Cols, Binding, T>::operator-()
+template<int Rows, int Cols, BindingType Binding, typename T>
+Matrix<Rows, Cols, Binding, T>&
+Matrix<Rows, Cols, Binding, T>::operator-()
 {
   for (int i = 0; i < Rows; i++)
     m_data[i] = -(m_data[i]);
   return *this;
 }
 
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-ShMatrix<Rows, Cols, Binding, T>&
-ShMatrix<Rows, Cols, Binding, T>::operator*=(const ShGeneric<1, T>& other)
+template<int Rows, int Cols, BindingType Binding, typename T>
+Matrix<Rows, Cols, Binding, T>&
+Matrix<Rows, Cols, Binding, T>::operator*=(const Generic<1, T>& other)
 {
   for (int i = 0; i < Rows; i++)
     m_data[i] *= other;
   return *this;
 }
   
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-ShMatrix<Rows, Cols, Binding, T>&
-ShMatrix<Rows, Cols, Binding, T>::operator/=(const ShGeneric<1, T>& other)
+template<int Rows, int Cols, BindingType Binding, typename T>
+Matrix<Rows, Cols, Binding, T>&
+Matrix<Rows, Cols, Binding, T>::operator/=(const Generic<1, T>& other)
 {
   for (int i = 0; i < Rows; i++)
     m_data[i] /= other;
   return *this;
 }
 
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-ShMatrixRows<Rows, Cols, T>
-ShMatrix<Rows, Cols, Binding, T>::operator()() const
+template<int Rows, int Cols, BindingType Binding, typename T>
+MatrixRows<Rows, Cols, T>
+Matrix<Rows, Cols, Binding, T>::operator()() const
 {
-  return ShMatrixRows<Rows, Cols, T>(*this);
+  return MatrixRows<Rows, Cols, T>(*this);
 }
 
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-ShMatrixRows<1, Cols, T>
-ShMatrix<Rows, Cols, Binding, T>::operator()(int i0) const
+template<int Rows, int Cols, BindingType Binding, typename T>
+MatrixRows<1, Cols, T>
+Matrix<Rows, Cols, Binding, T>::operator()(int i0) const
 {
-  return ShMatrixRows<1, Cols, T>(*this, i0);
+  return MatrixRows<1, Cols, T>(*this, i0);
 }
 
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-ShMatrixRows<2, Cols, T>
-ShMatrix<Rows, Cols, Binding, T>::operator()(int i0, int i1) const
+template<int Rows, int Cols, BindingType Binding, typename T>
+MatrixRows<2, Cols, T>
+Matrix<Rows, Cols, Binding, T>::operator()(int i0, int i1) const
 {
-  return ShMatrixRows<2, Cols, T>(*this, i0, i1);
+  return MatrixRows<2, Cols, T>(*this, i0, i1);
 }
 
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-ShMatrixRows<3, Cols, T>
-ShMatrix<Rows, Cols, Binding, T>::operator()(int i0, int i1, int i2) const
+template<int Rows, int Cols, BindingType Binding, typename T>
+MatrixRows<3, Cols, T>
+Matrix<Rows, Cols, Binding, T>::operator()(int i0, int i1, int i2) const
 {
-  return ShMatrixRows<3, Cols, T>(*this, i0, i1, i2);
+  return MatrixRows<3, Cols, T>(*this, i0, i1, i2);
 }
 
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-ShMatrixRows<4, Cols, T>
-ShMatrix<Rows, Cols, Binding, T>::operator()(int i0, int i1, int i2, int i3) const
+template<int Rows, int Cols, BindingType Binding, typename T>
+MatrixRows<4, Cols, T>
+Matrix<Rows, Cols, Binding, T>::operator()(int i0, int i1, int i2, int i3) const
 {
-  return ShMatrixRows<4, Cols, T>(*this, i0, i1, i2, i3);
+  return MatrixRows<4, Cols, T>(*this, i0, i1, i2, i3);
 }
 
-template<int Rows, int Cols, ShBindingType Binding, typename T>
+template<int Rows, int Cols, BindingType Binding, typename T>
 std::ostream& operator<<(std::ostream& out,
-                         const ShMatrix<Rows, Cols, Binding, T>& m)
+                         const Matrix<Rows, Cols, Binding, T>& m)
 {
   for (int k = 0; k < Rows; k++) {   
     out << m[k];
@@ -224,12 +224,12 @@ std::ostream& operator<<(std::ostream& out,
 }
   
   
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-ShMatrix<Rows - 1, Cols -1, SH_TEMP, T>
-ShMatrix<Rows, Cols, Binding, T>::subMatrix(int rowToRemove,
+template<int Rows, int Cols, BindingType Binding, typename T>
+Matrix<Rows - 1, Cols -1, TEMP, T>
+Matrix<Rows, Cols, Binding, T>::subMatrix(int rowToRemove,
                                             int columnToRemove) const
 {
-  ShMatrix<Rows - 1, Cols - 1, SH_TEMP, T> myMatrix;
+  Matrix<Rows - 1, Cols - 1, TEMP, T> myMatrix;
     
   int indices[Cols - 1];
   for (int i = 0; i < columnToRemove; i++) 
@@ -248,52 +248,52 @@ ShMatrix<Rows, Cols, Binding, T>::subMatrix(int rowToRemove,
   return myMatrix;
 }
 
-template<int Rows,int Cols,ShBindingType Binding, typename T>
-void ShMatrix<Rows, Cols, Binding, T>::setTranslation(const ShGeneric<Rows-1, T>& trans){
+template<int Rows,int Cols,BindingType Binding, typename T>
+void Matrix<Rows, Cols, Binding, T>::setTranslation(const Generic<Rows-1, T>& trans){
 							
   for(int i = 0;i<(Rows-1);i++)
     m_data[i][(Cols-1)] = trans[i];
 }
   
   
-template<int Rows,int Cols,ShBindingType Binding, typename T>
-void ShMatrix<Rows, Cols, Binding, T>::setScaling(const ShGeneric<Rows-1, T>& scale){
+template<int Rows,int Cols,BindingType Binding, typename T>
+void Matrix<Rows, Cols, Binding, T>::setScaling(const Generic<Rows-1, T>& scale){
   for(int i = 0;i<(Rows-1);i++)
     m_data[i][i] = scale[i];
 }
 
 ////////////////////////
-// ShMatrixRows stuff //
+// MatrixRows stuff //
 ////////////////////////
 
 
 template<int Rows, int Cols, typename T>
-template<int OR, ShBindingType Binding>
-ShMatrixRows<Rows, Cols, T>::ShMatrixRows(const ShMatrix<OR, Cols, Binding, T>& source,
+template<int OR, BindingType Binding>
+MatrixRows<Rows, Cols, T>::MatrixRows(const Matrix<OR, Cols, Binding, T>& source,
                                           int i0)
 {
-  SH_STATIC_CHECK(Rows == 1, Constructing_Non_1_Row_Matrix_From_1_Row);
+  STATIC_CHECK(Rows == 1, Constructing_Non_1_Row_Matrix_From_1_Row);
   
   m_data[0].clone(source[i0]);
 }
 
 template<int Rows, int Cols, typename T>
-template<int OR, ShBindingType Binding>
-ShMatrixRows<Rows, Cols, T>::ShMatrixRows(const ShMatrix<OR, Cols, Binding, T>& source,
+template<int OR, BindingType Binding>
+MatrixRows<Rows, Cols, T>::MatrixRows(const Matrix<OR, Cols, Binding, T>& source,
                                           int i0, int i1)
 {
-  SH_STATIC_CHECK(Rows == 2, Constructing_Non_2_Row_Matrix_From_2_Rows);
+  STATIC_CHECK(Rows == 2, Constructing_Non_2_Row_Matrix_From_2_Rows);
   
   m_data[0].clone(source[i0]);
   m_data[1].clone(source[i1]);
 }
 
 template<int Rows, int Cols, typename T>
-template<int OR, ShBindingType Binding>
-ShMatrixRows<Rows, Cols, T>::ShMatrixRows(const ShMatrix<OR, Cols, Binding, T>& source,
+template<int OR, BindingType Binding>
+MatrixRows<Rows, Cols, T>::MatrixRows(const Matrix<OR, Cols, Binding, T>& source,
                                           int i0, int i1, int i2)
 {
-  SH_STATIC_CHECK(Rows == 3, Constructing_Non_3_Row_Matrix_From_3_Rows);
+  STATIC_CHECK(Rows == 3, Constructing_Non_3_Row_Matrix_From_3_Rows);
   
   m_data[0].clone(source[i0]);
   m_data[1].clone(source[i1]);
@@ -301,11 +301,11 @@ ShMatrixRows<Rows, Cols, T>::ShMatrixRows(const ShMatrix<OR, Cols, Binding, T>& 
 }
 
 template<int Rows, int Cols, typename T>
-template<int OR, ShBindingType Binding>
-ShMatrixRows<Rows, Cols, T>::ShMatrixRows(const ShMatrix<OR, Cols, Binding, T>& source,
+template<int OR, BindingType Binding>
+MatrixRows<Rows, Cols, T>::MatrixRows(const Matrix<OR, Cols, Binding, T>& source,
                                           int i0, int i1, int i2, int i3)
 {
-  SH_STATIC_CHECK(Rows == 4, Constructing_Non_4_Row_Matrix_From_4_Rows);
+  STATIC_CHECK(Rows == 4, Constructing_Non_4_Row_Matrix_From_4_Rows);
   
   m_data[0].clone(source[i0]);
   m_data[1].clone(source[i1]);
@@ -314,7 +314,7 @@ ShMatrixRows<Rows, Cols, T>::ShMatrixRows(const ShMatrix<OR, Cols, Binding, T>& 
 }
 
 template<int Rows, int Cols, typename T>
-ShMatrixRows<Rows, Cols, T>::ShMatrixRows(const ShMatrixRows<Rows, Cols, T>& other)
+MatrixRows<Rows, Cols, T>::MatrixRows(const MatrixRows<Rows, Cols, T>& other)
 {
   // TODO: clone?
   for (int i = 0; i < Rows; i++)
@@ -322,8 +322,8 @@ ShMatrixRows<Rows, Cols, T>::ShMatrixRows(const ShMatrixRows<Rows, Cols, T>& oth
 }
 
 template<int Rows, int Cols, typename T>
-ShMatrixRows<Rows, Cols, T>&
-ShMatrixRows<Rows, Cols, T>::operator=(const ShMatrixRows<Rows, Cols, T>& other)
+MatrixRows<Rows, Cols, T>&
+MatrixRows<Rows, Cols, T>::operator=(const MatrixRows<Rows, Cols, T>& other)
 {
   // TODO: clone?
   for (int i = 0; i < Rows; i++)
@@ -331,66 +331,66 @@ ShMatrixRows<Rows, Cols, T>::operator=(const ShMatrixRows<Rows, Cols, T>& other)
 }
 
 template<int Rows, int Cols, typename T>
-ShMatrix<Rows, Cols, SH_TEMP, T>
-ShMatrixRows<Rows, Cols, T>::operator()() const
+Matrix<Rows, Cols, TEMP, T>
+MatrixRows<Rows, Cols, T>::operator()() const
 {
-  ShMatrix<Rows, Cols, SH_TEMP, T> r;
+  Matrix<Rows, Cols, TEMP, T> r;
   for (int i = 0; i < Rows; i++) r[i].clone(m_data[i]);
   return r;
 }
 
 template<int Rows, int Cols, typename T>
-ShMatrix<Rows, 1, SH_TEMP, T>
-ShMatrixRows<Rows, Cols, T>::operator()(int i0) const
+Matrix<Rows, 1, TEMP, T>
+MatrixRows<Rows, Cols, T>::operator()(int i0) const
 {
-  ShMatrix<Rows, 1, SH_TEMP, T> r;
+  Matrix<Rows, 1, TEMP, T> r;
   for (int i = 0; i < Rows; i++) r[i].clone(m_data[i](i0));
   return r;
 }
 
 template<int Rows, int Cols, typename T>
-ShMatrix<Rows, 2, SH_TEMP, T>
-ShMatrixRows<Rows, Cols, T>::operator()(int i0, int i1) const
+Matrix<Rows, 2, TEMP, T>
+MatrixRows<Rows, Cols, T>::operator()(int i0, int i1) const
 {
-  ShMatrix<Rows, 2, SH_TEMP, T> r;
+  Matrix<Rows, 2, TEMP, T> r;
   for (int i = 0; i < Rows; i++) r[i].clone(m_data[i](i0, i1));
   return r;
 }
 
 template<int Rows, int Cols, typename T>
-ShMatrix<Rows, 3, SH_TEMP, T>
-ShMatrixRows<Rows, Cols, T>::operator()(int i0, int i1, int i2) const
+Matrix<Rows, 3, TEMP, T>
+MatrixRows<Rows, Cols, T>::operator()(int i0, int i1, int i2) const
 {
-  ShMatrix<Rows, 3, SH_TEMP, T> r;
+  Matrix<Rows, 3, TEMP, T> r;
   for (int i = 0; i < Rows; i++) r[i].clone(m_data[i](i0, i1, i2));
   return r;
 }
 
 template<int Rows, int Cols, typename T>
-ShMatrix<Rows, 4, SH_TEMP, T>
-ShMatrixRows<Rows, Cols, T>::operator()(int i0, int i1, int i2, int i3) const
+Matrix<Rows, 4, TEMP, T>
+MatrixRows<Rows, Cols, T>::operator()(int i0, int i1, int i2, int i3) const
 {
-  ShMatrix<Rows, 4, SH_TEMP, T> r;
+  Matrix<Rows, 4, TEMP, T> r;
   for (int i = 0; i < Rows; i++) r[i].clone(m_data[i](i0, i1, i2, i3));
   return r;
 }
 
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-void ShMatrix<Rows, Cols, Binding, T>::range(host_type low, host_type high)
+template<int Rows, int Cols, BindingType Binding, typename T>
+void Matrix<Rows, Cols, Binding, T>::range(host_type low, host_type high)
 {
   for (int i = 0; i < Rows; i++) m_data[i].range(low, high);
 }
 
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-std::string ShMatrix<Rows, Cols, Binding, T>::name() const
+template<int Rows, int Cols, BindingType Binding, typename T>
+std::string Matrix<Rows, Cols, Binding, T>::name() const
   {
-  return ShMeta::name();
+  return Meta::name();
   }
 
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-void ShMatrix<Rows, Cols, Binding, T>::name(const std::string& n)
+template<int Rows, int Cols, BindingType Binding, typename T>
+void Matrix<Rows, Cols, Binding, T>::name(const std::string& n)
   {
-  ShMeta::name(n);
+  Meta::name(n);
   
   for (int i = 0; i < Rows; i++)
     {
@@ -400,22 +400,22 @@ void ShMatrix<Rows, Cols, Binding, T>::name(const std::string& n)
     }
   }
 
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-bool ShMatrix<Rows, Cols, Binding, T>:: has_name() const
+template<int Rows, int Cols, BindingType Binding, typename T>
+bool Matrix<Rows, Cols, Binding, T>:: has_name() const
   {
-  return ShMeta::has_name();
+  return Meta::has_name();
   }
   
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-bool ShMatrix<Rows, Cols, Binding, T>::internal() const
+template<int Rows, int Cols, BindingType Binding, typename T>
+bool Matrix<Rows, Cols, Binding, T>::internal() const
   {
-  return ShMeta::internal();
+  return Meta::internal();
   }
 
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-void ShMatrix<Rows, Cols, Binding, T>::internal(bool internal)
+template<int Rows, int Cols, BindingType Binding, typename T>
+void Matrix<Rows, Cols, Binding, T>::internal(bool internal)
   {
-  ShMeta::internal(internal);
+  Meta::internal(internal);
   
   for (int i = 0; i < Rows; i++)
     {
@@ -423,16 +423,16 @@ void ShMatrix<Rows, Cols, Binding, T>::internal(bool internal)
     }
   }
 
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-std::string ShMatrix<Rows, Cols, Binding, T>::title() const
+template<int Rows, int Cols, BindingType Binding, typename T>
+std::string Matrix<Rows, Cols, Binding, T>::title() const
   {
-  return ShMeta::title();
+  return Meta::title();
   }
 
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-void ShMatrix<Rows, Cols, Binding, T>::title(const std::string& t)
+template<int Rows, int Cols, BindingType Binding, typename T>
+void Matrix<Rows, Cols, Binding, T>::title(const std::string& t)
   {
-  ShMeta::title(t);
+  Meta::title(t);
 
   for (int i = 0; i < Rows; i++)
     {
@@ -442,16 +442,16 @@ void ShMatrix<Rows, Cols, Binding, T>::title(const std::string& t)
     }
   }
 
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-std::string ShMatrix<Rows, Cols, Binding, T>::description() const
+template<int Rows, int Cols, BindingType Binding, typename T>
+std::string Matrix<Rows, Cols, Binding, T>::description() const
   {
-  return ShMeta::description();
+  return Meta::description();
   }
 
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-void ShMatrix<Rows, Cols, Binding, T>::description(const std::string& d)
+template<int Rows, int Cols, BindingType Binding, typename T>
+void Matrix<Rows, Cols, Binding, T>::description(const std::string& d)
   {
-  ShMeta::description(d);
+  Meta::description(d);
 
   for (int i = 0; i < Rows; i++)
     {
@@ -461,16 +461,16 @@ void ShMatrix<Rows, Cols, Binding, T>::description(const std::string& d)
     }
   }
 
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-std::string ShMatrix<Rows, Cols, Binding, T>::meta(const std::string& key) const
+template<int Rows, int Cols, BindingType Binding, typename T>
+std::string Matrix<Rows, Cols, Binding, T>::meta(const std::string& key) const
   {
-  return ShMeta::meta(key);
+  return Meta::meta(key);
   }
 
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-void ShMatrix<Rows, Cols, Binding, T>::meta(const std::string& key, const std::string& value)
+template<int Rows, int Cols, BindingType Binding, typename T>
+void Matrix<Rows, Cols, Binding, T>::meta(const std::string& key, const std::string& value)
   {
-  ShMeta::meta(key, value);
+  Meta::meta(key, value);
 
   for (int i = 0; i < Rows; i++)
     {
@@ -480,15 +480,15 @@ void ShMatrix<Rows, Cols, Binding, T>::meta(const std::string& key, const std::s
     }
   }
 
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-void ShMatrix<Rows, Cols, Binding, T>::getValues(host_type dest[]) const
+template<int Rows, int Cols, BindingType Binding, typename T>
+void Matrix<Rows, Cols, Binding, T>::getValues(host_type dest[]) const
 {
   int x = 0;
   for (int i=0; i < Rows; i++) {
     for (int j=0; j < Cols; j++) {
-      typedef ShDataVariant<T, SH_HOST> VariantType;
-      typedef ShPointer<VariantType> VariantTypePtr;
-      VariantTypePtr c = variant_cast<T, SH_HOST>(m_data[i].getVariant());
+      typedef DataVariant<T, HOST> VariantType;
+      typedef Pointer<VariantType> VariantTypePtr;
+      VariantTypePtr c = variant_cast<T, HOST>(m_data[i].getVariant());
       dest[x] = (*c)[j];
       x++;
     }

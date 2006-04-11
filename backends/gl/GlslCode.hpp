@@ -26,10 +26,10 @@
 
 #include "Glsl.hpp"
 #include "GlBackend.hpp"
-#include "ShVariableNode.hpp"
-#include "ShProgram.hpp"
-#include "ShCtrlGraph.hpp"
-#include "ShTransformer.hpp"
+#include "VariableNode.hpp"
+#include "Program.hpp"
+#include "CtrlGraph.hpp"
+#include "Transformer.hpp"
 #include "GlslVariableMap.hpp"
 #include "GlslSet.hpp"
 
@@ -41,7 +41,7 @@ struct TextureInfo {
 };
 
 struct GlslMapping {
-  SH::ShOperation op;
+  SH::Operation op;
   const char* code;
 };
 
@@ -50,20 +50,20 @@ struct GlslLine {
   std::string code;
 };
 
-class GlslCode : public SH::ShBackendCode {
+class GlslCode : public SH::BackendCode {
 public:
-  GlslCode(const SH::ShProgramNodeCPtr& program, const std::string& target,
+  GlslCode(const SH::ProgramNodeCPtr& program, const std::string& target,
           TextureStrategy* texture);
   virtual ~GlslCode();
 
-  virtual bool allocateRegister(const SH::ShVariableNodePtr& var) { return true; }
-  virtual void freeRegister(const SH::ShVariableNodePtr& var) {}
+  virtual bool allocateRegister(const SH::VariableNodePtr& var) { return true; }
+  virtual void freeRegister(const SH::VariableNodePtr& var) {}
 
   virtual void upload();
   virtual void bind();
   virtual void unbind();
   virtual void update();
-  virtual void updateUniform(const SH::ShVariableNodePtr& uniform);
+  virtual void updateUniform(const SH::VariableNodePtr& uniform);
 
   void set_bound(GLhandleARB program);
   void upload_uniforms();
@@ -89,8 +89,8 @@ private:
   // NOTE: These two pointer are deliberately not smart pointers
   // so that the circular referenece between a program and
   // its compiled code is broken
-  SH::ShProgramNode* m_shader; // internally visible shader ShTransformered to fit this target (GLSL)
-  SH::ShProgramNode* m_originalShader; // original shader (should alway use this for external (e.g. globals))
+  SH::ProgramNode* m_shader; // internally visible shader Transformered to fit this target (GLSL)
+  SH::ProgramNode* m_originalShader; // original shader (should alway use this for external (e.g. globals))
   GlslProgramType m_unit;
   std::string m_target;
 
@@ -99,11 +99,11 @@ private:
   std::vector<GlslLine> m_lines; /// raw lines of code (unindented)
   int m_indent;
   GlslVariableMap* m_varmap;
-  std::map<SH::ShTextureNodePtr, TextureInfo> m_texture_units;
+  std::map<SH::TextureNodePtr, TextureInfo> m_texture_units;
   int m_nb_textures;
 
   /// The long tuple splits applied to this shader before compilation.
-  SH::ShTransformer::VarSplitMap m_splits;
+  SH::Transformer::VarSplitMap m_splits;
 
   // Linked GLSL Program that contains this shader and is currently
   // bound, if any
@@ -140,45 +140,45 @@ private:
   std::string print_decl(const GlslVariableDeclaration& decl);
 
   /// Generate code for this node and those following it.
-  void gen_structural_node(const SH::ShStructuralNodePtr& node);
+  void gen_structural_node(const SH::StructuralNodePtr& node);
 
   /// Generate code for a single Sh statement.
-  void emit(const SH::ShStatement& stmt);
-  void emit_ati_workaround(const SH::ShStatement& stmt, double real_answer, const char* code);
-  void emit_cbrt(const SH::ShStatement& stmt);
-  void emit_comment(const SH::ShStatement& stmt);
-  void emit_cond(const SH::ShStatement& stmt);
-  void emit_discard(const SH::ShStatement& stmt, const std::string& function);
-  void emit_exp10(const SH::ShStatement& stmt);
-  void emit_hyperbolic(const SH::ShStatement& stmt);
-  void emit_lit(const SH::ShStatement& stmt);
-  void emit_log(const SH::ShStatement& stmt);
-  void emit_log10(const SH::ShStatement& stmt);
-  void emit_logic(const SH::ShStatement& stmt);
-  void emit_noise(const SH::ShStatement& stmt);
-  void emit_pal(const SH::ShStatement& stmt);
-  void emit_pow(const SH::ShVariable& dest, const SH::ShVariable& a, const SH::ShVariable& b);
-  void emit_prod(const SH::ShStatement& stmt);
-  void emit_sum(const SH::ShStatement& stmt);
-  void emit_texture(const SH::ShStatement& stmt);
+  void emit(const SH::Statement& stmt);
+  void emit_ati_workaround(const SH::Statement& stmt, double real_answer, const char* code);
+  void emit_cbrt(const SH::Statement& stmt);
+  void emit_comment(const SH::Statement& stmt);
+  void emit_cond(const SH::Statement& stmt);
+  void emit_discard(const SH::Statement& stmt, const std::string& function);
+  void emit_exp10(const SH::Statement& stmt);
+  void emit_hyperbolic(const SH::Statement& stmt);
+  void emit_lit(const SH::Statement& stmt);
+  void emit_log(const SH::Statement& stmt);
+  void emit_log10(const SH::Statement& stmt);
+  void emit_logic(const SH::Statement& stmt);
+  void emit_noise(const SH::Statement& stmt);
+  void emit_pal(const SH::Statement& stmt);
+  void emit_pow(const SH::Variable& dest, const SH::Variable& a, const SH::Variable& b);
+  void emit_prod(const SH::Statement& stmt);
+  void emit_sum(const SH::Statement& stmt);
+  void emit_texture(const SH::Statement& stmt);
   
-  void table_substitution(const SH::ShStatement& stmt, const char* code_ptr);
-  bool handle_table_operation(const SH::ShStatement& stmt);
+  void table_substitution(const SH::Statement& stmt, const char* code_ptr);
+  bool handle_table_operation(const SH::Statement& stmt);
   
-  std::string resolve(const SH::ShVariable& v, int index = -1, int size = 0) const;
-  std::string resolve(const SH::ShVariable& v, const SH::ShVariable& index) const;
-  std::string resolve_constant(double constant, const SH::ShVariable& var, int size = 0) const;
+  std::string resolve(const SH::Variable& v, int index = -1, int size = 0) const;
+  std::string resolve(const SH::Variable& v, const SH::Variable& index) const;
+  std::string resolve_constant(double constant, const SH::Variable& var, int size = 0) const;
 
-  void update_float_uniform(const SH::ShVariableNodePtr& node, const GLint location);
-  void update_int_uniform(const SH::ShVariableNodePtr& node, const GLint location);
-  void real_update_uniform(const SH::ShVariableNodePtr& uniform, const std::string& name);
+  void update_float_uniform(const SH::VariableNodePtr& node, const GLint location);
+  void update_int_uniform(const SH::VariableNodePtr& node, const GLint location);
+  void real_update_uniform(const SH::VariableNodePtr& uniform, const std::string& name);
 
-  SH::ShVariableNodePtr allocate_constant(const SH::ShStatement& stmt, double constant, int size = 0) const;
-  SH::ShVariableNodePtr allocate_temp(const SH::ShStatement& stmt, int size = 0) const;
+  SH::VariableNodePtr allocate_constant(const SH::Statement& stmt, double constant, int size = 0) const;
+  SH::VariableNodePtr allocate_temp(const SH::Statement& stmt, int size = 0) const;
   void allocate_textures();
 };
 
-typedef SH::ShPointer<GlslCode> GlslCodePtr;
+typedef SH::Pointer<GlslCode> GlslCodePtr;
 
 }
 

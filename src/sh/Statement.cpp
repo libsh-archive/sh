@@ -18,46 +18,46 @@
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 #include <iostream>
-#include "ShStatement.hpp"
+#include "Statement.hpp"
 
 namespace SH {
 
-ShStatement::ShStatement(ShOperation op)
+Statement::Statement(Operation op)
   : src(3), op(op), marked(false)
 {
 }
 
-ShStatement::ShStatement(ShVariable dest, ShOperation op)
+Statement::Statement(Variable dest, Operation op)
   : dest(dest), src(3), op(op), marked(false)
 {
 }
 
-ShStatement::ShStatement(ShVariable dest, ShOperation op, ShVariable src1)
+Statement::Statement(Variable dest, Operation op, Variable src1)
   : dest(dest), src(3), op(op), marked(false)
 {
-  if(op == SH_OP_ASN && dest.size() != src1.size()) {
-    SH_DEBUG_PRINT("SH_OP_ASN dest.size() != src.size() (" << dest.size() << " != " << src1.size());
-    SH_DEBUG_PRINT("  dest=" << dest.name() << " src=" << src1.name());
-    SH_DEBUG_ASSERT(dest.size() == src1.size());
+  if(op == OP_ASN && dest.size() != src1.size()) {
+    DEBUG_PRINT("OP_ASN dest.size() != src.size() (" << dest.size() << " != " << src1.size());
+    DEBUG_PRINT("  dest=" << dest.name() << " src=" << src1.name());
+    DEBUG_ASSERT(dest.size() == src1.size());
   }
   src[0] = src1;
 }
 
-ShStatement::ShStatement(ShVariable dest, ShVariable src0, ShOperation op, ShVariable src1)
+Statement::Statement(Variable dest, Variable src0, Operation op, Variable src1)
   : dest(dest), src(3), op(op), marked(false)
 {
   src[0] = src0;
   src[1] = src1;
 }
 
-ShStatement::ShStatement(ShVariable dest, ShOperation op, ShVariable src0, ShVariable src1)
+Statement::Statement(Variable dest, Operation op, Variable src0, Variable src1)
   : dest(dest), src(3), op(op), marked(false)
 {
   src[0] = src0;
   src[1] = src1;
 }
 
-ShStatement::ShStatement(ShVariable dest, ShOperation op, ShVariable src0, ShVariable src1, ShVariable src2)
+Statement::Statement(Variable dest, Operation op, Variable src0, Variable src1, Variable src2)
   : dest(dest), src(3), op(op), marked(false)
 {
   src[0] = src0;
@@ -65,19 +65,19 @@ ShStatement::ShStatement(ShVariable dest, ShOperation op, ShVariable src0, ShVar
   src[2] = src2;
 }
 
-std::ostream& operator<<(std::ostream& out, const ShStatement& stmt)
+std::ostream& operator<<(std::ostream& out, const Statement& stmt)
 {
-  if(stmt.op == SH_OP_COMMENT) return out;
-  ShStatement::dumpVar(out, stmt.dest) << " := ";
-  if(stmt.op != SH_OP_ASN) out << opInfo[stmt.op].name << " ";
+  if(stmt.op == OP_COMMENT) return out;
+  Statement::dumpVar(out, stmt.dest) << " := ";
+  if(stmt.op != OP_ASN) out << opInfo[stmt.op].name << " ";
   for(int i = 0; i < opInfo[stmt.op].arity; ++i) {
     if(i != 0) out << ", ";
-    ShStatement::dumpVar(out, stmt.src[i]); 
+    Statement::dumpVar(out, stmt.src[i]); 
   }
   return out;
 }
 
-std::ostream& ShStatement::dumpVar(std::ostream &out, const ShVariable& var)
+std::ostream& Statement::dumpVar(std::ostream &out, const Variable& var)
 {
   if(var.null()) {
     out << "[null]";

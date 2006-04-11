@@ -17,37 +17,37 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#include "ShQuaternion.hpp"
+#include "Quaternion.hpp"
 
 namespace SH {
-template<ShBindingType B, typename T>
-ShQuaternion<B, T>::ShQuaternion() 
+template<BindingType B, typename T>
+Quaternion<B, T>::Quaternion() 
 {
-  if (B == SH_TEMP) 
+  if (B == TEMP) 
     {
-      m_data = ShVector4f(1.0, 0.0, 0.0, 0.0);
+      m_data = Vector4f(1.0, 0.0, 0.0, 0.0);
       //m_data.setUnit(true);
     }
 }
 
-template<ShBindingType B, typename T>
-template<ShBindingType B2>
-ShQuaternion<B, T>::ShQuaternion(const ShQuaternion<B2, T>& other)
+template<BindingType B, typename T>
+template<BindingType B2>
+Quaternion<B, T>::Quaternion(const Quaternion<B2, T>& other)
   : m_data(other.getVector())
 {
 }
 
-template<ShBindingType B, typename T>
-template<ShBindingType B2>
-ShQuaternion<B, T>::ShQuaternion(const ShAttrib<4, B2, T, SH_VECTOR>& values)
+template<BindingType B, typename T>
+template<BindingType B2>
+Quaternion<B, T>::Quaternion(const Attrib<4, B2, T, VECTOR>& values)
   : m_data(values)
 {
 }
 
-template<ShBindingType B, typename T>
-template<ShBindingType B2, ShBindingType B3>   
-ShQuaternion<B, T>::ShQuaternion(const ShAttrib<1, B2, T>& angle, 
-                                 const ShAttrib<3, B3, T, SH_VECTOR>& axis)
+template<BindingType B, typename T>
+template<BindingType B2, BindingType B3>   
+Quaternion<B, T>::Quaternion(const Attrib<1, B2, T>& angle, 
+                                 const Attrib<3, B3, T, VECTOR>& axis)
 {
   m_data(0) = cos(angle/2.0);
   m_data(1,2,3) = SH::normalize(axis);
@@ -55,17 +55,17 @@ ShQuaternion<B, T>::ShQuaternion(const ShAttrib<1, B2, T>& angle,
   //m_data.setUnit(true);
 }
 
-template<ShBindingType B, typename T>
-template<ShBindingType B2>
-ShQuaternion<B, T>::ShQuaternion(const ShMatrix<4, 4, B2, T>& mat)
+template<BindingType B, typename T>
+template<BindingType B2>
+Quaternion<B, T>::Quaternion(const Matrix<4, 4, B2, T>& mat)
 {
-  ShAttrib1f trace = 1.0 + mat[0](0) + mat[1](1) + mat[2](2);
+  Attrib1f trace = 1.0 + mat[0](0) + mat[1](1) + mat[2](2);
   trace = (trace >= 0.0)*trace + (trace < 0.0)*0.0;
-  ShAttrib1f c0 = (trace > 0.001);
-  ShAttrib1f c1 = ((mat[0](0) > mat[1](1))*(mat[0](0) > mat[2](2)));
-  ShAttrib1f c2 = ( mat[1](1) > mat[2](2) );
-  ShVector4f res0, res1, res2, res3;
-  ShAttrib1f S0 = sqrt(trace) * 2.0;
+  Attrib1f c0 = (trace > 0.001);
+  Attrib1f c1 = ((mat[0](0) > mat[1](1))*(mat[0](0) > mat[2](2)));
+  Attrib1f c2 = ( mat[1](1) > mat[2](2) );
+  Vector4f res0, res1, res2, res3;
+  Attrib1f S0 = sqrt(trace) * 2.0;
   S0 += (S0 == 0.0)*1.0;
   
   res0(0) = 0.25 * S0;
@@ -75,7 +75,7 @@ ShQuaternion<B, T>::ShQuaternion(const ShMatrix<4, 4, B2, T>& mat)
   
   trace = 1.0 + mat[0](0) - mat[1](1) - mat[2](2);
   trace = (trace >= 0.0)*trace + (trace < 0.0)*0.0;
-  ShAttrib1f S1 = sqrt(trace) * 2.0;
+  Attrib1f S1 = sqrt(trace) * 2.0;
   S1 += (S1 == 0.0)*1.0;
   
   res1(0) = (mat[2](1) - mat[1](2)) / S1;
@@ -85,7 +85,7 @@ ShQuaternion<B, T>::ShQuaternion(const ShMatrix<4, 4, B2, T>& mat)
   
   trace = 1.0 - mat[0](0) + mat[1](1) - mat[2](2);
   trace = (trace >= 0.0)*trace + (trace < 0.0)*0.0;
-  ShAttrib1f S2 = sqrt(trace) * 2.0;
+  Attrib1f S2 = sqrt(trace) * 2.0;
   S2 += (S2 == 0.0)*1.0;
   
   res2(0) = (mat[2](0) - mat[0](2)) / S2;
@@ -95,7 +95,7 @@ ShQuaternion<B, T>::ShQuaternion(const ShMatrix<4, 4, B2, T>& mat)
   
   trace = 1.0 - mat[0](0) - mat[1](1) + mat[2](2);
   trace = (trace >= 0.0)*trace + (trace < 0.0)*0.0;
-  ShAttrib1f S3 = sqrt(trace) * 2.0;
+  Attrib1f S3 = sqrt(trace) * 2.0;
   S3 += (S3 == 0.0)*1.0;
   
   res3(0) = (mat[1](0) - mat[0](1)) / S3;
@@ -108,50 +108,50 @@ ShQuaternion<B, T>::ShQuaternion(const ShMatrix<4, 4, B2, T>& mat)
   //m_data.setUnit(true);
 }
 
-template<ShBindingType B, typename T>
-std::ostream& operator<<(std::ostream& out, const ShQuaternion<B, T>& q)
+template<BindingType B, typename T>
+std::ostream& operator<<(std::ostream& out, const Quaternion<B, T>& q)
 {
   float vals[4];
   q.m_data.getValues(vals);
-  out << "ShQuaternion: " << vals[0] << " " << vals[1] << " " << vals[2] 
+  out << "Quaternion: " << vals[0] << " " << vals[1] << " " << vals[2] 
       << " " << vals[3];
   return out;
 }
 
-template<ShBindingType B, typename T>
-template<ShBindingType B2>
-ShQuaternion<B, T>& 
-ShQuaternion<B, T>::operator=(const ShQuaternion<B2, T>& other) 
+template<BindingType B, typename T>
+template<BindingType B2>
+Quaternion<B, T>& 
+Quaternion<B, T>::operator=(const Quaternion<B2, T>& other) 
 {
   m_data = other.getVector();
   return *this;
 }
 
-template<ShBindingType B, typename T>
-template<ShBindingType B2>
-ShQuaternion<B, T>& 
-ShQuaternion<B, T>::operator+=(const ShQuaternion<B2, T>& right) 
+template<BindingType B, typename T>
+template<BindingType B2>
+Quaternion<B, T>& 
+Quaternion<B, T>::operator+=(const Quaternion<B2, T>& right) 
 {
   m_data += right.getVector();
   return *this;
 }
 
-template<ShBindingType B, typename T>
-template<ShBindingType B2>
-ShQuaternion<B, T>& 
-ShQuaternion<B, T>::operator-=(const ShQuaternion<B2, T>& right) 
+template<BindingType B, typename T>
+template<BindingType B2>
+Quaternion<B, T>& 
+Quaternion<B, T>::operator-=(const Quaternion<B2, T>& right) 
 {
   m_data -= right.getVector();
   return *this;
 }
 
-template<ShBindingType B, typename T>
-template<ShBindingType B2>
-ShQuaternion<B, T>& 
-ShQuaternion<B, T>::operator*=(const ShQuaternion<B2, T>& right) 
+template<BindingType B, typename T>
+template<BindingType B2>
+Quaternion<B, T>& 
+Quaternion<B, T>::operator*=(const Quaternion<B2, T>& right) 
 {
-  ShVector4f result;
-  ShVector4f rightData = right.getVector();
+  Vector4f result;
+  Vector4f rightData = right.getVector();
   result(0) = 
     m_data(0)*rightData(0) - SH::dot(m_data(1,2,3), rightData(1,2,3));
   result(1,2,3) = 
@@ -163,78 +163,78 @@ ShQuaternion<B, T>::operator*=(const ShQuaternion<B2, T>& right)
   return *this;
 }
 
-template<ShBindingType B, typename T>
-template<ShBindingType B2>
-ShQuaternion<B, T>& 
-ShQuaternion<B, T>::operator*=(const ShAttrib<1, B2, T>& right) 
+template<BindingType B, typename T>
+template<BindingType B2>
+Quaternion<B, T>& 
+Quaternion<B, T>::operator*=(const Attrib<1, B2, T>& right) 
 {
   m_data = m_data*right;
   return *this;
 }
 
-template<ShBindingType B, typename T>
-template<ShBindingType B2>
-ShQuaternion<B, T>& 
-ShQuaternion<B, T>::operator*=(const ShAttrib<3, B2, T, SH_VECTOR>& right) 
+template<BindingType B, typename T>
+template<BindingType B2>
+Quaternion<B, T>& 
+Quaternion<B, T>::operator*=(const Attrib<3, B2, T, VECTOR>& right) 
 {
-  ShVector4f v;
+  Vector4f v;
   v(0) = 0.0;
   v(1,2,3) = right;
   //v.setUnit(right.isUnit());
-  *this *= ShQuaternionf(v);
+  *this *= Quaternionf(v);
   return *this;
 }
 
-template<ShBindingType B, typename T>
-template<ShBindingType B2>
-ShQuaternion<B, T>& 
-ShQuaternion<B, T>::operator*=(const ShAttrib<3, B2, T, SH_NORMAL>& right) 
+template<BindingType B, typename T>
+template<BindingType B2>
+Quaternion<B, T>& 
+Quaternion<B, T>::operator*=(const Attrib<3, B2, T, NORMAL>& right) 
 {
-  ShVector4f v;
+  Vector4f v;
   v(0) = 0.0;
   v(1,2,3) = right;
   //v.setUnit(right.isUnit());
-  *this *= ShQuaternionf(v);
+  *this *= Quaternionf(v);
   return *this;
 }
 
-template<ShBindingType B, typename T>
-template<ShBindingType B2>
-ShAttrib<1, SH_TEMP, T> 
-ShQuaternion<B, T>::dot(const ShQuaternion<B2, T>& q) const 
+template<BindingType B, typename T>
+template<BindingType B2>
+Attrib<1, TEMP, T> 
+Quaternion<B, T>::dot(const Quaternion<B2, T>& q) const 
 {
   return SH::dot(m_data, q.getVector());
 }
 
-template<ShBindingType B, typename T>
-ShQuaternion<SH_TEMP, T> ShQuaternion<B, T>::conjugate() const 
+template<BindingType B, typename T>
+Quaternion<TEMP, T> Quaternion<B, T>::conjugate() const 
 {
-  ShVector4f conjData;
+  Vector4f conjData;
   conjData(0) = m_data(0);
   conjData(1, 2, 3) = -m_data(1, 2, 3);
   //conjData.setUnit(m_data.isUnit());
 
-  return ShQuaternion<SH_TEMP>(conjData);
+  return Quaternion<TEMP>(conjData);
 }
 
-template<ShBindingType B, typename T>
-ShQuaternion<SH_TEMP, T> ShQuaternion<B, T>::inverse() const 
+template<BindingType B, typename T>
+Quaternion<TEMP, T> Quaternion<B, T>::inverse() const 
 {
   //  if (m_data.isUnit()) {
   //    return conjugate();
   //  } else {
-  ShAttrib1f norm = SH::dot(m_data, m_data); 
+  Attrib1f norm = SH::dot(m_data, m_data); 
   return conjugate() * (1.0 / norm);
   //  }
 }
 
-template<ShBindingType B, typename T>
-ShMatrix<4, 4, SH_TEMP, T> ShQuaternion<B, T>::getMatrix() const
+template<BindingType B, typename T>
+Matrix<4, 4, TEMP, T> Quaternion<B, T>::getMatrix() const
 {
-  SH::ShMatrix4x4f m;
-  ShAttrib4f x = m_data(1,1,1,1) * m_data(1,2,3,0);
-  ShAttrib4f y = m_data(2,2,2,2) * m_data(0,2,3,0);
-  ShAttrib4f z = m_data(3,3,3,3) * m_data(0,0,3,0);
+  SH::Matrix4x4f m;
+  Attrib4f x = m_data(1,1,1,1) * m_data(1,2,3,0);
+  Attrib4f y = m_data(2,2,2,2) * m_data(0,2,3,0);
+  Attrib4f z = m_data(3,3,3,3) * m_data(0,0,3,0);
 
   m[0](0) = 1 - 2 * (y(1) + z(2));
   m[1](0) = 2 * (x(1) - z(3));
@@ -251,117 +251,117 @@ ShMatrix<4, 4, SH_TEMP, T> ShQuaternion<B, T>::getMatrix() const
   return m;
 }
 
-template<ShBindingType B, typename T>
-ShAttrib<4, SH_TEMP, T, SH_VECTOR> ShQuaternion<B, T>::getVector() const
+template<BindingType B, typename T>
+Attrib<4, TEMP, T, VECTOR> Quaternion<B, T>::getVector() const
 {
   return m_data;
 }
 
-template<ShBindingType B, typename T>
-template<ShBindingType B2>
-ShQuaternion<SH_TEMP, T> 
-ShQuaternion<B, T>::operator+(const ShQuaternion<B2, T>& q)
+template<BindingType B, typename T>
+template<BindingType B2>
+Quaternion<TEMP, T> 
+Quaternion<B, T>::operator+(const Quaternion<B2, T>& q)
 {
-  ShQuaternion<B, T> r = *this;
+  Quaternion<B, T> r = *this;
   return (r += q);
 }
 
-template<ShBindingType B, typename T>
-template<ShBindingType B2>
-ShQuaternion<SH_TEMP, T> 
-ShQuaternion<B, T>::operator-(const ShQuaternion<B2, T>& q)
+template<BindingType B, typename T>
+template<BindingType B2>
+Quaternion<TEMP, T> 
+Quaternion<B, T>::operator-(const Quaternion<B2, T>& q)
 {
-  ShQuaternion<B, T> r = *this;
+  Quaternion<B, T> r = *this;
   return (r -= q);
 }
   
-template<ShBindingType B, typename T>
-template<ShBindingType B2>
-ShQuaternion<SH_TEMP, T> 
-ShQuaternion<B, T>::operator*(const ShQuaternion<B2, T>& q)
+template<BindingType B, typename T>
+template<BindingType B2>
+Quaternion<TEMP, T> 
+Quaternion<B, T>::operator*(const Quaternion<B2, T>& q)
 {
-  ShQuaternion<B, T> r = *this;
+  Quaternion<B, T> r = *this;
   return (r *= q);
 }
 
-template<ShBindingType B, typename T>
-template<ShBindingType B2>
-ShQuaternion<SH_TEMP, T> 
-ShQuaternion<B, T>::operator*(const ShAttrib<1, B2, T>& c)
+template<BindingType B, typename T>
+template<BindingType B2>
+Quaternion<TEMP, T> 
+Quaternion<B, T>::operator*(const Attrib<1, B2, T>& c)
 {
-  ShQuaternion<B, T> r = *this;
+  Quaternion<B, T> r = *this;
   return (r *= c);
 }
 
-template<ShBindingType B, typename T>
-template<ShBindingType B2>
-ShQuaternion<SH_TEMP, T> 
-ShQuaternion<B, T>::operator*(const ShAttrib<3, B2, T, SH_VECTOR>& v)
+template<BindingType B, typename T>
+template<BindingType B2>
+Quaternion<TEMP, T> 
+Quaternion<B, T>::operator*(const Attrib<3, B2, T, VECTOR>& v)
 {
-  ShQuaternion<B, T> r = *this;
+  Quaternion<B, T> r = *this;
   return (r *= v);
 }
 
-template<ShBindingType B, typename T>
-template<ShBindingType B2>
-ShQuaternion<SH_TEMP, T> 
-ShQuaternion<B, T>::operator*(const ShAttrib<3, B2, T, SH_NORMAL>& v)
+template<BindingType B, typename T>
+template<BindingType B2>
+Quaternion<TEMP, T> 
+Quaternion<B, T>::operator*(const Attrib<3, B2, T, NORMAL>& v)
 {
-  ShQuaternion<B, T> r = *this;
+  Quaternion<B, T> r = *this;
   return (r *= v);
 }
 
-template<ShBindingType B, typename T>
-void ShQuaternion<B, T>::normalize()
+template<BindingType B, typename T>
+void Quaternion<B, T>::normalize()
 {
   m_data = SH::normalize(m_data);
 }
 
-template<ShBindingType B, typename T>
-void ShQuaternion<B, T>::setUnit(bool flag)
+template<BindingType B, typename T>
+void Quaternion<B, T>::setUnit(bool flag)
 {
   //m_data.setUnit(flag);
 }
 
-template<ShBindingType B, typename T>
-void ShQuaternion<B, T>::getValues(HostType values[]) const
+template<BindingType B, typename T>
+void Quaternion<B, T>::getValues(HostType values[]) const
 {
   m_data.getValues(values);
 }
 
-template<ShBindingType B, typename T, ShBindingType B2>
-ShQuaternion<SH_TEMP, T> 
-operator*(const ShAttrib<1, B2, T>& c, const ShQuaternion<B, T>& q)
+template<BindingType B, typename T, BindingType B2>
+Quaternion<TEMP, T> 
+operator*(const Attrib<1, B2, T>& c, const Quaternion<B, T>& q)
 {
-  ShQuaternion<B, T> r = q;
+  Quaternion<B, T> r = q;
   return (r *= c);
 }
 
-template<ShBindingType B1, ShBindingType B2, typename T>
-extern ShQuaternion<SH_TEMP, T>
-slerp(const ShQuaternion<B1, T>& q1, const ShQuaternion<B2, T>& q2, const ShAttrib1f& t)
+template<BindingType B1, BindingType B2, typename T>
+extern Quaternion<TEMP, T>
+slerp(const Quaternion<B1, T>& q1, const Quaternion<B2, T>& q2, const Attrib1f& t)
 {
   //TODO::q1 and q2 must be unit quaternions, we cannot call normalize here
   //since it's not a const function.
   //TODO: when cosTheta is 1 or -1, we need to fallback to linear interpolation
   //not sure how to implement this efficiently yet
-  ShAttrib<1, SH_TEMP, T> cosTheta = q1.dot(q2);
-  ShAttrib<1, SH_TEMP, T> sinTheta = sqrt(1.0 - cosTheta*cosTheta);
+  Attrib<1, TEMP, T> cosTheta = q1.dot(q2);
+  Attrib<1, TEMP, T> sinTheta = sqrt(1.0 - cosTheta*cosTheta);
   
-  ShQuaternion<B2, T> q2prime = (cosTheta >= 0.0)*q2 - (cosTheta < 0.0)*q2;
-  ShAttrib<1, SH_TEMP, T> theta = asin(sinTheta);
+  Quaternion<B2, T> q2prime = (cosTheta >= 0.0)*q2 - (cosTheta < 0.0)*q2;
+  Attrib<1, TEMP, T> theta = asin(sinTheta);
 
   return (sin((1.0 - t)*theta)/sinTheta)*q1 + (sin(t*theta)/sinTheta)*q2prime;
 }
 
-template<ShBindingType B, typename T>
-std::string ShQuaternion<B, T>::name() const
+template<BindingType B, typename T>
+std::string Quaternion<B, T>::name() const
 {
   return m_data.name();
 }
 
-template<ShBindingType B, typename T>
-void ShQuaternion<B, T>::name(const std::string& name)
+template<BindingType B, typename T>
+void Quaternion<B, T>::name(const std::string& name)
 {
   m_data.name(name);
 }

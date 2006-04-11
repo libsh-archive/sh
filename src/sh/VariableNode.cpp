@@ -20,24 +20,24 @@
 #include <sstream>
 #include <cassert>
 #include <algorithm>
-#include "ShVariableNode.hpp"
-#include "ShDebug.hpp"
-#include "ShContext.hpp"
-#include "ShVariant.hpp"
-#include "ShVariantFactory.hpp"
-#include "ShProgramNode.hpp"
-#include "ShEvaluate.hpp"
+#include "VariableNode.hpp"
+#include "Debug.hpp"
+#include "Context.hpp"
+#include "Variant.hpp"
+#include "VariantFactory.hpp"
+#include "ProgramNode.hpp"
+#include "Evaluate.hpp"
 
 namespace SH {
 
-struct ShVariableNodeEval {
-  ShPointer<ShProgramNode> value;
+struct VariableNodeEval {
+  Pointer<ProgramNode> value;
 
-#ifdef SH_USE_MEMORY_POOL
+#ifdef USE_MEMORY_POOL
   // Memory pool stuff.
   void* operator new(std::size_t size)
   {
-    if (!m_pool) m_pool = new ShPool(sizeof(ShVariableNodeEval), 32768);
+    if (!m_pool) m_pool = new Pool(sizeof(VariableNodeEval), 32768);
     return m_pool->alloc();
   }
   void operator delete(void* ptr)
@@ -45,16 +45,16 @@ struct ShVariableNodeEval {
     m_pool->free(ptr);
   }
 
-  static ShPool* m_pool;
+  static Pool* m_pool;
 #endif
 };
 
-#ifdef SH_USE_MEMORY_POOL
-ShPool* ShVariableNodeEval::m_pool = 0;
+#ifdef USE_MEMORY_POOL
+Pool* VariableNodeEval::m_pool = 0;
 #endif
 
-ShVariableNode::ShVariableNode(ShBindingType kind, int size, ShValueType valueType, ShSemanticType type)
-  : m_uniform(!ShContext::current()->parsing() && kind == SH_TEMP),
+VariableNode::VariableNode(BindingType kind, int size, ValueType valueType, SemanticType type)
+  : m_uniform(!Context::current()->parsing() && kind == TEMP),
     m_kind(kind), m_specialType(type),
     m_valueType(valueType), 
     m_size(size), 
@@ -62,32 +62,32 @@ ShVariableNode::ShVariableNode(ShBindingType kind, int size, ShValueType valueTy
     m_variant(0),
     m_eval(0)
 {
-  if (m_uniform || m_kind == SH_CONST) addVariant();
+  if (m_uniform || m_kind == CONST) addVariant();
   programVarListInit();
   programDeclInit();
 }
 
-ShVariableNode::ShVariableNode(const ShVariableNode& old, ShBindingType newKind,
-          int newSize, ShValueType newValueType, ShSemanticType newType, 
+VariableNode::VariableNode(const VariableNode& old, BindingType newKind,
+          int newSize, ValueType newValueType, SemanticType newType, 
           bool updateVarList, bool keepUniform)
-  : ShMeta(old), 
+  : Meta(old), 
     m_uniform(old.m_uniform), m_kind(newKind), m_specialType(newType),
     m_valueType(newValueType), 
     m_size(newSize), 
     m_id(m_maxID++), m_locked(0),
     m_variant(0),
-    m_eval(new ShVariableNodeEval)
+    m_eval(new VariableNodeEval)
 {
   if(!keepUniform) {
-    m_uniform = !ShContext::current()->parsing() && m_kind == SH_TEMP;
+    m_uniform = !Context::current()->parsing() && m_kind == TEMP;
   }
 
-  if(m_uniform || m_kind == SH_CONST) addVariant(); 
+  if(m_uniform || m_kind == CONST) addVariant(); 
   if(updateVarList) programVarListInit();
   programDeclInit();
 }
 
-ShVariableNode::~ShVariableNode()
+VariableNode::~VariableNode()
 {
   detach_dependencies();
   /* TODO using a smart pointer now - probably shouldn't be though, so leave
@@ -98,100 +98,100 @@ ShVariableNode::~ShVariableNode()
   if(m_eval) delete m_eval;
 }
 
-ShVariableNodePtr ShVariableNode::clone(ShBindingType newKind, 
+VariableNodePtr VariableNode::clone(BindingType newKind, 
       int newSize, 
-      ShValueType newValueType, 
-      ShSemanticType newType, 
+      ValueType newValueType, 
+      SemanticType newType, 
       bool updateVarList, 
       bool keepUniform) const
 {
-  SH_DEBUG_ASSERT(newValueType != 0);
-  ShBindingType kind = (newKind == SH_BINDINGTYPE_END ? m_kind : newKind);
+  DEBUG_ASSERT(newValueType != 0);
+  BindingType kind = (newKind == BINDINGTYPE_END ? m_kind : newKind);
   int size = (newSize == 0 ? m_size : newSize);
-  ShValueType valueType = (newValueType == SH_VALUETYPE_END ? m_valueType : newValueType);
-  ShSemanticType type = (newType == SH_SEMANTICTYPE_END ? m_specialType : newType);
+  ValueType valueType = (newValueType == VALUETYPE_END ? m_valueType : newValueType);
+  SemanticType type = (newType == SEMANTICTYPE_END ? m_specialType : newType);
 
-  return new ShVariableNode(*this, kind, size, valueType, type, 
+  return new VariableNode(*this, kind, size, valueType, type, 
       updateVarList, keepUniform);
 }
 
-bool ShVariableNode::uniform() const
+bool VariableNode::uniform() const
 {
   return m_uniform;
 }
 
-bool ShVariableNode::hasValues() const
+bool VariableNode::hasValues() const
 {
   return (m_variant);
 }
 
-void ShVariableNode::lock()
+void VariableNode::lock()
 {
   m_locked++;
 }
 
-void ShVariableNode::unlock()
+void VariableNode::unlock()
 {
   m_locked--;
   update_all();
 }
 
-ShValueType ShVariableNode::valueType() const {
+ValueType VariableNode::valueType() const {
   return m_valueType;
 }
 
-int ShVariableNode::size() const
+int VariableNode::size() const
 {
   return m_size;
 }
 
-void ShVariableNode::size(int s)
+void VariableNode::size(int s)
 {
-  SH_DEBUG_ASSERT(!m_variant);
+  DEBUG_ASSERT(!m_variant);
   m_size = s;
 }
 
-void ShVariableNode::name(const std::string& n)
+void VariableNode::name(const std::string& n)
 {
-  this->ShMeta::name(n);
+  this->Meta::name(n);
 }
 
-std::string ShVariableNode::name() const
+std::string VariableNode::name() const
 {
 
-  if (has_name()) return this->ShMeta::name();
+  if (has_name()) return this->Meta::name();
   
   std::ostringstream stream;
   
   // Special case for constants
-  if (m_kind == SH_CONST) {
+  if (m_kind == CONST) {
     return m_variant->encodeArray();
   }
 
   switch (m_kind) {
-  case SH_INPUT:
+  case INPUT:
     stream << "i";
     break;
-  case SH_OUTPUT:
+  case OUTPUT:
     stream << "o";
     break;
-  case SH_INOUT:
+  case INOUT:
     stream << "io";
     break;
-  case SH_TEMP:
+  case TEMP:
     if(uniform()) stream << "ut";
     else stream << "t";
     break;
-  case SH_CONST:
+  case CONST:
     stream << "c";
     break;
-  case SH_TEXTURE:
+  case TEXTURE:
     stream << "tex";
     break;
-  case SH_STREAM:
+  case STREAM:
     stream << "str";
     break;
-  case SH_PALETTE:
+  case PALETTE:
     stream << "pal";
     break;
   default:
@@ -203,27 +203,27 @@ std::string ShVariableNode::name() const
   return stream.str();
 }
 
-bool ShVariableNode::hasRange()
+bool VariableNode::hasRange()
 {
   return has_meta("lowBound") && has_meta("highBound");
 }
 
-void ShVariableNode::rangeVariant(const ShVariant* low, const ShVariant* high) 
+void VariableNode::rangeVariant(const Variant* low, const Variant* high) 
 {
   meta("lowBound", low->encode(0, m_size));
   meta("highBound", high->encode(0, m_size));
 }
 
-void ShVariableNode::rangeVariant(const ShVariant* low, const ShVariant* high, 
-    bool neg, const ShSwizzle &writemask)
+void VariableNode::rangeVariant(const Variant* low, const Variant* high, 
+    bool neg, const Swizzle &writemask)
 {
-  const ShVariantFactory* factory = shVariantFactory(m_valueType);
+  const VariantFactory* factory = variantFactory(m_valueType);
 
   std::string oldLo, oldHi;
   oldLo = meta("lowBound");
   oldHi = meta("highBound");
 
-  ShVariant *newLo, *newHi; 
+  Variant *newLo, *newHi; 
   if(oldLo.empty() || oldHi.empty()) { // TODO they should be either both empty or both not
     newLo = makeLow(); 
     newHi = makeHigh(); 
@@ -234,8 +234,8 @@ void ShVariableNode::rangeVariant(const ShVariant* low, const ShVariant* high,
 
   // @todo type slow temporary solution
   for(int i = 0; i < writemask.size(); ++i) {
-    newLo->set(low, neg, ShSwizzle(m_size, writemask[i]));
-    newHi->set(high, neg, ShSwizzle(m_size, writemask[i]));
+    newLo->set(low, neg, Swizzle(m_size, writemask[i]));
+    newHi->set(high, neg, Swizzle(m_size, writemask[i]));
   }
 
   meta("lowBound", newLo->encode());
@@ -245,104 +245,104 @@ void ShVariableNode::rangeVariant(const ShVariant* low, const ShVariant* high,
   delete newHi;
 }
 
-ShVariantPtr ShVariableNode::lowBoundVariant() const
+VariantPtr VariableNode::lowBoundVariant() const
 {
-  const ShVariantFactory* factory = shVariantFactory(m_valueType);
+  const VariantFactory* factory = variantFactory(m_valueType);
   std::string metaLow = meta("lowBound");
 
   return (metaLow.empty() ? makeLow() : factory->generate(metaLow));
 }
 
-ShVariantPtr ShVariableNode::highBoundVariant() const
+VariantPtr VariableNode::highBoundVariant() const
 {
-  const ShVariantFactory* factory = shVariantFactory(m_valueType);
+  const VariantFactory* factory = variantFactory(m_valueType);
   std::string metaHigh = meta("highBound");
 
   return (metaHigh.empty() ? makeHigh() : factory->generate(metaHigh));
 }
 
-ShBindingType ShVariableNode::kind() const
+BindingType VariableNode::kind() const
 {
   return m_kind;
 }
 
-ShSemanticType ShVariableNode::specialType() const
+SemanticType VariableNode::specialType() const
 {
   return m_specialType;
 }
 
-std::string ShVariableNode::nameOfType() const {
+std::string VariableNode::nameOfType() const {
   std::ostringstream os;
   // TODO indicate ValueType properly
   os << "Sh" << bindingTypeName[ m_kind ] << semanticTypeName[ m_specialType ] 
-    << m_size << shTypeInfo(m_valueType)->name();
+    << m_size << typeInfo(m_valueType)->name();
   return os.str();
 }
 
-void ShVariableNode::specialType(ShSemanticType type)
+void VariableNode::specialType(SemanticType type)
 {
   m_specialType = type;
 }
 
 // TODO: also have an n-length set value, since updating the uniforms
 // will otherwise be horribly inefficient.
-void ShVariableNode::setVariant(const ShVariant* other)
+void VariableNode::setVariant(const Variant* other)
 {
   assert(m_variant);
   m_variant->set(other);
   update_all();
 }
 
-void ShVariableNode::setVariant(const ShVariantCPtr& other)
+void VariableNode::setVariant(const VariantCPtr& other)
 {
   setVariant(other.object());
 }
 
-void ShVariableNode::setVariant(const ShVariant* other, int index) 
+void VariableNode::setVariant(const Variant* other, int index) 
 {
   assert(m_variant);
   m_variant->set(other, index); 
   update_all();
 }
 
-void ShVariableNode::setVariant(const ShVariantCPtr& other, int index) 
+void VariableNode::setVariant(const VariantCPtr& other, int index) 
 {
   setVariant(other.object(), index);
 }
 
-void ShVariableNode::setVariant(const ShVariant* other, bool neg, const ShSwizzle &writemask)
+void VariableNode::setVariant(const Variant* other, bool neg, const Swizzle &writemask)
 {
   assert(m_variant);
   m_variant->set(other, neg, writemask);
   update_all();
 }
 
-void ShVariableNode::setVariant(const ShVariantCPtr& other, bool neg, const ShSwizzle &writemask)
+void VariableNode::setVariant(const VariantCPtr& other, bool neg, const Swizzle &writemask)
 {
   setVariant(other.object(), neg, writemask);
 }
 
-const ShVariant* ShVariableNode::getVariant() const
+const Variant* VariableNode::getVariant() const
 {
   return m_variant.object();
 }
 
 
-ShVariant* ShVariableNode::getVariant() 
+Variant* VariableNode::getVariant() 
 {
   return m_variant.object();
 }
 
-ShVariant* ShVariableNode::makeLow() const
+Variant* VariableNode::makeLow() const
 {
-  const ShVariantFactory* factory = shVariantFactory(m_valueType);
-  ShVariant* result;
+  const VariantFactory* factory = variantFactory(m_valueType);
+  Variant* result;
 
   switch(m_specialType) {
-    case SH_POINT:
-    case SH_VECTOR:
-    case SH_NORMAL:
-    case SH_POSITION:
+    case POINT:
+    case VECTOR:
+    case NORMAL:
+    case POSITION:
       result = factory->generateOne(m_size);
       // @todo types handle unsigned types
       result->negate();
@@ -353,19 +353,19 @@ ShVariant* ShVariableNode::makeLow() const
   return result;
 }
 
-ShVariant* ShVariableNode::makeHigh() const
+Variant* VariableNode::makeHigh() const
 {
-  const ShVariantFactory* factory = shVariantFactory(m_valueType);
+  const VariantFactory* factory = variantFactory(m_valueType);
   return factory->generateOne(m_size); 
 }
 
 
-void ShVariableNode::update_all() 
+void VariableNode::update_all() 
 {
   if (m_uniform && !m_locked) {
-    const ShBoundIterator begin = shBeginBound();
-    const ShBoundIterator end   = shEndBound();
-    for (ShBoundIterator i = begin; i != end; ++i) {
+    const BoundIterator begin = beginBound();
+    const BoundIterator end   = endBound();
+    for (BoundIterator i = begin; i != end; ++i) {
       // TODO: Maybe pass in the backend unit to updateUniform
       if (i->second.node()) i->second.updateUniform(this);
     }
@@ -374,24 +374,24 @@ void ShVariableNode::update_all()
   }
 }
 
-void ShVariableNode::programVarListInit() 
+void VariableNode::programVarListInit() 
 {
-  ShProgramNodePtr prog = ShContext::current()->parsing();
+  ProgramNodePtr prog = Context::current()->parsing();
   switch (m_kind) {
-  case SH_INPUT:
+  case INPUT:
     assert(prog);
     prog->inputs.push_back(this);
     break;
-  case SH_OUTPUT:
+  case OUTPUT:
     assert(prog);
     prog->outputs.push_back(this);
     break;
-  case SH_INOUT:
+  case INOUT:
     assert(prog);
     prog->outputs.push_back(this);
     prog->inputs.push_back(this);
     break;
-  case SH_TEMP:
+  case TEMP:
     break;
   default:
     // Do nothing
@@ -399,32 +399,32 @@ void ShVariableNode::programVarListInit()
   }
 }
 
-void ShVariableNode::programDeclInit() 
+void VariableNode::programDeclInit() 
 {
-  if (m_kind != SH_TEMP || m_uniform) return;
-  ShProgramNodePtr prog = ShContext::current()->parsing();
+  if (m_kind != TEMP || m_uniform) return;
+  ProgramNodePtr prog = Context::current()->parsing();
   if (prog) {
     if (prog->ctrlGraph) { // already has ctrlGraph, add decl to entry
       prog->addDecl(this);
     } else {
-      prog->tokenizer.blockList()->addStatement(ShStatement(ShVariable(this), 
-                                                            SH_OP_DECL, 
-                                                            ShVariable(this)));
+      prog->tokenizer.blockList()->addStatement(Statement(Variable(this), 
+                                                            OP_DECL, 
+                                                            Variable(this)));
     }
   }
 }
 
-void ShVariableNode::addVariant()
+void VariableNode::addVariant()
 {
   if (m_variant) return;
-  SH_DEBUG_ASSERT(m_valueType != SH_VALUETYPE_END);
-  m_variant = shVariantFactory(m_valueType)->generate(m_size);
+  DEBUG_ASSERT(m_valueType != VALUETYPE_END);
+  m_variant = variantFactory(m_valueType)->generate(m_size);
 }
 
-void ShVariableNode::attach(const ShProgramNodePtr& evaluator)
+void VariableNode::attach(const ProgramNodePtr& evaluator)
 {
-  SH_DEBUG_ASSERT(uniform());
-  if (!m_eval) m_eval = new ShVariableNodeEval;
+  DEBUG_ASSERT(uniform());
+  if (!m_eval) m_eval = new VariableNodeEval;
   // TODO: Check that the program really evaluates this variable.
 
   detach_dependencies();
@@ -432,7 +432,7 @@ void ShVariableNode::attach(const ShProgramNodePtr& evaluator)
   m_eval->value = evaluator;
 
   if (m_eval->value) {
-    for (ShProgramNode::VarList::const_iterator I = m_eval->value->begin_parameters();
+    for (ProgramNode::VarList::const_iterator I = m_eval->value->begin_parameters();
          I != m_eval->value->end_parameters(); ++I) {
       if ((*I).object() == this) continue;
       (*I)->add_dependent(this);
@@ -442,63 +442,63 @@ void ShVariableNode::attach(const ShProgramNodePtr& evaluator)
   }
 }
 
-void ShVariableNode::update()
+void VariableNode::update()
 {
-  if (!m_eval) m_eval = new ShVariableNodeEval;
+  if (!m_eval) m_eval = new VariableNodeEval;
   if (!m_eval->value) return;
 
   evaluate(m_eval->value);
 }
 
-const ShPointer<ShProgramNode>& ShVariableNode::evaluator() const
+const Pointer<ProgramNode>& VariableNode::evaluator() const
 {
-  if (!m_eval) m_eval = new ShVariableNodeEval;
+  if (!m_eval) m_eval = new VariableNodeEval;
   return m_eval->value;
 }
 
-#ifdef SH_USE_MEMORY_POOL
-void* ShVariableNode::operator new(std::size_t size)
+#ifdef USE_MEMORY_POOL
+void* VariableNode::operator new(std::size_t size)
 {
-  if (size != sizeof(ShVariableNode)) return ::operator new(size);
-  if (!m_pool) m_pool = new ShPool(sizeof(ShVariableNode), 32768);
+  if (size != sizeof(VariableNode)) return ::operator new(size);
+  if (!m_pool) m_pool = new Pool(sizeof(VariableNode), 32768);
   return m_pool->alloc();
 }
 
-void ShVariableNode::operator delete(void* ptr, std::size_t size)
+void VariableNode::operator delete(void* ptr, std::size_t size)
 {
-  if (size != sizeof(ShVariableNode)) ::operator delete(ptr);
+  if (size != sizeof(VariableNode)) ::operator delete(ptr);
   else {
     // We won't have a pool if the object is an instance of a class
-    // derived from ShVariableNode (ShChannelNode for example)
+    // derived from VariableNode (ChannelNode for example)
     if (m_pool) m_pool->free(ptr);
   }
 }
 #endif
 
-void ShVariableNode::add_dependent(ShVariableNode* dep)
+void VariableNode::add_dependent(VariableNode* dep)
 {
   if (std::find(m_dependents.begin(), m_dependents.end(), dep) != m_dependents.end()) return;
   m_dependents.push_back(dep);
 }
 
-void ShVariableNode::remove_dependent(ShVariableNode* dep)
+void VariableNode::remove_dependent(VariableNode* dep)
 {
   m_dependents.remove(dep);
 }
 
-void ShVariableNode::update_dependents()
+void VariableNode::update_dependents()
 {
-  for (std::list<ShVariableNode*>::iterator I = m_dependents.begin();
+  for (std::list<VariableNode*>::iterator I = m_dependents.begin();
        I != m_dependents.end(); ++I) {
     (*I)->update();
   }
 }
 
-void ShVariableNode::detach_dependencies()
+void VariableNode::detach_dependencies()
 {
   if (!m_eval) return;
   if (m_eval->value) {
-    for (ShProgramNode::VarList::const_iterator I = m_eval->value->begin_parameters();
+    for (ProgramNode::VarList::const_iterator I = m_eval->value->begin_parameters();
          I != m_eval->value->end_parameters(); ++I) {
       if ((*I).object() == this) continue;
       (*I)->remove_dependent(this);
@@ -507,8 +507,8 @@ void ShVariableNode::detach_dependencies()
   }
 }
 
-int ShVariableNode::m_maxID = 0;
-#ifdef SH_USE_MEMORY_POOL
-ShPool* ShVariableNode::m_pool = 0;
+int VariableNode::m_maxID = 0;
+#ifdef USE_MEMORY_POOL
+Pool* VariableNode::m_pool = 0;
 #endif
 }

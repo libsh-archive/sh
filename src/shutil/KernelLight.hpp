@@ -20,21 +20,21 @@
 #ifndef SHUTIL_KERNELLIGHT_HPP 
 #define SHUTIL_KERNELLIGHT_HPP 
 
-#include "sh/ShMatrix.hpp"
-#include "sh/ShTexture.hpp"
-#include "sh/ShProgram.hpp"
+#include "sh/Matrix.hpp"
+#include "sh/Texture.hpp"
+#include "sh/Program.hpp"
 
-/** \file ShKernelLight.hpp
+/** \file KernelLight.hpp
  * A set of light shaders
- * Light shaders can use any of the vertex shader outputs from ShKerneLib::vsh 
- * and must output one irrad representing the irradiance at a surface of type T (probably ShColor3f).
+ * Light shaders can use any of the vertex shader outputs from KerneLib::vsh 
+ * and must output one irrad representing the irradiance at a surface of type T (probably Color3f).
  */
 
 namespace ShUtil {
 
 using namespace SH;
 
-class ShKernelLight {
+class KernelLight {
   public:
     /** Omnidirectional light program
      * IN(0) T lightColor - color;
@@ -42,44 +42,44 @@ class ShKernelLight {
      * OUT(0) T irrad - irradiance
      */
     template<typename T>
-    static ShProgram pointLight();
+    static Program pointLight();
 
     /** Spotlight program 
      * linear falloff from (lightVec | lightDir) == -1 to -cos(fallofAngle)
      *
      * Takes a gradient direction and applies 
      * IN(0) T lightColor - color;
-     * IN(1) ShAttrib1f falloff  - angle in radians where spotlight intensity begins to go to 0 
-     * IN(0) ShAttrib1f lightAngle - angle in radians where spotlight intensity = 0
-     * IN(2) ShVector3f lightDir - light direction (VCS) 
+     * IN(1) Attrib1f falloff  - angle in radians where spotlight intensity begins to go to 0 
+     * IN(0) Attrib1f lightAngle - angle in radians where spotlight intensity = 0
+     * IN(2) Vector3f lightDir - light direction (VCS) 
      *
-     * The following usually comes from shVsh
-     * IN(3) ShPoint3f lightVec - light vector at surface point (VCS) 
+     * The following usually comes from vsh
+     * IN(3) Point3f lightVec - light vector at surface point (VCS) 
      *
      * OUT(0) T irrad - irradiance
      */
     template<typename T>
-    static ShProgram spotLight();
+    static Program spotLight();
 
     /** 2D-Textured light program  
      *
      * Takes as input
-     * IN(0) ShAttrib1f scaling - scaling on the texture (tiles texture)
-     * IN(1) ShAttrib1f lightAngle - angle in radians for fov of light 
-     * IN(2) ShVector3f lightDir - direction light faces (VCS)
-     * IN(3) ShVector3f lightUp - up direction of light, must be orthogonal to lightDir (VCS)
+     * IN(0) Attrib1f scaling - scaling on the texture (tiles texture)
+     * IN(1) Attrib1f lightAngle - angle in radians for fov of light 
+     * IN(2) Vector3f lightDir - direction light faces (VCS)
+     * IN(3) Vector3f lightUp - up direction of light, must be orthogonal to lightDir (VCS)
      *
-     * The following typically come from shVsh 
-     * IN(3) ShVector3f lightVec - light vector at surface point (VCS) 
+     * The following typically come from vsh 
+     * IN(3) Vector3f lightVec - light vector at surface point (VCS) 
      *
      * OUT(0) T irrad - irradiance
      */
     template<typename T>
-    static ShProgram texLight2D(const ShBaseTexture2D<T> &tex);
+    static Program texLight2D(const BaseTexture2D<T> &tex);
 };
 
 }
 
-#include "ShKernelLightImpl.hpp"
+#include "KernelLightImpl.hpp"
 
 #endif

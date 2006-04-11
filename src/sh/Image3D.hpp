@@ -17,13 +17,13 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHIMAGE3D_HPP
-#define SHIMAGE3D_HPP
+#ifndef IMAGE3D_HPP
+#define IMAGE3D_HPP
 
 #include <string>
-#include "ShDllExport.hpp"
-#include "ShRefCount.hpp"
-#include "ShMemory.hpp"
+#include "DllExport.hpp"
+#include "RefCount.hpp"
+#include "Memory.hpp"
 
 namespace SH {
 
@@ -31,19 +31,19 @@ namespace SH {
  * Consists of a grid of floating-point elements.   Stores data
  * in a memory object that can be shared with a 3D array, table, or
  * texture.
- * @see ShImage
+ * @see Image
  */
 class
-SH_DLLEXPORT ShImage3D : public ShRefCountable {
+DLLEXPORT Image3D : public RefCountable {
 public:
-  ShImage3D(); ///< Construct an empty image
-  ShImage3D(int width, int height, int depth, int elements); ///< Construct a black
+  Image3D(); ///< Construct an empty image
+  Image3D(int width, int height, int depth, int elements); ///< Construct a black
                                              ///image at the given width/height/elements
-  ShImage3D(const ShImage3D& other); ///< Copy an image
+  Image3D(const Image3D& other); ///< Copy an image
 
-  ~ShImage3D();
+  ~Image3D();
 
-  ShImage3D& operator=(const ShImage3D& other); ///< Copy the data from
+  Image3D& operator=(const Image3D& other); ///< Copy the data from
                                             ///one image to another
 
   int width() const; ///< Determine the width of the image
@@ -62,13 +62,13 @@ public:
   const float* data() const;
   float* data();
   
-  ShMemoryPtr memory();
-  ShPointer<const ShMemory> memory() const;
+  MemoryPtr memory();
+  Pointer<const Memory> memory() const;
   
 private:
   int m_width, m_height, m_depth;
   int m_elements;
-  ShHostMemoryPtr m_memory;
+  HostMemoryPtr m_memory;
 };
 
 }

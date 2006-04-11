@@ -27,28 +27,28 @@ using namespace std;
 
 void create_vertex_shader()
 {
-  ShProgram vsh = SH_BEGIN_VERTEX_PROGRAM {
-    ShInOutPosition4f pos;
-    ShInOutNormal3f normal;
-    ShOutputVector3f lightv;
+  Program vsh = SH_BEGIN_VERTEX_PROGRAM {
+    InOutPosition4f pos;
+    InOutNormal3f normal;
+    OutputVector3f lightv;
 
-    ShPoint3f posv = pos(0,1,2);
+    Point3f posv = pos(0,1,2);
     pos(0,1,2) = pos(0,3,2) + posv;
-    normal = normal + ShAttrib3f(1, 1, 1);
+    normal = normal + Attrib3f(1, 1, 1);
     lightv = normal;
   } SH_END;
-  shBind(vsh);
-  shUnbind(vsh);
+  bind(vsh);
+  unbind(vsh);
 }
 
 void create_fragment_shader()
 {
-  ShProgram fsh = SH_BEGIN_FRAGMENT_PROGRAM {
-    ShInputPosition4f pos;
-    ShInputNormal3f normal;
-    ShInputVector3f lightv;
+  Program fsh = SH_BEGIN_FRAGMENT_PROGRAM {
+    InputPosition4f pos;
+    InputNormal3f normal;
+    InputVector3f lightv;
 
-    ShOutputColor3f color(0, 4, 5);
+    OutputColor3f color(0, 4, 5);
 
     normal = normalize(normal);
     lightv = normalize(lightv);

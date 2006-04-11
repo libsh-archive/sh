@@ -18,25 +18,25 @@
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 #include <fstream>
-#include "ShTypeInfo.hpp"
-#include "ShCastManager.hpp"
-#include "ShVariantCast.hpp"
+#include "TypeInfo.hpp"
+#include "CastManager.hpp"
+#include "VariantCast.hpp"
 
 namespace {
 using namespace SH;
 
-template<typename Dest, ShDataType DestDT, typename Src, ShDataType SrcDT>
+template<typename Dest, DataType DestDT, typename Src, DataType SrcDT>
 void addCast(bool automatic)
 {
-  ShCastManager::instance()->addCast(ShDataVariantCast<Dest, DestDT, Src, SrcDT>::instance(), automatic);
+  CastManager::instance()->addCast(DataVariantCast<Dest, DestDT, Src, SrcDT>::instance(), automatic);
 }
 // adds automatic promotion from src to dest
 // and a type conversion edge in the opposite direction 
 template<typename Dest, typename Src>
 void addPromotion()
 {
-  addCast<Dest, SH_HOST, Src, SH_HOST>(true);
-  addCast<Src, SH_HOST, Dest, SH_HOST>(false);
+  addCast<Dest, HOST, Src, HOST>(true);
+  addCast<Src, HOST, Dest, HOST>(false);
 }
 
 // adds automatic promotion from src to dest
@@ -44,8 +44,8 @@ void addPromotion()
 template<typename T>
 void addMemoryCast()
 {
-  addCast<T, SH_HOST, T, SH_MEM>(false);
-  addCast<T, SH_MEM, T, SH_HOST>(false);
+  addCast<T, HOST, T, MEM>(false);
+  addCast<T, MEM, T, HOST>(false);
 }
 
 }
@@ -53,7 +53,7 @@ void addMemoryCast()
 namespace SH {
 
 // This adds the available automatic and explicit casts 
-void ShTypeInfo::addCasts()
+void TypeInfo::addCasts()
 {
   
   // automatic promotion DAG edges 
@@ -71,15 +71,15 @@ void ShTypeInfo::addCasts()
   
   addPromotion<double, float>();
 
-  addPromotion<float, ShHalf>();
+  addPromotion<float, Half>();
   addPromotion<float, int>();
   addPromotion<float, unsigned int>();
-  addPromotion<float, ShFracInt> ();
-  addPromotion<float, ShFracShort> ();
-  addPromotion<float, ShFracByte> ();
-  addPromotion<float, ShFracUInt> ();
-  addPromotion<float, ShFracUShort> ();
-  addPromotion<float, ShFracUByte> ();
+  addPromotion<float, FracInt> ();
+  addPromotion<float, FracShort> ();
+  addPromotion<float, FracByte> ();
+  addPromotion<float, FracUInt> ();
+  addPromotion<float, FracUShort> ();
+  addPromotion<float, FracUByte> ();
 
   addPromotion<int, short>();
   addPromotion<int, char>();
@@ -87,14 +87,14 @@ void ShTypeInfo::addCasts()
   addPromotion<int, unsigned char>();
 
   // these are the extra conversions to make the diameter = 2
-  addCast<float, SH_HOST, short, SH_HOST>(false);
-  addCast<float, SH_HOST, char, SH_HOST>(false);
-  addCast<float, SH_HOST, unsigned short, SH_HOST>(false);
-  addCast<float, SH_HOST, unsigned char, SH_HOST>(false);
+  addCast<float, HOST, short, HOST>(false);
+  addCast<float, HOST, char, HOST>(false);
+  addCast<float, HOST, unsigned short, HOST>(false);
+  addCast<float, HOST, unsigned char, HOST>(false);
 
   addMemoryCast<double>();
   addMemoryCast<float>();
-  addMemoryCast<ShHalf>();
+  addMemoryCast<Half>();
 
   addMemoryCast<int>();
   addMemoryCast<short>();
@@ -103,18 +103,18 @@ void ShTypeInfo::addCasts()
   addMemoryCast<unsigned short>();
   addMemoryCast<unsigned char>();
 
-  addMemoryCast<ShFraction<int> >();
-  addMemoryCast<ShFraction<short> >();
-  addMemoryCast<ShFraction<char> >();
-  addMemoryCast<ShFraction<unsigned int> >();
-  addMemoryCast<ShFraction<unsigned short> >();
-  addMemoryCast<ShFraction<unsigned char> >();
+  addMemoryCast<Fraction<int> >();
+  addMemoryCast<Fraction<short> >();
+  addMemoryCast<Fraction<char> >();
+  addMemoryCast<Fraction<unsigned int> >();
+  addMemoryCast<Fraction<unsigned short> >();
+  addMemoryCast<Fraction<unsigned char> >();
 
-  ShCastManager::instance()->init();
+  CastManager::instance()->init();
 
 #if 0
   std::ofstream fout("castgraph.dot");
-  ShCastManager::instance()->graphvizDump(fout);
+  CastManager::instance()->graphvizDump(fout);
   system("dot -Tps < castgraph.dot > castgraph.ps");
 #endif
 }

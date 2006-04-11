@@ -36,13 +36,13 @@
 using namespace SH;
 using namespace std;
 
-ShMatrix4x4f mv, mvd;
-ShPoint3f lightPos;
+Matrix4x4f mv, mvd;
+Point3f lightPos;
 Camera camera;
-ShProgramSet* shaders;
+ProgramSet* shaders;
 
-ShMIPFilter<ShTexture2D<ShColor3fub> > kd(512, 512);
-ShNoMIPFilter<ShTexture2D<ShColor3fub> > ks(512, 512);
+MIPFilter<Texture2D<Color3fub> > kd(512, 512);
+NoMIPFilter<Texture2D<Color3fub> > ks(512, 512);
 
 int gprintf(int x, int y, char* fmt, ...);
 
@@ -54,8 +54,8 @@ bool show_help = false;
 
 const int MIPMAP_LEVELS = 10;
 
-ShTypedImage<ShFracUByte> kd_images[MIPMAP_LEVELS + 1];
-ShTypedImage<ShFracUByte> ks_images[2];
+TypedImage<FracUByte> kd_images[MIPMAP_LEVELS + 1];
+TypedImage<FracUByte> ks_images[2];
 
 void rustTexture()
 {
@@ -74,43 +74,43 @@ void xTexture()
 
 void initShaders()
 {
-  ShProgram vsh = SH_BEGIN_VERTEX_PROGRAM {
-    ShInOutTexCoord2f u;
-    ShInOutPosition4f pos;
-    ShInOutNormal3f normal;
-    ShOutputVector3f lightv;
+  Program vsh = SH_BEGIN_VERTEX_PROGRAM {
+    InOutTexCoord2f u;
+    InOutPosition4f pos;
+    InOutNormal3f normal;
+    OutputVector3f lightv;
 
-    ShOutputPoint3f posv = (mv | pos)(0,1,2); // Compute viewspace position
+    OutputPoint3f posv = (mv | pos)(0,1,2); // Compute viewspace position
     lightv = lightPos - posv; // Compute light direction
     
     pos = mvd | pos; // Project position
     normal = mv | normal; // Project normal
   } SH_END;
 
-  ShColor3f SH_DECL(diffusecolor) = ShColor3f(0.2, 0.2, 0.2);
-  ShAttrib1f exponent(30.0);
+  Color3f DECL(diffusecolor) = Color3f(0.2, 0.2, 0.2);
+  Attrib1f exponent(30.0);
 
-  ShProgram fsh = SH_BEGIN_FRAGMENT_PROGRAM {
-    ShInputTexCoord2f u;
-    ShInputPosition4f position;
-    ShInputNormal3f normal;
-    ShInputVector3f lightv;
-    ShInputPoint3f posv;
+  Program fsh = SH_BEGIN_FRAGMENT_PROGRAM {
+    InputTexCoord2f u;
+    InputPosition4f position;
+    InputNormal3f normal;
+    InputVector3f lightv;
+    InputPoint3f posv;
 
-    ShOutputColor3f color;
+    OutputColor3f color;
 
     normal = normalize(normal);
     lightv = normalize(lightv);
 
     color = (normal | lightv) * diffusecolor;
 
-    ShVector3f vv = normalize(-posv);
-    ShVector3f hv = normalize(lightv + vv);
-    ShNormal3f nv = normal;
+    Vector3f vv = normalize(-posv);
+    Vector3f hv = normalize(lightv + vv);
+    Normal3f nv = normal;
     color += color*kd(u) + ks(u)*pow(pos(hv | nv), exponent);
   } SH_END;
 
-  shaders = new ShProgramSet(vsh, fsh);
+  shaders = new ProgramSet(vsh, fsh);
 
 #if 0
   cout << "Vertex Unit:" << endl;
@@ -126,13 +126,13 @@ void display()
 {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  shBind(*shaders);
+  bind(*shaders);
   
   glFrontFace(GL_CW);
   glutSolidTeapot(2.5);
   glFrontFace(GL_CCW);
 
-  shUnbind(*shaders);
+  unbind(*shaders);
   
   // Help information
   if (show_help) {
@@ -149,8 +149,8 @@ void display()
 
 void setupView()
 {
-  mv = camera.shModelView();
-  mvd = camera.shModelViewProjection(ShMatrix4x4f());
+  mv = camera.modelView();
+  mvd = camera.modelViewProjection(Matrix4x4f());
 }
 
 void reshape(int width, int height)
@@ -274,7 +274,7 @@ int main(int argc, char** argv)
   glutKeyboardFunc(keyboard);
 
   if (argc > 1) {
-    shUseBackend(argv[1]);
+    useBackend(argv[1]);
   }
 
   try {
@@ -287,43 +287,43 @@ int main(int argc, char** argv)
                                 kCFURLPOSIXPathStyle);
     filename = new char[CFStringGetLength(s) + 1];
     CFStringGetCString(s, filename, CFStringGetLength(s) + 1, kCFStringEncodingASCII);
-    ShUtil::load_PNG(kd_images[0], filename);
+    Util::load_PNG(kd_images[0], filename);
     delete [] filename;
 
     s = CFURLCopyFileSystemPath(CFBundleCopyResourceURL(mainBundle, CFSTR("rustks"), CFSTR("png"), NULL),
                                 kCFURLPOSIXPathStyle);
     filename = new char[CFStringGetLength(s) + 1];
     CFStringGetCString(s, filename, CFStringGetLength(s) + 1, kCFStringEncodingASCII);
-    ShUtil::load_PNG(ks_images[0], filename);
+    Util::load_PNG(ks_images[0], filename);
     delete [] filename;
 
     s = CFURLCopyFileSystemPath(CFBundleCopyResourceURL(mainBundle, CFSTR("kd"), CFSTR("png"), NULL),
                                 kCFURLPOSIXPathStyle);
     filename = new char[CFStringGetLength(s) + 1];
     CFStringGetCString(s, filename, CFStringGetLength(s) + 1, kCFStringEncodingASCII);
-    ShUtil::load_PNG(kd_images[1], filename);
+    Util::load_PNG(kd_images[1], filename);
     delete [] filename;
     
     s = CFURLCopyFileSystemPath(CFBundleCopyResourceURL(mainBundle, CFSTR("ks"), CFSTR("png"), NULL),
                                 kCFURLPOSIXPathStyle);
     filename = new char[CFStringGetLength(s) + 1];
     CFStringGetCString(s, filename, CFStringGetLength(s) + 1, kCFStringEncodingASCII);
-    ShUtil::load_PNG(ks_images[1], filename);
+    Util::load_PNG(ks_images[1], filename);
     delete [] filename;
 #else
-    ShUtil::load_PNG(kd_images[0], "tex_rustkd.png");
-    ShUtil::load_PNG(ks_images[0], "tex_rustks.png");
-    ShUtil::load_PNG(kd_images[1], "tex_kd.png");
-    ShUtil::load_PNG(ks_images[1], "tex_ks.png");
+    Util::load_PNG(kd_images[0], "tex_rustkd.png");
+    Util::load_PNG(ks_images[0], "tex_rustks.png");
+    Util::load_PNG(kd_images[1], "tex_kd.png");
+    Util::load_PNG(ks_images[1], "tex_ks.png");
 
     for (int i=1; i < MIPMAP_LEVELS; i++) {
       stringstream s;
       s << "tex_kd" << i << ".png";
-      ShUtil::load_PNG(kd_images[1 + i], s.str());
+      Util::load_PNG(kd_images[1 + i], s.str());
     }
 #endif
   } 
-  catch (const ShException& e) {
+  catch (const Exception& e) {
 #ifdef __APPLE__
     CFStringRef s = CFStringCreateWithCString(kCFAllocatorDefault, e.message().c_str(), kCFStringEncodingASCII);
     CFOptionFlags flags;
@@ -357,14 +357,14 @@ int main(int argc, char** argv)
   camera.move(0.0, 0.0, -15.0);
 
   // Set up the light position
-  lightPos = ShPoint3f(5.0, 5.0, 5.0);
+  lightPos = Point3f(5.0, 5.0, 5.0);
   
   initShaders();
 
   // Set the initial texture
   xTexture();
   
-  shBind(*shaders);
+  bind(*shaders);
   
   glutMainLoop();
 

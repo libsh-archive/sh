@@ -22,22 +22,22 @@
 
 #include <list>
 #include <map>
-#include "ShProgramNode.hpp"
+#include "ProgramNode.hpp"
 
 namespace SH {
 
-class ShBackend;
-class ShBackendSet;
-class ShProgram;
+class Backend;
+class BackendSet;
+class Program;
 
 class
-SH_DLLEXPORT ShProgramSet : public ShRefCountable {
+DLLEXPORT ProgramSet : public RefCountable {
 public:
-  ShProgramSet(); // empty set
-  explicit ShProgramSet(const ShProgram& a);
-  ShProgramSet(const ShProgram& a, const ShProgram& b);
+  ProgramSet(); // empty set
+  explicit ProgramSet(const Program& a);
+  ProgramSet(const Program& a, const Program& b);
 
-  typedef std::list<ShProgramNodePtr> NodeList;
+  typedef std::list<ProgramNodePtr> NodeList;
   typedef NodeList::iterator iterator;
   typedef NodeList::const_iterator const_iterator;
 
@@ -45,21 +45,21 @@ public:
   NodeList::const_iterator begin() const { return m_nodes.begin(); }
   NodeList::const_iterator end() const { return m_nodes.end(); }
 
-  ShPointer<ShBackendSet> backend_set(const ShPointer<ShBackend>&) const;
+  Pointer<BackendSet> backend_set(const Pointer<Backend>&) const;
   
 private:
   NodeList m_nodes;
 
-  typedef std::map<ShPointer<ShBackend>, ShPointer<ShBackendSet> > BackendMap;
+  typedef std::map<Pointer<Backend>, Pointer<BackendSet> > BackendMap;
   mutable BackendMap m_backend_sets;
 
   // NOT IMPLEMENTED (but maybe they should be)
-  ShProgramSet(const ShProgramSet& other);
-  ShProgramSet& operator=(const ShProgramSet& other);
+  ProgramSet(const ProgramSet& other);
+  ProgramSet& operator=(const ProgramSet& other);
 };
 
-typedef ShPointer<ShProgramSet> ShProgramSetPtr;
-typedef ShPointer<const ShProgramSet> ShProgramSetCPtr;
+typedef Pointer<ProgramSet> ProgramSetPtr;
+typedef Pointer<const ProgramSet> ProgramSetCPtr;
 
 }
 

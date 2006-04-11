@@ -22,8 +22,8 @@
 
 #include <iosfwd>
 //#include <vector>
-#include "ShDllExport.hpp"
-#include "ShException.hpp"
+#include "DllExport.hpp"
+#include "Exception.hpp"
 
 namespace SH {
 
@@ -47,40 +47,40 @@ namespace SH {
  * particular the size of) the tuple which they are swizzling.
  */
 class
-SH_DLLEXPORT
-ShSwizzle {
+DLLEXPORT
+Swizzle {
 public:
 
   // Null swizzle
-  ShSwizzle();
+  Swizzle();
 
   /// Identity swizzle: does nothing at all.
-  ShSwizzle(int srcSize);
+  Swizzle(int srcSize);
   /// Use one element from the original tuple.
-  ShSwizzle(int srcSize, int i0);
+  Swizzle(int srcSize, int i0);
   /// Use two elements from the original tuple.
-  ShSwizzle(int srcSize, int i0, int i1);
+  Swizzle(int srcSize, int i0, int i1);
   /// Use three elements from the original tuple.
-  ShSwizzle(int srcSize, int i0, int i1, int i2);
+  Swizzle(int srcSize, int i0, int i1, int i2);
   /// Use four elements from the original tuple.
-  ShSwizzle(int srcSize, int i0, int i1, int i2, int i3);
+  Swizzle(int srcSize, int i0, int i1, int i2, int i3);
   /// Use an arbitrary number of elements from the original tuple.
-  ShSwizzle(int srcSize, int size, int* indices);
+  Swizzle(int srcSize, int size, int* indices);
 
-  ShSwizzle(const ShSwizzle& other);
+  Swizzle(const Swizzle& other);
 
   /* Construct swizzle from repeating other n times */ 
-  ShSwizzle(const ShSwizzle& other, int n);
-  ~ShSwizzle();
+  Swizzle(const Swizzle& other, int n);
+  ~Swizzle();
 
-  ShSwizzle& operator=(const ShSwizzle& other);
+  Swizzle& operator=(const Swizzle& other);
   
   /// Combine a swizzle with this one, as if it occured after this
   /// swizzle occured.
-  ShSwizzle& operator*=(const ShSwizzle& other);
+  Swizzle& operator*=(const Swizzle& other);
 
   /// Combine two swizzles with left-to-right precedence.
-  ShSwizzle operator*(const ShSwizzle& other) const;
+  Swizzle operator*(const Swizzle& other) const;
 
   /// Determine how many elements this swizzle results in.
   int size() const { return m_size; }
@@ -94,15 +94,15 @@ public:
   bool identity() const;
 
   /// Determine whether two swizzles are identical
-  bool operator==(const ShSwizzle& other) const;
+  bool operator==(const Swizzle& other) const;
 
   /// Determine whether a swizzle is "less" than another swizzle.
   /// This is only useful to provide strong ordering.
-  bool operator<(const ShSwizzle& other) const;
+  bool operator<(const Swizzle& other) const;
   
 private:
   // copies the other swizzle's elements 
-  void copy(const ShSwizzle &other, bool islocal);
+  void copy(const Swizzle &other, bool islocal);
 
   // throws an exception if index < 0 or index >= m_srcSize
   void checkSrcSize(int index); 
@@ -120,7 +120,7 @@ private:
   // returns the identity swiz value on this machine
   int idswiz() const;
 
-  // Declare these two first so alignment problems don't make the ShSwizzle struct larger
+  // Declare these two first so alignment problems don't make the Swizzle struct larger
   int m_srcSize;
   int m_size;
 
@@ -133,20 +133,20 @@ private:
     int* ptr;
   } m_index;
 
-  friend SH_DLLEXPORT std::ostream& operator<<(std::ostream& out, const ShSwizzle& swizzle);
+  friend DLLEXPORT std::ostream& operator<<(std::ostream& out, const Swizzle& swizzle);
 };
 
 /// Thrown when an invalid swizzle is specified (e.g. an index in the
 /// swizzle is out of range).
 class
-SH_DLLEXPORT ShSwizzleException : public ShException 
+DLLEXPORT SwizzleException : public Exception 
 {
 public:
-  ShSwizzleException(const ShSwizzle& s, int idx, int size);
+  SwizzleException(const Swizzle& s, int idx, int size);
 };
   
 }
 
-#include "ShSwizzleImpl.hpp"
+#include "SwizzleImpl.hpp"
   
 #endif

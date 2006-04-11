@@ -20,92 +20,92 @@
 #ifndef SHTABLE_HPP
 #define SHTABLE_HPP
 
-#include "ShBaseTexture.hpp"
+#include "BaseTexture.hpp"
 
 namespace SH {
 
 struct
-ShTableTraits : public ShTextureTraits {
-  ShTableTraits()
-    : ShTextureTraits(1, SH_FILTER_NONE, SH_WRAP_CLAMP_TO_EDGE)
+TableTraits : public TextureTraits {
+  TableTraits()
+    : TextureTraits(1, FILTER_NONE, WRAP_CLAMP_TO_EDGE)
   {
   }
 };
 
-template<typename T> class ShTableRect;
+template<typename T> class TableRect;
 
 template<typename T>
-class ShTable1D
-  : public ShBaseTexture1D<T> {
+class Table1D
+  : public BaseTexture1D<T> {
 public:
-  ShTable1D()
-    : ShBaseTexture1D<T>(ShTableTraits())
+  Table1D()
+    : BaseTexture1D<T>(TableTraits())
   {}
-  ShTable1D(int width)
-    : ShBaseTexture1D<T>(width, ShTableTraits())
+  Table1D(int width)
+    : BaseTexture1D<T>(width, TableTraits())
   {}
-  typedef ShTableRect<T> rectangular_type;
-  typedef ShBaseTexture1D<T> base_type;
+  typedef TableRect<T> rectangular_type;
+  typedef BaseTexture1D<T> base_type;
   typedef T return_type;
 };
 
 template<typename T>
-class ShTable2D
-  : public ShBaseTexture2D<T> {
+class Table2D
+  : public BaseTexture2D<T> {
 public:
-  ShTable2D()
-    : ShBaseTexture2D<T>(ShTableTraits())
+  Table2D()
+    : BaseTexture2D<T>(TableTraits())
   {}
-  ShTable2D(int width, int height)
-    : ShBaseTexture2D<T>(width, height, ShTableTraits())
+  Table2D(int width, int height)
+    : BaseTexture2D<T>(width, height, TableTraits())
   {}
-  typedef ShTableRect<T> rectangular_type;
-  typedef ShBaseTexture2D<T> base_type;
+  typedef TableRect<T> rectangular_type;
+  typedef BaseTexture2D<T> base_type;
   typedef T return_type;
 };
 
 template<typename T>
-class ShTableRect
-  : public ShBaseTextureRect<T> {
+class TableRect
+  : public BaseTextureRect<T> {
 public:
-  ShTableRect()
-    : ShBaseTextureRect<T>(ShTableTraits())
+  TableRect()
+    : BaseTextureRect<T>(TableTraits())
   {}
-  ShTableRect(int width, int height)
-    : ShBaseTextureRect<T>(width, height, ShTableTraits())
+  TableRect(int width, int height)
+    : BaseTextureRect<T>(width, height, TableTraits())
   {}
-  typedef ShTableRect<T> rectangular_type;
-  typedef ShBaseTextureRect<T> base_type;
+  typedef TableRect<T> rectangular_type;
+  typedef BaseTextureRect<T> base_type;
   typedef T return_type;
 };
 
 template<typename T>
-class ShTable3D
-  : public ShBaseTexture3D<T> {
+class Table3D
+  : public BaseTexture3D<T> {
 public:
-  ShTable3D()
-    : ShBaseTexture3D<T>(ShTableTraits())
+  Table3D()
+    : BaseTexture3D<T>(TableTraits())
   {}
-  ShTable3D(int width, int height, int depth)
-    : ShBaseTexture3D<T>(width, height, depth, ShTableTraits())
+  Table3D(int width, int height, int depth)
+    : BaseTexture3D<T>(width, height, depth, TableTraits())
   {}
-  typedef ShTableRect<T> rectangular_type;
-  typedef ShBaseTexture3D<T> base_type;
+  typedef TableRect<T> rectangular_type;
+  typedef BaseTexture3D<T> base_type;
   typedef T return_type;
 };
 
 template<typename T>
-class ShTableCube
-  : public ShBaseTextureCube<T> {
+class TableCube
+  : public BaseTextureCube<T> {
 public:
-  ShTableCube()
-    : ShBaseTextureCube<T>(ShTableTraits())
+  TableCube()
+    : BaseTextureCube<T>(TableTraits())
   {}
-  ShTableCube(int width, int height)
-    : ShBaseTextureCube<T>(width, height, ShTableTraits())
+  TableCube(int width, int height)
+    : BaseTextureCube<T>(width, height, TableTraits())
   {}
-  typedef ShTableRect<T> rectangular_type;
-  typedef ShBaseTextureCube<T> base_type;
+  typedef TableRect<T> rectangular_type;
+  typedef BaseTextureCube<T> base_type;
   typedef T return_type;
 };
 

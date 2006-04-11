@@ -17,20 +17,20 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#include "ShOptimizations.hpp"
+#include "Optimizations.hpp"
 #include <map>
 #include <set>
 #include <utility>
-#include "ShBitSet.hpp"
-#include "ShCtrlGraph.hpp"
-#include "ShDebug.hpp"
-#include "ShEvaluate.hpp"
-#include "ShContext.hpp"
-#include "ShSyntax.hpp"
+#include "BitSet.hpp"
+#include "CtrlGraph.hpp"
+#include "Debug.hpp"
+#include "Evaluate.hpp"
+#include "Context.hpp"
+#include "Syntax.hpp"
 #include <sstream>
 #include <fstream>
 
-//#define SH_DEBUG_OPTIMIZER
+//#define DEBUG_OPTIMIZER
 
 namespace {
 
@@ -39,27 +39,27 @@ using namespace SH;
 // Branch instruction insertion/removal
 
 struct BraInstInserter {
-  void operator()(const ShCtrlGraphNodePtr& node)
+  void operator()(const CtrlGraphNodePtr& node)
   {
     if (!node) return;
 
-    for (std::vector<ShCtrlGraphBranch>::const_iterator I = node->successors.begin();
+    for (std::vector<CtrlGraphBranch>::const_iterator I = node->successors.begin();
          I != node->successors.end(); ++I) {
-      if (!node->block) node->block = new ShBasicBlock();
-      node->block->addStatement(ShStatement(I->cond, SH_OP_OPTBRA, I->cond));
+      if (!node->block) node->block = new BasicBlock();
+      node->block->addStatement(Statement(I->cond, OP_OPTBRA, I->cond));
     }
   }
 };
 
 struct BraInstRemover {
-  void operator()(const ShCtrlGraphNodePtr& node)
+  void operator()(const CtrlGraphNodePtr& node)
   {
     if (!node) return;
-    ShBasicBlockPtr block = node->block;
+    BasicBlockPtr block = node->block;
     if (!block) return;
     
-    for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end();) {
-      if (I->op == SH_OP_OPTBRA) {
+    for (BasicBlock::StmtList::iterator I = block->begin(); I != block->end();) {
+      if (I->op == OP_OPTBRA) {
         I = block->erase(I);
         continue;
       }
@@ -70,7 +70,7 @@ struct BraInstRemover {
 
 // Straightening
 struct Straightener {
-  Straightener(const ShCtrlGraphPtr& graph, bool& changed)
+  Straightener(const CtrlGraphPtr& graph, bool& changed)
     : graph(graph), changed(changed)
   {
   }
@@ -78,7 +78,7 @@ struct Straightener {
   // assignment operator could not be generated: declaration only
   Straightener& operator=(Straightener const&);
 
-  void operator()(const ShCtrlGraphNodePtr& node)
+  void operator()(const CtrlGraphNodePtr& node)
   {
     if (!node) return;
     if (!node->follower) return;
@@ -89,13 +89,13 @@ struct Straightener {
 
     // conditions added for maintaining section START/END marker invariants
     // node cannot end in an ENDSEC, node->follower cannot start with a STARTSEC
-    if (node->block && !node->block->empty() && node->block->rbegin()->op == SH_OP_ENDSEC) return; 
-    if (node->follower->block && !node->follower->block->empty() && node->follower->block->begin()->op == SH_OP_STARTSEC) return; 
+    if (node->block && !node->block->empty() && node->block->rbegin()->op == OP_ENDSEC) return; 
+    if (node->follower->block && !node->follower->block->empty() && node->follower->block->begin()->op == OP_STARTSEC) return; 
     
-    if (!node->block) node->block = new ShBasicBlock();
-    if (!node->follower->block) node->follower->block = new ShBasicBlock();
+    if (!node->block) node->block = new BasicBlock();
+    if (!node->follower->block) node->follower->block = new BasicBlock();
 
-    for (ShBasicBlock::ShStmtList::iterator I = node->follower->block->begin(); I != node->follower->block->end(); ++I) {
+    for (BasicBlock::StmtList::iterator I = node->follower->block->begin(); I != node->follower->block->end(); ++I) {
       node->block->addStatement(*I);
     }
     node->successors = node->follower->successors;
@@ -105,7 +105,7 @@ struct Straightener {
 
     // Update predecessors
     
-    for (std::vector<ShCtrlGraphBranch>::iterator I = node->follower->successors.begin();
+    for (std::vector<CtrlGraphBranch>::iterator I = node->follower->successors.begin();
          I != node->follower->successors.end(); ++I) {
       replacePredecessors(I->node, node->follower.object(), node.object());
     }
@@ -116,11 +116,11 @@ struct Straightener {
     changed = true;
   }
 
-  void replacePredecessors(const ShCtrlGraphNodePtr& node,
-                           ShCtrlGraphNode* old,
-                           ShCtrlGraphNode* replacement)
+  void replacePredecessors(const CtrlGraphNodePtr& node,
+                           CtrlGraphNode* old,
+                           CtrlGraphNode* replacement)
   {
-    for (ShCtrlGraphNode::ShPredList::iterator I = node->predecessors.begin(); I != node->predecessors.end(); ++I) {
+    for (CtrlGraphNode::PredList::iterator I = node->predecessors.begin(); I != node->predecessors.end(); ++I) {
       if (*I == old) {
         *I = replacement;
         break;
@@ -128,14 +128,14 @@ struct Straightener {
     }
   }
   
-  ShCtrlGraphPtr graph;
+  CtrlGraphPtr graph;
   bool& changed;
 };
 
 
 // Remove empty blocks
 struct EmptyBlockRemover {
-  EmptyBlockRemover(const ShCtrlGraphPtr& graph, bool& changed)
+  EmptyBlockRemover(const CtrlGraphPtr& graph, bool& changed)
     : graph(graph), changed(changed)
   {
   }
@@ -143,7 +143,7 @@ struct EmptyBlockRemover {
   // assignment operator could not be generated: declaration only
   EmptyBlockRemover& operator=(EmptyBlockRemover const&);
 
-  void operator()(const ShCtrlGraphNodePtr& node)
+  void operator()(const CtrlGraphNodePtr& node)
   {
     if (!node) return;
     if (!node->follower) return;
@@ -158,16 +158,16 @@ struct EmptyBlockRemover {
 
   void finish()
   {
-    for (std::list<ShCtrlGraphNodePtr>::iterator I = to_remove.begin(); I != to_remove.end(); ++I) {
+    for (std::list<CtrlGraphNodePtr>::iterator I = to_remove.begin(); I != to_remove.end(); ++I) {
       remove(*I);
     }
   }
 
-  void remove(const ShCtrlGraphNodePtr& node)
+  void remove(const CtrlGraphNodePtr& node)
   {
-    for (ShCtrlGraphNode::ShPredList::iterator P = node->predecessors.begin(); P != node->predecessors.end(); ++P) {
-      ShCtrlGraphNode* pred = *P;
-      for (std::vector<ShCtrlGraphBranch>::iterator S = pred->successors.begin(); S != pred->successors.end(); ++S) {
+    for (CtrlGraphNode::PredList::iterator P = node->predecessors.begin(); P != node->predecessors.end(); ++P) {
+      CtrlGraphNode* pred = *P;
+      for (std::vector<CtrlGraphBranch>::iterator S = pred->successors.begin(); S != pred->successors.end(); ++S) {
         if (S->node == node) {
           S->node = node->follower;
         }
@@ -178,7 +178,7 @@ struct EmptyBlockRemover {
     }
 
     // Remove ourselves from our follower's preds
-    for (ShCtrlGraphNode::ShPredList::iterator P = node->follower->predecessors.begin(); P != node->follower->predecessors.end();) {
+    for (CtrlGraphNode::PredList::iterator P = node->follower->predecessors.begin(); P != node->follower->predecessors.end();) {
       if (*P == node.object()) {
         P = node->follower->predecessors.erase(P);
       } else {
@@ -187,7 +187,7 @@ struct EmptyBlockRemover {
     }
 
     // Add in our predecessors to our follower's preds.
-    for (ShCtrlGraphNode::ShPredList::iterator P = node->predecessors.begin(); P != node->predecessors.end(); ++P) {
+    for (CtrlGraphNode::PredList::iterator P = node->predecessors.begin(); P != node->predecessors.end(); ++P) {
       if (std::find(node->follower->  predecessors.begin(), node->follower->predecessors.end(), *P) == node->follower->predecessors.end()) {
         node->follower->predecessors.push_back(*P);
       }
@@ -196,10 +196,10 @@ struct EmptyBlockRemover {
     changed = true;
   }
 
-  ShCtrlGraphPtr graph;
+  CtrlGraphPtr graph;
   bool& changed;
 
-  std::list<ShCtrlGraphNodePtr> to_remove;
+  std::list<CtrlGraphNodePtr> to_remove;
 };
 
 
@@ -213,13 +213,13 @@ struct RedundantEdgeRemover {
   // assignment operator could not be generated: declaration only
   RedundantEdgeRemover& operator=(RedundantEdgeRemover const&);
 
-  void operator()(const ShCtrlGraphNodePtr& node)
+  void operator()(const CtrlGraphNodePtr& node)
   {
     if (!node) return;
     if (!node->follower) return;
     if (node->successors.empty()) return;
 
-    ShCtrlGraphNode::SuccessorList::iterator I = node->successors.end();
+    CtrlGraphNode::SuccessorList::iterator I = node->successors.end();
     --I;
     while (1) {
       if (I->node == node->follower) {
@@ -238,10 +238,10 @@ struct RedundantEdgeRemover {
   bool& changed;
 };
 
-typedef std::queue<ShStatement*> DeadCodeWorkList;
+typedef std::queue<Statement*> DeadCodeWorkList;
 
 struct InitLiveCode {
-  InitLiveCode(const ShProgramNodeCPtr& p, DeadCodeWorkList& w)
+  InitLiveCode(const ProgramNodeCPtr& p, DeadCodeWorkList& w)
     : p(p), w(w)
   {
   }
@@ -249,14 +249,14 @@ struct InitLiveCode {
   // assignment operator could not be generated: declaration only
   InitLiveCode& operator=(InitLiveCode const&);
 
-  void operator()(const ShCtrlGraphNodePtr& node) {
+  void operator()(const CtrlGraphNodePtr& node) {
     if (!node) return;
-    ShBasicBlockPtr block = node->block;
+    BasicBlockPtr block = node->block;
     if (!block) return;
 
-    for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
-#ifdef SH_DEBUG_OPTIMIZER
-      if(!I->dest.null() && I->dest.node()->kind() == SH_TEMP && !p->hasDecl(I->dest.node())) {
+    for (BasicBlock::StmtList::iterator I = block->begin(); I != block->end(); ++I) {
+#ifdef DEBUG_OPTIMIZER
+      if(!I->dest.null() && I->dest.node()->kind() == TEMP && !p->hasDecl(I->dest.node())) {
         std::cerr << "No decl for " << I->dest.name() << std::endl;
       }
 #endif
@@ -264,11 +264,11 @@ struct InitLiveCode {
       // maybe use a different flag
       // @todo range conditions here are probably too conservative for 
       // inputs, outputs used in computation -> use the valuetracking
-      if (opInfo[I->op].result_source == ShOperationInfo::IGNORE
-          || I->dest.node()->kind() != SH_TEMP
+      if (opInfo[I->op].result_source == OperationInfo::IGNORE
+          || I->dest.node()->kind() != TEMP
           || I->dest.node()->uniform()
 //          || !p->hasDecl(I->dest.node())
-          || I->op == SH_OP_OPTBRA) {
+          || I->op == OP_OPTBRA) {
         I->marked = true;
         w.push(&(*I));
         continue;
@@ -277,7 +277,7 @@ struct InitLiveCode {
     }
   }
 
-  ShProgramNodeCPtr p;
+  ProgramNodeCPtr p;
   DeadCodeWorkList& w;
 };
 
@@ -290,12 +290,12 @@ struct DeadCodeRemover {
   // assignment operator could not be generated: declaration only
   DeadCodeRemover& operator=(DeadCodeRemover const&);
 
-  void operator()(const ShCtrlGraphNodePtr& node) {
+  void operator()(const CtrlGraphNodePtr& node) {
     if (!node) return;
-    ShBasicBlockPtr block = node->block;
+    BasicBlockPtr block = node->block;
     if (!block) return;
     
-    for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end();) {
+    for (BasicBlock::StmtList::iterator I = block->begin(); I != block->end();) {
       if (!I->marked) {
         changed = true;
         I = block->erase(I);
@@ -320,18 +320,18 @@ struct CopyPropagator {
   // assignment operator could not be generated: declaration only
   CopyPropagator& operator=(CopyPropagator const&);
 
-  void operator()(const ShCtrlGraphNodePtr& node) {
+  void operator()(const CtrlGraphNodePtr& node) {
     if (!node) return;
-    ShBasicBlockPtr block = node->block;
+    BasicBlockPtr block = node->block;
     
     if (!block) return;
-    for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
+    for (BasicBlock::StmtList::iterator I = block->begin(); I != block->end(); ++I) {
       for (int i = 0; i < opInfo[I->op].arity; i++) copyValue(I->src[i]);
       removeACP(I->dest);
       
-      if (I->op == SH_OP_ASN
+      if (I->op == OP_ASN
           && I->dest.node() != I->src[0].node()
-          && I->dest.node()->kind() == SH_TEMP
+          && I->dest.node()->kind() == TEMP
           && I->dest.swizzle().identity()
           && I->src[0].swizzle().identity()
 
@@ -343,7 +343,7 @@ struct CopyPropagator {
     m_acp.clear();
   }
 
-  void removeACP(const ShVariable& var)
+  void removeACP(const Variable& var)
   {
     for (ACP::iterator I = m_acp.begin(); I != m_acp.end();) {
       if (I->first.node() == var.node() || I->second.node() == var.node()) {
@@ -355,19 +355,19 @@ struct CopyPropagator {
   }
   
 
-  void copyValue(ShVariable& var)
+  void copyValue(Variable& var)
   {
     for (ACP::const_iterator I = m_acp.begin(); I != m_acp.end(); ++I) {
       if (I->first.node() == var.node()) {
         changed = true;
-        var = ShVariable(I->second.node(), var.swizzle(),
+        var = Variable(I->second.node(), var.swizzle(),
                          var.neg() ^ (I->first.neg() ^ I->second.neg()));
         break;
       }
     }
   }
 
-  typedef std::list< std::pair<ShVariable, ShVariable> > ACP;
+  typedef std::list< std::pair<Variable, Variable> > ACP;
   ACP m_acp;
   
   bool& changed;
@@ -375,8 +375,8 @@ struct CopyPropagator {
 
 
 /// Determine whether node is used in the RHS of stmt
-bool inRHS(const ShVariableNodePtr& node,
-           const ShStatement& stmt)
+bool inRHS(const VariableNodePtr& node,
+           const Statement& stmt)
 {
   for (int i = 0; i < opInfo[stmt.op].arity; i++) {
     if (stmt.src[i].node() == node) return true;
@@ -394,11 +394,11 @@ struct ForwardSubst {
   // assignment operator could not be generated: declaration only
   ForwardSubst& operator=(ForwardSubst const&);
 
-  void operator()(const ShCtrlGraphNodePtr& node) {
+  void operator()(const CtrlGraphNodePtr& node) {
     if (!node) return;
-    ShBasicBlockPtr block = node->block;
+    BasicBlockPtr block = node->block;
     if (!block) return;
-    for (ShBasicBlock::ShStmtList::iterator I = block->begin();
+    for (BasicBlock::StmtList::iterator I = block->begin();
          I != block->end(); ++I) {
       if(I->dest.null()) continue;
       substitute(*I);
@@ -406,7 +406,7 @@ struct ForwardSubst {
       removeAME(I->dest.node());
       
       if (!inRHS(I->dest.node(), *I)
-          && I->dest.node()->kind() == SH_TEMP
+          && I->dest.node()->kind() == TEMP
           && I->dest.swizzle().identity()) {
         m_ame.push_back(*I);
       }
@@ -414,18 +414,18 @@ struct ForwardSubst {
     m_ame.clear();
   }
   
-  void substitute(ShStatement& stmt)
+  void substitute(Statement& stmt)
   {
-    if (stmt.op != SH_OP_ASN) return;
+    if (stmt.op != OP_ASN) return;
     if (stmt.src[0].neg()) return;
-    if (stmt.src[0].node()->kind() != SH_TEMP) return;
+    if (stmt.src[0].node()->kind() != TEMP) return;
     if (!stmt.src[0].swizzle().identity()) return;
     // Added to preserve casts
     if (stmt.dest.valueType() != stmt.src[0].valueType()) return;
 
     for (AME::const_iterator I = m_ame.begin(); I != m_ame.end(); ++I) {
       if (I->dest.node() == stmt.src[0].node()) {
-        ShVariable v = stmt.dest;
+        Variable v = stmt.dest;
         stmt = *I;
         stmt.dest = v;
         changed = true;
@@ -434,7 +434,7 @@ struct ForwardSubst {
     }
   }
 
-  void removeAME(const ShVariableNodePtr& node)
+  void removeAME(const VariableNodePtr& node)
   {
     for (AME::iterator I = m_ame.begin(); I != m_ame.end();) {
       if (I->dest.node() == node || inRHS(node, *I)) {
@@ -446,17 +446,17 @@ struct ForwardSubst {
   }
 
   bool& changed;
-  typedef std::list<ShStatement> AME;
+  typedef std::list<Statement> AME;
   AME m_ame;
 };
 
 struct ForwardPlacement {
   
-  void operator()(const ShCtrlGraphNodePtr& node) {
+  void operator()(const CtrlGraphNodePtr& node) {
     if (!node) return;
-    ShBasicBlockPtr block = node->block;
+    BasicBlockPtr block = node->block;
     if (!block) return;
-    for (ShBasicBlock::ShStmtList::iterator I = block->begin();
+    for (BasicBlock::StmtList::iterator I = block->begin();
          I != block->end(); ++I) {
       if(I->dest.null()) continue;
 
@@ -476,7 +476,7 @@ struct ForwardPlacement {
     m_movable.clear();
   }
   
-  typedef std::list<ShBasicBlock::ShStmtList::iterator> MovableList;
+  typedef std::list<BasicBlock::StmtList::iterator> MovableList;
   MovableList m_movable;
 };
 
@@ -484,48 +484,48 @@ struct ForwardPlacement {
 
 namespace SH {
 
-void insert_branch_instructions(ShProgram& p)
+void insert_branch_instructions(Program& p)
 {
   BraInstInserter r;
   p.node()->ctrlGraph->dfs(r);
 }
 
-void remove_branch_instructions(ShProgram& p)
+void remove_branch_instructions(Program& p)
 {
   BraInstRemover r;
   p.node()->ctrlGraph->dfs(r);
 }
 
-void remove_redundant_edges(ShProgram& p, bool& changed)
+void remove_redundant_edges(Program& p, bool& changed)
 {
   RedundantEdgeRemover r(changed);
   p.node()->ctrlGraph->dfs(r);
 }
 
-void straighten(ShProgram& p, bool& changed)
+void straighten(Program& p, bool& changed)
 {
   Straightener s(p.node()->ctrlGraph, changed);
   p.node()->ctrlGraph->dfs(s);
 }
 
-void remove_empty_blocks(ShProgram& p, bool& changed)
+void remove_empty_blocks(Program& p, bool& changed)
 {
   EmptyBlockRemover e(p.node()->ctrlGraph, changed);
   p.node()->ctrlGraph->dfs(e);
   e.finish();
 }
 
-void remove_dead_code(ShProgram& p, bool& changed)
+void remove_dead_code(Program& p, bool& changed)
 {
   DeadCodeWorkList w;
 
-  ShCtrlGraphPtr graph = p.node()->ctrlGraph;
+  CtrlGraphPtr graph = p.node()->ctrlGraph;
   
   InitLiveCode init(p.node(), w);
   graph->dfs(init);
 
   while (!w.empty()) {
-    ShStatement* stmt = w.front(); w.pop();
+    Statement* stmt = w.front(); w.pop();
     ValueTracking* vt = stmt->get_info<ValueTracking>();
     if (!vt) continue; // Should never happen!
     
@@ -547,44 +547,44 @@ void remove_dead_code(ShProgram& p, bool& changed)
   graph->dfs(r);
 }
 
-void copy_propagate(ShProgram& p, bool& changed)
+void copy_propagate(Program& p, bool& changed)
 {
   CopyPropagator c(changed);
   p.node()->ctrlGraph->dfs(c);
 }
 
-void forward_substitute(ShProgram& p, bool& changed)
+void forward_substitute(Program& p, bool& changed)
 {
   ForwardSubst f(changed);
   p.node()->ctrlGraph->dfs(f);
 }
 
-void forward_placement(ShProgram& p)
+void forward_placement(Program& p)
 {
   ForwardPlacement r;
   p.node()->ctrlGraph->dfs(r);
 }
 
-void optimize(ShProgram& p, int level)
+void optimize(Program& p, int level)
 {
   if (level <= 0) return;
 
   p.node()->collectDecls();
-#ifdef SH_DEBUG_OPTIMIZER
-  SH_DEBUG_PRINT("After collecting declarations");
-  SH_DEBUG_PRINT(p.node()->describe_decls());
+#ifdef DEBUG_OPTIMIZER
+  DEBUG_PRINT("After collecting declarations");
+  DEBUG_PRINT(p.node()->describe_decls());
 #endif
 
-#ifdef SH_DEBUG_OPTIMIZER
+#ifdef DEBUG_OPTIMIZER
   int pass = 0;
-  SH_DEBUG_PRINT("Begin optimization for program with target " << p.node()->target());
+  DEBUG_PRINT("Begin optimization for program with target " << p.node()->target());
 #endif
   
   bool changed;
   do {
 
-#ifdef SH_DEBUG_OPTIMIZER
-    SH_DEBUG_PRINT("---Optimizer pass " << pass << " BEGIN---");
+#ifdef DEBUG_OPTIMIZER
+    DEBUG_PRINT("---Optimizer pass " << pass << " BEGIN---");
     std::ostringstream s;
     s << "opt_" << pass;
     std::string filename = s.str() + ".dot";
@@ -597,68 +597,68 @@ void optimize(ShProgram& p, int level)
 
     changed = false;
 
-    if (!ShContext::current()->optimization_disabled("copy propagation")) {
+    if (!Context::current()->optimization_disabled("copy propagation")) {
       copy_propagate(p, changed);
     }
-    if (!ShContext::current()->optimization_disabled("forward substitution")) {
+    if (!Context::current()->optimization_disabled("forward substitution")) {
       forward_substitute(p, changed);
     }
     
     p.node()->ctrlGraph->computePredecessors();
 
-    if (!ShContext::current()->optimization_disabled("remove_empty_blocks")) {
+    if (!Context::current()->optimization_disabled("remove_empty_blocks")) {
       remove_empty_blocks(p, changed);
     }
 
-    if (!ShContext::current()->optimization_disabled("straightening")) {
+    if (!Context::current()->optimization_disabled("straightening")) {
       straighten(p, changed);
     }
 
-    if (!ShContext::current()->optimization_disabled("remove_redundant_edges")) {
+    if (!Context::current()->optimization_disabled("remove_redundant_edges")) {
       remove_redundant_edges(p, changed);
     }
 
     insert_branch_instructions(p);
 
     if (level >= 2 &&
-        !ShContext::current()->optimization_disabled("propagation")) {
+        !Context::current()->optimization_disabled("propagation")) {
       add_value_tracking(p);
       propagate_constants(p);
     }
 
-    if (!ShContext::current()->optimization_disabled("deadcode")) {
+    if (!Context::current()->optimization_disabled("deadcode")) {
       add_value_tracking(p); // TODO: Really necessary?
       remove_dead_code(p, changed);
     }
 
     remove_branch_instructions(p);
 
-    if (!ShContext::current()->optimization_disabled("forward placement")) {
+    if (!Context::current()->optimization_disabled("forward placement")) {
       forward_placement(p);
     }
 
-#ifdef SH_DEBUG_OPTIMIZER
-    SH_DEBUG_PRINT("---Optimizer pass " << pass << " END---");
+#ifdef DEBUG_OPTIMIZER
+    DEBUG_PRINT("---Optimizer pass " << pass << " END---");
     pass++;
 #endif
   } while (changed);
   p.node()->collectVariables();
 }
 
-void optimize(const ShProgramNodePtr& n, int level)
+void optimize(const ProgramNodePtr& n, int level)
 {
-  ShProgram p(n);
+  Program p(n);
   optimize(p, level);
 }
 
-void optimize(ShProgram& p)
+void optimize(Program& p)
 {
-  optimize(p, ShContext::current()->optimization());
+  optimize(p, Context::current()->optimization());
 }
 
-void optimize(const ShProgramNodePtr& n)
+void optimize(const ProgramNodePtr& n)
 {
-  ShProgram p(n);
+  Program p(n);
   optimize(p);
 }
 

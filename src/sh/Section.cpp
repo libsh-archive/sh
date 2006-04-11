@@ -18,13 +18,13 @@
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 #include <iostream>
-#include "ShSection.hpp"
+#include "Section.hpp"
 
 namespace {
 using namespace SH;
 
 struct DefaultDumper {
-  void operator()(std::ostream& out, const ShCtrlGraphNodePtr& node)
+  void operator()(std::ostream& out, const CtrlGraphNodePtr& node)
   {
     out << "[label=\"";
     if(node->block) {
@@ -35,7 +35,7 @@ struct DefaultDumper {
     }
 }
 
-  void operator()(std::ostream& out, const ShSectionNodePtr& node)
+  void operator()(std::ostream& out, const SectionNodePtr& node)
   {
     out << "label=\"" << node->name() << "\"" << std::endl;
   }
@@ -44,74 +44,74 @@ struct DefaultDumper {
 }
 
 namespace SH {
-void ShSectionNode::addChild(ShPointer<ShSectionNode> child)
+void SectionNode::addChild(Pointer<SectionNode> child)
 {
   children.insert(child);
   child->parent = this;
 }
 
-ShSectionNode::ShSectionNode()
+SectionNode::SectionNode()
   : parent(0)
 {
 }
 
 
-ShStatement* ShSectionNode::getStart()
+Statement* SectionNode::getStart()
 {
   if(cfgNodes.empty() || !cfgNodes.front()->block 
       || cfgNodes.front()->block->empty()) {
-    SH_DEBUG_PRINT("Could not find STARTSEC");
+    DEBUG_PRINT("Could not find STARTSEC");
     return 0;
   }
 
-  ShStatement* result = &*cfgNodes.front()->block->begin();
-  if(result->op != SH_OP_STARTSEC) {
-    SH_DEBUG_PRINT("First stmt is not a STARTSEC");
+  Statement* result = &*cfgNodes.front()->block->begin();
+  if(result->op != OP_STARTSEC) {
+    DEBUG_PRINT("First stmt is not a STARTSEC");
     return 0;
   }
   return result;
 }
 
-ShStatement* ShSectionNode::getEnd()
+Statement* SectionNode::getEnd()
 {
   if(cfgNodes.empty() || !cfgNodes.back()->block 
       || cfgNodes.back()->block->empty()) {
-    SH_DEBUG_PRINT("Could not find ENDSEC");
+    DEBUG_PRINT("Could not find ENDSEC");
     return 0;
   }
 
-  ShStatement* result = &*cfgNodes.back()->block->rbegin();
-  if(result->op != SH_OP_ENDSEC) {
-    SH_DEBUG_PRINT("Last stmt is not a ENDSEC");
+  Statement* result = &*cfgNodes.back()->block->rbegin();
+  if(result->op != OP_ENDSEC) {
+    DEBUG_PRINT("Last stmt is not a ENDSEC");
     return 0;
   }
   return result;
 }
 
-std::string ShSectionNode::name() 
+std::string SectionNode::name() 
 {
   if(!parent) return "Main Program";                                                 
 
-  ShStatement* start = getStart();
+  Statement* start = getStart();
   if(!start) return "[null - error]";
-  ShInfoComment* comment = start->get_info<ShInfoComment>();                          
-  SH_DEBUG_ASSERT(comment);                                                           
+  InfoComment* comment = start->get_info<InfoComment>();                          
+  DEBUG_ASSERT(comment);                                                           
   return comment->comment;   
 }
 
-int ShSectionNode::depth()
+int SectionNode::depth()
 {
   if(!parent) return 0;
   return parent->depth() + 1;
 }
 
-ShSectionTree::ShSectionTree(ShStructural& structural) 
-  : root(new ShSectionNode())
+SectionTree::SectionTree(Structural& structural) 
+  : root(new SectionNode())
 {
   makeSection(structural.head(), root);
 }
 
-ShSectionNodePtr ShSectionTree::operator[](const ShCtrlGraphNodePtr& cfgNode)
+SectionNodePtr SectionTree::operator[](const CtrlGraphNodePtr& cfgNode)
 {
   if(cfgSection.empty()) {
     gatherCfgSection(root);
@@ -119,43 +119,43 @@ ShSectionNodePtr ShSectionTree::operator[](const ShCtrlGraphNodePtr& cfgNode)
   return cfgSection[cfgNode];
 }
 
-bool ShSectionTree::contains(const ShSectionNodePtr& section, const ShCtrlGraphNodePtr& cfgNode)
+bool SectionTree::contains(const SectionNodePtr& section, const CtrlGraphNodePtr& cfgNode)
 {
-  for(ShSectionNodePtr s = cfgSection[cfgNode]; s; s = s->parent) {
+  for(SectionNodePtr s = cfgSection[cfgNode]; s; s = s->parent) {
     if(s == section) return true;
   }
   return false;
 }
 
 /* Graphviz dump */
-std::ostream& ShSectionTree::dump(std::ostream& out)
+std::ostream& SectionTree::dump(std::ostream& out)
 {
   DefaultDumper dd;
   dump(out, dd);
   return out;
 }
 
-void ShSectionTree::makeSection(const ShStructuralNodePtr& structNode, ShSectionNodePtr section) 
+void SectionTree::makeSection(const StructuralNodePtr& structNode, SectionNodePtr section) 
 {
-  if(structNode->type == ShStructuralNode::SECTION) {
-    ShSectionNodePtr newSection = new ShSectionNode(); 
+  if(structNode->type == StructuralNode::SECTION) {
+    SectionNodePtr newSection = new SectionNode(); 
     section->addChild(newSection);
     section = newSection;
   }
 
   if(structNode->cfg_node) section->addCfg(structNode->cfg_node);
 
-  for(ShStructuralNode::StructNodeList::iterator I = structNode->structnodes.begin();
+  for(StructuralNode::StructNodeList::iterator I = structNode->structnodes.begin();
       I != structNode->structnodes.end(); ++I) {
     makeSection(*I, section);
   }
 }
 
-void ShSectionTree::gatherCfgSection(const ShSectionNodePtr& section) {
-  for(ShSectionNode::cfg_iterator I = section->cfgBegin(); I != section->cfgEnd(); ++I) {
+void SectionTree::gatherCfgSection(const SectionNodePtr& section) {
+  for(SectionNode::cfg_iterator I = section->cfgBegin(); I != section->cfgEnd(); ++I) {
     cfgSection[*I] = section;
   }
-  for(ShSectionNode::iterator J = section->begin(); J != section->end(); ++J) {
+  for(SectionNode::iterator J = section->begin(); J != section->end(); ++J) {
     gatherCfgSection(*J);
   }
 }

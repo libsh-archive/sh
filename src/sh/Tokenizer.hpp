@@ -24,12 +24,12 @@
 #include <queue>
 #include <vector>
 #include <iosfwd>
-#include "ShDllExport.hpp"
-#include "ShRefCount.hpp"
-#include "ShVariable.hpp"
-#include "ShBlock.hpp"
-#include "ShException.hpp"
-#include "ShToken.hpp"
+#include "DllExport.hpp"
+#include "RefCount.hpp"
+#include "Variable.hpp"
+#include "Block.hpp"
+#include "Exception.hpp"
+#include "Token.hpp"
 
 namespace SH {
 
@@ -39,14 +39,14 @@ namespace SH {
  * of the argument, and a block list describing how that value is to
  * be computed */
 struct 
-SH_DLLEXPORT ShTokenArgument {
-  ShTokenArgument(const ShVariable& result, const ShBlockListPtr& blockList)
+DLLEXPORT TokenArgument {
+  TokenArgument(const Variable& result, const BlockListPtr& blockList)
     : result(result), blockList(blockList)
   {
   }
   
-  ShVariable result; ///< Contains the value of the argument
-  ShBlockListPtr blockList; ///< Specifies how result is computed
+  Variable result; ///< Contains the value of the argument
+  BlockListPtr blockList; ///< Specifies how result is computed
 };
 
 /** An exception indicating a tokenizer error.
@@ -54,9 +54,9 @@ SH_DLLEXPORT ShTokenArgument {
  * the error.
  */
 class 
-SH_DLLEXPORT ShTokenizerException : public ShException {
+DLLEXPORT TokenizerException : public Exception {
 public:
-  ShTokenizerException(const std::string& error);
+  TokenizerException(const std::string& error);
 };
   
 /** A tokenizer.
@@ -69,9 +69,9 @@ public:
  *
  */
 class 
-SH_DLLEXPORT ShTokenizer {
+DLLEXPORT Tokenizer {
 public:
-  ShTokenizer();
+  Tokenizer();
 
   /** @name Pushing and processing arguments
    * These should always be called together, like so:
@@ -84,23 +84,23 @@ public:
   /// Indicate that an argument is coming. Always returns true.
   bool pushArg();
   /// Tokenize an argument, then add it to the argument queue. Always returns true.
-  bool processArg(const ShVariable& result);
+  bool processArg(const Variable& result);
   ///@}
 
   /** @name Retrieving arguments */
   ///@{
   /// Retrieve and remove the oldest parsed argument at the current level
-  ShTokenArgument getArgument();
+  TokenArgument getArgument();
   /// Pop the argument context (call after you've retrieved all your arguments)
   void popArgQueue();
   ///@}
 
   /// Get the currently active list
-  ShBlockListPtr blockList();
+  BlockListPtr blockList();
 
 private:
-  std::stack<ShBlockListPtr> m_listStack;
-  std::stack< std::queue<ShTokenArgument> > m_argQueueStack;
+  std::stack<BlockListPtr> m_listStack;
+  std::stack< std::queue<TokenArgument> > m_argQueueStack;
 };
 
 }

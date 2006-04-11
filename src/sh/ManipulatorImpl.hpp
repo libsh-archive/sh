@@ -23,12 +23,12 @@
 #include <cstdarg>
 #include <cassert>
 #include <sstream>
-#include "ShVariableNode.hpp"
-#include "ShError.hpp"
-#include "ShDebug.hpp"
-#include "ShAlgebra.hpp"
-#include "ShManipulator.hpp"
-#include "ShInstructions.hpp"
+#include "VariableNode.hpp"
+#include "Error.hpp"
+#include "Debug.hpp"
+#include "Algebra.hpp"
+#include "Manipulator.hpp"
+#include "Instructions.hpp"
 
 namespace SH {
 
@@ -49,12 +49,12 @@ OffsetRange<T>::OffsetRange( T start, int startOffset, T end, int endOffset )
   : start( start ), end( end ), startOffset( startOffset ), endOffset( endOffset ) {}
 
 template<typename T>
-int OffsetRange<T>::absStartIndex( const ShProgramNode::VarList vars ) const {
+int OffsetRange<T>::absStartIndex( const ProgramNode::VarList vars ) const {
   return absIndex( start, startOffset, vars );
 }
 
 template<typename T>
-int OffsetRange<T>::absEndIndex( const ShProgramNode::VarList vars ) const {
+int OffsetRange<T>::absEndIndex( const ProgramNode::VarList vars ) const {
   return absIndex( end, endOffset, vars );
 }
 
@@ -67,37 +67,37 @@ std::string OffsetRange<T>::toString() const {
 }
 
 template<typename T>
-ShManipulator<T>::ShManipulator() {} 
+Manipulator<T>::Manipulator() {} 
 
 template<typename T>
-ShManipulator<T>::~ShManipulator() {
+Manipulator<T>::~Manipulator() {
 } 
 
 template<typename T>
-ShManipulator<T>& ShManipulator<T>::operator()(T i) {
+Manipulator<T>& Manipulator<T>::operator()(T i) {
   m_ranges.push_back(IndexRange(i, i));
   return *this;
 }
 
 template<typename T>
-ShManipulator<T>& ShManipulator<T>::operator()(T start, T end) {
+Manipulator<T>& Manipulator<T>::operator()(T start, T end) {
   m_ranges.push_back(IndexRange(start, end));
   return *this;
 }
 
 template<typename T>
-ShManipulator<T>& ShManipulator<T>::operator()(const IndexRange &range) {
+Manipulator<T>& Manipulator<T>::operator()(const IndexRange &range) {
   m_ranges.push_back(range);
   return *this;
 }
 
 template<typename T>
-typename ShManipulator<T>::IndexRangeVector ShManipulator<T>::getRanges() const { 
+typename Manipulator<T>::IndexRangeVector Manipulator<T>::getRanges() const { 
   return m_ranges;
 }
 
 template<typename T>
-std::string ShManipulator<T>::toString() const {
+std::string Manipulator<T>::toString() const {
   std::ostringstream os;
   for(typename IndexRangeVector::const_iterator it = m_ranges.begin(); it != m_ranges.end(); ++it) {
     if(it != m_ranges.begin()) os << ", ";
@@ -108,23 +108,23 @@ std::string ShManipulator<T>::toString() const {
 
 /* input permutation */
 template<typename T>
-ShProgram operator<<(const ShProgram &p, const ShManipulator<T> &m) {
-  typedef typename ShManipulator<T>::IndexRangeVector RangeVec;
+Program operator<<(const Program &p, const Manipulator<T> &m) {
+  typedef typename Manipulator<T>::IndexRangeVector RangeVec;
   RangeVec mranges = m.getRanges();
   int i;
 
-  ShProgram permuter = SH_BEGIN_PROGRAM() {
+  Program permuter = SH_BEGIN_PROGRAM() {
     /* Make shader outputs from p's inputs 
      * default output value is zero, so for those that have
      * no matching inputs, they become zero outputs */
-    std::vector<ShVariable> outputs;
-    for(ShProgramNode::VarList::const_iterator inIt = p.node()->inputs.begin();
+    std::vector<Variable> outputs;
+    for(ProgramNode::VarList::const_iterator inIt = p.node()->inputs.begin();
         inIt != p.node()->inputs.end(); ++inIt) {
-      ShVariable out((*inIt)->clone(SH_OUTPUT));
+      Variable out((*inIt)->clone(OUTPUT));
       outputs.push_back(out);
     }
 
-    std::vector<ShVariable>::size_type size = outputs.size();
+    std::vector<Variable>::size_type size = outputs.size();
 
     /* Make shader outputs from permuted ranges of inputs */
     std::vector<bool> used(size, false); //mark used inputs
@@ -136,9 +136,9 @@ ShProgram operator<<(const ShProgram &p, const ShManipulator<T> &m) {
       if(start == OFFSET_RANGE_BAD_OFFSET || end == OFFSET_RANGE_BAD_OFFSET ) continue;
       if(start == OFFSET_RANGE_BAD_INDEX || end == OFFSET_RANGE_BAD_INDEX ) {
         std::ostringstream os;
-        os << "Invalid ShManipulator Range " << irvIt->toString() 
-          << " for an ShProgram with output size " << static_cast<unsigned>(size);
-        shError(ShAlgebraException(os.str())); 
+        os << "Invalid Manipulator Range " << irvIt->toString() 
+          << " for an Program with output size " << static_cast<unsigned>(size);
+        error(AlgebraException(os.str())); 
       }
 
       for(i = start; i <= end; ++i) {
@@ -146,11 +146,11 @@ ShProgram operator<<(const ShProgram &p, const ShManipulator<T> &m) {
           std::ostringstream os;
           os << "Duplicate index " << i << " in range " << irvIt->toString() 
             << " not allowed for input manipulators"; 
-          shError(ShAlgebraException(os.str()));
+          error(AlgebraException(os.str()));
         }
         used[i] = true;
 
-        ShVariable input(outputs[i].node()->clone(SH_INPUT));
+        Variable input(outputs[i].node()->clone(INPUT));
         shASN(outputs[i], input);
       }
     }
@@ -160,20 +160,20 @@ ShProgram operator<<(const ShProgram &p, const ShManipulator<T> &m) {
 }
 
 template<typename T>
-ShProgram operator<<(const ShManipulator<T> &m, const ShProgram &p) {
-  typedef typename ShManipulator<T>::IndexRangeVector RangeVec;
+Program operator<<(const Manipulator<T> &m, const Program &p) {
+  typedef typename Manipulator<T>::IndexRangeVector RangeVec;
   RangeVec mranges = m.getRanges();
 
-  ShProgram permuter = SH_BEGIN_PROGRAM() {
+  Program permuter = SH_BEGIN_PROGRAM() {
     /* Make shader inputs from p's outputs */
-    std::vector<ShVariable> inputs;
-    for(ShProgramNode::VarList::const_iterator outIt = p.node()->outputs.begin();
+    std::vector<Variable> inputs;
+    for(ProgramNode::VarList::const_iterator outIt = p.node()->outputs.begin();
         outIt != p.node()->outputs.end(); ++outIt) {
-      ShVariable in((*outIt)->clone(SH_INPUT));
+      Variable in((*outIt)->clone(INPUT));
       inputs.push_back(in);
     }
 
-    std::vector<ShVariable>::size_type size = inputs.size();
+    std::vector<Variable>::size_type size = inputs.size();
 
     /* Make shader outputs from permuted ranges of inputs */
     for(typename RangeVec::const_iterator irvIt = mranges.begin();
@@ -184,13 +184,13 @@ ShProgram operator<<(const ShManipulator<T> &m, const ShProgram &p) {
       if(start == OFFSET_RANGE_BAD_OFFSET || end == OFFSET_RANGE_BAD_OFFSET ) continue;
       if(start == OFFSET_RANGE_BAD_INDEX || end == OFFSET_RANGE_BAD_INDEX ) {
         std::ostringstream os;
-        os << "Invalid ShManipulator Range " << irvIt->toString() << 
-          " for an ShProgram with output size " << static_cast<unsigned>(size);
-        shError(ShAlgebraException(os.str())); 
+        os << "Invalid Manipulator Range " << irvIt->toString() << 
+          " for an Program with output size " << static_cast<unsigned>(size);
+        error(AlgebraException(os.str())); 
       }
 
       for(int i = start; i <= end; ++i) { // handles end < start case
-        ShVariable output(inputs[i].node()->clone(SH_OUTPUT));
+        Variable output(inputs[i].node()->clone(OUTPUT));
         shASN(output, inputs[i]);
       }
     }
@@ -200,78 +200,78 @@ ShProgram operator<<(const ShManipulator<T> &m, const ShProgram &p) {
 }
 
 template<typename T>
-ShManipulator<T> shSwizzle(T i0) {
-  ShManipulator<T> m;
+Manipulator<T> swizzle(T i0) {
+  Manipulator<T> m;
   m(i0);
   return m;
 }
 template<typename T>
-ShManipulator<T> shSwizzle(T i0, T i1) {
-  ShManipulator<T> m;
+Manipulator<T> swizzle(T i0, T i1) {
+  Manipulator<T> m;
   m(i0); m(i1);
   return m;
 }
 template<typename T>
-ShManipulator<T> shSwizzle(T i0, T i1, T i2) {
-  ShManipulator<T> m;
+Manipulator<T> swizzle(T i0, T i1, T i2) {
+  Manipulator<T> m;
   m(i0); m(i1); m(i2); 
   return m;
 }
 
 template<typename T>
-ShManipulator<T> shSwizzle(T i0, T i1, T i2, T i3) {
-  ShManipulator<T> m;
+Manipulator<T> swizzle(T i0, T i1, T i2, T i3) {
+  Manipulator<T> m;
   m(i0); m(i1); m(i2); m(i3);
   return m;
 }
 
 template<typename T>
-ShManipulator<T> shSwizzle(T i0, T i1, T i2, T i3, T i4) {
-  ShManipulator<T> m;
+Manipulator<T> swizzle(T i0, T i1, T i2, T i3, T i4) {
+  Manipulator<T> m;
   m(i0); m(i1); m(i2); m(i3); m(i4); 
   return m;
 }
 
 template<typename T>
-ShManipulator<T> shSwizzle(T i0, T i1, T i2, T i3, T i4, T i5) {
-  ShManipulator<T> m;
+Manipulator<T> swizzle(T i0, T i1, T i2, T i3, T i4, T i5) {
+  Manipulator<T> m;
   m(i0); m(i1); m(i2); m(i3); m(i4); m(i5); 
   return m;
 }
 
 template<typename T>
-ShManipulator<T> shSwizzle(T i0, T i1, T i2, T i3, T i4, T i5, T i6) {
-  ShManipulator<T> m;
+Manipulator<T> swizzle(T i0, T i1, T i2, T i3, T i4, T i5, T i6) {
+  Manipulator<T> m;
   m(i0); m(i1); m(i2); m(i3); m(i4); m(i5); m(i6); 
   return m;
 }
 
 template<typename T>
-ShManipulator<T> shSwizzle(T i0, T i1, T i2, T i3, T i4, T i5, T i6, T i7) {
-  ShManipulator<T> m;
+Manipulator<T> swizzle(T i0, T i1, T i2, T i3, T i4, T i5, T i6, T i7) {
+  Manipulator<T> m;
   m(i0); m(i1); m(i2); m(i3); m(i4); m(i5); m(i6); m(i7); 
   return m;
 }
 
 template<typename T>
-ShManipulator<T> shSwizzle(T i0, T i1, T i2, T i3, T i4, T i5, T i6, T i7, T i8) {
-  ShManipulator<T> m;
+Manipulator<T> swizzle(T i0, T i1, T i2, T i3, T i4, T i5, T i6, T i7, T i8) {
+  Manipulator<T> m;
   m(i0); m(i1); m(i2); m(i3); m(i4); m(i5); m(i6); 
   m(i7); m(i8);
   return m;
 }
 
 template<typename T>
-ShManipulator<T> shSwizzle(T i0, T i1, T i2, T i3, T i4, T i5, T i6, T i7, T i8, T i9) {
-  ShManipulator<T> m;
+Manipulator<T> swizzle(T i0, T i1, T i2, T i3, T i4, T i5, T i6, T i7, T i8, T i9) {
+  Manipulator<T> m;
   m(i0); m(i1); m(i2); m(i3); m(i4); m(i5); m(i6); 
   m(i7); m(i8); m(i9);
   return m;
 }
 
 template<typename T>
-ShManipulator<T> shSwizzle(std::vector<T> indices) {
-  ShManipulator<T> m;
+Manipulator<T> swizzle(std::vector<T> indices) {
+  Manipulator<T> m;
   for(typename std::vector<T>::iterator it = indices.begin();
       it != indices.end(); ++it) {
     m(*it);
@@ -280,33 +280,33 @@ ShManipulator<T> shSwizzle(std::vector<T> indices) {
 }
 
 template<typename T>
-ShManipulator<T> shRange(T i) {
-  ShManipulator<T> m;
+Manipulator<T> range(T i) {
+  Manipulator<T> m;
   m(i);
   return m;
 }
 
 template<typename T>
-ShManipulator<T> shRange(T start, T end) {
-  ShManipulator<T> m;
+Manipulator<T> range(T start, T end) {
+  Manipulator<T> m;
   m(start, end);
   return m;
 }
 
 template<typename T>
-ShManipulator<T> shExtract(T k) {
-  ShManipulator<T> m;
+Manipulator<T> extract(T k) {
+  Manipulator<T> m;
   m(k);
-  typedef typename ShManipulator<T>::IndexRange Range;
+  typedef typename Manipulator<T>::IndexRange Range;
   m(Range(k,_FIRST,k,-1));
   m(Range(k,1,k,_LAST));
   return m;
 }
 
 template<typename T>
-ShManipulator<T> shInsert(T k) {
-  ShManipulator<T> m;
-  typedef typename ShManipulator<T>::IndexRange Range;
+Manipulator<T> insert(T k) {
+  Manipulator<T> m;
+  typedef typename Manipulator<T>::IndexRange Range;
   
   m(Range(k,_SECOND,k,0));
   m(Range(k,_FIRST,k,_FIRST));
@@ -316,9 +316,9 @@ ShManipulator<T> shInsert(T k) {
 }
 
 template<typename T>
-ShManipulator<T> shDrop(T k) {
-  ShManipulator<T> m;
-  typedef typename ShManipulator<T>::IndexRange Range; 
+Manipulator<T> drop(T k) {
+  Manipulator<T> m;
+  typedef typename Manipulator<T>::IndexRange Range; 
   m(Range(k,_FIRST,k,-1));
   m(Range(k,1,k,_LAST));
   return m;

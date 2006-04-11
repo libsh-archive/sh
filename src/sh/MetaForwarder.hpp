@@ -22,16 +22,16 @@
 
 #include <string>
 #include <map>
-#include "ShDllExport.hpp"
+#include "DllExport.hpp"
 
 namespace SH {
 
-class ShMeta;
+class Meta;
 
 class
-SH_DLLEXPORT ShMetaForwarder {
+DLLEXPORT MetaForwarder {
 public:
-  ShMetaForwarder(ShMeta* meta);
+  MetaForwarder(Meta* meta);
   
   std::string name() const;
   void name(const std::string& n);
@@ -53,11 +53,11 @@ public:
   std::map<std::string, std::string>::const_iterator end_meta() const;
 
 protected:
-  ShMeta* real_meta();
-  void real_meta(ShMeta*);
+  Meta* real_meta();
+  void real_meta(Meta*);
   
 private:
-  ShMeta* m_meta;
+  Meta* m_meta;
 };
 
 }

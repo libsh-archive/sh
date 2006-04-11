@@ -17,45 +17,45 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SH_SHMATRIX_HPP
-#define SH_SHMATRIX_HPP
+#ifndef SHSHMATRIX_HPP
+#define SHSHMATRIX_HPP
 
-#include "ShMeta.hpp"
-#include "ShVariable.hpp"
-#include "ShAttrib.hpp"
-#include "ShRefCount.hpp"
+#include "Meta.hpp"
+#include "Variable.hpp"
+#include "Attrib.hpp"
+#include "RefCount.hpp"
 
 namespace SH {
 
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-class ShMatrix;
+template<int Rows, int Cols, BindingType Binding, typename T>
+class Matrix;
 
 template<int Rows, int Cols, typename T>
-class ShMatrixRows;
+class MatrixRows;
 
 /** A matrix of Rows by Cols elements.
  * A matrix is a representation of a linear operator.  In Sh, this
  * class represents SMALL matrices that will fit in registers.   For
- * large amounts of data, use an ShArray.
- * @see ShArray
+ * large amounts of data, use an Array.
+ * @see Array
  */
-template<int Rows, int Cols, ShBindingType Binding, typename T>
-class ShMatrix: public virtual ShMeta {
+template<int Rows, int Cols, BindingType Binding, typename T>
+class Matrix: public virtual Meta {
 public:
   typedef T storage_type;
-  typedef typename ShHostType<T>::type host_type;
-  typedef typename ShMemType<T>::type mem_type;
-  static const ShValueType value_type = ShStorageTypeInfo<T>::value_type;
-  static const ShBindingType binding_type = Binding;
+  typedef typename HostType<T>::type host_type;
+  typedef typename MemType<T>::type mem_type;
+  static const ValueType value_type = StorageTypeInfo<T>::value_type;
+  static const BindingType binding_type = Binding;
   static const int rows = Rows;
   static const int cols = Cols;
   static const int typesize = Rows * Cols;
 
-  typedef ShMatrix<Rows, Cols, SH_INPUT, T> InputType;
-  typedef ShMatrix<Rows, Cols, SH_OUTPUT, T> OutputType;
-  typedef ShMatrix<Rows, Cols, SH_INOUT, T> InOutType;
-  typedef ShMatrix<Rows, Cols, SH_TEMP, T> TempType;
-  typedef ShMatrix<Rows, Cols, SH_CONST, T> ConstType;
+  typedef Matrix<Rows, Cols, INPUT, T> InputType;
+  typedef Matrix<Rows, Cols, OUTPUT, T> OutputType;
+  typedef Matrix<Rows, Cols, INOUT, T> InOutType;
+  typedef Matrix<Rows, Cols, TEMP, T> TempType;
+  typedef Matrix<Rows, Cols, CONST, T> ConstType;
 
   /** \brief Identity constructor.
    *
@@ -64,71 +64,71 @@ public:
    * possible is made an identity matrix, with the rest left zero.
    *
    */
-  ShMatrix();
+  Matrix();
 
   /** \brief Copy constructor.
    *
    * Construct a matrix with the same contents as the given matrix.
    */
-  template<ShBindingType Binding2>
-  ShMatrix(const ShMatrix<Rows, Cols, Binding2, T>& other);
+  template<BindingType Binding2>
+  Matrix(const Matrix<Rows, Cols, Binding2, T>& other);
   
-  ~ShMatrix();
+  ~Matrix();
 
   /** \brief Assignment.
    *
    * Replace each entry in this matrix with the corresponding entry of
    * the given matrix.
    */
-  ShMatrix& operator=(const ShMatrix<Rows, Cols, Binding, T>& other);
+  Matrix& operator=(const Matrix<Rows, Cols, Binding, T>& other);
 
   /** \brief Assignment.
    *
    * Replace each entry in this matrix with the corresponding entry of
    * the given matrix.
    */
-  template<ShBindingType Binding2>
-  ShMatrix& operator=(const ShMatrix<Rows, Cols, Binding2, T>& other);
+  template<BindingType Binding2>
+  Matrix& operator=(const Matrix<Rows, Cols, Binding2, T>& other);
 
   /** \brief Assignment (scalar promotion).
    * 
    * Construct an identity matrix multiplied by the scalar.
    */
-  ShMatrix& operator=(const T& scalar);
+  Matrix& operator=(const T& scalar);
 
   /** \brief Assignment (scalar promotion).
    * 
    * Construct an identity matrix multiplied by the scalar.
    */
-  ShMatrix& operator=(const ShGeneric<1, T>& scalar);
+  Matrix& operator=(const Generic<1, T>& scalar);
 
   /** \brief Attribute row access.
    *
-   * Return a reference to the given row as an ShAttrib.
+   * Return a reference to the given row as an Attrib.
    */
-  ShAttrib<Cols, Binding, T>& operator[](int i);
+  Attrib<Cols, Binding, T>& operator[](int i);
 
   /** \brief Attribute row access.
    *
-   * Return a reference to the given row as an ShAttrib.
+   * Return a reference to the given row as an Attrib.
    */
-  const ShAttrib<Cols, Binding, T>& operator[](int i) const;
+  const Attrib<Cols, Binding, T>& operator[](int i) const;
 
   /** \brief Modifying componentwise addition
    *
    * Add each entry in the given matrix to each entry in this
    * matrix matching its row and column index.
    */
-  template<ShBindingType Binding2>
-  ShMatrix& operator+=(const ShMatrix<Rows, Cols, Binding2, T>& other);
+  template<BindingType Binding2>
+  Matrix& operator+=(const Matrix<Rows, Cols, Binding2, T>& other);
 
   /** \brief Modifying componentwise subtraction
    *
    * Subtract each entry in the given matrix from each entry in this
    * matrix matching its row and column index.
    */
-  template<ShBindingType Binding2>
-  ShMatrix& operator-=(const ShMatrix<Rows, Cols, Binding2, T>& other);
+  template<BindingType Binding2>
+  Matrix& operator-=(const Matrix<Rows, Cols, Binding2, T>& other);
 
 
   /** \brief Modifying componentwise division
@@ -137,32 +137,32 @@ public:
    * matching its row and column index.
    *
    */
-  template<ShBindingType Binding2>
-  ShMatrix& operator/=(const ShMatrix<Rows, Cols, Binding2, T>& other);    
+  template<BindingType Binding2>
+  Matrix& operator/=(const Matrix<Rows, Cols, Binding2, T>& other);    
 
   /** \brief Modifying matrix multiplication
    *
    * Replace the matrix by the result of the matrix multiplied by the
    * other.  Note: the two matrices must have the same size.
    */
-  template<ShBindingType Binding2>
-  ShMatrix& operator*=(const ShMatrix<Rows, Cols, Binding2, T>& other);    
+  template<BindingType Binding2>
+  Matrix& operator*=(const Matrix<Rows, Cols, Binding2, T>& other);    
    
   /** \brief Negation
    *
    * Assign each entry to its negated value.
    */
-  ShMatrix& operator-();
+  Matrix& operator-();
 
   /** \brief Obtain a submatrix of this matrix.
    *
    * Return a copy of this matrix not containing the given row and column.
    */
-  ShMatrix<Rows - 1, Cols -1, SH_TEMP, T> subMatrix(int,int) const;
+  Matrix<Rows - 1, Cols -1, TEMP, T> subMatrix(int,int) const;
 
-  void setTranslation(const ShGeneric<Rows-1, T>& trans);
+  void setTranslation(const Generic<Rows-1, T>& trans);
   
-  void setScaling(const ShGeneric<Rows-1, T>& scale);
+  void setScaling(const Generic<Rows-1, T>& scale);
 
 
   /** \brief Modifying scalar multiplicatoin
@@ -170,24 +170,24 @@ public:
    * Multiply the given scalar attribute with each component of this
    * matrix.
    */
-  ShMatrix& operator*=(const ShGeneric<1, T>& a);
+  Matrix& operator*=(const Generic<1, T>& a);
     
   /** \brief Modifying scalar division
    *
    * Divide each component of this matrix by the given attribute.
    */
-  ShMatrix& operator/=(const ShGeneric<1, T>& a);
+  Matrix& operator/=(const Generic<1, T>& a);
 
   /**@name Swizzling
    * Retrieve some set of rows from this matrix. These must be
    * swizzled again to operate on them.
    */
   //@{
-  ShMatrixRows<Rows, Cols, T> operator()() const; ///< Identity swizzle
-  ShMatrixRows<1, Cols, T> operator()(int) const;
-  ShMatrixRows<2, Cols, T> operator()(int, int) const;
-  ShMatrixRows<3, Cols, T> operator()(int, int, int) const;
-  ShMatrixRows<4, Cols, T> operator()(int, int, int, int) const;
+  MatrixRows<Rows, Cols, T> operator()() const; ///< Identity swizzle
+  MatrixRows<1, Cols, T> operator()(int) const;
+  MatrixRows<2, Cols, T> operator()(int, int) const;
+  MatrixRows<3, Cols, T> operator()(int, int, int) const;
+  MatrixRows<4, Cols, T> operator()(int, int, int, int) const;
   //@}
   
   /**@name Metadata
@@ -226,7 +226,7 @@ private:
    *
    * The data structure that hold the data
    */
-  ShAttrib<Cols, Binding, T> m_data[Rows];
+  Attrib<Cols, Binding, T> m_data[Rows];
   
 };
 /** \brief Matrix output operator
@@ -235,9 +235,9 @@ private:
  * values to the given stream.
  */
 
-template<int R, int C, ShBindingType B, typename Ty>
+template<int R, int C, BindingType B, typename Ty>
 std::ostream& operator<<(std::ostream& out,
-                         const ShMatrix<R, C, B, Ty>& m);
+                         const Matrix<R, C, B, Ty>& m);
 
 /** A few rows from a matrix.
  * This is an intermediate structure representing some rows that have
@@ -246,114 +246,114 @@ std::ostream& operator<<(std::ostream& out,
  * and columns.
  */
 template<int Rows, int Cols, typename T>
-class ShMatrixRows {
+class MatrixRows {
 public:
-  template<ShBindingType Binding>
-  ShMatrixRows(const ShMatrix<Rows, Cols, Binding, T>& source);
+  template<BindingType Binding>
+  MatrixRows(const Matrix<Rows, Cols, Binding, T>& source);
   
-  template<int OR, ShBindingType Binding>
-  ShMatrixRows(const ShMatrix<OR, Cols, Binding, T>& source,
+  template<int OR, BindingType Binding>
+  MatrixRows(const Matrix<OR, Cols, Binding, T>& source,
                int idx0);
-  template<int OR, ShBindingType Binding>
-  ShMatrixRows(const ShMatrix<OR, Cols, Binding, T>& source,
+  template<int OR, BindingType Binding>
+  MatrixRows(const Matrix<OR, Cols, Binding, T>& source,
                int idx0, int idx1);
-  template<int OR, ShBindingType Binding>
-  ShMatrixRows(const ShMatrix<OR, Cols, Binding, T>& source,
+  template<int OR, BindingType Binding>
+  MatrixRows(const Matrix<OR, Cols, Binding, T>& source,
                int idx0, int idx1, int idx2);
-  template<int OR, ShBindingType Binding>
-  ShMatrixRows(const ShMatrix<OR, Cols, Binding, T>& source,
+  template<int OR, BindingType Binding>
+  MatrixRows(const Matrix<OR, Cols, Binding, T>& source,
                int idx0, int idx1, int idx2, int idx3);
 
-  ShMatrixRows(const ShMatrixRows<Rows, Cols, T>& other);
+  MatrixRows(const MatrixRows<Rows, Cols, T>& other);
   
-  ShMatrixRows& operator=(const ShMatrixRows<Rows, Cols, T>& other);
+  MatrixRows& operator=(const MatrixRows<Rows, Cols, T>& other);
 
   /**@name Swizzling
    * Retrieve a matrix consisting of these rows and the given columns.
    */
   //@{
-  ShMatrix<Rows, Cols, SH_TEMP, T> operator()() const; ///< Identity swizzle
-  ShMatrix<Rows, 1, SH_TEMP, T> operator()(int) const;
-  ShMatrix<Rows, 2, SH_TEMP, T> operator()(int, int) const;
-  ShMatrix<Rows, 3, SH_TEMP, T> operator()(int, int, int) const;
-  ShMatrix<Rows, 4, SH_TEMP, T> operator()(int, int, int, int) const;
+  Matrix<Rows, Cols, TEMP, T> operator()() const; ///< Identity swizzle
+  Matrix<Rows, 1, TEMP, T> operator()(int) const;
+  Matrix<Rows, 2, TEMP, T> operator()(int, int) const;
+  Matrix<Rows, 3, TEMP, T> operator()(int, int, int) const;
+  Matrix<Rows, 4, TEMP, T> operator()(int, int, int, int) const;
   //@}
 private:
-  ShAttrib<Cols, SH_TEMP, T> m_data[Rows];
+  Attrib<Cols, TEMP, T> m_data[Rows];
 };
 
 
-typedef ShMatrix<1, 1, SH_INPUT, float> ShInputMatrix1x1f;
-typedef ShMatrix<1, 1, SH_OUTPUT, float> ShOutputMatrix1x1f;
-typedef ShMatrix<1, 1, SH_INOUT, float> ShInOutMatrix1x1f;
-typedef ShMatrix<1, 1, SH_TEMP, float> ShMatrix1x1f;
-typedef ShMatrix<1, 2, SH_INPUT, float> ShInputMatrix1x2f;
-typedef ShMatrix<1, 2, SH_OUTPUT, float> ShOutputMatrix1x2f;
-typedef ShMatrix<1, 2, SH_INOUT, float> ShInOutMatrix1x2f;
-typedef ShMatrix<1, 2, SH_TEMP, float> ShMatrix1x2f;
-typedef ShMatrix<1, 3, SH_INPUT, float> ShInputMatrix1x3f;
-typedef ShMatrix<1, 3, SH_OUTPUT, float> ShOutputMatrix1x3f;
-typedef ShMatrix<1, 3, SH_INOUT, float> ShInOutMatrix1x3f;
-typedef ShMatrix<1, 3, SH_TEMP, float> ShMatrix1x3f;
-typedef ShMatrix<1, 4, SH_INPUT, float> ShInputMatrix1x4f;
-typedef ShMatrix<1, 4, SH_OUTPUT, float> ShOutputMatrix1x4f;
-typedef ShMatrix<1, 4, SH_INOUT, float> ShInOutMatrix1x4f;
-typedef ShMatrix<1, 4, SH_TEMP, float> ShMatrix1x4f;
+typedef Matrix<1, 1, INPUT, float> InputMatrix1x1f;
+typedef Matrix<1, 1, OUTPUT, float> OutputMatrix1x1f;
+typedef Matrix<1, 1, INOUT, float> InOutMatrix1x1f;
+typedef Matrix<1, 1, TEMP, float> Matrix1x1f;
+typedef Matrix<1, 2, INPUT, float> InputMatrix1x2f;
+typedef Matrix<1, 2, OUTPUT, float> OutputMatrix1x2f;
+typedef Matrix<1, 2, INOUT, float> InOutMatrix1x2f;
+typedef Matrix<1, 2, TEMP, float> Matrix1x2f;
+typedef Matrix<1, 3, INPUT, float> InputMatrix1x3f;
+typedef Matrix<1, 3, OUTPUT, float> OutputMatrix1x3f;
+typedef Matrix<1, 3, INOUT, float> InOutMatrix1x3f;
+typedef Matrix<1, 3, TEMP, float> Matrix1x3f;
+typedef Matrix<1, 4, INPUT, float> InputMatrix1x4f;
+typedef Matrix<1, 4, OUTPUT, float> OutputMatrix1x4f;
+typedef Matrix<1, 4, INOUT, float> InOutMatrix1x4f;
+typedef Matrix<1, 4, TEMP, float> Matrix1x4f;
 
-typedef ShMatrix<2, 1, SH_INPUT, float> ShInputMatrix2x1f;
-typedef ShMatrix<2, 1, SH_OUTPUT, float> ShOutputMatrix2x1f;
-typedef ShMatrix<2, 1, SH_INOUT, float> ShInOutMatrix2x1f;
-typedef ShMatrix<2, 1, SH_TEMP, float> ShMatrix2x1f;
-typedef ShMatrix<2, 2, SH_INPUT, float> ShInputMatrix2x2f;
-typedef ShMatrix<2, 2, SH_OUTPUT, float> ShOutputMatrix2x2f;
-typedef ShMatrix<2, 2, SH_INOUT, float> ShInOutMatrix2x2f;
-typedef ShMatrix<2, 2, SH_TEMP, float> ShMatrix2x2f;
-typedef ShMatrix<2, 3, SH_INPUT, float> ShInputMatrix2x3f;
-typedef ShMatrix<2, 3, SH_OUTPUT, float> ShOutputMatrix2x3f;
-typedef ShMatrix<2, 3, SH_INOUT, float> ShInOutMatrix2x3f;
-typedef ShMatrix<2, 3, SH_TEMP, float> ShMatrix2x3f;
-typedef ShMatrix<2, 4, SH_INPUT, float> ShInputMatrix2x4f;
-typedef ShMatrix<2, 4, SH_OUTPUT, float> ShOutputMatrix2x4f;
-typedef ShMatrix<2, 4, SH_INOUT, float> ShInOutMatrix2x4f;
-typedef ShMatrix<2, 4, SH_TEMP, float> ShMatrix2x4f;
+typedef Matrix<2, 1, INPUT, float> InputMatrix2x1f;
+typedef Matrix<2, 1, OUTPUT, float> OutputMatrix2x1f;
+typedef Matrix<2, 1, INOUT, float> InOutMatrix2x1f;
+typedef Matrix<2, 1, TEMP, float> Matrix2x1f;
+typedef Matrix<2, 2, INPUT, float> InputMatrix2x2f;
+typedef Matrix<2, 2, OUTPUT, float> OutputMatrix2x2f;
+typedef Matrix<2, 2, INOUT, float> InOutMatrix2x2f;
+typedef Matrix<2, 2, TEMP, float> Matrix2x2f;
+typedef Matrix<2, 3, INPUT, float> InputMatrix2x3f;
+typedef Matrix<2, 3, OUTPUT, float> OutputMatrix2x3f;
+typedef Matrix<2, 3, INOUT, float> InOutMatrix2x3f;
+typedef Matrix<2, 3, TEMP, float> Matrix2x3f;
+typedef Matrix<2, 4, INPUT, float> InputMatrix2x4f;
+typedef Matrix<2, 4, OUTPUT, float> OutputMatrix2x4f;
+typedef Matrix<2, 4, INOUT, float> InOutMatrix2x4f;
+typedef Matrix<2, 4, TEMP, float> Matrix2x4f;
 
-typedef ShMatrix<3, 1, SH_INPUT, float> ShInputMatrix3x1f;
-typedef ShMatrix<3, 1, SH_OUTPUT, float> ShOutputMatrix3x1f;
-typedef ShMatrix<3, 1, SH_INOUT, float> ShInOutMatrix3x1f;
-typedef ShMatrix<3, 1, SH_TEMP, float> ShMatrix3x1f;
-typedef ShMatrix<3, 2, SH_INPUT, float> ShInputMatrix3x2f;
-typedef ShMatrix<3, 2, SH_OUTPUT, float> ShOutputMatrix3x2f;
-typedef ShMatrix<3, 2, SH_INOUT, float> ShInOutMatrix3x2f;
-typedef ShMatrix<3, 2, SH_TEMP, float> ShMatrix3x2f;
-typedef ShMatrix<3, 3, SH_INPUT, float> ShInputMatrix3x3f;
-typedef ShMatrix<3, 3, SH_OUTPUT, float> ShOutputMatrix3x3f;
-typedef ShMatrix<3, 3, SH_INOUT, float> ShInOutMatrix3x3f;
-typedef ShMatrix<3, 3, SH_TEMP, float> ShMatrix3x3f;
-typedef ShMatrix<3, 4, SH_INPUT, float> ShInputMatrix3x4f;
-typedef ShMatrix<3, 4, SH_OUTPUT, float> ShOutputMatrix3x4f;
-typedef ShMatrix<3, 4, SH_INOUT, float> ShInOutMatrix3x4f;
-typedef ShMatrix<3, 4, SH_TEMP, float> ShMatrix3x4f;
+typedef Matrix<3, 1, INPUT, float> InputMatrix3x1f;
+typedef Matrix<3, 1, OUTPUT, float> OutputMatrix3x1f;
+typedef Matrix<3, 1, INOUT, float> InOutMatrix3x1f;
+typedef Matrix<3, 1, TEMP, float> Matrix3x1f;
+typedef Matrix<3, 2, INPUT, float> InputMatrix3x2f;
+typedef Matrix<3, 2, OUTPUT, float> OutputMatrix3x2f;
+typedef Matrix<3, 2, INOUT, float> InOutMatrix3x2f;
+typedef Matrix<3, 2, TEMP, float> Matrix3x2f;
+typedef Matrix<3, 3, INPUT, float> InputMatrix3x3f;
+typedef Matrix<3, 3, OUTPUT, float> OutputMatrix3x3f;
+typedef Matrix<3, 3, INOUT, float> InOutMatrix3x3f;
+typedef Matrix<3, 3, TEMP, float> Matrix3x3f;
+typedef Matrix<3, 4, INPUT, float> InputMatrix3x4f;
+typedef Matrix<3, 4, OUTPUT, float> OutputMatrix3x4f;
+typedef Matrix<3, 4, INOUT, float> InOutMatrix3x4f;
+typedef Matrix<3, 4, TEMP, float> Matrix3x4f;
 
-typedef ShMatrix<4, 1, SH_INPUT, float> ShInputMatrix4x1f;
-typedef ShMatrix<4, 1, SH_OUTPUT, float> ShOutputMatrix4x1f;
-typedef ShMatrix<4, 1, SH_INOUT, float> ShInOutMatrix4x1f;
-typedef ShMatrix<4, 1, SH_TEMP, float> ShMatrix4x1f;
-typedef ShMatrix<4, 2, SH_INPUT, float> ShInputMatrix4x2f;
-typedef ShMatrix<4, 2, SH_OUTPUT, float> ShOutputMatrix4x2f;
-typedef ShMatrix<4, 2, SH_INOUT, float> ShInOutMatrix4x2f;
-typedef ShMatrix<4, 2, SH_TEMP, float> ShMatrix4x2f;
-typedef ShMatrix<4, 3, SH_INPUT, float> ShInputMatrix4x3f;
-typedef ShMatrix<4, 3, SH_OUTPUT, float> ShOutputMatrix4x3f;
-typedef ShMatrix<4, 3, SH_INOUT, float> ShInOutMatrix4x3f;
-typedef ShMatrix<4, 3, SH_TEMP, float> ShMatrix4x3f;
-typedef ShMatrix<4, 4, SH_INPUT, float> ShInputMatrix4x4f;
-typedef ShMatrix<4, 4, SH_OUTPUT, float> ShOutputMatrix4x4f;
-typedef ShMatrix<4, 4, SH_INOUT, float> ShInOutMatrix4x4f;
-typedef ShMatrix<4, 4, SH_TEMP, float> ShMatrix4x4f;
+typedef Matrix<4, 1, INPUT, float> InputMatrix4x1f;
+typedef Matrix<4, 1, OUTPUT, float> OutputMatrix4x1f;
+typedef Matrix<4, 1, INOUT, float> InOutMatrix4x1f;
+typedef Matrix<4, 1, TEMP, float> Matrix4x1f;
+typedef Matrix<4, 2, INPUT, float> InputMatrix4x2f;
+typedef Matrix<4, 2, OUTPUT, float> OutputMatrix4x2f;
+typedef Matrix<4, 2, INOUT, float> InOutMatrix4x2f;
+typedef Matrix<4, 2, TEMP, float> Matrix4x2f;
+typedef Matrix<4, 3, INPUT, float> InputMatrix4x3f;
+typedef Matrix<4, 3, OUTPUT, float> OutputMatrix4x3f;
+typedef Matrix<4, 3, INOUT, float> InOutMatrix4x3f;
+typedef Matrix<4, 3, TEMP, float> Matrix4x3f;
+typedef Matrix<4, 4, INPUT, float> InputMatrix4x4f;
+typedef Matrix<4, 4, OUTPUT, float> OutputMatrix4x4f;
+typedef Matrix<4, 4, INOUT, float> InOutMatrix4x4f;
+typedef Matrix<4, 4, TEMP, float> Matrix4x4f;
 
 }
 
-#include "ShMatrixImpl.hpp"
+#include "MatrixImpl.hpp"
 
 #endif
 

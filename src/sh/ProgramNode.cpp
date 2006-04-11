@@ -17,46 +17,46 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#include "ShProgramNode.hpp"
+#include "ProgramNode.hpp"
 #include <cassert>
 #include <algorithm>
 #include <sstream>
 #include <fstream>
-#include "ShBackend.hpp"
-#include "ShContext.hpp"
-#include "ShDebug.hpp"
-#include "ShTextureNode.hpp"
-#include "ShPaletteNode.hpp"
-#include "ShChannelNode.hpp"
-#include "ShCtrlGraph.hpp"
-#include "ShError.hpp"
+#include "Backend.hpp"
+#include "Context.hpp"
+#include "Debug.hpp"
+#include "TextureNode.hpp"
+#include "PaletteNode.hpp"
+#include "ChannelNode.hpp"
+#include "CtrlGraph.hpp"
+#include "Error.hpp"
 
 namespace {
 
 using namespace SH;
 
-std::string describe(const ShProgramNode::VarList &varlist)
+std::string describe(const ProgramNode::VarList &varlist)
 {
   std::ostringstream os;
-  for (ShProgramNode::VarList::const_iterator I = varlist.begin(); I != varlist.end(); ++I) {
+  for (ProgramNode::VarList::const_iterator I = varlist.begin(); I != varlist.end(); ++I) {
     os << "  " << (*I)->nameOfType() << " " << (*I)->name() << std::endl;
   }
   return os.str();
 }
 
-std::string describe(const ShProgramNode::TexList &texlist)
+std::string describe(const ProgramNode::TexList &texlist)
 {
   std::ostringstream os;
-  for (ShProgramNode::TexList::const_iterator I = texlist.begin(); I != texlist.end(); ++I) {
+  for (ProgramNode::TexList::const_iterator I = texlist.begin(); I != texlist.end(); ++I) {
     os << "  " << (*I)->nameOfType() << " " << (*I)->name() << std::endl;
   }
   return os.str();
 }
 
-std::string describe(const ShProgramNode::ChannelList& chanlist)
+std::string describe(const ProgramNode::ChannelList& chanlist)
 {
   std::ostringstream os;
-  for (ShProgramNode::ChannelList::const_iterator I = chanlist.begin(); I != chanlist.end(); ++I) {
+  for (ProgramNode::ChannelList::const_iterator I = chanlist.begin(); I != chanlist.end(); ++I) {
     os << "  " << (*I)->nameOfType() << " " << (*I)->name() << std::endl;
   }
   return os.str();
@@ -66,68 +66,68 @@ std::string describe(const ShProgramNode::ChannelList& chanlist)
 
 namespace SH {
 
-ShProgramNode::ShProgramNode(const std::string& target)
+ProgramNode::ProgramNode(const std::string& target)
   : m_backend_name(""), m_target(target), m_finished(false),
     m_assigned_var(0)
 {
 }
 
-ShProgramNode::~ShProgramNode()
+ProgramNode::~ProgramNode()
 {
 }
 
-void ShProgramNode::compile(const ShPointer<ShBackend>& backend)
+void ProgramNode::compile(const Pointer<Backend>& backend)
 {
-  if (m_target.empty()) shError(ShException("Empty ShProgram target"));
+  if (m_target.empty()) error(Exception("Empty Program target"));
   compile(m_target, backend);
 }
 
-void ShProgramNode::compile(const std::string& target, const ShPointer<ShBackend>& backend)
+void ProgramNode::compile(const std::string& target, const Pointer<Backend>& backend)
 {
   if (!backend) return;
-  if (target.empty()) shError(ShException("Empty ShProgram target"));
+  if (target.empty()) error(Exception("Empty Program target"));
   if (!ctrlGraph || !ctrlGraph->entry()) {
-    shError(ShException("Impossible to compile an empty ShProgram."));
+    error(Exception("Impossible to compile an empty Program."));
   } 
 
-  ShContext::current()->enter(this);
-  ShBackendCodePtr code = 0;
+  Context::current()->enter(this);
+  BackendCodePtr code = 0;
   try {
     collectDecls();
     collectVariables();
     code = backend->generate_code(target, this);
   } catch (...) {
-    ShContext::current()->exit();
+    Context::current()->exit();
     throw;
   }
-  ShContext::current()->exit();
+  Context::current()->exit();
   if (code) {
     m_code[std::make_pair(target, backend)] = code;
     m_backend_name = backend->name();
   }
 }
 
-bool ShProgramNode::is_compiled() const
+bool ProgramNode::is_compiled() const
 {
-  if (m_target.empty()) shError( ShException( "Invalid ShProgram target" ) );
+  if (m_target.empty()) error( Exception( "Invalid Program target" ) );
 
-  return is_compiled(m_target, ShBackend::get_backend(m_target));
+  return is_compiled(m_target, Backend::get_backend(m_target));
 }
 
-bool ShProgramNode::is_compiled(const std::string& target) const
+bool ProgramNode::is_compiled(const std::string& target) const
 {
-  if (target.empty()) shError( ShException( "Invalid compilation target" ) );
+  if (target.empty()) error( Exception( "Invalid compilation target" ) );
 
-  return is_compiled(target, ShBackend::get_backend(target));
+  return is_compiled(target, Backend::get_backend(target));
 }
 
-bool ShProgramNode::is_compiled(const std::string& target, const ShPointer<ShBackend>& backend) const
+bool ProgramNode::is_compiled(const std::string& target, const Pointer<Backend>& backend) const
 {
   // Try for a perfect match first
   if (m_code.find(std::make_pair(target, backend)) != m_code.end()) return true;
 
   // Look for a derived target
-  std::list<std::string> derived_targets = ShBackend::derived_targets(target);
+  std::list<std::string> derived_targets = Backend::derived_targets(target);
   for (std::list<std::string>::const_iterator i = derived_targets.begin(); 
        i != derived_targets.end(); i++) {
     if (m_code.find(std::make_pair(*i, backend)) != m_code.end()) return true;
@@ -136,19 +136,19 @@ bool ShProgramNode::is_compiled(const std::string& target, const ShPointer<ShBac
   return false;
 }
 
-ShPointer<ShBackendCode> ShProgramNode::code()
+Pointer<BackendCode> ProgramNode::code()
 {
-  return code(ShBackend::get_backend(m_target));
+  return code(Backend::get_backend(m_target));
 }
 
-ShPointer<ShBackendCode> ShProgramNode::code(const ShPointer<ShBackend>& backend)
+Pointer<BackendCode> ProgramNode::code(const Pointer<Backend>& backend)
 {
-  if (m_target.empty()) shError( ShException( "Invalid ShProgram target" ) );
+  if (m_target.empty()) error( Exception( "Invalid Program target" ) );
 
   return code(m_target, backend);
 }
 
-ShPointer<ShBackendCode> ShProgramNode::code(const std::string& target, const ShPointer<ShBackend>& backend)
+Pointer<BackendCode> ProgramNode::code(const std::string& target, const Pointer<Backend>& backend)
 {
   if (!backend) return 0;
 
@@ -157,7 +157,7 @@ ShPointer<ShBackendCode> ShProgramNode::code(const std::string& target, const Sh
   return m_code[std::make_pair(target, backend)];
 }
 
-std::string ShProgramNode::describe_interface() const
+std::string ProgramNode::describe_interface() const
 {
   std::ostringstream os;
   os << "Interface for ";
@@ -182,7 +182,7 @@ std::string ShProgramNode::describe_interface() const
   return os.str();
 }
 
-std::string ShProgramNode::describe_vars() const
+std::string ProgramNode::describe_vars() const
 {
   std::ostringstream os;
   os << describe_interface(); 
@@ -193,7 +193,7 @@ std::string ShProgramNode::describe_vars() const
   return os.str();
 }
 
-std::string ShProgramNode::describe_decls() const
+std::string ProgramNode::describe_decls() const
 {
   std::ostringstream os;
   os << "Temp Declarations:" << std::endl;
@@ -203,7 +203,7 @@ std::string ShProgramNode::describe_decls() const
   return os.str();
 }
 
-std::string ShProgramNode::describe_bindings()
+std::string ProgramNode::describe_bindings()
 {
   std::ostringstream os;
   os << "Bindings for ";
@@ -218,7 +218,7 @@ std::string ShProgramNode::describe_bindings()
   return os.str();
 }
 
-std::string ShProgramNode::describe_bindings(const std::string& target)
+std::string ProgramNode::describe_bindings(const std::string& target)
 {
   std::ostringstream os;
   os << "Bindings for ";
@@ -229,17 +229,17 @@ std::string ShProgramNode::describe_bindings(const std::string& target)
   }
   os << std::endl;
   os << std::endl;
-  ShBackendPtr backend = ShBackend::get_backend(target);
+  BackendPtr backend = Backend::get_backend(target);
   code(target, backend)->describe_bindings(os);
   return os.str();
 }
 
-void ShProgramNode::dump(std::string filename) const
+void ProgramNode::dump(std::string filename) const
 {
-  SH_DEBUG_PRINT("Dumping " << filename);
+  DEBUG_PRINT("Dumping " << filename);
   std::string varfile = filename + ".vars";
   std::ofstream varout(varfile.c_str());
-  varout << "ShProgram "; 
+  varout << "Program "; 
   varout << describe_vars(); 
   varout << describe_decls();
 
@@ -251,14 +251,14 @@ void ShProgramNode::dump(std::string filename) const
   system(cmd.c_str());
 }
 
-void ShProgramNode::updateUniform(const ShVariableNodePtr& uniform)
+void ProgramNode::updateUniform(const VariableNodePtr& uniform)
 {
   for (CodeMap::iterator I = m_code.begin(); I != m_code.end(); ++I) {
     I->second->updateUniform(uniform);
   }
 }
 
-void ShProgramNode::collectVariables()
+void ProgramNode::collectVariables()
 {
   temps.clear();
   uniforms.clear();
@@ -274,7 +274,7 @@ void ShProgramNode::collectVariables()
   }
 }
 
-void ShProgramNode::collectDecls()
+void ProgramNode::collectDecls()
 {
   tempDecls.clear();
   // @todo range - use collectVariables temps result
@@ -289,35 +289,35 @@ void ShProgramNode::collectDecls()
   }
 }
 
-bool ShProgramNode::hasDecl(const ShVariableNodePtr& node) const
+bool ProgramNode::hasDecl(const VariableNodePtr& node) const
 {
   return tempDecls.find(node) != tempDecls.end();
 }
 
-void ShProgramNode::addDecl(const ShVariableNodePtr& node, const ShCtrlGraphNodePtr& cfgNode)
+void ProgramNode::addDecl(const VariableNodePtr& node, const CtrlGraphNodePtr& cfgNode)
 {
   tempDecls.insert(node);
-  SH_DEBUG_ASSERT(ctrlGraph->entry());
+  DEBUG_ASSERT(ctrlGraph->entry());
   cfgNode->addDecl(node);
 }
 
-void ShProgramNode::addDecl(const ShVariableNodePtr& node)
+void ProgramNode::addDecl(const VariableNodePtr& node)
 {
   addDecl(node, ctrlGraph->entry());
 }
 
-void ShProgramNode::collect_node_decls(const ShCtrlGraphNodePtr& node)
+void ProgramNode::collect_node_decls(const CtrlGraphNodePtr& node)
 {
   if (node->marked()) return;
   node->mark();
   tempDecls.insert(node->decl_begin(), node->decl_end());
   /* @todo range
-  for(ShCtrlGraphNode::DeclIt I = node->decl_begin(); I != node->decl_end(); ++I) {
-    SH_DEBUG_PRINT("  collectDecls - " << (*I)->name());
+  for(CtrlGraphNode::DeclIt I = node->decl_begin(); I != node->decl_end(); ++I) {
+    DEBUG_PRINT("  collectDecls - " << (*I)->name());
   }
   */
 
-  for (std::vector<ShCtrlGraphBranch>::const_iterator J = node->successors.begin();
+  for (std::vector<CtrlGraphBranch>::const_iterator J = node->successors.begin();
        J != node->successors.end(); ++J) {
     collect_node_decls(J->node);
   }
@@ -325,13 +325,13 @@ void ShProgramNode::collect_node_decls(const ShCtrlGraphNodePtr& node)
   if (node->follower) collect_node_decls(node->follower);
 }
 
-void ShProgramNode::collect_node_vars(const ShCtrlGraphNodePtr& node)
+void ProgramNode::collect_node_vars(const CtrlGraphNodePtr& node)
 {
   if (node->marked()) return;
   node->mark();
 
   if (node->block) {
-    for (ShBasicBlock::ShStmtList::const_iterator I = node->block->begin();
+    for (BasicBlock::StmtList::const_iterator I = node->block->begin();
          I != node->block->end(); ++I) {
       
       collect_var(I->dest.node());
@@ -341,7 +341,7 @@ void ShProgramNode::collect_node_vars(const ShCtrlGraphNodePtr& node)
     }
   }
 
-  for (std::vector<ShCtrlGraphBranch>::const_iterator J = node->successors.begin();
+  for (std::vector<CtrlGraphBranch>::const_iterator J = node->successors.begin();
        J != node->successors.end(); ++J) {
     collect_node_vars(J->node);
   }
@@ -349,13 +349,13 @@ void ShProgramNode::collect_node_vars(const ShCtrlGraphNodePtr& node)
   if (node->follower) collect_node_vars(node->follower);
 }
 
-void ShProgramNode::collect_dependent_uniform(const ShVariableNodePtr& var)
+void ProgramNode::collect_dependent_uniform(const VariableNodePtr& var)
 {
   all_uniforms.push_back(var);
 
   // Get all of the recursively dependent uniforms
   if (var->evaluator()) {
-    for (ShProgramNode::VarList::const_iterator I = var->evaluator()->uniforms.begin();
+    for (ProgramNode::VarList::const_iterator I = var->evaluator()->uniforms.begin();
          I != var->evaluator()->uniforms.end(); ++I) {
       if (std::find(all_uniforms.begin(), all_uniforms.end(), *I) == all_uniforms.end()) {
         collect_dependent_uniform(*I);
@@ -364,7 +364,7 @@ void ShProgramNode::collect_dependent_uniform(const ShVariableNodePtr& var)
   }
 }
 
-void ShProgramNode::collect_var(const ShVariableNodePtr& var)
+void ProgramNode::collect_var(const VariableNodePtr& var)
 {
   if (!var) return;
   if (var->uniform()) {
@@ -373,45 +373,45 @@ void ShProgramNode::collect_var(const ShVariableNodePtr& var)
       collect_dependent_uniform(var);
     }
   } else switch (var->kind()) {
-  case SH_INPUT:
-  case SH_OUTPUT:
-  case SH_INOUT:
-    // Taken care of by ShVariableNode constructor
+  case INPUT:
+  case OUTPUT:
+  case INOUT:
+    // Taken care of by VariableNode constructor
     break;
-  case SH_TEMP:
+  case TEMP:
     if (std::find(temps.begin(), temps.end(), var) == temps.end()) {
       temps.push_back(var);
     }
     break;
-  case SH_CONST:
+  case CONST:
     if (std::find(constants.begin(), constants.end(), var) == constants.end()) {
       constants.push_back(var);
     }
     break;
-  case SH_TEXTURE:
+  case TEXTURE:
     if (std::find(textures.begin(), textures.end(),
-                  shref_dynamic_cast<ShTextureNode>(var)) == textures.end()) {
-      textures.push_back(shref_dynamic_cast<ShTextureNode>(var));
+                  shref_dynamic_cast<TextureNode>(var)) == textures.end()) {
+      textures.push_back(shref_dynamic_cast<TextureNode>(var));
     }    
     break;
-  case SH_STREAM:
+  case STREAM:
     if (std::find(channels.begin(), channels.end(),
-                  shref_dynamic_cast<ShChannelNode>(var)) == channels.end()) {
-      channels.push_back(shref_dynamic_cast<ShChannelNode>(var));
+                  shref_dynamic_cast<ChannelNode>(var)) == channels.end()) {
+      channels.push_back(shref_dynamic_cast<ChannelNode>(var));
     }
-  case SH_PALETTE:
+  case PALETTE:
     if (std::find(palettes.begin(), palettes.end(),
-                  shref_dynamic_cast<ShPaletteNode>(var)) == palettes.end()) {
-      palettes.push_back(shref_dynamic_cast<ShPaletteNode>(var));
+                  shref_dynamic_cast<PaletteNode>(var)) == palettes.end()) {
+      palettes.push_back(shref_dynamic_cast<PaletteNode>(var));
     }
     break;
   default:
-    SH_DEBUG_ASSERT(0);
+    DEBUG_ASSERT(0);
   }
 }
 
-std::ostream& ShProgramNode::print(std::ostream& out,
-                                   const ShProgramNode::VarList& varList)
+std::ostream& ProgramNode::print(std::ostream& out,
+                                   const ProgramNode::VarList& varList)
 {
   out << "(";
   for (VarList::const_iterator it = varList.begin(); it != varList.end(); ++it) {
@@ -422,15 +422,15 @@ std::ostream& ShProgramNode::print(std::ostream& out,
   return out;
 }
 
-ShPointer<ShProgramNode> ShProgramNode::clone() const
+Pointer<ProgramNode> ProgramNode::clone() const
 {
-  ShCtrlGraphNodePtr head, tail;
+  CtrlGraphNodePtr head, tail;
   ctrlGraph->copy(head, tail);
 
-  ShProgramNodePtr result = new ShProgramNode(target());
-  result->ShInfoHolder::operator=(*this);
-  result->ShMeta::operator=(*this);
-  result->ctrlGraph = new ShCtrlGraph(head, tail);
+  ProgramNodePtr result = new ProgramNode(target());
+  result->InfoHolder::operator=(*this);
+  result->Meta::operator=(*this);
+  result->ctrlGraph = new CtrlGraph(head, tail);
   result->inputs = inputs;
   result->outputs = outputs;
   result->collectDecls();
@@ -438,7 +438,7 @@ ShPointer<ShProgramNode> ShProgramNode::clone() const
   return result;
 }
 
-void ShProgramNode::finish()
+void ProgramNode::finish()
 {
   m_finished = true;
   if (m_assigned_var) {

@@ -18,80 +18,80 @@
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 #include <iostream>
-#include "ShBlock.hpp"
-#include "ShStatement.hpp"
-#include "ShBasicBlock.hpp"
+#include "Block.hpp"
+#include "Statement.hpp"
+#include "BasicBlock.hpp"
 
 namespace SH {
 
-ShBlock::~ShBlock()
+Block::~Block()
 {
 }
 
-// ShBlockList stuff
+// BlockList stuff
 
-ShBlockList::ShBlockList(bool isArgument)
+BlockList::BlockList(bool isArgument)
   : m_isArgument(isArgument)
 {
 }
 
-bool ShBlockList::isArgument()
+bool BlockList::isArgument()
 {
   return m_isArgument;
 }
 
-void ShBlockList::addStatement(const ShStatement& statement)
+void BlockList::addStatement(const Statement& statement)
 {
-  ShBasicBlockPtr basicBlock;
+  BasicBlockPtr basicBlock;
   if (!m_blocks.empty()) {
-    basicBlock = shref_dynamic_cast<ShBasicBlock>(m_blocks.back());
+    basicBlock = shref_dynamic_cast<BasicBlock>(m_blocks.back());
     if (!basicBlock) {
-      basicBlock = new ShBasicBlock();
-      m_blocks.push_back(ShBlockPtr(basicBlock));
+      basicBlock = new BasicBlock();
+      m_blocks.push_back(BlockPtr(basicBlock));
     }
   } else {
-    basicBlock = new ShBasicBlock();
-    m_blocks.push_back(ShBlockPtr(basicBlock));
+    basicBlock = new BasicBlock();
+    m_blocks.push_back(BlockPtr(basicBlock));
   }
   basicBlock->addStatement(statement);
 }
 
-void ShBlockList::addBlock(const ShBlockPtr& statement)
+void BlockList::addBlock(const BlockPtr& statement)
 {
   m_blocks.push_back(statement);
 }
 
-ShBlockPtr ShBlockList::getFront() const
+BlockPtr BlockList::getFront() const
 {
   if (m_blocks.empty()) return 0;
   
   return m_blocks.front();
 }
 
-ShBlockPtr ShBlockList::removeFront()
+BlockPtr BlockList::removeFront()
 {
   if (m_blocks.empty()) return 0;
   
-  ShBlockPtr front = m_blocks.front();
+  BlockPtr front = m_blocks.front();
   m_blocks.erase(m_blocks.begin());
   return front;
 }
 
-bool ShBlockList::empty() const
+bool BlockList::empty() const
 {
   return m_blocks.empty();
 }
 
-std::ostream& ShBlockList::print(std::ostream& out, int indent) const
+std::ostream& BlockList::print(std::ostream& out, int indent) const
 {
-  for (std::vector<ShBlockPtr>::const_iterator I = m_blocks.begin();
+  for (std::vector<BlockPtr>::const_iterator I = m_blocks.begin();
        I != m_blocks.end(); ++I) {
     (*I)->print(out, indent);
   }
   return out;
 }
 
-std::ostream& operator<<(std::ostream& out, const ShBlockList& l)
+std::ostream& operator<<(std::ostream& out, const BlockList& l)
 {
   l.print(out, 0);
   return out;

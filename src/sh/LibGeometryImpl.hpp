@@ -20,136 +20,136 @@
 #ifndef SHLIBGEOMETRYIMPL_HPP
 #define SHLIBGEOMETRYIMPL_HPP
 
-#include "ShLibClamp.hpp"
-#include "ShAttrib.hpp"
-#include "ShInstructions.hpp"
+#include "LibClamp.hpp"
+#include "Attrib.hpp"
+#include "Instructions.hpp"
 
 namespace SH {
 
 template<typename T1, typename T2>
-ShGeneric<3, CT1T2> cross(const ShGeneric<3, T1>& left, const ShGeneric<3, T2>& right)
+Generic<3, CT1T2> cross(const Generic<3, T1>& left, const Generic<3, T2>& right)
 {
-  ShAttrib<3, SH_TEMP, CT1T2> t;
+  Attrib<3, TEMP, CT1T2> t;
   shXPD(t, left, right);
   return t;
 }
 
 template<typename T1, typename T2>
 inline
-ShGeneric<3, CT1T2> operator^(const ShGeneric<3, T1>& left, const ShGeneric<3, T2>& right)
+Generic<3, CT1T2> operator^(const Generic<3, T1>& left, const Generic<3, T2>& right)
 {
   return cross(left, right);
 }
 
 template<int N, typename T>
-ShGeneric<N, T> normalize(const ShGeneric<N, T>& var)
+Generic<N, T> normalize(const Generic<N, T>& var)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  Attrib<N, TEMP, T> t;
   shNORM(t, var);
   return t;
 }
 
 template<int N1, int N2, typename T1, typename T2>
-ShGeneric<1, CT1T2> dot(const ShGeneric<N1, T1>& left, const ShGeneric<N2, T2>& right)
+Generic<1, CT1T2> dot(const Generic<N1, T1>& left, const Generic<N2, T2>& right)
 {
-  ShAttrib<1, SH_TEMP, CT1T2> t;
+  Attrib<1, TEMP, CT1T2> t;
   if (N1 == N2) {
     shDOT(t, left, right);
   } else {
-    shError(ShException("The two vectors are not of the same size."));
+    error(Exception("The two vectors are not of the same size."));
   }
   return t;
 }
 
 template<int N, typename T1, typename T2>
 inline
-ShGeneric<1,  CT1T2> operator|(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right)
+Generic<1,  CT1T2> operator|(const Generic<N, T1>& left, const Generic<N, T2>& right)
 {
   return dot(left, right);
 }
-SH_SHLIB_CONST_N_OP_RETSIZE_BOTH(dot, 1);
+SHLIB_CONST_N_OP_RETSIZE_BOTH(dot, 1);
 
 template<int N, typename T1, typename T2>
-ShGeneric<N, CT1T2> reflect(const ShGeneric<N, T1>& a, const ShGeneric<N, T2>& b)
+Generic<N, CT1T2> reflect(const Generic<N, T1>& a, const Generic<N, T2>& b)
 {
-  ShGeneric<N, T2> bn = normalize(b);
+  Generic<N, T2> bn = normalize(b);
   return 2 * dot(a, bn) * bn - a;
 }
 
 template<int N, typename T1, typename T2, typename T3>
-ShGeneric<N, CT1T2T3> refract(const ShGeneric<N, T1>& v, const ShGeneric<N, T2>& n,
-                        const ShGeneric<1, T3>& eta)
+Generic<N, CT1T2T3> refract(const Generic<N, T1>& v, const Generic<N, T2>& n,
+                        const Generic<1, T3>& eta)
 {
-  ShGeneric<N, T1> vn = normalize(v);
-  ShGeneric<N, T2> nn = normalize(n);
-  ShGeneric<1, CT1T2T3> c = (vn|nn);
+  Generic<N, T1> vn = normalize(v);
+  Generic<N, T2> nn = normalize(n);
+  Generic<1, CT1T2T3> c = (vn|nn);
 
-  ShGeneric<1, T3> theta = rcp(eta);
+  Generic<1, T3> theta = rcp(eta);
 
-  ShGeneric<1, CT1T2T3> k = c*c - ShDataTypeConstant<CT1T2T3, SH_HOST>::One;
-  k = ShDataTypeConstant<CT1T2T3, SH_HOST>::One + theta*theta*k;
-  k = clamp(k, ShDataTypeConstant<CT1T2T3, SH_HOST>::Zero, ShDataTypeConstant<CT1T2T3, SH_HOST>::One); 
-  ShGeneric<1, CT1T2T3> a = -theta;
-  ShGeneric<1, CT1T2T3> b = theta*c - sqrt(k);
+  Generic<1, CT1T2T3> k = c*c - DataTypeConstant<CT1T2T3, HOST>::One;
+  k = DataTypeConstant<CT1T2T3, HOST>::One + theta*theta*k;
+  k = clamp(k, DataTypeConstant<CT1T2T3, HOST>::Zero, DataTypeConstant<CT1T2T3, HOST>::One); 
+  Generic<1, CT1T2T3> a = -theta;
+  Generic<1, CT1T2T3> b = theta*c - sqrt(k);
   return (a*vn + b*nn);
 }
 
 template<int N, typename T1, typename T2>
 inline
-ShGeneric<N, CT1T2> faceforward(const ShGeneric<N, T1>& a, const ShGeneric<N, T2>& b)
+Generic<N, CT1T2> faceforward(const Generic<N, T1>& a, const Generic<N, T2>& b)
 {
   return (2 * (dot(a, b) > 0) - 1) * b;
 }
 
 template<typename T1, typename T2, typename T3>
-ShGeneric<4, CT1T2T3> lit(const ShGeneric<1, T1>& a,
-                          const ShGeneric<1, T2>& b,
-                          const ShGeneric<1, T3>& c)
+Generic<4, CT1T2T3> lit(const Generic<1, T1>& a,
+                          const Generic<1, T2>& b,
+                          const Generic<1, T3>& c)
 {
-  ShAttrib<4, SH_TEMP, CT1T2T3> i;
-  ShAttrib<4, SH_TEMP, CT1T2T3> r;
+  Attrib<4, TEMP, CT1T2T3> i;
+  Attrib<4, TEMP, CT1T2T3> r;
   shLIT(r, join(a, b, c, c));
   return r;
 }
 
 template<int N, typename T>
 inline
-ShGeneric<1, T> distance(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b)
+Generic<1, T> distance(const Generic<N, T>& a, const Generic<N, T>& b)
 {
   return length(a-b);
 }
 
 template<int N, typename T>
 inline
-ShGeneric<1, T> distance_1(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b)
+Generic<1, T> distance_1(const Generic<N, T>& a, const Generic<N, T>& b)
 {
   return length_1(a-b);
 }
 
 template<int N, typename T>
 inline
-ShGeneric<1, T> distance_inf(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b)
+Generic<1, T> distance_inf(const Generic<N, T>& a, const Generic<N, T>& b)
 {
   return length_inf(a-b);
 }
 
 template<int N, typename T>
 inline
-ShGeneric<1, T> length(const ShGeneric<N, T>& a)
+Generic<1, T> length(const Generic<N, T>& a)
 {
   return sqrt(dot(a, a));
 }
 
 template<int N, typename T>
 inline
-ShGeneric<1, T> length_1(const ShGeneric<N, T>& a)
+Generic<1, T> length_1(const Generic<N, T>& a)
 {
   return sum(abs(a));
 }
 
 template<int N, typename T>
 inline
-ShGeneric<1, T> length_inf(const ShGeneric<N, T>& a)
+Generic<1, T> length_inf(const Generic<N, T>& a)
 {
   return max(abs(a));
 }

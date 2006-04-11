@@ -21,11 +21,11 @@
 #define SHUTIL_KERNELPOST_HPP 
 
 #include <string>
-#include "sh/ShMatrix.hpp"
-#include "sh/ShTexture.hpp"
-#include "sh/ShProgram.hpp"
+#include "sh/Matrix.hpp"
+#include "sh/Texture.hpp"
+#include "sh/Program.hpp"
 
-/** \file ShKernelPost.hpp
+/** \file KernelPost.hpp
  * These are postprocessing kernels.  Several postprocessing kernels can be
  * connected together to create a more complicated postprocessing kernel.
  *
@@ -38,25 +38,25 @@ using namespace SH;
 
 /** screen space Halftoning/Hatching in each color channel using tex as a threshold image
  * IN(0) T result 
- * IN(1) ShTexcoord2f texcoord
+ * IN(1) Texcoord2f texcoord
  *
  * OUT(0) T result            - output result 
  */
 template<typename T>
-static ShProgram shHalftone(const ShBaseTexture2D<T> &tex);
+static Program halftone(const BaseTexture2D<T> &tex);
 
 /** screen space noise 
- * IN(0) ShAttrib1f noise_scale - scaling on cellnoise
+ * IN(0) Attrib1f noise_scale - scaling on cellnoise
  * IN(1) T result 
- * IN(2) ShAttrib<N> texcoord  
+ * IN(2) Attrib<N> texcoord  
  *
  * OUT(0) T result            - output result 
  */
 template<int N, typename T>
-static ShProgram shNoisify(bool useTexture = false);
+static Program noisify(bool useTexture = false);
 
 }
 
-#include "ShKernelPostImpl.hpp"
+#include "KernelPostImpl.hpp"
 
 #endif

@@ -17,15 +17,15 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#include "ShContext.hpp"
-#include "ShDebug.hpp"
-#include "ShTypeInfo.hpp"
-#include "ShVariant.hpp"
-#include "ShVariantCast.hpp"
-#include "ShCastManager.hpp"
+#include "Context.hpp"
+#include "Debug.hpp"
+#include "TypeInfo.hpp"
+#include "Variant.hpp"
+#include "VariantCast.hpp"
+#include "CastManager.hpp"
 
 namespace {
-struct ShCastMgrEdgeWeigher
+struct CastMgrEdgeWeigher
 {
   typedef int WeightType;
   // larger than any useable cast sequence length
@@ -33,10 +33,10 @@ struct ShCastMgrEdgeWeigher
   static const int LARGE = 10000000; 
   static const int ZERO = 0;
 
-  ShCastMgrEdgeWeigher(bool needAuto = false)
+  CastMgrEdgeWeigher(bool needAuto = false)
     : m_needAuto(needAuto) {}
 
-  int operator()(const SH::ShCastMgrEdge &e) const
+  int operator()(const SH::CastMgrEdge &e) const
   {
     if(m_needAuto && !e.m_auto) return LARGE;
     return 1;
@@ -48,18 +48,18 @@ struct ShCastMgrEdgeWeigher
 
 namespace SH {
 
-ShCastManager* ShCastManager::m_instance = 0;
+CastManager* CastManager::m_instance = 0;
 
-ShCastMgrEdge::ShCastMgrEdge(const ShVariantCast* caster, bool automatic)
+CastMgrEdge::CastMgrEdge(const VariantCast* caster, bool automatic)
   : m_caster(caster), m_auto(automatic)
 {
 }
 
-ShCastMgrEdge::ShCastMgrEdge(const ShCastMgrEdge &other)
+CastMgrEdge::CastMgrEdge(const CastMgrEdge &other)
   : m_caster(other.m_caster), m_auto(other.m_auto)
 {}
 
-std::ostream& ShCastMgrEdge::graphvizDump(std::ostream& out) const
+std::ostream& CastMgrEdge::graphvizDump(std::ostream& out) const
 {
   if(m_auto) out << "[style=\"bold\" color=\"red\"";
   else out << "[style=\"dashed\"";
@@ -68,60 +68,60 @@ std::ostream& ShCastMgrEdge::graphvizDump(std::ostream& out) const
   return out;
 }
 
-ShCastMgrVertex::ShCastMgrVertex(ShValueType valueType, ShDataType dataType)
+CastMgrVertex::CastMgrVertex(ValueType valueType, DataType dataType)
   : m_valueType(valueType), m_dataType(dataType)
 {}
 
-ShCastMgrVertex::ShCastMgrVertex(const ShCastMgrVertex &other)
+CastMgrVertex::CastMgrVertex(const CastMgrVertex &other)
   : m_valueType(other.m_valueType), m_dataType(other.m_dataType)
 {}
 
-ShCastMgrGraph::ShCastMgrGraph() 
+CastMgrGraph::CastMgrGraph() 
 {
 }
 
-ShCastMgrVertex* ShCastMgrGraph::addVertex(ShValueType valueType, ShDataType dataType)
+CastMgrVertex* CastMgrGraph::addVertex(ValueType valueType, DataType dataType)
 {
   if(!m_vert(valueType, dataType)) {
-    m_vert(valueType, dataType) = new ShCastMgrVertex(valueType, dataType);
-    ShGraph<ShCastMgrGraphType>::addVertex(m_vert(valueType, dataType));
+    m_vert(valueType, dataType) = new CastMgrVertex(valueType, dataType);
+    Graph<CastMgrGraphType>::addVertex(m_vert(valueType, dataType));
   }
   return m_vert(valueType, dataType);
 }
 
-void ShCastMgrGraph::addEdge( ShCastMgrEdge *edge)
+void CastMgrGraph::addEdge( CastMgrEdge *edge)
 {
-  ShValueType src, dest;
-  ShDataType srcdt, destdt;
+  ValueType src, dest;
+  DataType srcdt, destdt;
   edge->m_caster->getCastTypes(dest, destdt, src, srcdt);
 
   edge->start = addVertex(src, srcdt); 
   edge->end = addVertex(dest, destdt); 
-  ShGraph<ShCastMgrGraphType>::addEdge(edge);
+  Graph<CastMgrGraphType>::addEdge(edge);
 }
 
-std::ostream& ShCastMgrVertex::graphvizDump(std::ostream& out) const
+std::ostream& CastMgrVertex::graphvizDump(std::ostream& out) const
 {
-  out << "[label=\"" << shValueTypeName(m_valueType) << ", " 
+  out << "[label=\"" << valueTypeName(m_valueType) << ", " 
       << dataTypeName[m_dataType] << "\"]";
   return out;
 }
 
-void ShCastManager::addCast(const ShVariantCast* caster, bool automatic) {
-  m_casts.addEdge(new ShCastMgrEdge(caster, automatic));
+void CastManager::addCast(const VariantCast* caster, bool automatic) {
+  m_casts.addEdge(new CastMgrEdge(caster, automatic));
 }
 
-void ShCastManager::init() 
+void CastManager::init() 
 {
   // for m_castStep, m_castDist
-  ShCastMgrEdgeWeigher cast_weigher(false);
-  ShCastMgrEdgeWeigher auto_weigher(true);
+  CastMgrEdgeWeigher cast_weigher(false);
+  CastMgrEdgeWeigher auto_weigher(true);
 
-  ShCastMgrGraph::FirstStepMap step;
-  ShCastMgrGraph::FirstStepMap::iterator S;
+  CastMgrGraph::FirstStepMap step;
+  CastMgrGraph::FirstStepMap::iterator S;
 
-  ShCastMgrGraph::VertexPairMap<int> temp;
-  ShCastMgrGraph::VertexPairMap<int>::iterator T;
+  CastMgrGraph::VertexPairMap<int> temp;
+  CastMgrGraph::VertexPairMap<int>::iterator T;
 
   // @todo type check graphs for errors
 
@@ -129,42 +129,42 @@ void ShCastManager::init()
 
   m_casts.floydWarshall(cast_weigher, temp, &step); 
   for(S = step.begin(); S != step.end(); ++S) {
-    ShCastMgrVertex &src = *(S->first.first);
-    ShCastMgrVertex &dest = *(S->first.second);
+    CastMgrVertex &src = *(S->first.first);
+    CastMgrVertex &dest = *(S->first.second);
     m_castStep(dest.m_valueType, dest.m_dataType, 
                src.m_valueType, src.m_dataType) = S->second->m_caster;
   }
 
   m_casts.floydWarshall(auto_weigher, temp, &step); 
   for(T = temp.begin(); T != temp.end(); ++T) {
-    ShCastMgrVertex &src = *(T->first.first);
-    ShCastMgrVertex &dest = *(T->first.second);
-    if((src.m_dataType != SH_HOST) || (dest.m_dataType != SH_HOST)) continue;
+    CastMgrVertex &src = *(T->first.first);
+    CastMgrVertex &dest = *(T->first.second);
+    if((src.m_dataType != HOST) || (dest.m_dataType != HOST)) continue;
     m_autoDist(dest.m_valueType, src.m_valueType) = T->second;
   }
 }
 
-void ShCastManager::doCast(ShVariant* dest, const ShVariant* src)
+void CastManager::doCast(Variant* dest, const Variant* src)
 {
-  SH_DEBUG_ASSERT(dest != src);
+  DEBUG_ASSERT(dest != src);
 
   // should be the same size
   int size = dest->size();
-  ShValueType destVt = dest->valueType();
-  ShDataType destDt = dest->dataType();
+  ValueType destVt = dest->valueType();
+  DataType destDt = dest->dataType();
 
   // start as srcValue and cast step by step to destValueType type 
-  ShValueType srcVt = src->valueType();
-  ShDataType srcDt = src->dataType();
+  ValueType srcVt = src->valueType();
+  DataType srcDt = src->dataType();
 
-  SH_DEBUG_ASSERT(!(destVt == srcVt && srcDt == destDt));
+  DEBUG_ASSERT(!(destVt == srcVt && srcDt == destDt));
 
   for(bool first = true;;first = false) {
-    const ShVariantCast* caster = m_castStep(destVt, destDt, srcVt, srcDt);
+    const VariantCast* caster = m_castStep(destVt, destDt, srcVt, srcDt);
     if(!caster) {
-      SH_DEBUG_ERROR("Unable to cast to " << shValueTypeName(destVt) << " from " << shValueTypeName(srcVt));
+      DEBUG_ERROR("Unable to cast to " << valueTypeName(destVt) << " from " << valueTypeName(srcVt));
     }
-    SH_DEBUG_ASSERT(caster);
+    DEBUG_ASSERT(caster);
 
     caster->getDestTypes(srcVt, srcDt); // get results of next step in cast
     if((srcVt == destVt) && (srcDt == destDt)) {
@@ -173,7 +173,7 @@ void ShCastManager::doCast(ShVariant* dest, const ShVariant* src)
       break;
     } else {
       // make a temporary
-      ShVariant *temp = shVariantFactory(srcVt, srcDt)->generate(size);
+      Variant *temp = variantFactory(srcVt, srcDt)->generate(size);
       caster->doCast(temp, src);
       if(!first) delete src;
       src = temp;
@@ -181,39 +181,39 @@ void ShCastManager::doCast(ShVariant* dest, const ShVariant* src)
   }
 }
 
-bool ShCastManager::doAllocCast(ShVariant*& dest, ShVariant *src, 
-    ShValueType valueType, ShDataType dataType)
+bool CastManager::doAllocCast(Variant*& dest, Variant *src, 
+    ValueType valueType, DataType dataType)
 {
   if(!src || src->typeMatches(valueType, dataType)) {
     dest = src;
     return false;
   }
-  dest = shVariantFactory(valueType, dataType)->generate(src->size());
+  dest = variantFactory(valueType, dataType)->generate(src->size());
   doCast(dest, src);
   return true;
 }
 
-bool ShCastManager::doAllocCast(const ShVariant*& dest, const ShVariant* src, 
-    ShValueType valueType, ShDataType dataType)
+bool CastManager::doAllocCast(const Variant*& dest, const Variant* src, 
+    ValueType valueType, DataType dataType)
 {
   // do something devious, but it works as intended since src will not be
   // changed by doCast.
-  return doAllocCast(const_cast<ShVariant *&>(dest), const_cast<ShVariant *>(src),
+  return doAllocCast(const_cast<Variant *&>(dest), const_cast<Variant *>(src),
       valueType, dataType); 
 }
 
-int ShCastManager::castDist(ShValueType destValueType, ShValueType srcValueType)
+int CastManager::castDist(ValueType destValueType, ValueType srcValueType)
 {
   return m_autoDist(destValueType, srcValueType);
 }
 
-ShCastManager* ShCastManager::instance() 
+CastManager* CastManager::instance() 
 {
-  if(!m_instance) m_instance = new ShCastManager();
+  if(!m_instance) m_instance = new CastManager();
   return m_instance;
 }
 
-std::ostream& ShCastManager::graphvizDump(std::ostream& out) const
+std::ostream& CastManager::graphvizDump(std::ostream& out) const
 {
   SH::graphvizDump(out, m_casts);
   return out;

@@ -20,21 +20,21 @@
 #ifndef SHVARIANTCASTIMPL_HPP
 #define SHVARIANTCASTIMPL_HPP
 
-#include "ShInternals.hpp"
-#include "ShVariant.hpp"
-#include "ShVariantCast.hpp"
+#include "Internals.hpp"
+#include "Variant.hpp"
+#include "VariantCast.hpp"
 
 namespace SH {
 
-template<typename Dest, ShDataType DestDT, 
-  typename Src, ShDataType SrcDT> 
-ShDataVariantCast<Dest, DestDT, Src, SrcDT>* 
-ShDataVariantCast<Dest, DestDT, Src, SrcDT>::m_instance = 0;
+template<typename Dest, DataType DestDT, 
+  typename Src, DataType SrcDT> 
+DataVariantCast<Dest, DestDT, Src, SrcDT>* 
+DataVariantCast<Dest, DestDT, Src, SrcDT>::m_instance = 0;
 
-template<typename Dest, ShDataType DestDT, 
-  typename Src, ShDataType SrcDT> 
-void ShDataVariantCast<Dest, DestDT, Src, SrcDT>::doCast(
-    ShVariant* dest, const ShVariant *src) const
+template<typename Dest, DataType DestDT, 
+  typename Src, DataType SrcDT> 
+void DataVariantCast<Dest, DestDT, Src, SrcDT>::doCast(
+    Variant* dest, const Variant *src) const
 {
 
   SrcVariant* sv = variant_cast<Src, SrcDT>(src);
@@ -45,11 +45,11 @@ void ShDataVariantCast<Dest, DestDT, Src, SrcDT>::doCast(
   for(;S != sv->end(); ++S, ++D) doCast(*D, *S);
 }
 
-template<typename Dest, ShDataType DestDT, 
-  typename Src, ShDataType SrcDT>
-void ShDataVariantCast<Dest, DestDT, Src, SrcDT>::getCastTypes(
-    ShValueType &dest, ShDataType &destDT, 
-    ShValueType &src, ShDataType &srcDT) const
+template<typename Dest, DataType DestDT, 
+  typename Src, DataType SrcDT>
+void DataVariantCast<Dest, DestDT, Src, SrcDT>::getCastTypes(
+    ValueType &dest, DataType &destDT, 
+    ValueType &src, DataType &srcDT) const
 {
   dest = DestValueType;
   destDT = DestDT;
@@ -57,28 +57,28 @@ void ShDataVariantCast<Dest, DestDT, Src, SrcDT>::getCastTypes(
   srcDT = SrcDT;
 }
 
-template<typename Dest, ShDataType DestDT, 
-  typename Src, ShDataType SrcDT>
-void ShDataVariantCast<Dest, DestDT, Src, SrcDT>::getDestTypes(
-    ShValueType &valueType, ShDataType &dataType) const
+template<typename Dest, DataType DestDT, 
+  typename Src, DataType SrcDT>
+void DataVariantCast<Dest, DestDT, Src, SrcDT>::getDestTypes(
+    ValueType &valueType, DataType &dataType) const
 {
   valueType = DestValueType; 
   dataType = DestDT;
 }
 
-template<typename Dest, ShDataType DestDT, 
-  typename Src, ShDataType SrcDT>
-void ShDataVariantCast<Dest, DestDT, Src, SrcDT>::doCast(D &dest, const S &src) const
+template<typename Dest, DataType DestDT, 
+  typename Src, DataType SrcDT>
+void DataVariantCast<Dest, DestDT, Src, SrcDT>::doCast(D &dest, const S &src) const
 {
-  shDataTypeCast<Dest, DestDT, Src, SrcDT>(dest, src);
+  dataTypeCast<Dest, DestDT, Src, SrcDT>(dest, src);
 }
 
-template<typename Dest, ShDataType DestDT, 
-  typename Src, ShDataType SrcDT>
-const ShDataVariantCast<Dest, DestDT, Src, SrcDT>*
-ShDataVariantCast<Dest, DestDT, Src, SrcDT>::instance()
+template<typename Dest, DataType DestDT, 
+  typename Src, DataType SrcDT>
+const DataVariantCast<Dest, DestDT, Src, SrcDT>*
+DataVariantCast<Dest, DestDT, Src, SrcDT>::instance()
 {
-  if(!m_instance) m_instance = new ShDataVariantCast();
+  if(!m_instance) m_instance = new DataVariantCast();
   return m_instance;
 }
 

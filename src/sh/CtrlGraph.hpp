@@ -24,23 +24,23 @@
 #include <vector>
 #include <list>
 #include <iosfwd>
-#include "ShDllExport.hpp"
-#include "ShRefCount.hpp"
-#include "ShBasicBlock.hpp"
-#include "ShVariable.hpp"
-#include "ShBlock.hpp"
+#include "DllExport.hpp"
+#include "RefCount.hpp"
+#include "BasicBlock.hpp"
+#include "Variable.hpp"
+#include "Block.hpp"
 
 namespace SH {
 
-class ShCtrlGraphNode;
+class CtrlGraphNode;
 
 struct
-SH_DLLEXPORT ShCtrlGraphBranch {
-  ShCtrlGraphBranch(const ShPointer<ShCtrlGraphNode>& node,
-                    ShVariable cond);
+DLLEXPORT CtrlGraphBranch {
+  CtrlGraphBranch(const Pointer<CtrlGraphNode>& node,
+                    Variable cond);
   
-  ShPointer<ShCtrlGraphNode> node; ///< The successor node
-  ShVariable cond; ///< If this is 1, take this branch.
+  Pointer<CtrlGraphNode> node; ///< The successor node
+  Variable cond; ///< If this is 1, take this branch.
 };
 
 /** A node in the control graph.
@@ -54,18 +54,18 @@ SH_DLLEXPORT ShCtrlGraphBranch {
  * successor of 0.
  */
 class
-SH_DLLEXPORT ShCtrlGraphNode : public ShRefCountable, public ShInfoHolder {
+DLLEXPORT CtrlGraphNode : public RefCountable, public InfoHolder {
 public:
-  ShCtrlGraphNode();
-  ~ShCtrlGraphNode();
+  CtrlGraphNode();
+  ~CtrlGraphNode();
 
-  ShBasicBlockPtr block;
-  typedef std::vector<ShCtrlGraphBranch> SuccessorList;
+  BasicBlockPtr block;
+  typedef std::vector<CtrlGraphBranch> SuccessorList;
   SuccessorList successors; ///< Conditional successors
-  ShPointer<ShCtrlGraphNode> follower; ///< Unconditional successor
+  Pointer<CtrlGraphNode> follower; ///< Unconditional successor
 
-  typedef std::list<ShCtrlGraphNode*> ShPredList;
-  ShPredList predecessors;
+  typedef std::list<CtrlGraphNode*> PredList;
+  PredList predecessors;
 
   /// Output a graph node _and its successors_ at the given
   /// indentation level.
@@ -76,11 +76,11 @@ public:
   std::ostream& graphvizDump(std::ostream& out) const;
 
   /// Append an unconditional successor, if node is not null.
-  void append(const ShPointer<ShCtrlGraphNode>& node);
+  void append(const Pointer<CtrlGraphNode>& node);
 
   /// Append an conditional successor, if node is not null.
-  void append(const ShPointer<ShCtrlGraphNode>& node,
-              ShVariable cond);
+  void append(const Pointer<CtrlGraphNode>& node,
+              Variable cond);
 
   /** Splits this control graph node into two nodes A, B, at the given statement.
    * A is this, and keeps all predecessor information, 
@@ -95,17 +95,17 @@ public:
    *
    * Returns B. 
    */
-  ShPointer<ShCtrlGraphNode> 
-  split(ShBasicBlock::ShStmtList::iterator stmt);
+  Pointer<CtrlGraphNode> 
+  split(BasicBlock::StmtList::iterator stmt);
 
-  typedef std::set<ShVariableNodePtr> DeclSet;
+  typedef std::set<VariableNodePtr> DeclSet;
   typedef DeclSet::const_iterator DeclIt;
 
   /** Adds a temporary declaration to this cfg node */
-  void addDecl(const ShVariableNodePtr& node);
+  void addDecl(const VariableNodePtr& node);
 
   /** Returns whether this node contains a declaration for the given node */
-  bool hasDecl(const ShVariableNodePtr& node) const;
+  bool hasDecl(const VariableNodePtr& node) const;
 
   /** Inserts the given declarations into this */ 
   void insert_decls(DeclIt f, DeclIt l);
@@ -144,38 +144,38 @@ private:
   DeclSet m_decls; ///< temporary declarations in this node
 };
 
-typedef ShPointer<ShCtrlGraphNode> ShCtrlGraphNodePtr;
-typedef ShPointer<const ShCtrlGraphNode> ShCtrlGraphNodeCPtr;
+typedef Pointer<CtrlGraphNode> CtrlGraphNodePtr;
+typedef Pointer<const CtrlGraphNode> CtrlGraphNodeCPtr;
 
 /** A control-flow graph.
  * This is the parsed form of a shader body.
  */
 class
-SH_DLLEXPORT ShCtrlGraph : public ShRefCountable {
+DLLEXPORT CtrlGraph : public RefCountable {
 public:
-  ShCtrlGraph(const ShCtrlGraphNodePtr& head, const ShCtrlGraphNodePtr& tail);
-  ShCtrlGraph(const ShBlockListPtr& blocks);
-  ~ShCtrlGraph();
+  CtrlGraph(const CtrlGraphNodePtr& head, const CtrlGraphNodePtr& tail);
+  CtrlGraph(const BlockListPtr& blocks);
+  ~CtrlGraph();
 
   std::ostream& print(std::ostream& out, int indent) const;
   
   std::ostream& graphvizDump(std::ostream& out) const;
 
-  ShCtrlGraphNodePtr entry() const;
-  ShCtrlGraphNodePtr exit() const;
+  CtrlGraphNodePtr entry() const;
+  CtrlGraphNodePtr exit() const;
 
   /// Adds an empty node before entry, gives old entry a block and returns it.
   // New entry is marked (so it does not prevent clearMarking on future DFSes)
-  ShCtrlGraphNodePtr prependEntry();
+  CtrlGraphNodePtr prependEntry();
 
   /// Adds an empty node after exit, gives old exit a block and returns it. 
-  ShCtrlGraphNodePtr appendExit();
+  CtrlGraphNodePtr appendExit();
 
   /// prepends another ctrl graph to this' entry (updating entry) 
-  void prepend(ShPointer<ShCtrlGraph> cfg); 
+  void prepend(Pointer<CtrlGraph> cfg); 
 
   /// appends another ctrl graph to this' exit (updating exit)
-  void append(ShPointer<ShCtrlGraph> cfg); 
+  void append(Pointer<CtrlGraph> cfg); 
 
 
   template<typename F>
@@ -188,39 +188,39 @@ public:
   void computePredecessors();
 
   // Make a copy of this control graph placing the result into head and tail.
-  void copy(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail) const;
+  void copy(CtrlGraphNodePtr& head, CtrlGraphNodePtr& tail) const;
   
 private:
-  ShCtrlGraphNodePtr m_entry;
-  ShCtrlGraphNodePtr m_exit;
+  CtrlGraphNodePtr m_entry;
+  CtrlGraphNodePtr m_exit;
 
-  //  void parse(ShCtrlGraphNodePtr& tail, ShBlockListPtr blocks);
+  //  void parse(CtrlGraphNodePtr& tail, BlockListPtr blocks);
 };
 
-typedef ShPointer<ShCtrlGraph> ShCtrlGraphPtr;
-typedef ShPointer<const ShCtrlGraph> ShCtrlGraphCPtr;
+typedef Pointer<CtrlGraph> CtrlGraphPtr;
+typedef Pointer<const CtrlGraph> CtrlGraphCPtr;
 
 template<typename F>
-void ShCtrlGraphNode::real_dfs(F& functor)
+void CtrlGraphNode::real_dfs(F& functor)
 {
   if (this == 0) return;
   if (m_marked) return;
   mark();
   functor(this);
-  for (std::vector<ShCtrlGraphBranch>::iterator I = successors.begin(); I != successors.end(); ++I) {
+  for (std::vector<CtrlGraphBranch>::iterator I = successors.begin(); I != successors.end(); ++I) {
     I->node->real_dfs(functor);
   }
   if (follower) follower->real_dfs(functor);
 }
 
 template<typename F>
-void ShCtrlGraphNode::real_dfs(F& functor) const
+void CtrlGraphNode::real_dfs(F& functor) const
 {
   if (this == 0) return;
   if (m_marked) return;
   mark();
   functor(this);
-  for (std::vector<ShCtrlGraphBranch>::const_iterator I = successors.begin();
+  for (std::vector<CtrlGraphBranch>::const_iterator I = successors.begin();
        I != successors.end(); ++I) {
     I->node->real_dfs(functor);
   }
@@ -228,7 +228,7 @@ void ShCtrlGraphNode::real_dfs(F& functor) const
 }
 
 template<typename F>
-void ShCtrlGraphNode::dfs(F& functor)
+void CtrlGraphNode::dfs(F& functor)
 {
   clearMarked();
   real_dfs(functor);
@@ -236,7 +236,7 @@ void ShCtrlGraphNode::dfs(F& functor)
 }
 
 template<typename F>
-void ShCtrlGraphNode::dfs(F& functor) const
+void CtrlGraphNode::dfs(F& functor) const
 {
   clearMarked();
   real_dfs(functor);
@@ -244,13 +244,13 @@ void ShCtrlGraphNode::dfs(F& functor) const
 }
 
 template<typename F>
-void ShCtrlGraph::dfs(F& functor)
+void CtrlGraph::dfs(F& functor)
 {
   m_entry->dfs(functor);
 }
 
 template<typename F>
-void ShCtrlGraph::dfs(F& functor) const
+void CtrlGraph::dfs(F& functor) const
 {
   m_entry->dfs(functor);
 }

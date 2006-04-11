@@ -17,13 +17,13 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#include "ShLib.hpp" // ShLibMatrix needs to be included from within ShLib
+#include "Lib.hpp" // LibMatrix needs to be included from within Lib
 
 #ifndef SHLIBMATRIX_HPP
 #define SHLIBMATRIX_HPP
 
-#include "ShGeneric.hpp"
-#include "ShMatrix.hpp"
+#include "Generic.hpp"
+#include "Matrix.hpp"
 
 namespace SH {
 
@@ -35,218 +35,218 @@ namespace SH {
 /** Matrix addition.
  * Only works on matrices of same sizes.
  */
-template<int M, int N, ShBindingType Binding, ShBindingType Binding2, typename T1, typename T2>
-ShMatrix<N, M, SH_TEMP, CT1T2>
-operator+(const ShMatrix<N, M, Binding, T1>& a, const ShMatrix<N, M, Binding2, T2>& b);
+template<int M, int N, BindingType Binding, BindingType Binding2, typename T1, typename T2>
+Matrix<N, M, TEMP, CT1T2>
+operator+(const Matrix<N, M, Binding, T1>& a, const Matrix<N, M, Binding2, T2>& b);
 
 /** Matrix subtraction.
  * Only works on matrices of same sizes.
  */
-template<int M, int N, ShBindingType Binding, ShBindingType Binding2, typename T1, typename T2>
-ShMatrix<N, M, SH_TEMP, CT1T2>
-operator-(const ShMatrix<N, M, Binding, T1>& a, const ShMatrix<N, M, Binding2, T2>& b);
+template<int M, int N, BindingType Binding, BindingType Binding2, typename T1, typename T2>
+Matrix<N, M, TEMP, CT1T2>
+operator-(const Matrix<N, M, Binding, T1>& a, const Matrix<N, M, Binding2, T2>& b);
 
 /** Matrix division.
  * Only works on matrices of same sizes.
  */
-template<int M, int N, ShBindingType Binding, ShBindingType Binding2, typename T1, typename T2>
-ShMatrix<N, M, SH_TEMP, CT1T2>
-operator/(const ShMatrix<N, M, Binding, T1>& a, const ShMatrix<N, M, Binding2, T2>& b);
+template<int M, int N, BindingType Binding, BindingType Binding2, typename T1, typename T2>
+Matrix<N, M, TEMP, CT1T2>
+operator/(const Matrix<N, M, Binding, T1>& a, const Matrix<N, M, Binding2, T2>& b);
 
 /** Matrix multiplication.
  * Only works on matrices of compatible sizes or ones that can be expanded to be compatible.
  */
-template<int M, int N1, int N2, int P, ShBindingType Binding, ShBindingType Binding2, typename T1, typename T2>
-ShMatrix<M, P, SH_TEMP, CT1T2>
-operator|(const ShMatrix<M, N1, Binding, T1>& a,
-          const ShMatrix<N2, P, Binding2, T2>& b);
-template<int M, int N1, int N2, int P, ShBindingType Binding, ShBindingType Binding2, typename T1, typename T2>
-ShMatrix<M, P, SH_TEMP, CT1T2>
-operator*(const ShMatrix<M, N1, Binding, T1>& a,
-          const ShMatrix<N2, P, Binding2, T2>& b);
+template<int M, int N1, int N2, int P, BindingType Binding, BindingType Binding2, typename T1, typename T2>
+Matrix<M, P, TEMP, CT1T2>
+operator|(const Matrix<M, N1, Binding, T1>& a,
+          const Matrix<N2, P, Binding2, T2>& b);
+template<int M, int N1, int N2, int P, BindingType Binding, BindingType Binding2, typename T1, typename T2>
+Matrix<M, P, TEMP, CT1T2>
+operator*(const Matrix<M, N1, Binding, T1>& a,
+          const Matrix<N2, P, Binding2, T2>& b);
 
 /** Matrix-tuple multiplication.
  * Treats the tuple as a column vector.
  * @{ */
-template<int M, int N, ShBindingType Binding, typename T1, typename T2>
-ShGeneric<M, CT1T2> operator|(const ShMatrix<M, N, Binding, T1>& a, const ShGeneric<N, T2>& b);
-template<int M, int N, ShBindingType Binding, typename T1, typename T2>
-ShGeneric<M, CT1T2> operator*(const ShMatrix<M, N, Binding, T1>& a, const ShGeneric<N, T2>& b);
+template<int M, int N, BindingType Binding, typename T1, typename T2>
+Generic<M, CT1T2> operator|(const Matrix<M, N, Binding, T1>& a, const Generic<N, T2>& b);
+template<int M, int N, BindingType Binding, typename T1, typename T2>
+Generic<M, CT1T2> operator*(const Matrix<M, N, Binding, T1>& a, const Generic<N, T2>& b);
 // @}
 
 /** Matrix-tuple multiplication.
  * If the matrix on the left has one more column than the number of
  * elements in the tuple, the weight of the last column is assumed to
  * be ZERO. @{ */
-template<int M, int N, ShBindingType Binding1, ShBindingType Binding2, typename T1, typename T2, bool swizzled>
-ShAttrib<N-1, SH_TEMP, CT1T2, SH_VECTOR>
-operator|(const ShMatrix<M, N, Binding1, T1>& a, const ShAttrib<N-1, Binding2, T2, SH_VECTOR, swizzled>& b);
-template<int M, int N, ShBindingType Binding1, ShBindingType Binding2, typename T1, typename T2, bool swizzled>
-ShAttrib<N-1, SH_TEMP, CT1T2, SH_NORMAL>
-operator|(const ShMatrix<M, N, Binding1, T1>& a, const ShAttrib<N-1, Binding2, T2, SH_NORMAL, swizzled>& b);
-template<int M, int N, ShBindingType Binding1, ShBindingType Binding2, typename T1, typename T2, bool swizzled>
-ShAttrib<N-1, SH_TEMP, CT1T2, SH_VECTOR>
-operator*(const ShMatrix<M, N, Binding1, T1>& a, const ShAttrib<N-1, Binding2, T2, SH_VECTOR, swizzled>& b);
-template<int M, int N, ShBindingType Binding1, ShBindingType Binding2, typename T1, typename T2, bool swizzled>
-ShAttrib<N-1, SH_TEMP, CT1T2, SH_NORMAL>
-operator*(const ShMatrix<M, N, Binding1, T1>& a, const ShAttrib<N-1, Binding2, T2, SH_NORMAL, swizzled>& b);
+template<int M, int N, BindingType Binding1, BindingType Binding2, typename T1, typename T2, bool swizzled>
+Attrib<N-1, TEMP, CT1T2, VECTOR>
+operator|(const Matrix<M, N, Binding1, T1>& a, const Attrib<N-1, Binding2, T2, VECTOR, swizzled>& b);
+template<int M, int N, BindingType Binding1, BindingType Binding2, typename T1, typename T2, bool swizzled>
+Attrib<N-1, TEMP, CT1T2, NORMAL>
+operator|(const Matrix<M, N, Binding1, T1>& a, const Attrib<N-1, Binding2, T2, NORMAL, swizzled>& b);
+template<int M, int N, BindingType Binding1, BindingType Binding2, typename T1, typename T2, bool swizzled>
+Attrib<N-1, TEMP, CT1T2, VECTOR>
+operator*(const Matrix<M, N, Binding1, T1>& a, const Attrib<N-1, Binding2, T2, VECTOR, swizzled>& b);
+template<int M, int N, BindingType Binding1, BindingType Binding2, typename T1, typename T2, bool swizzled>
+Attrib<N-1, TEMP, CT1T2, NORMAL>
+operator*(const Matrix<M, N, Binding1, T1>& a, const Attrib<N-1, Binding2, T2, NORMAL, swizzled>& b);
 // @}
 
 /** Matrix-tuple multiplication.
  * If the matrix on the left has one more column than the number of
  * elements in the tuple, the weight of the last column is assumed to
  * be ONE. @{ */
-template<int M, int N, ShBindingType Binding1, ShBindingType Binding2, typename T1, typename T2, bool swizzled>
-ShAttrib<N-1, SH_TEMP, CT1T2, SH_TEXCOORD>
-operator|(const ShMatrix<M, N, Binding1, T1>& a, const ShAttrib<N-1, Binding2, T2, SH_TEXCOORD, swizzled>& b);
-template<int M, int N, ShBindingType Binding1, ShBindingType Binding2, typename T1, typename T2, bool swizzled>
-ShAttrib<N-1, SH_TEMP, CT1T2, SH_POINT>
-operator|(const ShMatrix<M, N, Binding1, T1>& a, const ShAttrib<N-1, Binding2, T2, SH_POINT, swizzled>& b);
-template<int M, int N, ShBindingType Binding1, ShBindingType Binding2, typename T1, typename T2, bool swizzled>
-ShAttrib<N-1, SH_TEMP, CT1T2, SH_PLANE>
-operator|(const ShMatrix<M, N, Binding1, T1>& a, const ShAttrib<N-1, Binding2, T2, SH_PLANE, swizzled>& b);
-template<int M, int N, ShBindingType Binding1, ShBindingType Binding2, typename T1, typename T2, bool swizzled>
-ShAttrib<N-1, SH_TEMP, CT1T2, SH_TEXCOORD>
-operator*(const ShMatrix<M, N, Binding1, T1>& a, const ShAttrib<N-1, Binding2, T2, SH_TEXCOORD, swizzled>& b);
-template<int M, int N, ShBindingType Binding1, ShBindingType Binding2, typename T1, typename T2, bool swizzled>
-ShAttrib<N-1, SH_TEMP, CT1T2, SH_POINT>
-operator*(const ShMatrix<M, N, Binding1, T1>& a, const ShAttrib<N-1, Binding2, T2, SH_POINT, swizzled>& b);
-template<int M, int N, ShBindingType Binding1, ShBindingType Binding2, typename T1, typename T2, bool swizzled>
-ShAttrib<N-1, SH_TEMP, CT1T2, SH_PLANE>
-operator*(const ShMatrix<M, N, Binding1, T1>& a, const ShAttrib<N-1, Binding2, T2, SH_PLANE, swizzled>& b);
+template<int M, int N, BindingType Binding1, BindingType Binding2, typename T1, typename T2, bool swizzled>
+Attrib<N-1, TEMP, CT1T2, TEXCOORD>
+operator|(const Matrix<M, N, Binding1, T1>& a, const Attrib<N-1, Binding2, T2, TEXCOORD, swizzled>& b);
+template<int M, int N, BindingType Binding1, BindingType Binding2, typename T1, typename T2, bool swizzled>
+Attrib<N-1, TEMP, CT1T2, POINT>
+operator|(const Matrix<M, N, Binding1, T1>& a, const Attrib<N-1, Binding2, T2, POINT, swizzled>& b);
+template<int M, int N, BindingType Binding1, BindingType Binding2, typename T1, typename T2, bool swizzled>
+Attrib<N-1, TEMP, CT1T2, PLANE>
+operator|(const Matrix<M, N, Binding1, T1>& a, const Attrib<N-1, Binding2, T2, PLANE, swizzled>& b);
+template<int M, int N, BindingType Binding1, BindingType Binding2, typename T1, typename T2, bool swizzled>
+Attrib<N-1, TEMP, CT1T2, TEXCOORD>
+operator*(const Matrix<M, N, Binding1, T1>& a, const Attrib<N-1, Binding2, T2, TEXCOORD, swizzled>& b);
+template<int M, int N, BindingType Binding1, BindingType Binding2, typename T1, typename T2, bool swizzled>
+Attrib<N-1, TEMP, CT1T2, POINT>
+operator*(const Matrix<M, N, Binding1, T1>& a, const Attrib<N-1, Binding2, T2, POINT, swizzled>& b);
+template<int M, int N, BindingType Binding1, BindingType Binding2, typename T1, typename T2, bool swizzled>
+Attrib<N-1, TEMP, CT1T2, PLANE>
+operator*(const Matrix<M, N, Binding1, T1>& a, const Attrib<N-1, Binding2, T2, PLANE, swizzled>& b);
 // @}
 
 /** Tuple-matrix multiplication.
  * Treats the tuple as a row vector.
  */
-template<int M, int N, ShBindingType Binding, typename T1, typename T2>
-ShGeneric<N, CT1T2> operator|(const ShGeneric<M, T1>& a, const ShMatrix<M, N, Binding, T2>& b);
-template<int M, int N, ShBindingType Binding, typename T1, typename T2>
-ShGeneric<N, CT1T2> operator*(const ShGeneric<M, T1>& a, const ShMatrix<M, N, Binding, T2>& b);
+template<int M, int N, BindingType Binding, typename T1, typename T2>
+Generic<N, CT1T2> operator|(const Generic<M, T1>& a, const Matrix<M, N, Binding, T2>& b);
+template<int M, int N, BindingType Binding, typename T1, typename T2>
+Generic<N, CT1T2> operator*(const Generic<M, T1>& a, const Matrix<M, N, Binding, T2>& b);
 
 /// Matrix-scalar multiplication
-template<int M, int N, ShBindingType Binding, typename T1, typename T2>
-ShMatrix<M, N, SH_TEMP, CT1T2>
-operator*(const ShMatrix<M, N, Binding, T1>& a, const ShGeneric<1, T2>& b);
+template<int M, int N, BindingType Binding, typename T1, typename T2>
+Matrix<M, N, TEMP, CT1T2>
+operator*(const Matrix<M, N, Binding, T1>& a, const Generic<1, T2>& b);
 
-template<int M, ShBindingType Binding, typename T1, typename T2>
-ShMatrix<M, 1, SH_TEMP, CT1T2>
-operator*(const ShMatrix<M, 1, Binding, T1>& a, const ShGeneric<1, T2>& b);
+template<int M, BindingType Binding, typename T1, typename T2>
+Matrix<M, 1, TEMP, CT1T2>
+operator*(const Matrix<M, 1, Binding, T1>& a, const Generic<1, T2>& b);
 
 /// Scalar-matrix multiplication
-template<int M, int N, ShBindingType Binding, typename T1, typename T2>
-ShMatrix<M, N, SH_TEMP, CT1T2>
-operator*(const ShGeneric<1, T1>& a, const ShMatrix<M, N, Binding, T2>& b);
+template<int M, int N, BindingType Binding, typename T1, typename T2>
+Matrix<M, N, TEMP, CT1T2>
+operator*(const Generic<1, T1>& a, const Matrix<M, N, Binding, T2>& b);
 
-template<int N, ShBindingType Binding, typename T1, typename T2>
-ShMatrix<1, N, SH_TEMP, CT1T2>
-operator*(const ShGeneric<1, T1>& a, const ShMatrix<1, N, Binding, T2>& b);
+template<int N, BindingType Binding, typename T1, typename T2>
+Matrix<1, N, TEMP, CT1T2>
+operator*(const Generic<1, T1>& a, const Matrix<1, N, Binding, T2>& b);
 
 /// Matrix-scalar division
-template<int M, int N, ShBindingType Binding, typename T1, typename T2>
-ShMatrix<M, N, SH_TEMP, CT1T2>
-operator/(const ShMatrix<M, N, Binding, T1>& a, const ShGeneric<1, T2>& b);
+template<int M, int N, BindingType Binding, typename T1, typename T2>
+Matrix<M, N, TEMP, CT1T2>
+operator/(const Matrix<M, N, Binding, T1>& a, const Generic<1, T2>& b);
 
 /** \brief Returns the determinant for the given matrix
  *
  */
-template<ShBindingType Binding2, typename T2>
-ShAttrib1f det(const ShMatrix<1, 1, Binding2, T2>& matrix);
+template<BindingType Binding2, typename T2>
+Attrib1f det(const Matrix<1, 1, Binding2, T2>& matrix);
 
-template<ShBindingType Binding2, typename T2>
-ShAttrib1f det(const ShMatrix<2, 2, Binding2, T2>& matrix);
+template<BindingType Binding2, typename T2>
+Attrib1f det(const Matrix<2, 2, Binding2, T2>& matrix);
     
-template<int RowsCols, ShBindingType Binding2, typename T2>
-ShAttrib1f det(const ShMatrix<RowsCols, RowsCols, Binding2, T2>& matrix);
+template<int RowsCols, BindingType Binding2, typename T2>
+Attrib1f det(const Matrix<RowsCols, RowsCols, Binding2, T2>& matrix);
 
 
 /** \brief Returns the matrix of cofactors for the given matrix 
  *
  */
-template<int RowsCols, ShBindingType Binding2, typename T2>
-ShMatrix<RowsCols, RowsCols, SH_TEMP, T2>
-cofactors(const ShMatrix<RowsCols, RowsCols, Binding2, T2>& matrix);
+template<int RowsCols, BindingType Binding2, typename T2>
+Matrix<RowsCols, RowsCols, TEMP, T2>
+cofactors(const Matrix<RowsCols, RowsCols, Binding2, T2>& matrix);
     
 /** \brief Returns the transpose of the given matrix.
  *
  * The matrix is flipped around its diagonal.
  *
  */
-template<int M, int N, ShBindingType Binding2, typename T2>
-ShMatrix<N, M, SH_TEMP, T2>
-transpose(const ShMatrix<M, N, Binding2, T2>& matrix);
+template<int M, int N, BindingType Binding2, typename T2>
+Matrix<N, M, TEMP, T2>
+transpose(const Matrix<M, N, Binding2, T2>& matrix);
   
 /** \brief Returns the adjoint of the given matrix.
  *
  */
-template<int RowsCols, ShBindingType Binding2, typename T2>
-ShMatrix<RowsCols, RowsCols, SH_TEMP, T2>
-adjoint(const ShMatrix<RowsCols, RowsCols, Binding2, T2>& matrix);
+template<int RowsCols, BindingType Binding2, typename T2>
+Matrix<RowsCols, RowsCols, TEMP, T2>
+adjoint(const Matrix<RowsCols, RowsCols, Binding2, T2>& matrix);
 
 /** \brief Invert a matrix
  *
  * Results are undefined if the matrix is non-invertible.
  *
  */
-template<int RowsCols, ShBindingType Binding2, typename T2>
-ShMatrix<RowsCols,RowsCols, SH_TEMP, T2>
-inverse(const ShMatrix<RowsCols, RowsCols, Binding2, T2>& matrix);
+template<int RowsCols, BindingType Binding2, typename T2>
+Matrix<RowsCols,RowsCols, TEMP, T2>
+inverse(const Matrix<RowsCols, RowsCols, Binding2, T2>& matrix);
 
 /** \brief Trace of a matrix.
  *
  * Returns the sum of the diagonal entries of a matrix.
  */
-template<int RowsCols, ShBindingType Binding, typename T>
-ShGeneric<1, T>
-trace(const ShMatrix<RowsCols, RowsCols, Binding, T>& matrix);
+template<int RowsCols, BindingType Binding, typename T>
+Generic<1, T>
+trace(const Matrix<RowsCols, RowsCols, Binding, T>& matrix);
 
 template<int N, typename T>
-ShMatrix<1, N, SH_TEMP, T>
-rowmat(const ShGeneric<N, T>& s0);
+Matrix<1, N, TEMP, T>
+rowmat(const Generic<N, T>& s0);
 
 template<int N, typename T1, typename T2>
-ShMatrix<2, N, SH_TEMP, CT1T2>
-rowmat(const ShGeneric<N, T1>& s0,
-       const ShGeneric<N, T2>& s1);
+Matrix<2, N, TEMP, CT1T2>
+rowmat(const Generic<N, T1>& s0,
+       const Generic<N, T2>& s1);
 
 template<int N, typename T1, typename T2, typename T3>
-ShMatrix<3, N, SH_TEMP, CT1T2T3>
-rowmat(const ShGeneric<N, T1>& s0,
-       const ShGeneric<N, T2>& s1,
-       const ShGeneric<N, T3>& s2);
+Matrix<3, N, TEMP, CT1T2T3>
+rowmat(const Generic<N, T1>& s0,
+       const Generic<N, T2>& s1,
+       const Generic<N, T3>& s2);
 
 template<int N, typename T1, typename T2, typename T3, typename T4>
-ShMatrix<4, N, SH_TEMP, CT1T2T3T4>
-rowmat(const ShGeneric<N, T1>& s0,
-       const ShGeneric<N, T2>& s1,
-       const ShGeneric<N, T3>& s2,
-       const ShGeneric<N, T4>& s3);
+Matrix<4, N, TEMP, CT1T2T3T4>
+rowmat(const Generic<N, T1>& s0,
+       const Generic<N, T2>& s1,
+       const Generic<N, T3>& s2,
+       const Generic<N, T4>& s3);
 
 template<int N, typename T>
-ShMatrix<N, 1, SH_TEMP, T>
-colmat(const ShGeneric<N, T>& s0);
+Matrix<N, 1, TEMP, T>
+colmat(const Generic<N, T>& s0);
 
 template<int N, typename T>
-ShMatrix<N, 2, SH_TEMP, T>
-colmat(const ShGeneric<N, T>& s0,
-       const ShGeneric<N, T>& s1);
+Matrix<N, 2, TEMP, T>
+colmat(const Generic<N, T>& s0,
+       const Generic<N, T>& s1);
 
 template<int N, typename T>
-ShMatrix<N, 3, SH_TEMP, T>
-colmat(const ShGeneric<N, T>& s0,
-       const ShGeneric<N, T>& s1,
-       const ShGeneric<N, T>& s2);
+Matrix<N, 3, TEMP, T>
+colmat(const Generic<N, T>& s0,
+       const Generic<N, T>& s1,
+       const Generic<N, T>& s2);
 
 template<int N, typename T>
-ShMatrix<N, 4, SH_TEMP, T>
-colmat(const ShGeneric<N, T>& s0,
-       const ShGeneric<N, T>& s1,
-       const ShGeneric<N, T>& s2,
-       const ShGeneric<N, T>& s3);
+Matrix<N, 4, TEMP, T>
+colmat(const Generic<N, T>& s0,
+       const Generic<N, T>& s1,
+       const Generic<N, T>& s2,
+       const Generic<N, T>& s3);
 
 template<int N, typename T>
-ShMatrix<N, N, SH_TEMP, T>
-diag(const ShGeneric<N, T>& a);
+Matrix<N, N, TEMP, T>
+diag(const Generic<N, T>& a);
 
 /*@}*/
 
@@ -262,8 +262,8 @@ diag(const ShGeneric<N, T>& a);
  * transformation matrix.
  */
 template<typename T>
-ShMatrix<4, 4, SH_TEMP, T>
-rotate(const ShGeneric<3, T>& axis, const ShGeneric<1, T>& angle);
+Matrix<4, 4, TEMP, T>
+rotate(const Generic<3, T>& axis, const Generic<1, T>& angle);
 
 /** \brief 2D Rotation about the given angle
  *
@@ -271,8 +271,8 @@ rotate(const ShGeneric<3, T>& axis, const ShGeneric<1, T>& angle);
  * transformation matrix.
  */
 template<typename T>
-ShMatrix<3, 3, SH_TEMP, T>
-rotate(const ShGeneric<1, T>& angle);
+Matrix<3, 3, TEMP, T>
+rotate(const Generic<1, T>& angle);
 
 /** \brief 3D Translation
  *
@@ -280,8 +280,8 @@ rotate(const ShGeneric<1, T>& angle);
  * vector.
  */
 template<typename T>
-ShMatrix<4, 4, SH_TEMP, T>
-translate(const ShGeneric<3, T>& a);
+Matrix<4, 4, TEMP, T>
+translate(const Generic<3, T>& a);
 
 /** \brief 2D Translation
  *
@@ -289,8 +289,8 @@ translate(const ShGeneric<3, T>& a);
  * vector.
  */
 template<typename T>
-ShMatrix<3, 3, SH_TEMP, T>
-translate(const ShGeneric<2, T>& a);
+Matrix<3, 3, TEMP, T>
+translate(const Generic<2, T>& a);
 
 /** \brief 3D Scale
  *
@@ -298,8 +298,8 @@ translate(const ShGeneric<2, T>& a);
  * nonuniform vector.
  */
 template<typename T>
-ShMatrix<4, 4, SH_TEMP, T>
-scale(const ShGeneric<3, T>& a);
+Matrix<4, 4, TEMP, T>
+scale(const Generic<3, T>& a);
 
 /** \brief 2D Scale
  *
@@ -307,8 +307,8 @@ scale(const ShGeneric<3, T>& a);
  * nonuniform vector.
  */
 template<typename T>
-ShMatrix<3, 3, SH_TEMP, T>
-scale(const ShGeneric<2, T>& a);
+Matrix<3, 3, TEMP, T>
+scale(const Generic<2, T>& a);
 
 /** \brief Uniform scale in N-1 dimensions
  *
@@ -316,13 +316,13 @@ scale(const ShGeneric<2, T>& a);
  * scale of the given amount in (N-1) dimensions.
  */
 template<int N, typename T>
-ShMatrix<N, N, SH_TEMP, T>
-scale(const ShGeneric<1, T>& a);
+Matrix<N, N, TEMP, T>
+scale(const Generic<1, T>& a);
 
 /*@}*/
 
 }
 
-#include "ShLibMatrixImpl.hpp"
+#include "LibMatrixImpl.hpp"
 
 #endif

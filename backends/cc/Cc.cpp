@@ -31,31 +31,31 @@
 #include <fstream>
 
 #include "Cc.hpp" 
-#include "ShDebug.hpp" 
-#include "ShStream.hpp" 
-#include "ShVariant.hpp"
-#include "ShVariantFactory.hpp"
-#include "ShTypeInfo.hpp"
-#include "ShOptimizations.hpp"
+#include "Debug.hpp" 
+#include "Stream.hpp" 
+#include "Variant.hpp"
+#include "VariantFactory.hpp"
+#include "TypeInfo.hpp"
+#include "Optimizations.hpp"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
-#ifdef SH_CC_DEBUG
-#  define SH_CC_DEBUG_PRINT(x) SH_DEBUG_PRINT(x)
+#ifdef CC_DEBUG
+#  define CC_DEBUG_PRINT(x) DEBUG_PRINT(x)
 #else
-#  define SH_CC_DEBUG_PRINT(x) do { } while(0)
+#  define CC_DEBUG_PRINT(x) do { } while(0)
 #endif
 
 
-namespace ShCc {
+namespace Cc {
 
 using namespace SH;
 
 #include "CcTexturesString.hpp"
 
-std::string encode(const ShVariable& v)
+std::string encode(const Variable& v)
 {
   std::stringstream ret;
   if (v.neg()) ret << "-";
@@ -83,22 +83,22 @@ const char* UniformPrefix= "var_u_";
 CcVariable::CcVariable(void) 
   : m_num(-1), 
     m_size(-1), 
-    m_valueType(SH_VALUETYPE_END)
+    m_valueType(VALUETYPE_END)
 {}
   
-CcVariable::CcVariable(int num, const std::string& name, int size, ShValueType valueType) 
+CcVariable::CcVariable(int num, const std::string& name, int size, ValueType valueType) 
   : m_num(num),
     m_name(name),
     m_size(size),
     m_valueType(valueType) 
 {}
 
-CcBackendCode::LabelFunctor::LabelFunctor(std::map<ShCtrlGraphNodePtr, int>& label_map) 
+CcBackendCode::LabelFunctor::LabelFunctor(std::map<CtrlGraphNodePtr, int>& label_map) 
   : m_cur_label(0),
     m_label_map(label_map) 
 {}
 
-void CcBackendCode::LabelFunctor::operator()(ShCtrlGraphNode* node) 
+void CcBackendCode::LabelFunctor::operator()(CtrlGraphNode* node) 
 {
   m_label_map[node] = m_cur_label++;
 }
@@ -107,12 +107,12 @@ CcBackendCode::EmitFunctor::EmitFunctor(CcBackendCode* bec)
   : m_bec(bec) 
 {}
   
-void CcBackendCode::EmitFunctor::operator()(ShCtrlGraphNode* node) 
+void CcBackendCode::EmitFunctor::operator()(CtrlGraphNode* node) 
 {
   m_bec->emit(node);
 }
   
-CcBackendCode::CcBackendCode(const ShProgramNodeCPtr& program) 
+CcBackendCode::CcBackendCode(const ProgramNodeCPtr& program) 
   : m_original_program(program),
     m_program(0),
 #ifdef _WIN32
@@ -124,74 +124,74 @@ CcBackendCode::CcBackendCode(const ShProgramNodeCPtr& program)
     m_cur_temp(0),
     m_params(NULL) 
 {
-  SH_CC_DEBUG_PRINT(__FUNCTION__);
+  CC_DEBUG_PRINT(__FUNCTION__);
 
   // convert half floats, fractionals to types we can use
-  m_convertMap[SH_HALF] = SH_FLOAT;
-  m_convertMap[SH_FINT] = SH_FLOAT;
-  m_convertMap[SH_FSHORT] = SH_FLOAT;
-  m_convertMap[SH_FBYTE] = SH_FLOAT;
-  m_convertMap[SH_FUINT] = SH_FLOAT;
-  m_convertMap[SH_FUSHORT] = SH_FLOAT;
-  m_convertMap[SH_FUBYTE] = SH_FLOAT;
+  m_convertMap[HALF] = FLOAT;
+  m_convertMap[FINT] = FLOAT;
+  m_convertMap[FSHORT] = FLOAT;
+  m_convertMap[FBYTE] = FLOAT;
+  m_convertMap[FUINT] = FLOAT;
+  m_convertMap[FUSHORT] = FLOAT;
+  m_convertMap[FUBYTE] = FLOAT;
 }
 
 CcBackendCode::~CcBackendCode(void) 
 {
-  SH_CC_DEBUG_PRINT(__FUNCTION__);
+  CC_DEBUG_PRINT(__FUNCTION__);
 }
 
-bool CcBackendCode::allocateRegister(const ShVariableNodePtr& var) 
+bool CcBackendCode::allocateRegister(const VariableNodePtr& var) 
 {
-  SH_CC_DEBUG_PRINT(__FUNCTION__);
+  CC_DEBUG_PRINT(__FUNCTION__);
   return false;
 }
 
-void CcBackendCode::freeRegister(const ShVariableNodePtr& var) 
+void CcBackendCode::freeRegister(const VariableNodePtr& var) 
 {
-  SH_CC_DEBUG_PRINT(__FUNCTION__);
+  CC_DEBUG_PRINT(__FUNCTION__);
 }
 
 void CcBackendCode::upload(void) 
 {
-  SH_CC_DEBUG_PRINT(__FUNCTION__);
+  CC_DEBUG_PRINT(__FUNCTION__);
 }
 
 void CcBackendCode::bind(void) 
 {
-  SH_CC_DEBUG_PRINT(__FUNCTION__);
+  CC_DEBUG_PRINT(__FUNCTION__);
 }
 
 void CcBackendCode::unbind(void)
 {
-  SH_CC_DEBUG_PRINT(__FUNCTION__);
+  CC_DEBUG_PRINT(__FUNCTION__);
 }
 
 void CcBackendCode::update(void) 
 {
-  SH_CC_DEBUG_PRINT(__FUNCTION__);
+  CC_DEBUG_PRINT(__FUNCTION__);
 }
 
-void CcBackendCode::updateUniform(const ShVariableNodePtr& uniform) 
+void CcBackendCode::updateUniform(const VariableNodePtr& uniform) 
 {
-  SH_CC_DEBUG_PRINT(__FUNCTION__);
+  CC_DEBUG_PRINT(__FUNCTION__);
 }
 
 std::ostream& CcBackendCode::print(std::ostream& out) 
 {
-  SH_CC_DEBUG_PRINT(__FUNCTION__);
+  CC_DEBUG_PRINT(__FUNCTION__);
   return out;
 }
 
 std::ostream& CcBackendCode::describe_interface(std::ostream& out) 
 {
-  SH_CC_DEBUG_PRINT(__FUNCTION__);
+  CC_DEBUG_PRINT(__FUNCTION__);
   return out;
 }
 
 std::ostream& CcBackendCode::describe_bindings(std::ostream& out) 
 {
-  SH_CC_DEBUG_PRINT(__FUNCTION__);
+  CC_DEBUG_PRINT(__FUNCTION__);
   return out;
 }
 
@@ -203,7 +203,7 @@ void CcBackendCode::allocate_varlist(const std::list<T> &varList, const char* va
   m_code << "  // Assigning locals for " << arrayName << std::endl;
   for(typename std::list<T>::const_iterator I = varList.begin()
         ; I != varList.end(); ++I, ++num) {
-    ShVariableNodePtr node = *I; 
+    VariableNodePtr node = *I; 
 
     const char* name = makeVarname(varPrefix, num);
     const char* type = ctype(node->valueType());
@@ -215,7 +215,7 @@ void CcBackendCode::allocate_varlist(const std::list<T> &varList, const char* va
   }
   m_code << std::endl;
 
-  SH_CC_DEBUG_PRINT("Found " << num << " " << arrayName << "...");
+  CC_DEBUG_PRINT("Found " << num << " " << arrayName << "...");
 }
 
 void CcBackendCode::allocate_consts(void) 
@@ -223,9 +223,9 @@ void CcBackendCode::allocate_consts(void)
   int num = 0;
     
   m_code << "  // Declaring constants" << std::endl; 
-  for (ShProgramNode::VarList::const_iterator I = m_program->constants.begin()
+  for (ProgramNode::VarList::const_iterator I = m_program->constants.begin()
 	 ; I != m_program->constants.end(); ++I, ++num) {
-    ShVariableNodePtr node = (*I);
+    VariableNodePtr node = (*I);
     const char* name = makeVarname(ConstPrefix, num);
       
     m_code << "const " << ctype(node->valueType()) << " " << name << "[" << node->size() << "] = {" 
@@ -235,7 +235,7 @@ void CcBackendCode::allocate_consts(void)
   }
   m_code << std::endl;
 
-  SH_CC_DEBUG_PRINT("Found " << num << " consts...");
+  CC_DEBUG_PRINT("Found " << num << " consts...");
 }
 
 void CcBackendCode::allocate_inputs(void) 
@@ -249,9 +249,9 @@ void CcBackendCode::allocate_outputs(void)
   
   m_code << "  // Initializing output variables to zero " << std::endl;
   int num = 0;
-  for (ShProgramNode::VarList::const_iterator I = m_program->outputs.begin(); 
+  for (ProgramNode::VarList::const_iterator I = m_program->outputs.begin(); 
        I != m_program->outputs.end(); ++I, ++num) {
-    ShVariableNodePtr node = *I; 
+    VariableNodePtr node = *I; 
 
     const char* name = makeVarname(OutputPrefix, num);
     const char* type = ctype(node->valueType());
@@ -276,25 +276,25 @@ void CcBackendCode::allocate_uniforms(void)
 {
   allocate_varlist(m_program->uniforms, UniformPrefix, "params"/*, "const"*/);  // let uniforms be assigned to...
     
-  ShProgramNode::VarList &uniforms = m_program->uniforms;
+  ProgramNode::VarList &uniforms = m_program->uniforms;
   m_params = new void*[uniforms.size()]; 
 
 
   // @todo type Trying to use the variants' data arrays directly. Hope this works. (<-- stupid comment)
   // @todo note that since ray assigns to uniforms, we're going to allow
   // this to be non-const...
-  ShProgramNode::VarList::iterator I = uniforms.begin(); 
+  ProgramNode::VarList::iterator I = uniforms.begin(); 
   for (int i = 0; I != m_program->uniforms.end(); ++I, ++i) {
-    ShVariableNodePtr node = *I; 
+    VariableNodePtr node = *I; 
     m_params[i] = node->getVariant()->array(); 
   }
 }
 
 void CcBackendCode::allocate_temps() 
 {
-  ShProgramNode::VarList::const_iterator I = m_program->temps.begin();
+  ProgramNode::VarList::const_iterator I = m_program->temps.begin();
   for (; I != m_program->temps.end(); ++I, ++m_cur_temp) {
-    ShVariableNodePtr node = (*I);
+    VariableNodePtr node = (*I);
     const char* name = makeVarname(TempPrefix, m_cur_temp);
       
     m_code << ctype(node->valueType()) << " " << name << "[" << node->size() << "]"
@@ -302,13 +302,13 @@ void CcBackendCode::allocate_temps()
     m_varmap[node] = CcVariable(m_cur_temp, name, node->size(), node->valueType()); 
   }
 
-  SH_CC_DEBUG_PRINT("Found " << m_cur_temp << " temps...");
+  CC_DEBUG_PRINT("Found " << m_cur_temp << " temps...");
 }
 
-std::string CcBackendCode::resolve(const ShVariable& v) 
+std::string CcBackendCode::resolve(const Variable& v) 
 {
   CcVariable &var = m_varmap[v.node()];
-  SH_DEBUG_ASSERT(var.m_num != -1);
+  DEBUG_ASSERT(var.m_num != -1);
 
   std::stringstream buf;
   if (v.neg()) buf << "-";
@@ -316,10 +316,10 @@ std::string CcBackendCode::resolve(const ShVariable& v)
   return buf.str();
 }
 
-std::string CcBackendCode::resolve(const ShVariable& v, int idx) 
+std::string CcBackendCode::resolve(const Variable& v, int idx) 
 {
   CcVariable &var = m_varmap[v.node()];
-  SH_DEBUG_ASSERT(var.m_num != -1);
+  DEBUG_ASSERT(var.m_num != -1);
 
   std::stringstream buf;
   if (v.neg()) buf << "-";
@@ -327,41 +327,41 @@ std::string CcBackendCode::resolve(const ShVariable& v, int idx)
   return buf.str();
 }
 
-const char* CcBackendCode::ctype(ShValueType valueType)
+const char* CcBackendCode::ctype(ValueType valueType)
 {
   switch(valueType) {
-  case SH_HALF:
-  case SH_FLOAT:
-  case SH_FBYTE:
-  case SH_FSHORT:
-  case SH_FINT:
-  case SH_FUBYTE:
-  case SH_FUSHORT:
-  case SH_FUINT:
+  case HALF:
+  case FLOAT:
+  case FBYTE:
+  case FSHORT:
+  case FINT:
+  case FUBYTE:
+  case FUSHORT:
+  case FUINT:
     return "float";
 
-  case SH_DOUBLE: return "double";
-  case SH_BYTE:   return "char";
-  case SH_SHORT:  return "short";
-  case SH_INT:    return "int";
-  case SH_UBYTE:  return "unsigned char";
-  case SH_USHORT: return "unsigned short";
-  case SH_UINT:   return "unsigned int";
+  case DOUBLE: return "double";
+  case BYTE:   return "char";
+  case SHORT:  return "short";
+  case INT:    return "int";
+  case UBYTE:  return "unsigned char";
+  case USHORT: return "unsigned short";
+  case UINT:   return "unsigned int";
   default:
-    SH_DEBUG_PRINT("Invalid value type: " << shValueTypeName(valueType));
-    SH_DEBUG_ASSERT(0); 
+    DEBUG_PRINT("Invalid value type: " << valueTypeName(valueType));
+    DEBUG_ASSERT(0); 
   }
   return "unknown"; 
 }
 
-void CcBackendCode::emit(const ShBasicBlockPtr& block) 
+void CcBackendCode::emit(const BasicBlockPtr& block) 
 {
   if (!block) {
     m_code << "  // empty basic block" << std::endl;
   }
   else {
     m_code << "  // start basic block" << std::endl;
-    ShBasicBlock::ShStmtList::const_iterator I = block->begin();
+    BasicBlock::StmtList::const_iterator I = block->begin();
     for(;I != block->end(); ++I) {
       emit((*I));
     }
@@ -369,7 +369,7 @@ void CcBackendCode::emit(const ShBasicBlockPtr& block)
   }
 }
 
-void CcBackendCode::emit(const ShCtrlGraphNodePtr& node) 
+void CcBackendCode::emit(const CtrlGraphNodePtr& node) 
 {
   m_code << "label_" << m_label_map[node] << ":" << std::endl
 	 << "  ;" << std::endl;
@@ -378,7 +378,7 @@ void CcBackendCode::emit(const ShCtrlGraphNodePtr& node)
     emit(node->block);
   }
 
-  std::vector<ShCtrlGraphBranch>::iterator I = node->successors.begin();
+  std::vector<CtrlGraphBranch>::iterator I = node->successors.begin();
   for(;I != node->successors.end(); ++I) {
 
     m_code << "  if (";
@@ -410,20 +410,20 @@ bool CcBackendCode::generate(void)
 {
   // Transform the code to remove types this backend cannot handle
   m_program = m_original_program->clone();
-  ShContext::current()->enter(m_program);
-  ShTransformer transform(m_program);
+  Context::current()->enter(m_program);
+  Transformer transform(m_program);
 
   transform.convertToFloat(m_convertMap);
   transform.stripDummyOps();
   if(transform.changed()) {
     optimize(m_program);
   } else {
-    m_program = shref_const_cast<ShProgramNode>(m_original_program);
+    m_program = shref_const_cast<ProgramNode>(m_original_program);
   }
-  ShContext::current()->exit();
+  Context::current()->exit();
 
   // @todo type add conversion code on 
-  // transformer already fixes the ShProgram.  Now we just need to set up
+  // transformer already fixes the Program.  Now we just need to set up
   // some storages that hold a copy of texture and input stream data in 
   // our computation type, and make a temp buffer for output if it needs 
   // to be type converted.
@@ -432,7 +432,7 @@ bool CcBackendCode::generate(void)
   // b) convert input data array to a useable computation type
   // c) convert output data array to the memory storage type
 
-  SH_CC_DEBUG_PRINT("Creating label map...");
+  CC_DEBUG_PRINT("Creating label map...");
   LabelFunctor f(m_label_map);
   m_program->ctrlGraph->dfs(f);
 
@@ -445,7 +445,7 @@ bool CcBackendCode::generate(void)
   allocate_temps();
 
   // emit code
-  SH_CC_DEBUG_PRINT("Emitting code...");
+  CC_DEBUG_PRINT("Emitting code...");
   EmitFunctor fe(this);
   m_program->ctrlGraph->dfs(fe);
 
@@ -480,8 +480,8 @@ bool CcBackendCode::generate(void)
   std::stringstream epilogue;
   epilogue << "}" << std::endl;
 
-#ifdef SH_CC_DEBUG
-  SH_CC_DEBUG_PRINT("Outputting generated C++ code to ccstream.cpp");
+#ifdef CC_DEBUG
+  CC_DEBUG_PRINT("Outputting generated C++ code to ccstream.cpp");
   std::ofstream dbgout("ccstream.cpp");
   dbgout << prologue.str();
   dbgout << m_code.str();
@@ -524,7 +524,7 @@ bool CcBackendCode::load_shader_func(const std::stringstream& prologue,
   char cmdline[1024];
   sprintf(cmdline, "cl /EHsc /LD /Fe\"%s\" \"%s\"", dllfile, cppfile);
 
-  SH_CC_DEBUG_PRINT("cmdline: \"" << cmdline << "\"");
+  CC_DEBUG_PRINT("cmdline: \"" << cmdline << "\"");
 
   STARTUPINFO si;
   PROCESS_INFORMATION pi;
@@ -534,7 +534,7 @@ bool CcBackendCode::load_shader_func(const std::stringstream& prologue,
 
   if (!CreateProcess(NULL, cmdline, NULL, NULL,
 		     TRUE, 0, NULL, NULL, &si, &pi)) {
-    SH_CC_DEBUG_PRINT("CreateProcess failed!" << GetLastError());
+    CC_DEBUG_PRINT("CreateProcess failed!" << GetLastError());
     return false;
   }
 
@@ -544,13 +544,13 @@ bool CcBackendCode::load_shader_func(const std::stringstream& prologue,
   // Attempt to load the dll and fetch our function
   m_hmodule = LoadLibrary(dllfile);
   if (m_hmodule == NULL) {
-    SH_CC_DEBUG_PRINT("LoadLibrary failed: " << GetLastError());
+    CC_DEBUG_PRINT("LoadLibrary failed: " << GetLastError());
     return false;
   } else {
     m_shader_func = (CcShaderFunc)GetProcAddress(m_hmodule, "cc_shader");
 
     if (m_shader_func == NULL) {
-      SH_CC_DEBUG_PRINT("GetProcAddress failed: " << GetLastError());
+      CC_DEBUG_PRINT("GetProcAddress failed: " << GetLastError());
       return false;
     }
   }
@@ -586,33 +586,33 @@ bool CcBackendCode::load_shader_func(const std::stringstream& prologue,
 #else
     execlp("cc", "cc", "-O2", "-fPIC", "-shared", "-o", sofile, ccfile, (void*)NULL);
 #endif // __APPLE__
-    SH_CC_DEBUG_PRINT("exec failed (" << errno << ")");
+    CC_DEBUG_PRINT("exec failed (" << errno << ")");
     exit(-1);
   } else if (pid > 0) {
     int status;
     pid_t ret = waitpid(pid, &status, 0);
     if (ret == -1) {
-      SH_CC_DEBUG_PRINT("wait failed...");
+      CC_DEBUG_PRINT("wait failed...");
       return false;
     } else {
-      SH_CC_DEBUG_PRINT("status = " << status);
+      CC_DEBUG_PRINT("status = " << status);
     }
 
     m_handle = dlopen(sofile, RTLD_NOW);
     if (m_handle == NULL) {
-      SH_CC_DEBUG_PRINT("dlopen failed: " << dlerror());
+      CC_DEBUG_PRINT("dlopen failed: " << dlerror());
       return false;
     } else {
       m_shader_func = (CcShaderFunc)dlsym(m_handle, "cc_shader");
       if (m_shader_func == NULL) {
-	SH_CC_DEBUG_PRINT("dlsym failed: " << dlerror());
+	CC_DEBUG_PRINT("dlsym failed: " << dlerror());
 	return false;
       }
     }
     return true;
   } else  {
     // fork failed
-    SH_CC_DEBUG_PRINT("fork failed...");
+    CC_DEBUG_PRINT("fork failed...");
     return false;
   }
 #endif /* _WIN32 */
@@ -631,11 +631,11 @@ void CcBackendCode::delete_temporary_files()
   }
 }
 
-bool CcBackendCode::execute(ShStream& dest) 
+bool CcBackendCode::execute(Stream& dest) 
 {
   if (!m_shader_func) {
     if (!generate()) {
-      SH_CC_DEBUG_PRINT("failed to generate program..."); 
+      CC_DEBUG_PRINT("failed to generate program..."); 
       return false;
     }
   }
@@ -654,18 +654,18 @@ bool CcBackendCode::execute(ShStream& dest)
     
   int sidx = 0;
     
-  SH_CC_DEBUG_PRINT("Assigning input channels to arrays");
-  for(ShProgramNode::ChannelList::const_iterator I = m_program->begin_channels()
+  CC_DEBUG_PRINT("Assigning input channels to arrays");
+  for(ProgramNode::ChannelList::const_iterator I = m_program->begin_channels()
         ;I != m_program->end_channels(); ++I, ++sidx) {
-    ShChannelNodePtr channel = (*I);
-    ShHostStoragePtr storage = shref_dynamic_cast<ShHostStorage>(channel->memory()->findStorage("host"));
+    ChannelNodePtr channel = (*I);
+    HostStoragePtr storage = shref_dynamic_cast<HostStorage>(channel->memory()->findStorage("host"));
       
-    int datasize = shTypeInfo(channel->valueType(), SH_MEM)->datasize();
+    int datasize = typeInfo(channel->valueType(), MEM)->datasize();
     stream_sizes[sidx] = datasize * channel->size() * channel->stride();
     stream_types[sidx] = channel->valueType();
 
     if (!storage) {
-      storage = new ShHostStorage(channel->memory().object(),
+      storage = new HostStorage(channel->memory().object(),
 				  datasize * channel->size() * channel->count(), channel->valueType());
     }
     storage->dirty();
@@ -674,11 +674,11 @@ bool CcBackendCode::execute(ShStream& dest)
   }
 
   int tidx = 0;
-  for(ShProgramNode::TexList::const_iterator I = m_program->begin_textures()
+  for(ProgramNode::TexList::const_iterator I = m_program->begin_textures()
         ;I != m_program->end_textures(); ++I, ++tidx) {
-    ShTextureNodePtr texture = (*I);
+    TextureNodePtr texture = (*I);
 
-    ShHostStoragePtr storage = shref_dynamic_cast<ShHostStorage>(texture->memory(0)->findStorage("host"));
+    HostStoragePtr storage = shref_dynamic_cast<HostStorage>(texture->memory(0)->findStorage("host"));
 
     // @todo type this doesn't work with cube maps
     // but should be taken care of
@@ -691,42 +691,42 @@ bool CcBackendCode::execute(ShStream& dest)
   int count = 0;
 
     
-  SH_CC_DEBUG_PRINT("Assigning output channels to arrays");
-  for(ShStream::NodeList::iterator I = dest.begin()
+  CC_DEBUG_PRINT("Assigning output channels to arrays");
+  for(Stream::NodeList::iterator I = dest.begin()
         ;I != dest.end(); ++I, ++oidx) {
-    ShChannelNodePtr channel = (*I);
-    ShHostStoragePtr storage = shref_dynamic_cast<ShHostStorage>(
+    ChannelNodePtr channel = (*I);
+    HostStoragePtr storage = shref_dynamic_cast<HostStorage>(
 								 channel->memory()->findStorage("host"));
 
-    int datasize = shTypeInfo(channel->valueType(), SH_MEM)->datasize();
+    int datasize = typeInfo(channel->valueType(), MEM)->datasize();
     output_sizes[oidx] = datasize * channel->size() * channel->stride();
     output_types[oidx] = channel->valueType();
 
     if (!storage) {
-      SH_CC_DEBUG_PRINT("  Allocating new storage?");
-      storage = new ShHostStorage(channel->memory().object(),
+      CC_DEBUG_PRINT("  Allocating new storage?");
+      storage = new HostStorage(channel->memory().object(),
 				  datasize * channel->size() * channel->count(), channel->valueType());
     }
     storage->dirty();
     outputs[oidx] = reinterpret_cast<char*>(storage->data()) +
                     datasize * channel->size() * channel->offset();
-    SH_CC_DEBUG_PRINT("  outputs[" << oidx << "] = " << outputs[oidx]);
+    CC_DEBUG_PRINT("  outputs[" << oidx << "] = " << outputs[oidx]);
 
     if (count == 0) {
       count = channel->count();
     } else if (count != channel->count()) {
-      SH_CC_DEBUG_PRINT("channel count discrepancy...");
+      CC_DEBUG_PRINT("channel count discrepancy...");
       return false;
     }
   }
 
       
   for(int i = 0; i < count; i++) {
-    SH_CC_DEBUG_PRINT("execution " << i << " of " << count);
+    CC_DEBUG_PRINT("execution " << i << " of " << count);
     m_shader_func(inputs, m_params, streams, textures, outputs);
 
     for(int j = 0; j < num_streams; j++) {
-      SH_CC_DEBUG_PRINT("advancing input stream "
+      CC_DEBUG_PRINT("advancing input stream "
 			<< j
 			<< " by "
 			<< stream_sizes[j] 
@@ -736,7 +736,7 @@ bool CcBackendCode::execute(ShStream& dest)
       streams[j] = reinterpret_cast<char*>(streams[j]) + stream_sizes[j]; 
     }
     for(int j = 0; j < num_outputs; j++) {
-      SH_CC_DEBUG_PRINT("advancing output stream "
+      CC_DEBUG_PRINT("advancing output stream "
 			<< j
 			<< " by "
 			<< output_sizes[j]
@@ -750,31 +750,31 @@ bool CcBackendCode::execute(ShStream& dest)
 
 
 CcBackend::CcBackend(void)
-  : ShBackend("cc", "1.0")
+  : Backend("cc", "1.0")
 {
-  SH_CC_DEBUG_PRINT(__FUNCTION__);
+  CC_DEBUG_PRINT(__FUNCTION__);
 }
 
 CcBackend::~CcBackend(void) 
 {
-  SH_CC_DEBUG_PRINT(__FUNCTION__);
+  CC_DEBUG_PRINT(__FUNCTION__);
 }
 
-ShBackendCodePtr CcBackend::generate_code(const std::string& target,
-					  const ShProgramNodeCPtr& program) 
+BackendCodePtr CcBackend::generate_code(const std::string& target,
+					  const ProgramNodeCPtr& program) 
 {
-  SH_CC_DEBUG_PRINT(__FUNCTION__);
+  CC_DEBUG_PRINT(__FUNCTION__);
   CcBackendCodePtr backendcode = new CcBackendCode(program);
   backendcode->generate();
   return backendcode;
 }
 
-void CcBackend::execute(const ShProgramNodeCPtr& program, ShStream& dest) 
+void CcBackend::execute(const ProgramNodeCPtr& program, Stream& dest) 
 {
-  SH_CC_DEBUG_PRINT(__FUNCTION__);
+  CC_DEBUG_PRINT(__FUNCTION__);
 
-  ShProgramNodePtr prg = shref_const_cast<ShProgramNode>(program);
-  ShPointer<ShBackend> b(this);
+  ProgramNodePtr prg = shref_const_cast<ProgramNode>(program);
+  Pointer<Backend> b(this);
     
   CcBackendCodePtr backendcode = shref_dynamic_cast<CcBackendCode>(prg->code(b)); // = new CcBackendCode(program);
   backendcode->execute(dest);
@@ -786,12 +786,12 @@ void CcBackend::execute(const ShProgramNodeCPtr& program, ShStream& dest)
 
 
 extern "C" {
-  using namespace ShCc;
+  using namespace Cc;
 
 #ifdef _WIN32
   __declspec(dllexport) 
 #endif
-  CcBackend* shBackend_libshcc_instantiate()
+  CcBackend* backend_libshcc_instantiate()
   {
     return new CcBackend();
   }
@@ -799,7 +799,7 @@ extern "C" {
 #ifdef _WIN32
   __declspec(dllexport) 
 #endif
-  int shBackend_libshcc_target_cost(const std::string& target)
+  int backend_libshcc_target_cost(const std::string& target)
   {
     if ("cc:stream" == target)  return 1;
     if ("cpu:stream" == target) return 5;

@@ -22,27 +22,27 @@
 
 #if defined(_WIN32)
 
-# ifndef SH_DLLEXPORT
-#   define SH_DLLEXPORT __declspec(dllimport)
+# ifndef DLLEXPORT
+#   define DLLEXPORT __declspec(dllimport)
 # endif
 
-# ifndef SH_DLLLOCAL
-#   define SH_DLLLOCAL
+# ifndef DLLLOCAL
+#   define DLLLOCAL
 # endif
 
 #elif defined(HAVE_GCCVISIBILITYPATCH)
 
-# define SH_DLLEXPORT __attribute__ ((visibility("default")))
-# define SH_DLLLOCAL __attribute__ ((visibility("hidden")))
+# define DLLEXPORT __attribute__ ((visibility("default")))
+# define DLLLOCAL __attribute__ ((visibility("hidden")))
 
 #else
 
-# ifndef SH_DLLEXPORT
-#   define SH_DLLEXPORT
+# ifndef DLLEXPORT
+#   define DLLEXPORT
 # endif
 
-# ifndef SH_DLLLOCAL
-#   define SH_DLLLOCAL
+# ifndef DLLLOCAL
+#   define DLLLOCAL
 # endif
 
 #endif // _WIN32

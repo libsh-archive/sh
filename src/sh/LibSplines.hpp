@@ -17,12 +17,12 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#include "ShLib.hpp" // ShLibSplines needs to be included from within ShLib
+#include "Lib.hpp" // LibSplines needs to be included from within Lib
 
 #ifndef SHLIBSPLINES_HPP
 #define SHLIBSPLINES_HPP
 
-#include "ShGeneric.hpp"
+#include "Generic.hpp"
 
 #ifndef _WIN32
 namespace SH {
@@ -35,25 +35,25 @@ namespace SH {
 /** Evaluate the bernstein (Bezier) basis functions of order N at
  * parameter a. */
 template<int N, typename T>
-ShGeneric<N, T> bernstein(const ShGeneric<1, T>& a);
+Generic<N, T> bernstein(const Generic<1, T>& a);
 
 /** Evaluate the cubic Bezier spline.
  */
 template <int N, typename T>
-ShGeneric<N, T> bezier(const ShGeneric<1, T>& t, const ShGeneric<N, T>& p);
+Generic<N, T> bezier(const Generic<1, T>& t, const Generic<N, T>& p);
 
 /** Evaluate the cubic Hermite spline at parameter a interpolating b
  *  at 0 with tangent c and d at 1 with tangent e. */
 template <int N, typename T>
-ShGeneric<N, T> hermite(const ShGeneric<1, T>& a, const ShGeneric<N, T>& b, 
-                        const ShGeneric<N, T>& c, const ShGeneric<N, T>& d, 
-                        const ShGeneric<N, T>& e);
+Generic<N, T> hermite(const Generic<1, T>& a, const Generic<N, T>& b, 
+                        const Generic<N, T>& c, const Generic<N, T>& d, 
+                        const Generic<N, T>& e);
 
 /*@}*/
 
 }
 #endif
 
-#include "ShLibSplinesImpl.hpp"
+#include "LibSplinesImpl.hpp"
 
 #endif

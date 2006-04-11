@@ -28,42 +28,42 @@ namespace SH {
  * between the two closest one.
  */
 template<typename T, bool interpolated=true>
-class ShMIPFilter : public T {
+class MIPFilter : public T {
 public:
-  ShMIPFilter()
+  MIPFilter()
     : T()
   {
     if (interpolated) {
-      this->m_node->traits().filtering(ShTextureTraits::SH_FILTER_MIPMAP_LINEAR);
+      this->m_node->traits().filtering(TextureTraits::FILTER_MIPMAP_LINEAR);
     } else {
-      this->m_node->traits().filtering(ShTextureTraits::SH_FILTER_MIPMAP_NEAREST);
+      this->m_node->traits().filtering(TextureTraits::FILTER_MIPMAP_NEAREST);
     }
   }
-  ShMIPFilter(int width)
+  MIPFilter(int width)
     : T(width)
   {
     if (interpolated) {
-      this->m_node->traits().filtering(ShTextureTraits::SH_FILTER_MIPMAP_LINEAR);
+      this->m_node->traits().filtering(TextureTraits::FILTER_MIPMAP_LINEAR);
     } else {
-      this->m_node->traits().filtering(ShTextureTraits::SH_FILTER_MIPMAP_NEAREST);
+      this->m_node->traits().filtering(TextureTraits::FILTER_MIPMAP_NEAREST);
     }
   }
-  ShMIPFilter(int width, int height)
+  MIPFilter(int width, int height)
     : T(width, height)
   {
     if (interpolated) {
-      this->m_node->traits().filtering(ShTextureTraits::SH_FILTER_MIPMAP_LINEAR);
+      this->m_node->traits().filtering(TextureTraits::FILTER_MIPMAP_LINEAR);
     } else {
-      this->m_node->traits().filtering(ShTextureTraits::SH_FILTER_MIPMAP_NEAREST);
+      this->m_node->traits().filtering(TextureTraits::FILTER_MIPMAP_NEAREST);
     }
   }
-  ShMIPFilter(int width, int height, int depth)
+  MIPFilter(int width, int height, int depth)
     : T(width, height, depth)
   {
     if (interpolated) {
-      this->m_node->traits().filtering(ShTextureTraits::SH_FILTER_MIPMAP_LINEAR);
+      this->m_node->traits().filtering(TextureTraits::FILTER_MIPMAP_LINEAR);
     } else {
-      this->m_node->traits().filtering(ShTextureTraits::SH_FILTER_MIPMAP_NEAREST);
+      this->m_node->traits().filtering(TextureTraits::FILTER_MIPMAP_NEAREST);
     }
   }
 
@@ -75,27 +75,27 @@ public:
  * Use this template to indicate that a texture should not be mipmapped.
  */
 template<typename T>
-class ShNoMIPFilter : public T {
+class NoMIPFilter : public T {
 public:
-  ShNoMIPFilter()
+  NoMIPFilter()
     : T()
   {
-    this->m_node->traits().filtering(ShTextureTraits::SH_FILTER_NONE);
+    this->m_node->traits().filtering(TextureTraits::FILTER_NONE);
   }
-  ShNoMIPFilter(int width)
+  NoMIPFilter(int width)
     : T(width)
   {
-    this->m_node->traits().filtering(ShTextureTraits::SH_FILTER_NONE);
+    this->m_node->traits().filtering(TextureTraits::FILTER_NONE);
   }
-  ShNoMIPFilter(int width, int height)
+  NoMIPFilter(int width, int height)
     : T(width, height)
   {
-    this->m_node->traits().filtering(ShTextureTraits::SH_FILTER_NONE);
+    this->m_node->traits().filtering(TextureTraits::FILTER_NONE);
   }
-  ShNoMIPFilter(int width, int height, int depth)
+  NoMIPFilter(int width, int height, int depth)
     : T(width, height, depth)
   {
-    this->m_node->traits().filtering(ShTextureTraits::SH_FILTER_NONE);
+    this->m_node->traits().filtering(TextureTraits::FILTER_NONE);
   }
 
   typedef typename T::return_type return_type;

@@ -20,7 +20,7 @@
 #ifndef SHGRAPHIMPL_HPP 
 #define SHGRAPHIMPL_HPP 
 
-#include "ShGraph.hpp"
+#include "Graph.hpp"
 #include <stack>
 #include <map>
 
@@ -31,74 +31,74 @@ namespace SH {
 
 
 template<typename G>
-ShGraphVertex<G>::ShGraphVertex()
+GraphVertex<G>::GraphVertex()
   : marked(false)
 {}
 
 template<typename G>
-ShGraphVertex<G>::ShGraphVertex(const ShGraphVertex<G> &other)
+GraphVertex<G>::GraphVertex(const GraphVertex<G> &other)
   : marked(other.marked)
 {}
 
 template<typename G>
-std::ostream& ShGraphVertex<G>::graphvizDump(std::ostream &out) const
+std::ostream& GraphVertex<G>::graphvizDump(std::ostream &out) const
 {
   out << " [label=\"\", shape=circle, height=0.25]";
   return out;
 }
 
 template<typename G>
-ShGraphEdge<G>::ShGraphEdge()
+GraphEdge<G>::GraphEdge()
   : start(0), end(0)
 {}
 
 template<typename G>
-ShGraphEdge<G>::ShGraphEdge(typename G::Vertex *start, typename G::Vertex *end)
+GraphEdge<G>::GraphEdge(typename G::Vertex *start, typename G::Vertex *end)
   : start(start), end(end)
 {}
 
 template<typename G>
-ShGraphEdge<G>::ShGraphEdge(const ShGraphEdge<G> &other)
+GraphEdge<G>::GraphEdge(const GraphEdge<G> &other)
   : start(0), end(0) 
 {}
 
 template<typename G>
-std::ostream& ShGraphEdge<G>::graphvizDump(std::ostream &out) const
+std::ostream& GraphEdge<G>::graphvizDump(std::ostream &out) const
 {
   return out; // use default edge
 }
 
 template<typename G>
-ShGraph<G>::ShGraph()
+Graph<G>::Graph()
 {}
 
 template<typename G>
-ShGraph<G>::ShGraph(const ShGraph<G> &other)
+Graph<G>::Graph(const Graph<G> &other)
 {
   *this = other;
 }
 
 template<typename G>
-ShGraph<G>::~ShGraph()
+Graph<G>::~Graph()
 {
   clear();
 }
 
 template<typename G>
-void ShGraph<G>::addVertex(typename G::Vertex *v)
+void Graph<G>::addVertex(typename G::Vertex *v)
 {
   verts.insert(v);
 }
 
 template<typename G>
-void ShGraph<G>::addEdge(typename G::Edge *e)
+void Graph<G>::addEdge(typename G::Edge *e)
 {
   edges.insert(e);
   e->start->edges.push_back(e);
 }
 
 template<typename G>
-void ShGraph<G>::removeVertex(typename G::Vertex *v)
+void Graph<G>::removeVertex(typename G::Vertex *v)
 {
   for(typename EdgeList::iterator E = v->edges.begin(); E != v->edges.end(); ++E) {
     edges.erase(*E);
@@ -107,7 +107,7 @@ void ShGraph<G>::removeVertex(typename G::Vertex *v)
 }
 
 template<typename G>
-void ShGraph<G>::removeEdge(typename G::Edge *e)
+void Graph<G>::removeEdge(typename G::Edge *e)
 {
   edges.erase(e);
   e->start->edges.remove(e);
@@ -115,7 +115,7 @@ void ShGraph<G>::removeEdge(typename G::Edge *e)
 }
 
 template<typename G>
-void ShGraph<G>::clear()
+void Graph<G>::clear()
 {
   for(typename VertexSet::iterator V = verts.begin(); V != verts.end(); ++V) delete *V;
   for(typename EdgeSet::iterator E = edges.begin(); E != edges.end(); ++E) delete *E;
@@ -125,13 +125,13 @@ void ShGraph<G>::clear()
 }
 
 template<typename G>
-void ShGraph<G>::clearMarked()
+void Graph<G>::clearMarked()
 {
   for(typename VertexSet::iterator V = verts.begin(); V != verts.end(); ++V) (*V)->marked = false;
 }
 
 template<typename G>
-ShGraph<G>& ShGraph<G>::operator=(const ShGraph<G> &other)
+Graph<G>& Graph<G>::operator=(const Graph<G> &other)
 {
   clear();
 
@@ -158,7 +158,7 @@ ShGraph<G>& ShGraph<G>::operator=(const ShGraph<G> &other)
 
 template<typename G>
 template<typename F>
-void ShGraph<G>::dfs(typename G::Vertex *start, F &functor)
+void Graph<G>::dfs(typename G::Vertex *start, F &functor)
 {
   std::stack<typename G::Vertex *> worklist;
 
@@ -176,7 +176,7 @@ void ShGraph<G>::dfs(typename G::Vertex *start, F &functor)
 
 template<typename G>
 template<typename W>
-typename W::WeightType ShGraph<G>::bellmanFord(typename G::Vertex *start, typename G::Vertex *end, W &weigher, EdgeList *path) 
+typename W::WeightType Graph<G>::bellmanFord(typename G::Vertex *start, typename G::Vertex *end, W &weigher, EdgeList *path) 
 {
   // essentially the same as above, with predecessors
   // TODO refactor so the algorithm shows up only once
@@ -215,7 +215,7 @@ typename W::WeightType ShGraph<G>::bellmanFord(typename G::Vertex *start, typena
 
 template<typename G>
 template<typename W>
-void ShGraph<G>::floydWarshall(W &weigher, VertexPairMap<typename W::WeightType> &dist, FirstStepMap *path) 
+void Graph<G>::floydWarshall(W &weigher, VertexPairMap<typename W::WeightType> &dist, FirstStepMap *path) 
 {
   typename VertexSet::const_iterator V, U, X; 
   typename EdgeSet::iterator E;
@@ -261,7 +261,7 @@ void ShGraph<G>::floydWarshall(W &weigher, VertexPairMap<typename W::WeightType>
 
 
 template<typename G>
-void ShGraph<G>::transitiveClosure(TransitiveClosureMap &tcm)
+void Graph<G>::transitiveClosure(TransitiveClosureMap &tcm)
 {
   typename VertexSet::const_iterator V, U, X; 
   typename EdgeSet::iterator E;
@@ -287,7 +287,7 @@ void ShGraph<G>::transitiveClosure(TransitiveClosureMap &tcm)
 }
 
 template<typename G>
-void ShGraph<G>::rootSet(VertexSet &roots) {
+void Graph<G>::rootSet(VertexSet &roots) {
   roots = verts;
   typename EdgeSet::const_iterator E;
   for(E = edges.begin(); E != edges.end(); ++E) {
@@ -304,7 +304,7 @@ struct NegativeWeigher {
 }; 
 
 template<typename G>
-void ShGraph<G>::vertexHeight(const VertexSet &roots, HeightMap &heights) {
+void Graph<G>::vertexHeight(const VertexSet &roots, HeightMap &heights) {
   heights.clear();
   VertexPairMap<int> dist;
   NegativeWeigher<G> weigher;
@@ -320,7 +320,7 @@ void ShGraph<G>::vertexHeight(const VertexSet &roots, HeightMap &heights) {
 
 
 template<typename G>
-void ShGraph<G>::leastCommonAncestor(LCAMap &ancestor)
+void Graph<G>::leastCommonAncestor(LCAMap &ancestor)
 {
   typename VertexSet::const_iterator U, V, W;
   typename EdgeSet::const_iterator E;
@@ -356,29 +356,29 @@ void ShGraph<G>::leastCommonAncestor(LCAMap &ancestor)
 }
 
 template<typename G>
-std::ostream& ShGraphDefaultDumper<G>::operator()(std::ostream& out, const typename G::Vertex *v)
+std::ostream& GraphDefaultDumper<G>::operator()(std::ostream& out, const typename G::Vertex *v)
 {
   return v->graphvizDump(out);
 }
 
 template<typename G>
-std::ostream& ShGraphDefaultDumper<G>::operator()(std::ostream& out, const typename G::Edge *e)
+std::ostream& GraphDefaultDumper<G>::operator()(std::ostream& out, const typename G::Edge *e)
 {
   return e->graphvizDump(out);
 }
 
 template<typename G>
-std::ostream& graphvizDump(std::ostream &out, const ShGraph<G> &g)
+std::ostream& graphvizDump(std::ostream &out, const Graph<G> &g)
 {
-  ShGraphDefaultDumper<G> dumper;
+  GraphDefaultDumper<G> dumper;
   return graphvizDump(out, g, dumper); 
 }
 
 template<typename G, typename D>
-std::ostream& graphvizDump(std::ostream &out, const ShGraph<G> &g, D &dumpFunctor)
+std::ostream& graphvizDump(std::ostream &out, const Graph<G> &g, D &dumpFunctor)
 {
   out << "digraph {" << std::endl;
-    typename ShGraph<G>::VertexSet::const_iterator V = g.verts.begin();
+    typename Graph<G>::VertexSet::const_iterator V = g.verts.begin();
     for(; V != g.verts.end(); ++V) {
       out << "\"" << *V << "\" ";
       dumpFunctor(out, *V);
@@ -386,7 +386,7 @@ std::ostream& graphvizDump(std::ostream &out, const ShGraph<G> &g, D &dumpFuncto
       out << std::endl;
     }
 
-    typename ShGraph<G>::EdgeSet::const_iterator E = g.edges.begin();
+    typename Graph<G>::EdgeSet::const_iterator E = g.edges.begin();
     for(; E != g.edges.end(); ++E) {
       const typename G::Edge &e = **E;
       out << "\"" << e.start << "\" ";

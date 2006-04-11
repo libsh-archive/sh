@@ -20,8 +20,8 @@
 #ifndef WGLPBUFFERCONTEXT_HPP
 #define WGLPBUFFERCONTEXT_HPP
 
-#include "ShStream.hpp"
-#include "ShProgram.hpp"
+#include "Stream.hpp"
+#include "Program.hpp"
 #include "PBufferContext.hpp"
 
 namespace shgl {
@@ -57,8 +57,8 @@ private:
   HGLRC m_hglrc;
 };
 
-typedef SH::ShPointer<WGLPBufferContext> WGLPBufferContextPtr;
-typedef SH::ShPointer<const WGLPBufferContext> WGLPBufferContextCPtr;
+typedef SH::Pointer<WGLPBufferContext> WGLPBufferContextPtr;
+typedef SH::Pointer<const WGLPBufferContext> WGLPBufferContextCPtr;
 
 class WGLPBufferFactory : public PBufferFactory {
 public:

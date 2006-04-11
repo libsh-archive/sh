@@ -20,14 +20,14 @@
 #ifndef SHLIBCOLOR_HPP
 #define SHLIBCOLOR_HPP
 
-#include "ShAttrib.hpp"
-#include "ShLib.hpp"
+#include "Attrib.hpp"
+#include "Lib.hpp"
 
 namespace SH {
-SH_SHLIB_USUAL_OPERATIONS(SH_COLOR);
-SH_SHLIB_USUAL_SUBTRACT(SH_COLOR);
+SHLIB_USUAL_OPERATIONS(COLOR);
+SHLIB_USUAL_SUBTRACT(COLOR);
 
-SH_SHLIB_LEFT_MATRIX_OPERATION(SH_COLOR, operator|, M);
+SHLIB_LEFT_MATRIX_OPERATION(COLOR, operator|, M);
 
 }
 

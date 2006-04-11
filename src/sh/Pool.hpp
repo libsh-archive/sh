@@ -20,20 +20,20 @@
 #ifndef SHPOOL_HPP
 #define SHPOOL_HPP
 
-#define SH_USE_MEMORY_POOL
+#define USE_MEMORY_POOL
 
-#ifdef SH_USE_MEMORY_POOL
+#ifdef USE_MEMORY_POOL
 
 #include <cstddef>
-#include "ShDllExport.hpp"
+#include "DllExport.hpp"
 
 namespace SH {
 
 class 
-SH_DLLEXPORT
-ShPool {
+DLLEXPORT
+Pool {
 public:
-  ShPool(std::size_t element_size, std::size_t block_size);
+  Pool(std::size_t element_size, std::size_t block_size);
 
   void* alloc();
   void free(void*);
@@ -47,6 +47,6 @@ private:
 
 }
 
-#endif // SH_USE_MEMORY_POOL
+#endif // USE_MEMORY_POOL
 
 #endif

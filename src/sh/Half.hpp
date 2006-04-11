@@ -21,11 +21,11 @@
 #define SHHALF_HPP
 
 #include <limits>
-#include "ShUtility.hpp"
+#include "Utility.hpp"
 
 namespace SH {
 
-struct ShHalf {
+struct Half {
   typedef unsigned short T; 
 
   static const int S = 1 << 15; // sign bit
@@ -34,44 +34,44 @@ struct ShHalf {
   T m_val;
 
   /** Constructs an half with undefined value */
-  ShHalf();
+  Half();
 
   /** Constructs an half */
-  ShHalf(double value); 
+  Half(double value); 
 
   operator double() const;
 
   /** Arithmetic operators **/
-  ShHalf& operator=(double value);
-  ShHalf& operator=(const ShHalf& other);
-  ShHalf& operator+=(double value);
-  ShHalf& operator+=(const ShHalf& other);
-  ShHalf& operator-=(double value);
-  ShHalf& operator-=(const ShHalf& other);
-  ShHalf& operator*=(double value);
-  ShHalf& operator*=(const ShHalf& other);
-  ShHalf& operator/=(double value);
-  ShHalf& operator/=(const ShHalf& other);
+  Half& operator=(double value);
+  Half& operator=(const Half& other);
+  Half& operator+=(double value);
+  Half& operator+=(const Half& other);
+  Half& operator-=(double value);
+  Half& operator-=(const Half& other);
+  Half& operator*=(double value);
+  Half& operator*=(const Half& other);
+  Half& operator/=(double value);
+  Half& operator/=(const Half& other);
 
   /** Float modulus - result is always positive 
    *@{*/
-  ShHalf& operator%=(double value);
-  ShHalf& operator%=(const ShHalf& other);
+  Half& operator%=(double value);
+  Half& operator%=(const Half& other);
   // @}
 
   /** Negation **/
-  ShHalf operator-() const;
+  Half operator-() const;
 
   /** Output operator **/
-  friend std::ostream& operator<<(std::ostream& out, const ShHalf &value);
+  friend std::ostream& operator<<(std::ostream& out, const Half &value);
 
 
   /** Input operator (format matches output) **/
-  friend std::istream& operator>>(std::istream& out, ShHalf &value);
+  friend std::istream& operator>>(std::istream& out, Half &value);
 
   private:
     /** Constructs a half */
-    static ShHalf make_half(T value);
+    static Half make_half(T value);
 
     static T to_val(double value);
     void set_val(double value);
@@ -80,6 +80,6 @@ struct ShHalf {
 
 }
 
-#include "ShHalfImpl.hpp"
+#include "HalfImpl.hpp"
   
 #endif

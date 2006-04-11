@@ -21,24 +21,24 @@
 #include <string>
 #include <sstream>
 #include <algorithm>
-#include "ShAlgebra.hpp"
-#include "ShCtrlGraph.hpp"
-#include "ShDebug.hpp"
-#include "ShError.hpp"
-#include "ShOptimizations.hpp"
-#include "ShInternals.hpp"
-#include "ShContext.hpp"
-#include "ShManipulator.hpp"
-#include "ShFixedManipulator.hpp"
+#include "Algebra.hpp"
+#include "CtrlGraph.hpp"
+#include "Debug.hpp"
+#include "Error.hpp"
+#include "Optimizations.hpp"
+#include "Internals.hpp"
+#include "Context.hpp"
+#include "Manipulator.hpp"
+#include "FixedManipulator.hpp"
 
 namespace SH {
 
-ShProgram connect(ShProgram pa, ShProgram pb)
+Program connect(Program pa, Program pb)
 {
-  ShProgramNodePtr a = pa.node();
-  ShProgramNodePtr b = pb.node();
+  ProgramNodePtr a = pa.node();
+  ProgramNodePtr b = pb.node();
   
-  if( !a || !b ) SH_DEBUG_WARN( "Connecting with a null ShProgram" );
+  if( !a || !b ) DEBUG_WARN( "Connecting with a null Program" );
   if( !a ) return b;
   if( !b ) return a;
   
@@ -52,28 +52,28 @@ ShProgram connect(ShProgram pa, ShProgram pb)
     if (b->target().empty() || a->target() == b->target()) {
       rtarget = a->target(); // A has a target, b doesn't
     } else {
-      SH_DEBUG_WARN("Connecting two different targets. Using empty target for result.");
+      DEBUG_WARN("Connecting two different targets. Using empty target for result.");
       rtarget = ""; // Connecting different targets.
     }
   }
 
-  ShProgramNodePtr program = new ShProgramNode(rtarget);
+  ProgramNodePtr program = new ProgramNode(rtarget);
 
-  ShCtrlGraphNodePtr heada, taila, headb, tailb;
+  CtrlGraphNodePtr heada, taila, headb, tailb;
 
   a->ctrlGraph->copy(heada, taila);
   b->ctrlGraph->copy(headb, tailb);
 
   taila->append(headb);
 
-  ShCtrlGraphPtr new_graph = new ShCtrlGraph(heada, tailb);
+  CtrlGraphPtr new_graph = new CtrlGraph(heada, tailb);
   program->ctrlGraph = new_graph;
 
   program->inputs = a->inputs;
 
   // push back extra inputs from b if aosize < bisize
   if(aosize < bisize) {
-    ShProgramNode::VarList::const_iterator II = b->inputs.begin();
+    ProgramNode::VarList::const_iterator II = b->inputs.begin();
     for(int i = 0; i < aosize; ++i, ++II); 
     for(; II != b->inputs.end(); ++II) {
       program->inputs.push_back(*II);
@@ -83,21 +83,21 @@ ShProgram connect(ShProgram pa, ShProgram pb)
 
   // push back extra outputs from a if aosize > bisize
   if(aosize > bisize) { 
-    ShProgramNode::VarList::const_iterator II = a->outputs.begin();
+    ProgramNode::VarList::const_iterator II = a->outputs.begin();
     for(int i = 0; i < bisize; ++i, ++II); 
     for(; II != a->outputs.end(); ++II) {
       program->outputs.push_back(*II);
     }
   }
   
-  ShVarMap varMap;
+  VarMap varMap;
 
-  ShContext::current()->enter(program);
+  Context::current()->enter(program);
   
-  ShProgramNode::VarList::const_iterator I, J;  
+  ProgramNode::VarList::const_iterator I, J;  
 
-  ShProgramNode::VarList InOutInputs;
-  ShProgramNode::VarList InOutOutputs;
+  ProgramNode::VarList InOutInputs;
+  ProgramNode::VarList InOutOutputs;
 
   // replace outputs and inputs connected together by temps 
   for (I = a->outputs.begin(), J = b->inputs.begin(); 
@@ -108,52 +108,52 @@ ShProgram connect(ShProgram pa, ShProgram pb)
           << (*I)->nameOfType() << " " << (*I)->name() << " and " 
           << (*J)->nameOfType() << " " << (*J)->name() << " with different sizes" << std::endl;
       err << "while connecting outputs: ";
-      ShProgramNode::print(err, a->outputs) << std::endl;
+      ProgramNode::print(err, a->outputs) << std::endl;
       err << "to inputs: ";
-      ShProgramNode::print(err, b->inputs) << std::endl;
-      ShContext::current()->exit();
-      shError(ShAlgebraException(err.str()));
-      return ShProgram(ShProgramNodePtr(0));
+      ProgramNode::print(err, b->inputs) << std::endl;
+      Context::current()->exit();
+      error(AlgebraException(err.str()));
+      return Program(ProgramNodePtr(0));
     }
-    ShVariableNodePtr n = (*I)->clone(SH_TEMP);
+    VariableNodePtr n = (*I)->clone(TEMP);
     varMap[*I] = n;
     varMap[*J] = n;
 
-    if((*I)->kind() == SH_INOUT) InOutInputs.push_back((*I)); 
-    if((*J)->kind() == SH_INOUT) InOutOutputs.push_back((*J)); 
+    if((*I)->kind() == INOUT) InOutInputs.push_back((*I)); 
+    if((*J)->kind() == INOUT) InOutOutputs.push_back((*J)); 
   }
 
   // Change connected InOut variables to either Input or Output only
   // (since they have been connected and turned into temps internally)
-  ShCtrlGraphNodePtr graphEntry;
+  CtrlGraphNodePtr graphEntry;
   for (I = InOutInputs.begin(); I != InOutInputs.end(); ++I) {
     if(!graphEntry) graphEntry = program->ctrlGraph->prependEntry();
-    ShVariableNodePtr newInput((*I)->clone(SH_INPUT)); 
+    VariableNodePtr newInput((*I)->clone(INPUT)); 
 
     std::replace(program->inputs.begin(), program->inputs.end(),
         (*I), newInput);
     program->inputs.pop_back();
 
-    graphEntry->block->addStatement(ShStatement(
-        ShVariable(varMap[*I]), SH_OP_ASN, ShVariable(newInput)));
+    graphEntry->block->addStatement(Statement(
+        Variable(varMap[*I]), OP_ASN, Variable(newInput)));
   }
 
-  ShCtrlGraphNodePtr graphExit;
+  CtrlGraphNodePtr graphExit;
   for (I = InOutOutputs.begin(); I != InOutOutputs.end(); ++I) {
     if(!graphExit) graphExit = program->ctrlGraph->appendExit();
-    ShVariableNodePtr newOutput((*I)->clone(SH_OUTPUT));
+    VariableNodePtr newOutput((*I)->clone(OUTPUT));
     
     std::replace(program->outputs.begin(), program->outputs.end(),
         (*I), newOutput);
     program->outputs.pop_back();
 
-    graphExit->block->addStatement(ShStatement(
-        ShVariable(newOutput), SH_OP_ASN, ShVariable(varMap[*I])));
+    graphExit->block->addStatement(Statement(
+        Variable(newOutput), OP_ASN, Variable(varMap[*I])));
   }
 
-  ShContext::current()->exit();
+  Context::current()->exit();
 
-  ShVariableReplacer replacer(varMap);
+  VariableReplacer replacer(varMap);
   program->ctrlGraph->dfs(replacer);
 
   program->collectVariables();
@@ -162,13 +162,13 @@ ShProgram connect(ShProgram pa, ShProgram pb)
   return program;
 }
 
-ShProgram combine(ShProgram pa, ShProgram pb)
+Program combine(Program pa, Program pb)
 {
-  ShProgramNodePtr a = pa.node();
-  ShProgramNodePtr b = pb.node();
+  ProgramNodePtr a = pa.node();
+  ProgramNodePtr b = pb.node();
   
   std::string rtarget;
-  if( !a || !b ) SH_DEBUG_WARN( "Connecting with a null ShProgram" );
+  if( !a || !b ) DEBUG_WARN( "Connecting with a null Program" );
   if (!a) return b;
   if (!b) return a;
 
@@ -182,16 +182,16 @@ ShProgram combine(ShProgram pa, ShProgram pb)
     }
   }
 
-  ShProgramNodePtr program = new ShProgramNode(rtarget);
+  ProgramNodePtr program = new ProgramNode(rtarget);
 
-  ShCtrlGraphNodePtr heada, taila, headb, tailb;
+  CtrlGraphNodePtr heada, taila, headb, tailb;
 
   a->ctrlGraph->copy(heada, taila);
   b->ctrlGraph->copy(headb, tailb);
 
   taila->append(headb);
 
-  ShCtrlGraphPtr new_graph = new ShCtrlGraph(heada, tailb);
+  CtrlGraphPtr new_graph = new CtrlGraph(heada, tailb);
   program->ctrlGraph = new_graph;
 
   program->inputs = a->inputs;
@@ -206,7 +206,7 @@ ShProgram combine(ShProgram pa, ShProgram pb)
 }
 
 // Duplicates to inputs with matching name/type
-ShProgram mergeNames(ShProgram p)
+Program mergeNames(Program p)
 {
   typedef std::pair<std::string, int> InputType;
   typedef std::map< InputType, int > FirstOccurenceMap;  // position of first occurence of an input type
@@ -217,7 +217,7 @@ ShProgram mergeNames(ShProgram p)
   Duplicates dups( p.node()->inputs.size(), std::vector<int>()); 
 
   std::size_t i = 0;
-  for(ShProgramNode::VarList::const_iterator I = p.node()->inputs.begin();
+  for(ProgramNode::VarList::const_iterator I = p.node()->inputs.begin();
       I != p.node()->inputs.end(); ++I, ++i) {
     InputType it( (*I)->name(), (*I)->size() );
     if( firsts.find( it ) != firsts.end() ) { // duplicate
@@ -227,28 +227,28 @@ ShProgram mergeNames(ShProgram p)
       dups[i].push_back(i);
     }
   }
-  std::vector<int> swizzle;
-  ShFixedManipulator duplicator;
+  std::vector<int> swiz;
+  FixedManipulator duplicator;
   for(i = 0; i < dups.size(); ++i) {
     if( dups[i].empty() ) continue;
-    for(std::size_t j = 0; j < dups[i].size(); ++j) swizzle.push_back(dups[i][j]);
-    if( duplicator ) duplicator = duplicator & shDup(dups[i].size());
-    else duplicator = shDup(dups[i].size());
+    for(std::size_t j = 0; j < dups[i].size(); ++j) swiz.push_back(dups[i][j]);
+    if( duplicator ) duplicator = duplicator & dup(dups[i].size());
+    else duplicator = dup(dups[i].size());
   }
-  ShProgram result = p << shSwizzle(swizzle);
+  Program result = p << swizzle(swiz);
   if( duplicator ) result = result << duplicator;
   return result.node(); 
 }
 
-ShProgram namedCombine(ShProgram a, ShProgram b)
+Program namedCombine(Program a, Program b)
 {
   return mergeNames(combine(a, b));
 }
 
-ShProgram namedConnect(ShProgram pa, ShProgram pb, bool keepExtra)
+Program namedConnect(Program pa, Program pb, bool keepExtra)
 {
-  ShProgramNodeCPtr a = pa.node();
-  ShProgramNodeCPtr b = pb.node();
+  ProgramNodeCPtr a = pa.node();
+  ProgramNodeCPtr b = pb.node();
   // positions of a pair of matched a output and b input 
   typedef std::map<int, int> MatchedChannelMap; 
 
@@ -256,7 +256,7 @@ ShProgram namedConnect(ShProgram pa, ShProgram pb, bool keepExtra)
   std::vector<bool> bMatch(b->inputs.size(), false);
   MatchedChannelMap mcm;
   std::size_t i, j;
-  ShProgramNode::VarList::const_iterator I, J;
+  ProgramNode::VarList::const_iterator I, J;
 
   i = 0;
   for(I = a->outputs.begin(); I != a->outputs.end(); ++I, ++i) {
@@ -265,7 +265,7 @@ ShProgram namedConnect(ShProgram pa, ShProgram pb, bool keepExtra)
       if(bMatch[j]) continue;
       if((*I)->name() != (*J)->name()) continue;
       if((*I)->size() != (*J)->size()) {
-        SH_DEBUG_WARN("Named connect matched channel name " << (*I)->name() 
+        DEBUG_WARN("Named connect matched channel name " << (*I)->name() 
             << " but output size " << (*I)->size() << " != " << " input size " << (*J)->size() );
         continue;
       }
@@ -281,18 +281,18 @@ ShProgram namedConnect(ShProgram pa, ShProgram pb, bool keepExtra)
   }
 
   // swizzle unmatched inputs and make a pass them through properly
-  ShProgram passer = SH_BEGIN_PROGRAM() {} SH_END;
+  Program passer = SH_BEGIN_PROGRAM() {} SH_END;
   int newInputIdx = a->outputs.size(); // index of next new input added to a
   for(j = 0, J= b->inputs.begin(); J != b->inputs.end(); ++J, ++j) {
     if( !bMatch[j] ) {
-      ShProgram passOne = SH_BEGIN_PROGRAM() {
-        ShVariable var((*J)->clone(SH_INOUT));
+      Program passOne = SH_BEGIN_PROGRAM() {
+        Variable var((*J)->clone(INOUT));
       } SH_END;
       passer = passer & passOne; 
       swiz[j] = newInputIdx++;
     }
   }
-  ShProgram aPass = combine(pa, passer);
+  Program aPass = combine(pa, passer);
 
   if( keepExtra ) {
     for(i = 0; i < aMatch.size(); ++i) {
@@ -300,16 +300,16 @@ ShProgram namedConnect(ShProgram pa, ShProgram pb, bool keepExtra)
     }
   }
    
-  return mergeNames(pb << ( shSwizzle(swiz) << aPass )); 
+  return mergeNames(pb << ( swizzle(swiz) << aPass )); 
 }
 
-ShProgram renameInput(ShProgram a, const std::string& oldName,
+Program renameInput(Program a, const std::string& oldName,
                       const std::string& newName)
 {
-  ShProgram renamer = SH_BEGIN_PROGRAM() {
-    for(ShProgramNode::VarList::const_iterator I = a.node()->inputs.begin();
+  Program renamer = SH_BEGIN_PROGRAM() {
+    for(ProgramNode::VarList::const_iterator I = a.node()->inputs.begin();
         I != a.node()->inputs.end(); ++I) {
-      ShVariable var((*I)->clone(SH_INOUT));
+      Variable var((*I)->clone(INOUT));
 
       if (!(*I)->has_name()) continue;
       std::string name = (*I)->name();
@@ -324,13 +324,13 @@ ShProgram renameInput(ShProgram a, const std::string& oldName,
 }
 
 // TODO factor out common code from renameInput, renameOutput
-ShProgram renameOutput(ShProgram a, const std::string& oldName, 
+Program renameOutput(Program a, const std::string& oldName, 
                        const std::string& newName)
 {
-  ShProgram renamer = SH_BEGIN_PROGRAM() {
-    for(ShProgramNode::VarList::const_iterator I = a.node()->outputs.begin();
+  Program renamer = SH_BEGIN_PROGRAM() {
+    for(ProgramNode::VarList::const_iterator I = a.node()->outputs.begin();
         I != a.node()->outputs.end(); ++I) {
-      ShVariable var((*I)->clone(SH_INOUT));
+      Variable var((*I)->clone(INOUT));
 
       if (!(*I)->has_name()) continue;
       std::string name = (*I)->name();
@@ -344,11 +344,11 @@ ShProgram renameOutput(ShProgram a, const std::string& oldName,
   return connect(a, renamer);
 }
 
-ShProgram namedAlign(ShProgram a, ShProgram b)
+Program namedAlign(Program a, Program b)
 {
-  ShManipulator<std::string> ordering;
+  Manipulator<std::string> ordering;
 
-  for(ShProgramNode::VarList::const_iterator I = b.node()->inputs.begin();
+  for(ProgramNode::VarList::const_iterator I = b.node()->inputs.begin();
       I != b.node()->inputs.end(); ++I) {
     ordering((*I)->name());
   }
@@ -356,50 +356,50 @@ ShProgram namedAlign(ShProgram a, ShProgram b)
   return ordering << a; 
 }
 
-ShProgram operator<<(ShProgram a, ShProgram b)
+Program operator<<(Program a, Program b)
 {
   return connect(b,a);
 }
 
-ShProgram operator>>(ShProgram a, ShProgram b)
+Program operator>>(Program a, Program b)
 {
   return connect(a,b);
 }
 
-ShProgram operator&(ShProgram a, ShProgram b)
+Program operator&(Program a, Program b)
 {
   return combine(a, b);
 }
 
-ShProgram operator>>(ShProgram p, const ShVariable &var) { 
+Program operator>>(Program p, const Variable &var) { 
   return replaceVariable(p, var);
 }
 
-ShProgram replaceVariable(ShProgram a, const ShVariable& v)
+Program replaceVariable(Program a, const Variable& v)
 {
-  ShProgram program(a.node()->clone()); 
+  Program program(a.node()->clone()); 
   
-  ShVarMap varMap;
+  VarMap varMap;
 
-  ShContext::current()->enter(program.node());
+  Context::current()->enter(program.node());
 
   // make a new input
-  ShVariableNodePtr newInput(v.node()->clone(SH_INPUT)); 
+  VariableNodePtr newInput(v.node()->clone(INPUT)); 
   varMap[v.node()] = newInput;
 
-  ShContext::current()->exit();
+  Context::current()->exit();
 
-  ShVariableReplacer replacer(varMap);
+  VariableReplacer replacer(varMap);
   program.node()->ctrlGraph->dfs(replacer);
 
   optimize(program);
   return program;
 }
 
-ShProgram operator<<(ShProgram a, const ShVariable& var)
+Program operator<<(Program a, const Variable& var)
 {
-  ShProgram vNibble = SH_BEGIN_PROGRAM() {
-    ShVariable out(var.node()->clone(SH_OUTPUT, var.size(), var.valueType(), SH_SEMANTICTYPE_END, true, false));
+  Program vNibble = SH_BEGIN_PROGRAM() {
+    Variable out(var.node()->clone(OUTPUT, var.size(), var.valueType(), SEMANTICTYPE_END, true, false));
     shASN(out, var);
   } SH_END_PROGRAM;
   return connect(vNibble, a); 

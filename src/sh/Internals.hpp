@@ -21,40 +21,40 @@
 #define SHINTERNALS_HPP
 
 #include <map>
-#include "ShDllExport.hpp"
-#include "ShVariableNode.hpp"
-#include "ShCtrlGraph.hpp"
-#include "ShBackend.hpp"
-#include "ShProgramNode.hpp"
-#include "ShStructural.hpp"
+#include "DllExport.hpp"
+#include "VariableNode.hpp"
+#include "CtrlGraph.hpp"
+#include "Backend.hpp"
+#include "ProgramNode.hpp"
+#include "Structural.hpp"
 #include <map>
 
 namespace SH { 
 
-typedef std::map<ShVariableNodePtr, ShVariableNodePtr> ShVarMap;
+typedef std::map<VariableNodePtr, VariableNodePtr> VarMap;
 
 struct
-SH_DLLEXPORT ShVariableReplacer {
+DLLEXPORT VariableReplacer {
 
-  ShVariableReplacer(ShVarMap& v);
+  VariableReplacer(VarMap& v);
 
   // assignment operator could not be generated: declaration only
-  ShVariableReplacer& operator=(ShVariableReplacer const&);
+  VariableReplacer& operator=(VariableReplacer const&);
 
   // replaces variables in node based on varMap
-  void operator()(const ShCtrlGraphNodePtr& node);
+  void operator()(const CtrlGraphNodePtr& node);
 
-  // replaces variables in a ShProgramNode::VarList based on varMap 
-  void operator()(ShProgramNode::VarList &varList);
+  // replaces variables in a ProgramNode::VarList based on varMap 
+  void operator()(ProgramNode::VarList &varList);
 
-  // replaces variables in a ShStructuralNode and all Structural
+  // replaces variables in a StructuralNode and all Structural
   // Nodes in its region.
-  void operator()(const ShStructuralNodePtr& node);
+  void operator()(const StructuralNodePtr& node);
 
   // replaces node in a single variable using varMap
-  void repVar(ShVariable& var);
+  void repVar(Variable& var);
 
-  ShVarMap& varMap;
+  VarMap& varMap;
 };
 
 
@@ -63,16 +63,16 @@ SH_DLLEXPORT ShVariableReplacer {
  * the given "transformed" variable was derived.
  */
 class
-SH_DLLEXPORT ShVarTransformMap {
+DLLEXPORT VarTransformMap {
 private:
-  ShVarMap m_NewToOldMap;
+  VarMap m_NewToOldMap;
 
 public:
-  ShVarTransformMap() {}
-  explicit ShVarTransformMap(const ShVarTransformMap &m)
+  VarTransformMap() {}
+  explicit VarTransformMap(const VarTransformMap &m)
     : m_NewToOldMap(m.m_NewToOldMap)
   {}
-  ShVarTransformMap & operator=(const ShVarTransformMap &m)
+  VarTransformMap & operator=(const VarTransformMap &m)
   {
     m_NewToOldMap = m.m_NewToOldMap;
     return *this;
@@ -84,14 +84,14 @@ public:
   /// Indicate that we are creating a new transformed variable derived from the
   /// given original variable. If the original variable is already in the map, the
   /// mapping from new to old will follow the chain all the way back.
-  void add_variable_transform(const ShVariableNodePtr& origVar, const ShVariableNodePtr& newVar);
+  void add_variable_transform(const VariableNodePtr& origVar, const VariableNodePtr& newVar);
 
   /// Get the original variable (ALL the way back) that gave rise to the given
   /// transformed variable. If a mapping is not found for the given variable,
   /// the variable itself is return (ie. it has not been transformed at all).
-  ShVariableNodePtr get_original_variable(const ShVariableNodePtr& newVar) const
+  VariableNodePtr get_original_variable(const VariableNodePtr& newVar) const
   {
-    ShVarMap::const_iterator i = m_NewToOldMap.find(newVar);
+    VarMap::const_iterator i = m_NewToOldMap.find(newVar);
     return (i != m_NewToOldMap.end() ? i->second : newVar);
   }
 };

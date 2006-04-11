@@ -43,18 +43,18 @@ PBufferStorage::~PBufferStorage()
 {
 }
 
-ShPointer<PBufferContext> PBufferStorage::context() const
+Pointer<PBufferContext> PBufferStorage::context() const
 {
   return m_context;
 }
 
-class PBufferGlTextureTransfer : public ShTransfer {
+class PBufferGlTextureTransfer : public Transfer {
   PBufferGlTextureTransfer()
-    : ShTransfer("opengl:pbuffer", "opengl:texture")
+    : Transfer("opengl:pbuffer", "opengl:texture")
   {
   }
 
-  bool transfer(const ShStorage* from, ShStorage* to)
+  bool transfer(const Storage* from, Storage* to)
   {
     const PBufferStorage* pbuffer = dynamic_cast<const PBufferStorage*>(from);
     PBufferContextPtr context = pbuffer->context();
@@ -62,15 +62,15 @@ class PBufferGlTextureTransfer : public ShTransfer {
     PBufferHandlePtr handle = context->activate();
     GlTextureStorage* texture = dynamic_cast<GlTextureStorage*>(to);
 
-    SH_DEBUG_ASSERT(from->value_type() == to->value_type());
+    DEBUG_ASSERT(from->value_type() == to->value_type());
 
-    SH_DEBUG_ASSERT(texture->target() == GL_TEXTURE_2D ||
+    DEBUG_ASSERT(texture->target() == GL_TEXTURE_2D ||
                     texture->target() == GL_TEXTURE_RECTANGLE_NV);
-    SH_DEBUG_ASSERT(context->width() == texture->width());
-    SH_DEBUG_ASSERT(context->height() == texture->height());
+    DEBUG_ASSERT(context->width() == texture->width());
+    DEBUG_ASSERT(context->height() == texture->height());
 
     GlTextureName::Binding binding(texture->texName());
-    SH_GL_CHECK_ERROR(glCopyTexSubImage2D(texture->target(), 0,
+    GL_CHECK_ERROR(glCopyTexSubImage2D(texture->target(), 0,
                                           0, 0, 0, 0, context->width(), context->height()));
     
     if (handle) { handle->restore(); }
@@ -78,7 +78,7 @@ class PBufferGlTextureTransfer : public ShTransfer {
     return true;
   }
 
-  int cost(const ShStorage* from, const ShStorage* to)
+  int cost(const Storage* from, const Storage* to)
   {
     return 20;
   }

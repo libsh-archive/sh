@@ -23,21 +23,21 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
-#include "ShOptimizations.hpp"
-#include "ShBitSet.hpp"
-#include "ShCtrlGraph.hpp"
-#include "ShDebug.hpp"
-#include "ShEvaluate.hpp"
-#include "ShContext.hpp"
-#include "ShSyntax.hpp"
-#include "ShProgramNode.hpp"
+#include "Optimizations.hpp"
+#include "BitSet.hpp"
+#include "CtrlGraph.hpp"
+#include "Debug.hpp"
+#include "Evaluate.hpp"
+#include "Context.hpp"
+#include "Syntax.hpp"
+#include "ProgramNode.hpp"
 
 // Uncomment to enable use-def chain debugging 
-// #define SH_DEBUG_VALUETRACK
+// #define DEBUG_VALUETRACK
 
-#ifdef SH_DEBUG_OPTIMIZER
-#ifndef SH_DEBUG_VALUETRACK
-#define SH_DEBUG_VALUETRACK
+#ifdef DEBUG_OPTIMIZER
+#ifndef DEBUG_VALUETRACK
+#define DEBUG_VALUETRACK
 #endif
 #endif
 namespace {
@@ -52,18 +52,18 @@ struct ReachingDefs {
   }
   
   struct Definition {
-    Definition(ShStatement* stmt,
-               const ShCtrlGraphNodePtr& node,
+    Definition(Statement* stmt,
+               const CtrlGraphNodePtr& node,
                int offset,
-               ShBitSet disable_mask)
+               BitSet disable_mask)
       : varnode(stmt->dest.node()), stmt(stmt), node(node), offset(offset),
         disable_mask(disable_mask)
     {}
 
-    Definition(const ShVariableNodePtr& varnode,
-               const ShCtrlGraphNodePtr& node,
+    Definition(const VariableNodePtr& varnode,
+               const CtrlGraphNodePtr& node,
                int offset,
-               ShBitSet disable_mask)
+               BitSet disable_mask)
       : varnode(varnode), stmt(0), node(node), offset(offset), 
         disable_mask(disable_mask)
     {}
@@ -117,16 +117,16 @@ struct ReachingDefs {
       return out;
     }
     
-    ShVariableNodePtr varnode;
-    ShStatement* stmt;
-    ShCtrlGraphNodePtr node;
+    VariableNodePtr varnode;
+    Statement* stmt;
+    CtrlGraphNodePtr node;
     int offset;
     
     // Sometimes we want to ignore some of the elements, when
     // constructing gen, because they are overwritten by later
     // statements. In that case we mark the ignored components here.
     // unswizzled disable mask
-    ShBitSet disable_mask;
+    BitSet disable_mask;
   };
 
   void addDefinition(const Definition& d)
@@ -136,8 +136,8 @@ struct ReachingDefs {
     defsize += d.size(); 
   }
 
-  typedef std::map<ShCtrlGraphNodePtr, int> SizeMap;
-  typedef std::map<ShCtrlGraphNodePtr, ShBitSet> ReachingMap;
+  typedef std::map<CtrlGraphNodePtr, int> SizeMap;
+  typedef std::map<CtrlGraphNodePtr, BitSet> ReachingMap;
   
   std::vector<Definition> defs;
   int defsize; ///< current defsize, offset for next added Definition
@@ -147,7 +147,7 @@ struct ReachingDefs {
 };
 
 struct DefFinder {
-  DefFinder(ReachingDefs& r, const ShCtrlGraphNodePtr& entry, const ShProgramNode::VarList& inputs)
+  DefFinder(ReachingDefs& r, const CtrlGraphNodePtr& entry, const ProgramNode::VarList& inputs)
     : entry(entry), inputs(inputs), r(r), offset(0)
   {
   }
@@ -155,31 +155,31 @@ struct DefFinder {
   // assignment operator could not be generated: declaration only
   DefFinder& operator=(DefFinder const&);
 
-  void operator()(const ShCtrlGraphNodePtr& node)
+  void operator()(const CtrlGraphNodePtr& node)
   {
     if (!node) return;
-    ShBasicBlockPtr block = node->block;
+    BasicBlockPtr block = node->block;
 
     // Use this data structure to mark assignments to node elements,
     // so that we can ignore earlier assignments to them in this block.
-    std::map<ShVariableNodePtr, ShBitSet> disable_map;
+    std::map<VariableNodePtr, BitSet> disable_map;
 
     if(block) {
       // Iterate backwards over the list of statements...
-      ShBasicBlock::ShStmtList::iterator I = block->end();
+      BasicBlock::StmtList::iterator I = block->end();
       while (1) {
         if (I == block->begin()) break;
         --I;
-        if (!I->dest.null() && I->op != SH_OP_KIL && I->op != SH_OP_OPTBRA /*&& I->dest.node()->kind() == SH_TEMP*/) {
+        if (!I->dest.null() && I->op != OP_KIL && I->op != OP_OPTBRA /*&& I->dest.node()->kind() == TEMP*/) {
           // Construct a disable map if this node has not yet been
           // assigned to in a later statement in this block.
           if (disable_map.find(I->dest.node()) == disable_map.end()) {
-            disable_map[I->dest.node()] = ShBitSet(I->dest.node()->size());
+            disable_map[I->dest.node()] = BitSet(I->dest.node()->size());
           }
 
           // Construct a bitset containing all elements which this
           // definition affects.
-          ShBitSet defn_map(I->dest.node()->size());
+          BitSet defn_map(I->dest.node()->size());
           for (int i = 0; i < I->dest.size(); i++) defn_map[I->dest.swizzle()[i]] = true;
 
           // Skip this definition if all its components have already
@@ -198,10 +198,10 @@ struct DefFinder {
 
     // Add in defs for the inputs
     if(node != entry) return; 
-    for(ShProgramNode::VarList::const_iterator I = inputs.begin(); 
+    for(ProgramNode::VarList::const_iterator I = inputs.begin(); 
         I != inputs.end(); ++I) {
       if(disable_map.find(*I) == disable_map.end()) {
-        disable_map[*I] = ShBitSet((*I)->size());
+        disable_map[*I] = BitSet((*I)->size());
       }
 
       // check whether input does not reach end of block
@@ -212,8 +212,8 @@ struct DefFinder {
     }
   }
 
-  ShCtrlGraphNodePtr entry; // @todo range - this is a touch clumsy
-  const ShProgramNode::VarList& inputs;
+  CtrlGraphNodePtr entry; // @todo range - this is a touch clumsy
+  const ProgramNode::VarList& inputs;
   ReachingDefs& r;
   int offset;
 };
@@ -227,15 +227,15 @@ struct InitRch {
   // assignment operator could not be generated: declaration only
   InitRch& operator=(InitRch const&);
 
-  void operator()(const ShCtrlGraphNodePtr& node)
+  void operator()(const CtrlGraphNodePtr& node)
   {
     if (!node) return;
 
-    r.rchin[node] = ShBitSet(r.defsize);
-    r.gen[node] = ShBitSet(r.defsize);
-    r.prsv[node] = ~ShBitSet(r.defsize);
+    r.rchin[node] = BitSet(r.defsize);
+    r.gen[node] = BitSet(r.defsize);
+    r.prsv[node] = ~BitSet(r.defsize);
       
-    ShBasicBlockPtr block = node->block;
+    BasicBlockPtr block = node->block;
 
     // Initialize gen
     for (unsigned int i = 0; i < r.defs.size(); i++) {
@@ -255,11 +255,11 @@ struct InitRch {
     if(!block) return;
 
     // Initialize prsv
-    for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
+    for (BasicBlock::StmtList::iterator I = block->begin(); I != block->end(); ++I) {
       if (I->dest.null() 
-          || I->op == SH_OP_KIL
-          || I->op == SH_OP_OPTBRA
-          /*|| I->dest.node()->kind() != SH_TEMP*/) continue;
+          || I->op == OP_KIL
+          || I->op == OP_OPTBRA
+          /*|| I->dest.node()->kind() != TEMP*/) continue;
       for (unsigned int i = 0; i < r.defs.size(); i++) {
         ReachingDefs::Definition &d = r.defs[i];
         if (d.varnode != I->dest.node()) continue;
@@ -287,17 +287,17 @@ struct IterateRch {
   // assignment operator could not be generated: declaration only
   IterateRch& operator=(IterateRch const&);
 
-  void operator()(const ShCtrlGraphNodePtr& node)
+  void operator()(const CtrlGraphNodePtr& node)
   {
     if (!node) return;
-    SH_DEBUG_ASSERT(r.rchin.find(node) != r.rchin.end());
-    ShBitSet newRchIn(r.defsize);
+    DEBUG_ASSERT(r.rchin.find(node) != r.rchin.end());
+    BitSet newRchIn(r.defsize);
     
-    for (ShCtrlGraphNode::ShPredList::iterator I = node->predecessors.begin();
+    for (CtrlGraphNode::PredList::iterator I = node->predecessors.begin();
          I != node->predecessors.end(); ++I) {
-      SH_DEBUG_ASSERT(r.gen.find(*I) != r.gen.end());
-      SH_DEBUG_ASSERT(r.prsv.find(*I) != r.prsv.end());
-      SH_DEBUG_ASSERT(r.rchin.find(*I) != r.rchin.end());
+      DEBUG_ASSERT(r.gen.find(*I) != r.gen.end());
+      DEBUG_ASSERT(r.prsv.find(*I) != r.prsv.end());
+      DEBUG_ASSERT(r.rchin.find(*I) != r.rchin.end());
       
       newRchIn |= (r.gen[*I] | (r.rchin[*I] & r.prsv[*I]));
     }
@@ -314,7 +314,7 @@ struct IterateRch {
 // Builds ud and du chains per statement and
 // also gathers input du and output ud chains into the program
 struct UdDuBuilder {
-  UdDuBuilder(ReachingDefs& r, const ShProgramNodePtr& p) 
+  UdDuBuilder(ReachingDefs& r, const ProgramNodePtr& p) 
     : r(r), m_exit(p->ctrlGraph->exit()), p(p),
       intrack(new InputValueTracking()),
       outtrack(new OutputValueTracking())
@@ -326,7 +326,7 @@ struct UdDuBuilder {
   }
 
   struct TupleElement {
-    TupleElement(const ShVariableNodePtr& node, int index)
+    TupleElement(const VariableNodePtr& node, int index)
       : node(node), index(index)
     {
     }
@@ -338,14 +338,14 @@ struct UdDuBuilder {
       return false;
     }
     
-    ShVariableNodePtr node;
+    VariableNodePtr node;
     int index;
   };
 
   // assignment operator could not be generated: declaration only
   UdDuBuilder& operator=(UdDuBuilder const&);
 
-  void operator()(const ShCtrlGraphNodePtr& node) {
+  void operator()(const CtrlGraphNodePtr& node) {
     typedef std::set<ValueTracking::Def> DefSet;
     typedef std::map<TupleElement, DefSet> DefMap;
 
@@ -354,7 +354,7 @@ struct UdDuBuilder {
     DefMap defs;
     
     if (!node) return;
-    ShBasicBlockPtr block = node->block;
+    BasicBlockPtr block = node->block;
 
     // TODO: Handle "non assigning" statements like KIL
 
@@ -372,17 +372,17 @@ struct UdDuBuilder {
 
     if(block) {
       // Now consider each statement in turn.
-      for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
+      for (BasicBlock::StmtList::iterator I = block->begin(); I != block->end(); ++I) {
         // Compute the ud chains for the statement's source variables,
         // and contribute to the du chains of the source variables' definitions.
         for (int j = 0; j < opInfo[I->op].arity; j++) {
-          //if (I->src[j].node()->kind() == SH_TEMP) {
+          //if (I->src[j].node()->kind() == TEMP) {
             ValueTracking* vt = I->get_info<ValueTracking>();
             if (!vt) {
               vt = new ValueTracking(&(*I));
               I->add_info(vt);
             }
-            ShVariableNodePtr srcNode = I->src[j].node();
+            VariableNodePtr srcNode = I->src[j].node();
             for (int i = 0; i < I->src[j].size(); i++) {
               const DefSet& ds = defs[TupleElement(srcNode, I->src[j].swizzle()[i])];
 
@@ -430,11 +430,11 @@ struct UdDuBuilder {
     // to store somewhere if needed
     if(node == m_exit) {
       for(DefMap::iterator D = defs.begin(); D != defs.end(); ++D) {
-        ShVariableNodePtr node = D->first.node;
-        ShBindingType kind = node->kind();
+        VariableNodePtr node = D->first.node;
+        BindingType kind = node->kind();
         int index = D->first.index;
 
-        if(kind == SH_INOUT || kind == SH_OUTPUT) {
+        if(kind == INOUT || kind == OUTPUT) {
           DefSet& ds = D->second;
 
           ValueTracking::TupleUseDefChain& outDef = outtrack->outputDefs[node];
@@ -450,7 +450,7 @@ struct UdDuBuilder {
               vt = new ValueTracking(S->stmt);
               S->stmt->add_info(vt);
             }
-            SH_DEBUG_ASSERT(vt); // must have added it above somewhere
+            DEBUG_ASSERT(vt); // must have added it above somewhere
             ValueTracking::Use use(node, S->stmt->dest.swizzle()[S->index]);
             vt->uses[S->index].insert(use);
           }
@@ -460,53 +460,53 @@ struct UdDuBuilder {
   }
 
   ReachingDefs& r;
-  ShCtrlGraphNodePtr m_exit;
-  ShProgramNodePtr p;
+  CtrlGraphNodePtr m_exit;
+  ProgramNodePtr p;
   InputValueTracking* intrack;
   OutputValueTracking* outtrack;
 };
 
 struct UdDuClearer {
-  void operator()(const ShCtrlGraphNodePtr& node) {
+  void operator()(const CtrlGraphNodePtr& node) {
     if (!node) return;
-    ShBasicBlockPtr block = node->block;
+    BasicBlockPtr block = node->block;
     if (!block) return;
     
-    for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
+    for (BasicBlock::StmtList::iterator I = block->begin(); I != block->end(); ++I) {
       I->destroy_info<ValueTracking>();
     }
   }
 };
 
 struct UdDuDumper {
-  void operator()(const ShCtrlGraphNodePtr& node) {
+  void operator()(const CtrlGraphNodePtr& node) {
     if (!node) return;
-    ShBasicBlockPtr block = node->block;
+    BasicBlockPtr block = node->block;
     if (!block) return;
 
-    for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
+    for (BasicBlock::StmtList::iterator I = block->begin(); I != block->end(); ++I) {
       ValueTracking* vt = I->get_info<ValueTracking>();
       if (!vt) {
-        SH_DEBUG_PRINT(*I << " HAS NO VALUE TRACKING");
+        DEBUG_PRINT(*I << " HAS NO VALUE TRACKING");
         continue;
       }
-      SH_DEBUG_PRINT("Valuetracking for " << *I);
+      DEBUG_PRINT("Valuetracking for " << *I);
       for (int i = 0; i < opInfo[I->op].arity; i++) {
-        SH_DEBUG_PRINT("  src ud" << i << "\n" << vt->defs[i]);
+        DEBUG_PRINT("  src ud" << i << "\n" << vt->defs[i]);
       }
-      SH_DEBUG_PRINT("  dest du" << vt->uses);
+      DEBUG_PRINT("  dest du" << vt->uses);
     }
   }
 
-  void operator()(const ShProgramNodePtr& p) {
-#ifdef SH_DEBUG
+  void operator()(const ProgramNodePtr& p) {
+#ifdef DEBUG
     InputValueTracking* ivt = p->get_info<InputValueTracking>();
-    SH_DEBUG_ASSERT(ivt);
-    SH_DEBUG_PRINT("Input Valuetracking:\n" << *ivt);
+    DEBUG_ASSERT(ivt);
+    DEBUG_PRINT("Input Valuetracking:\n" << *ivt);
 
     OutputValueTracking* ovt = p->get_info<OutputValueTracking>();
-    SH_DEBUG_ASSERT(ovt);
-    SH_DEBUG_PRINT("Output Valuetracking:\n" << *ovt);
+    DEBUG_ASSERT(ovt);
+    DEBUG_PRINT("Output Valuetracking:\n" << *ovt);
 #endif
   }
 };
@@ -515,12 +515,12 @@ struct UdDuDumper {
 
 namespace SH {
 
-ValueTracking::ValueTracking(ShStatement* stmt)
+ValueTracking::ValueTracking(Statement* stmt)
   : uses(stmt->dest.node() ? stmt->dest.size() : 0),
     defs(stmt->src.size())
 {
-#ifdef SH_DEBUG_VALUETRACK
-  SH_DEBUG_PRINT("Adding value tracking to " << *stmt);
+#ifdef DEBUG_VALUETRACK
+  DEBUG_PRINT("Adding value tracking to " << *stmt);
 #endif
   for (int i = 0; i < opInfo[stmt->op].arity; i++) {
     for (int j = 0; j < (stmt->src[i].node() ? stmt->src[i].size() : 0); j++) {
@@ -529,7 +529,7 @@ ValueTracking::ValueTracking(ShStatement* stmt)
   }
 }
 
-ShInfo* ValueTracking::clone() const
+Info* ValueTracking::clone() const
 {
   return new ValueTracking(*this);
 }
@@ -582,7 +582,7 @@ std::ostream& operator<<(std::ostream& out, const ValueTracking::TupleDefUseChai
   return out;
 }
 
-ShInfo* InputValueTracking::clone() const
+Info* InputValueTracking::clone() const
 {
   return new InputValueTracking(*this);
 }
@@ -592,7 +592,7 @@ std::ostream& operator<<(std::ostream& out, const InputValueTracking& ivt)
 {
   InputValueTracking::InputTupleDefUseChain::const_iterator I;
   for(I = ivt.inputUses.begin(); I != ivt.inputUses.end(); ++I) {
-    ShVariableNodePtr node = I->first;
+    VariableNodePtr node = I->first;
     const ValueTracking::TupleDefUseChain& tdu = I->second;
     out << node->name();
     out << tdu; 
@@ -601,7 +601,7 @@ std::ostream& operator<<(std::ostream& out, const InputValueTracking& ivt)
 }
 
 
-ShInfo* OutputValueTracking::clone() const
+Info* OutputValueTracking::clone() const
 {
   return new OutputValueTracking(*this);
 }
@@ -610,18 +610,18 @@ std::ostream& operator<<(std::ostream& out, const OutputValueTracking& ovt)
 {
   OutputValueTracking::OutputTupleUseDefChain::const_iterator O;
   for(O = ovt.outputDefs.begin(); O != ovt.outputDefs.end(); ++O) {
-    ShVariableNodePtr node = O->first;
+    VariableNodePtr node = O->first;
     const ValueTracking::TupleUseDefChain& tud = O->second;
     out << node->name() << tud; 
   }
   return out;
 }
 
-void add_value_tracking(ShProgram& p)
+void add_value_tracking(Program& p)
 {
   ReachingDefs r;
 
-  ShCtrlGraphPtr graph = p.node()->ctrlGraph;
+  CtrlGraphPtr graph = p.node()->ctrlGraph;
   
   DefFinder finder(r, graph->entry(), p.node()->inputs);
   graph->dfs(finder);
@@ -636,20 +636,20 @@ void add_value_tracking(ShProgram& p)
     graph->dfs(iter);
   } while (changed);
 
-#ifdef SH_DEBUG_VALUETRACK
-  SH_DEBUG_PRINT("Dumping Reaching Defs");
-  SH_DEBUG_PRINT("defsize = " << r.defsize);
-  SH_DEBUG_PRINT("defs.size() = " << r.defs.size());
+#ifdef DEBUG_VALUETRACK
+  DEBUG_PRINT("Dumping Reaching Defs");
+  DEBUG_PRINT("defsize = " << r.defsize);
+  DEBUG_PRINT("defs.size() = " << r.defs.size());
   for(unsigned int i = 0; i < r.defs.size(); ++i) {
-    SH_DEBUG_PRINT("  " << i << ": " << r.defs[i]);
+    DEBUG_PRINT("  " << i << ": " << r.defs[i]);
   }
   std::cerr << std::endl;
 
   for (ReachingDefs::ReachingMap::const_iterator I = r.rchin.begin(); I != r.rchin.end(); ++I) {
-    ShCtrlGraphNodePtr node = I->first;
-    SH_DEBUG_PRINT(" rchin[" << node.object() << "]: " << I->second);
-    SH_DEBUG_PRINT("   gen[" << node.object() << "]: " << r.gen[I->first]);
-    SH_DEBUG_PRINT("  prsv[" << node.object() << "]: " << r.prsv[I->first]);
+    CtrlGraphNodePtr node = I->first;
+    DEBUG_PRINT(" rchin[" << node.object() << "]: " << I->second);
+    DEBUG_PRINT("   gen[" << node.object() << "]: " << r.gen[I->first]);
+    DEBUG_PRINT("  prsv[" << node.object() << "]: " << r.prsv[I->first]);
     std::cerr << std::endl;
   }
 #endif
@@ -660,8 +660,8 @@ void add_value_tracking(ShProgram& p)
   UdDuBuilder builder(r, p.node());
   graph->dfs(builder);
 
-#ifdef SH_DEBUG_VALUETRACK
-  SH_DEBUG_PRINT("Uddu Dump");
+#ifdef DEBUG_VALUETRACK
+  DEBUG_PRINT("Uddu Dump");
   UdDuDumper dumper;
   graph->dfs(dumper);
   dumper(p.node());

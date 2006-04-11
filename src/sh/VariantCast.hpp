@@ -20,77 +20,77 @@
 #ifndef SHVARIANTCAST_HPP
 #define SHVARIANTCAST_HPP
 
-#include "ShDllExport.hpp"
-#include "ShVariableType.hpp"
-#include "ShDataType.hpp"
-#include "ShVariant.hpp"
+#include "DllExport.hpp"
+#include "VariableType.hpp"
+#include "DataType.hpp"
+#include "Variant.hpp"
 
 namespace SH {
 
 // forward declaration
-class ShVariant;
+class Variant;
 
-/// @file ShVariantCast.hpp
+/// @file VariantCast.hpp
 /// Declares a cast between one data type of a storage type and another.  
 
 class 
-SH_DLLEXPORT
-ShVariantCast {
+DLLEXPORT
+VariantCast {
   public:
-    virtual ~ShVariantCast() {}
+    virtual ~VariantCast() {}
 
     /** Casts data from src into dest.  src must have Src value type and SrcDT
      * data type.  dest similarly must match Dest and DestDT.
      * Also, must guarantee dest != src (it will work if they are the same
      * but what a waste...)
      * @{ */
-    virtual void doCast(ShVariant* dest, const ShVariant* src) const = 0;
+    virtual void doCast(Variant* dest, const Variant* src) const = 0;
     // @}
 
-    virtual void getCastTypes(ShValueType &dest, ShDataType &destDT, 
-                              ShValueType &src, ShDataType &srcDT) const = 0;
+    virtual void getCastTypes(ValueType &dest, DataType &destDT, 
+                              ValueType &src, DataType &srcDT) const = 0;
 
     /** Returns whether the destination of this caster matches the given types
      **/
-    virtual void getDestTypes(ShValueType &valueType, ShDataType &dataType) const = 0;
+    virtual void getDestTypes(ValueType &valueType, DataType &dataType) const = 0;
 };
 
 /** @brief Handles casting between S and D storage types.
  *
- * The actual data cast will have type ShHostType<SRC> to ShHostType<DEST>
+ * The actual data cast will have type HostType<SRC> to HostType<DEST>
  * and may have some extra conversion code (e.g. clamping) applied
  * in addition to the default C cast for those types. 
  */
-template<typename Dest, ShDataType DestDT, 
-  typename Src, ShDataType SrcDT>
-struct ShDataVariantCast: public ShVariantCast {
+template<typename Dest, DataType DestDT, 
+  typename Src, DataType SrcDT>
+struct DataVariantCast: public VariantCast {
   public:
-    static const ShValueType DestValueType = ShStorageTypeInfo<Dest>::value_type;
-    static const ShValueType SrcValueType = ShStorageTypeInfo<Src>::value_type;
-    typedef typename ShDataTypeCppType<Dest, DestDT>::type D;
-    typedef typename ShDataTypeCppType<Src, SrcDT>::type S;
+    static const ValueType DestValueType = StorageTypeInfo<Dest>::value_type;
+    static const ValueType SrcValueType = StorageTypeInfo<Src>::value_type;
+    typedef typename DataTypeCppType<Dest, DestDT>::type D;
+    typedef typename DataTypeCppType<Src, SrcDT>::type S;
 
-    typedef ShDataVariant<Dest, DestDT> DestVariant;
-    typedef const ShDataVariant<Src, SrcDT> SrcVariant;
+    typedef DataVariant<Dest, DestDT> DestVariant;
+    typedef const DataVariant<Src, SrcDT> SrcVariant;
 
-    void doCast(ShVariant* dest, const ShVariant* src) const;
+    void doCast(Variant* dest, const Variant* src) const;
 
-    void getCastTypes(ShValueType &dest, ShDataType &destDT, 
-                      ShValueType &src, ShDataType &srcDT) const;
+    void getCastTypes(ValueType &dest, DataType &destDT, 
+                      ValueType &src, DataType &srcDT) const;
 
-    void getDestTypes(ShValueType &valueType, ShDataType &dataType) const; 
+    void getDestTypes(ValueType &valueType, DataType &dataType) const; 
 
     void doCast(D &dest, const S &src) const;
 
-    static const ShDataVariantCast *instance();
+    static const DataVariantCast *instance();
   private:
-    static ShDataVariantCast *m_instance;
-    ShDataVariantCast() {}
+    static DataVariantCast *m_instance;
+    DataVariantCast() {}
 };
 
 
 }
 
-#include "ShVariantCastImpl.hpp"
+#include "VariantCastImpl.hpp"
 
 #endif

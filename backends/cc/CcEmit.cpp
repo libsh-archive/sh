@@ -21,27 +21,27 @@
 #include <vector>
 #include <sstream>
 #include "Cc.hpp" 
-#include "ShDebug.hpp" 
-#include "ShStream.hpp" 
-#include "ShVariant.hpp"
-#include "ShOperation.hpp"
+#include "Debug.hpp" 
+#include "Stream.hpp" 
+#include "Variant.hpp"
+#include "Operation.hpp"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
-#ifdef SH_CC_DEBUG
-#  define SH_CC_DEBUG_PRINT(x) SH_DEBUG_PRINT(x)
+#ifdef CC_DEBUG
+#  define CC_DEBUG_PRINT(x) DEBUG_PRINT(x)
 #else
-#  define SH_CC_DEBUG_PRINT(x) do { } while(0)
+#  define CC_DEBUG_PRINT(x) do { } while(0)
 #endif
 
-namespace ShCc {
+namespace Cc {
 
 using namespace SH;
 
 /** @file CcEmit.cpp
- * Implements code emission for a single ShStatement.  This is a table-driven approach
+ * Implements code emission for a single Statement.  This is a table-driven approach
  * patterned on ArbEmit.cpp in the GL backend.
  */
 
@@ -51,7 +51,7 @@ using namespace SH;
 // handles linear ops that require up to 4 src arguments (may not be independent) 
 struct CcOpCode 
 {
-  ShOperation op;
+  Operation op;
   char *code;
 };
 
@@ -72,7 +72,7 @@ struct CcOpCodeVecs
 
   std::string encode() const;
 
-  ShOperation op;
+  Operation op;
 
   std::vector<int> index;
   std::vector<bool> scalar;
@@ -80,7 +80,7 @@ struct CcOpCodeVecs
 };
 
 
-typedef std::map<SH::ShOperation, CcOpCodeVecs> CcOpCodeMap;
+typedef std::map<SH::Operation, CcOpCodeVecs> CcOpCodeMap;
 
 CcOpCodeVecs::CcOpCodeVecs(const CcOpCode &op) {
   std::string code = op.code; 
@@ -130,84 +130,84 @@ std::string CcOpCodeVecs::encode() const
 //        $i in rhs replaced by resolve(src[i], src[i].size() == 1 ? 0 : j)
 //        where i is an non-negative integer
 const CcOpCode opCodeTable[] = {
-  {SH_OP_ASN,   "#0" },
-  {SH_OP_NEG,   "-#0" },  
-  {SH_OP_ADD,   "$0 + $1"},
-  {SH_OP_MUL,   "$0 * $1"},
-  {SH_OP_DIV,   "$0 / $1"},
+  {OP_ASN,   "#0" },
+  {OP_NEG,   "-#0" },  
+  {OP_ADD,   "$0 + $1"},
+  {OP_MUL,   "$0 * $1"},
+  {OP_DIV,   "$0 / $1"},
 
-  {SH_OP_SLT,   "($0 < $1 ? 1 : 0)"},
-  {SH_OP_SLE,   "($0 <= $1 ? 1 : 0)"},
-  {SH_OP_SGT,   "($0 > $1 ? 1 : 0)"},
-  {SH_OP_SGE,   "($0 >= $1 ? 1 : 0)"},
-  {SH_OP_SEQ,   "($0 == $1 ? 1 : 0)"},
-  {SH_OP_SNE,   "($0 != $1 ? 1 : 0)"},
+  {OP_SLT,   "($0 < $1 ? 1 : 0)"},
+  {OP_SLE,   "($0 <= $1 ? 1 : 0)"},
+  {OP_SGT,   "($0 > $1 ? 1 : 0)"},
+  {OP_SGE,   "($0 >= $1 ? 1 : 0)"},
+  {OP_SEQ,   "($0 == $1 ? 1 : 0)"},
+  {OP_SNE,   "($0 != $1 ? 1 : 0)"},
 
-  {SH_OP_ABS,   "fabs(#0)"}, 
-  {SH_OP_ACOS,  "acos(#0)"},
-  {SH_OP_ASIN,  "asin(#0)"},
-  {SH_OP_ATAN,  "atan(#0)"},
-  {SH_OP_ATAN2, "atan2(#0, #1)"},
+  {OP_ABS,   "fabs(#0)"}, 
+  {OP_ACOS,  "acos(#0)"},
+  {OP_ASIN,  "asin(#0)"},
+  {OP_ATAN,  "atan(#0)"},
+  {OP_ATAN2, "atan2(#0, #1)"},
 #ifdef _WIN32
-  {SH_OP_ACOSH, "log(#0 + sqrt(#0 * #0 - 1.0))"},
-  {SH_OP_ASINH, "log(#0 + sqrt(#0 * #0 + 1.0))"},
-  {SH_OP_ATANH, "log((1.0 + #0)/(1.0 - #0)) / 2.0"},
+  {OP_ACOSH, "log(#0 + sqrt(#0 * #0 - 1.0))"},
+  {OP_ASINH, "log(#0 + sqrt(#0 * #0 + 1.0))"},
+  {OP_ATANH, "log((1.0 + #0)/(1.0 - #0)) / 2.0"},
 #else
-  {SH_OP_ACOSH, "acosh(#0)"},
-  {SH_OP_ASINH, "asinh(#0)"},
-  {SH_OP_ATANH, "atanh(#0)"},
+  {OP_ACOSH, "acosh(#0)"},
+  {OP_ASINH, "asinh(#0)"},
+  {OP_ATANH, "atanh(#0)"},
 #endif
-  {SH_OP_CBRT,  "pow(#0, 1 / 3.0)"},
-  {SH_OP_CEIL,  "ceil(#0)"},
-  {SH_OP_COS,   "cos(#0)"},
-  {SH_OP_COSH,  "cosh(#0)"},
-  {SH_OP_EXP,   "exp(#0)"},
-  {SH_OP_EXP2,  "exp2(#0)"},
-  {SH_OP_EXP10, "exp10(#0)"},
-  {SH_OP_FLR,   "floor(#0)"},
-  {SH_OP_FRAC,  "#0 - floor(#0)"},
-  {SH_OP_LOG,   "log(#0)"},
-  {SH_OP_LOG2,  "log2(#0)"},
-  {SH_OP_LOG10, "log10(#0)"},
-  {SH_OP_LRP,   "$0 * ($1 - $2) + $2"},
-  {SH_OP_MAD,   "$0 * $1 + $2"},
-  {SH_OP_MAX,   "($0 > $1 ? $0 : $1)"},
-  {SH_OP_MIN,   "($0 < $1 ? $0 : $1)"}, 
-  {SH_OP_MOD,   "($0 - $1 * floor((double)$0 / $1))"},
-  {SH_OP_POW,   "pow($0, $1)"},
-  {SH_OP_RCP,   "1 / #0"},
-  {SH_OP_RND,   "floor(#0 + 0.5)"},
-  {SH_OP_RSQ,   "1 / sqrt(#0)"},
-  {SH_OP_SIN,   "sin(#0)"},
-  {SH_OP_SINH,  "sinh(#0)"},
-  {SH_OP_SGN,   "(#0 < 0 ? -1 : (#0 > 0 ? 1 : 0))"},
-  {SH_OP_SQRT,  "sqrt(#0)"},
-  {SH_OP_TAN,   "tan(#0)"},
-  {SH_OP_TANH,  "tanh(#0)"},
-  {SH_OP_COND,  "($0 > 0 ? $1 : $2)"},
-  {SH_OP_FETCH, "#0"},
+  {OP_CBRT,  "pow(#0, 1 / 3.0)"},
+  {OP_CEIL,  "ceil(#0)"},
+  {OP_COS,   "cos(#0)"},
+  {OP_COSH,  "cosh(#0)"},
+  {OP_EXP,   "exp(#0)"},
+  {OP_EXP2,  "exp2(#0)"},
+  {OP_EXP10, "exp10(#0)"},
+  {OP_FLR,   "floor(#0)"},
+  {OP_FRAC,  "#0 - floor(#0)"},
+  {OP_LOG,   "log(#0)"},
+  {OP_LOG2,  "log2(#0)"},
+  {OP_LOG10, "log10(#0)"},
+  {OP_LRP,   "$0 * ($1 - $2) + $2"},
+  {OP_MAD,   "$0 * $1 + $2"},
+  {OP_MAX,   "($0 > $1 ? $0 : $1)"},
+  {OP_MIN,   "($0 < $1 ? $0 : $1)"}, 
+  {OP_MOD,   "($0 - $1 * floor((double)$0 / $1))"},
+  {OP_POW,   "pow($0, $1)"},
+  {OP_RCP,   "1 / #0"},
+  {OP_RND,   "floor(#0 + 0.5)"},
+  {OP_RSQ,   "1 / sqrt(#0)"},
+  {OP_SIN,   "sin(#0)"},
+  {OP_SINH,  "sinh(#0)"},
+  {OP_SGN,   "(#0 < 0 ? -1 : (#0 > 0 ? 1 : 0))"},
+  {OP_SQRT,  "sqrt(#0)"},
+  {OP_TAN,   "tan(#0)"},
+  {OP_TANH,  "tanh(#0)"},
+  {OP_COND,  "($0 > 0 ? $1 : $2)"},
+  {OP_FETCH, "#0"},
 
-  {SH_OPERATION_END,  0} 
+  {OPERATION_END,  0} 
   // @todo LO, HI, SETLO, SETHI
 };
 
 // @todo type these are still implemented in the switch statement below
 // fix them later or maybe just leave them 
 #if 0
-  {SH_OP_CMUL,             
-  {SH_OP_CSUM,             
-  {SH_OP_DOT,             
-  {SH_OP_NORM,             
-  {SH_OP_XPD,              
-  {SH_OP_TEX,              
-  {SH_OP_TEXI,             
-  {SH_OP_TEXD,             
-  {SH_OP_KIL,              
-  {SH_OP_OPTBRA,           
+  {OP_CMUL,             
+  {OP_CSUM,             
+  {OP_DOT,             
+  {OP_NORM,             
+  {OP_XPD,              
+  {OP_TEX,              
+  {OP_TEXI,             
+  {OP_TEXD,             
+  {OP_KIL,              
+  {OP_OPTBRA,           
 #endif
 
 // @todo type implement emit
-void CcBackendCode::emit(const ShStatement& stmt) {
+void CcBackendCode::emit(const Statement& stmt) {
   static CcOpCodeMap opcodeMap;
 
   // @todo type should really move this to the CcBackendCode constructor 
@@ -215,11 +215,11 @@ void CcBackendCode::emit(const ShStatement& stmt) {
   
   // fill in opcodeMap from the above table
   if(opcodeMap.empty()) {
-    SH_CC_DEBUG_PRINT("ShOperation -> C++ code mappings");
-    for(int i = 0; opCodeTable[i].op != SH_OPERATION_END; ++i) {
+    CC_DEBUG_PRINT("Operation -> C++ code mappings");
+    for(int i = 0; opCodeTable[i].op != OPERATION_END; ++i) {
 
       opcodeMap[opCodeTable[i].op] = CcOpCodeVecs(opCodeTable[i]); 
-      SH_CC_DEBUG_PRINT(opInfo[opCodeTable[i].op].name << " -> " 
+      CC_DEBUG_PRINT(opInfo[opCodeTable[i].op].name << " -> " 
           << opcodeMap[opCodeTable[i].op].encode());
     }
   }
@@ -240,7 +240,7 @@ void CcBackendCode::emit(const ShStatement& stmt) {
         << ctype(stmt.dest.valueType()) << ")(";
       unsigned int j;
       for(j = 0; j < codeVecs.index.size(); ++j) { 
-        const ShVariable& src = stmt.src[codeVecs.index[j]];
+        const Variable& src = stmt.src[codeVecs.index[j]];
         m_code << codeVecs.frag[j];
         if(codeVecs.scalar[j]) {
           m_code << resolve(src, src.size() > 1 ? i : 0); 
@@ -256,9 +256,9 @@ void CcBackendCode::emit(const ShStatement& stmt) {
   // handle remaining ops with some custom code
   // @todo improve collecting ops
   switch(stmt.op) {
-    case SH_OP_DOT:
+    case OP_DOT:
       {
-        SH_DEBUG_ASSERT(stmt.dest.size() == 1);
+        DEBUG_ASSERT(stmt.dest.size() == 1);
         m_code << "  " << resolve(stmt.dest, 0) << " = " 
           << resolve(stmt.src[0], 0) 
           << " * "
@@ -280,9 +280,9 @@ void CcBackendCode::emit(const ShStatement& stmt) {
         break;
       }
 
-    case SH_OP_CSUM:
+    case OP_CSUM:
       {
-        SH_DEBUG_ASSERT(stmt.dest.size() == 1);
+        DEBUG_ASSERT(stmt.dest.size() == 1);
         m_code << "  " << resolve(stmt.dest, 0) << " = " 
           << resolve(stmt.src[0], 0) 
           << ";" << std::endl;
@@ -296,9 +296,9 @@ void CcBackendCode::emit(const ShStatement& stmt) {
         break;
       }
 
-    case SH_OP_CMUL:
+    case OP_CMUL:
       {
-        SH_DEBUG_ASSERT(stmt.dest.size() == 1);
+        DEBUG_ASSERT(stmt.dest.size() == 1);
         m_code << "  " << resolve(stmt.dest, 0) << " = " 
           << resolve(stmt.src[0], 0) 
           << ";" << std::endl;
@@ -312,7 +312,7 @@ void CcBackendCode::emit(const ShStatement& stmt) {
         break;
       }
 
-    case SH_OP_LIT:
+    case OP_LIT:
       {
         m_code << "  {" << std::endl;
 	
@@ -346,7 +346,7 @@ void CcBackendCode::emit(const ShStatement& stmt) {
 	break;
       }
 
-    case SH_OP_NORM:
+    case OP_NORM:
       {
         m_code << "  {" << std::endl;
         m_code << "    float len = 1.0/sqrt(";
@@ -370,7 +370,7 @@ void CcBackendCode::emit(const ShStatement& stmt) {
 
         break;
       }
-    case SH_OP_XPD:
+    case OP_XPD:
       {
         for(int i = 0; i < stmt.dest.size(); i++)
         {
@@ -391,15 +391,15 @@ void CcBackendCode::emit(const ShStatement& stmt) {
 
         break;
       }
-    case SH_OP_TEX:
+    case OP_TEX:
       emitTexLookup(stmt, "sh_cc_backend_lookup");
       break;
 
-    case SH_OP_TEXI:
+    case OP_TEXI:
       emitTexLookup(stmt, "sh_cc_backend_lookupi");
       break;
 
-    case SH_OP_KIL:
+    case OP_KIL:
       {
       // TODO: maintain prior output values 
       m_code << "  if (";
@@ -414,9 +414,9 @@ void CcBackendCode::emit(const ShStatement& stmt) {
       m_code << "    return;" << std::endl;
       break;
       }
-    case SH_OP_OPTBRA:
+    case OP_OPTBRA:
       {
-        SH_DEBUG_ASSERT(false);
+        DEBUG_ASSERT(false);
         break;
       }
     default:
@@ -426,7 +426,7 @@ void CcBackendCode::emit(const ShStatement& stmt) {
 
         // std::stringstream s;
         // s << "CC Code: Unknown operation " << opInfo[stmt.op].name;
-        // shError(s.str());
+        // error(s.str());
         // break;
 
         m_code << "  // *** unhandled operation " << opInfo[stmt.op].name
@@ -436,43 +436,43 @@ void CcBackendCode::emit(const ShStatement& stmt) {
   }
 }
 
-void CcBackendCode::emitTexLookup(const ShStatement& stmt, const char* texfunc) {
-  ShTextureNodePtr node = shref_dynamic_cast<ShTextureNode>(stmt.src[0].node());
+void CcBackendCode::emitTexLookup(const Statement& stmt, const char* texfunc) {
+  TextureNodePtr node = shref_dynamic_cast<TextureNode>(stmt.src[0].node());
   int dims = 0; 
   switch(node->dims()) {
-    case SH_TEXTURE_1D: dims = 1; break;   
-    case SH_TEXTURE_2D: dims = 2; break; 
-    case SH_TEXTURE_RECT: dims = 2; break;
-    case SH_TEXTURE_3D: dims = 3; break; 
-    case SH_TEXTURE_CUBE: 
-      SH_DEBUG_ERROR("Cube maps not handled"); 
+    case TEXTURE_1D: dims = 1; break;   
+    case TEXTURE_2D: dims = 2; break; 
+    case TEXTURE_RECT: dims = 2; break;
+    case TEXTURE_3D: dims = 3; break; 
+    case TEXTURE_CUBE: 
+      DEBUG_ERROR("Cube maps not handled"); 
     default:
-      SH_DEBUG_ERROR("Unhandled texture dim");
+      DEBUG_ERROR("Unhandled texture dim");
   }
 
   // names of the functors to use for different texture lookup types 
   std::string srcInterp, srcFilter, srcWrap;
 
   if(node->traits().interpolation() != 0) {
-      //shError(ShBackendException("cc backend supports only nearest-neighbour texture lookup."));
-      //SH_DEBUG_WARN("cc backend supports only nearest-neighbour texture lookup.");
+      //error(BackendException("cc backend supports only nearest-neighbour texture lookup."));
+      //DEBUG_WARN("cc backend supports only nearest-neighbour texture lookup.");
   }
 
-  if (node->traits().filtering() != ShTextureTraits::SH_FILTER_NONE) {
-      //shError(ShBackendException("cc backend does not support texture filtering."));
-      SH_DEBUG_WARN("cc backend does not support texture filtering.");
+  if (node->traits().filtering() != TextureTraits::FILTER_NONE) {
+      //error(BackendException("cc backend does not support texture filtering."));
+      DEBUG_WARN("cc backend does not support texture filtering.");
   }
 
   switch(node->traits().wrapping()) {
-    case ShTextureTraits::SH_WRAP_CLAMP:
-    case ShTextureTraits::SH_WRAP_CLAMP_TO_EDGE:
+    case TextureTraits::WRAP_CLAMP:
+    case TextureTraits::WRAP_CLAMP_TO_EDGE:
       srcWrap = "sh_gcc_backend_wrap_clamp";
       break;
-    case ShTextureTraits::SH_WRAP_REPEAT:
+    case TextureTraits::WRAP_REPEAT:
       srcWrap = "sh_gcc_backend_wrap_repeat";
       break;
     default:
-      shError(ShBackendException("cc backend does not support requested texture wrapping mode."));
+      error(BackendException("cc backend does not support requested texture wrapping mode."));
       break;
   }
 

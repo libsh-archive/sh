@@ -18,29 +18,29 @@
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 #include <iostream>
-#include "ShProgram.hpp"
-#include "ShUtility.hpp"
-#include "ShCfgBlock.hpp"
+#include "Program.hpp"
+#include "Utility.hpp"
+#include "CfgBlock.hpp"
 
 namespace SH {
 
-ShCfgBlock::ShCfgBlock(const ShProgram &program, bool copy)
+CfgBlock::CfgBlock(const Program &program, bool copy)
 {
   init(program.node()->ctrlGraph, copy);
 }
 
-ShCfgBlock::ShCfgBlock(const ShCtrlGraphPtr& cfg, bool copy)
+CfgBlock::CfgBlock(const CtrlGraphPtr& cfg, bool copy)
 {
   init(cfg, copy);
 }
 
-ShCfgBlock::ShCfgBlock(const ShCtrlGraphNodePtr& node, bool copy)
+CfgBlock::CfgBlock(const CtrlGraphNodePtr& node, bool copy)
 {
-  ShCtrlGraphPtr cfg = new ShCtrlGraph(node, node); 
+  CtrlGraphPtr cfg = new CtrlGraph(node, node); 
   init(cfg, copy);
 }
 
-void ShCfgBlock::init(const ShCtrlGraphPtr& cfg, bool copy)
+void CfgBlock::init(const CtrlGraphPtr& cfg, bool copy)
 {
   if(copy) {
     cfg->copy(m_entry, m_exit);
@@ -50,32 +50,32 @@ void ShCfgBlock::init(const ShCtrlGraphPtr& cfg, bool copy)
   }
 }
 
-ShCfgBlock::~ShCfgBlock()
+CfgBlock::~CfgBlock()
 {
 }
 
-ShCtrlGraphNodePtr ShCfgBlock::entry() const 
+CtrlGraphNodePtr CfgBlock::entry() const 
 {
   return m_entry;
 }
 
-ShCtrlGraphNodePtr ShCfgBlock::exit() const 
+CtrlGraphNodePtr CfgBlock::exit() const 
 {
   return m_exit;
 }
 
-void ShCfgBlock::print(std::ostream& out, int indent) const
+void CfgBlock::print(std::ostream& out, int indent) const
 {
   using std::endl;
   
-  shPrintIndent(out, indent);
+  printIndent(out, indent);
   out << "CfgBlock {" << endl;
     m_entry->print(out, indent + 2);
-  shPrintIndent(out, indent);
+  printIndent(out, indent);
   out << "}" << endl;
 }
 
-void ShCfgBlock::graphvizDump(std::ostream& out) const
+void CfgBlock::graphvizDump(std::ostream& out) const
 {
   out << "subgraph cfgblock {";
     m_entry->graphvizDump(out);

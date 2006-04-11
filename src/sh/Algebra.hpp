@@ -21,10 +21,10 @@
 #define SHALGEBRA_HPP
 
 #include <string>
-#include "ShDllExport.hpp"
-#include "ShProgram.hpp"
-#include "ShSyntax.hpp"
-#include "ShAttrib.hpp"
+#include "DllExport.hpp"
+#include "Program.hpp"
+#include "Syntax.hpp"
+#include "Attrib.hpp"
 
 namespace SH {
 
@@ -34,16 +34,16 @@ namespace SH {
  * If A > B, extra outputs are kept at end
  * If A < B, extra inputs are kept at end
  */
-SH_DLLEXPORT
-ShProgram connect(ShProgram a, ShProgram b);
+DLLEXPORT
+Program connect(Program a, Program b);
 
 /** Combine a and b.
  * Use all inputs from a and b and all outputs from a and b,
  * concatenated in order,
  * and perform all operations from both programs.
  */
-SH_DLLEXPORT
-ShProgram combine(ShProgram a, ShProgram b);
+DLLEXPORT
+Program combine(Program a, Program b);
 
 /** Combine a and b.
  * Use all inputs from a and b and all outputs from a and b,
@@ -58,8 +58,8 @@ ShProgram combine(ShProgram a, ShProgram b);
  * For instance, if a has inputs x, y, k, x, z and b has inputs w, y, x, v
  * then the result has inputs x, y, k, z, w, v
  */
-SH_DLLEXPORT
-ShProgram namedCombine(ShProgram a, ShProgram b);
+DLLEXPORT
+Program namedCombine(Program a, Program b);
 
 /** Replace inputs of b with outputs of a.
  * Functional composition.
@@ -70,55 +70,55 @@ ShProgram namedCombine(ShProgram a, ShProgram b);
  * another output of a.
  * Extra inputs remain at the end.  Extra outputs remain iff keepExtra = true 
  */
-SH_DLLEXPORT
-ShProgram namedConnect(ShProgram a, ShProgram b, bool keepExtra = false );
+DLLEXPORT
+Program namedConnect(Program a, Program b, bool keepExtra = false );
 
 /** Renames all inputs named oldName to newName.
  */
-SH_DLLEXPORT
-ShProgram renameInput(ShProgram a, const std::string& oldName, const std::string& newName);
+DLLEXPORT
+Program renameInput(Program a, const std::string& oldName, const std::string& newName);
 
 /** Renames all outputs named oldName to newName.
  */
-SH_DLLEXPORT
-ShProgram renameOutput(ShProgram a, const std::string& oldName, const std::string& newName);
+DLLEXPORT
+Program renameOutput(Program a, const std::string& oldName, const std::string& newName);
 
 /** Swizzles named outputs of a to match named inputs of b.
  * This only works on programs with inputs/outputs that all have unique names. 
  * Also, the inputs of b must be a subset of the outputs of a.
  */
-SH_DLLEXPORT
-ShProgram namedAlign(ShProgram a, ShProgram b);
+DLLEXPORT
+Program namedAlign(Program a, Program b);
 
 /** Replaces variable with input attribute.
  * Replaces a variable by appending an
  * input attribute to the end of the list of inputs.
  */
-SH_DLLEXPORT
-ShProgram replaceVariable(ShProgram a, const ShVariable &var); 
+DLLEXPORT
+Program replaceVariable(Program a, const Variable &var); 
 
 /** Equivalent to combine(a,b).
  */
-SH_DLLEXPORT
-ShProgram operator&(ShProgram a, ShProgram b);
+DLLEXPORT
+Program operator&(Program a, Program b);
 
 /** Equivalent to connect(b,a).
  */
-SH_DLLEXPORT
-ShProgram operator<<(ShProgram a, ShProgram b);
+DLLEXPORT
+Program operator<<(Program a, Program b);
 
 /** Equivalent to replaceVariable(p,var).
  */
-SH_DLLEXPORT
-ShProgram operator>>(ShProgram p, const ShVariable &var); 
+DLLEXPORT
+Program operator>>(Program p, const Variable &var); 
 
 /** Application operator.
  * The operator used for combine can also be used to apply a program
  * to a variable.   The implementation supports currying with delayed
  * read, which is equivalent to replacing an input with a parameter.
  */
-SH_DLLEXPORT
-ShProgram operator<<(ShProgram a, const ShVariable& var); 
+DLLEXPORT
+Program operator<<(Program a, const Variable& var); 
 
 }
 

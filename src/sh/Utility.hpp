@@ -26,32 +26,32 @@
 
 #include <iosfwd>
 #include <map>
-#include "ShDllExport.hpp"
+#include "DllExport.hpp"
 
 namespace SH {
 
 /// Print "indent" spaces to out.
-SH_DLLEXPORT
-std::ostream& shPrintIndent(std::ostream& out, int indent);
+DLLEXPORT
+std::ostream& printIndent(std::ostream& out, int indent);
 
 /** Check a boolean condition at compile time.
  * This follows Alexandrescu's excellent book "Modern C++ Design"
  */
-template<bool B> struct ShCompileTimeChecker
+template<bool B> struct CompileTimeChecker
 {
-  ShCompileTimeChecker(...);
+  CompileTimeChecker(...);
 };
-template<> struct ShCompileTimeChecker<false> {
+template<> struct CompileTimeChecker<false> {
 };
 
-#define SH_STATIC_CHECK(expr, msg) \
+#define STATIC_CHECK(expr, msg) \
 { \
-  class SH_ERROR_##msg {} y; \
-  (void)sizeof(ShCompileTimeChecker<(expr)>(y));\
+  class ERROR_##msg {} y; \
+  (void)sizeof(CompileTimeChecker<(expr)>(y));\
 }
 
 struct 
-SH_DLLEXPORT ShIgnore {
+DLLEXPORT Ignore {
   template<typename T>
   T& operator&(T& other) { return other; }
 };
@@ -88,8 +88,8 @@ struct MatchEitherType {
 };
 
 /** Returns true if T matches a given templated type.
- * For example, MatchTemplateType<int, ShInterval>::matches == false
- * but MatchTemplateType<ShInterval<int>, ShInterval>::matches == true
+ * For example, MatchTemplateType<int, Interval>::matches == false
+ * but MatchTemplateType<Interval<int>, Interval>::matches == true
  *
  * You can subclass this like this:
  * template<typename T> struct MatchMyType: public MatchTemplateType<T, MyType> {}; 

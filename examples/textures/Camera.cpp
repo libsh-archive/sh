@@ -28,7 +28,7 @@
 #endif
 
 #include "Camera.hpp"
-#include "ShTrackball.hpp"
+#include "Trackball.hpp"
 
 using namespace SH;
 
@@ -37,7 +37,7 @@ Camera::Camera()
   proj = perspective(45, 1, (double).1f, 100);
 }
 
-void printMatrix(std::ostream& out, const ShMatrix4x4f& mat)
+void printMatrix(std::ostream& out, const Matrix4x4f& mat)
 {
   for (int i = 0; i < 4; ++i) {
     for (int j = 0; j < 4; ++j) {
@@ -84,19 +84,19 @@ void Camera::glProjection(float aspect)
   glMultMatrixf(values);
 }
 
-ShMatrix4x4f Camera::shModelView()
+Matrix4x4f Camera::modelView()
 {
   return (trans | rots);
 }
 
-ShMatrix4x4f Camera::shModelViewProjection(ShMatrix4x4f viewport)
+Matrix4x4f Camera::modelViewProjection(Matrix4x4f viewport)
 {
   return (viewport | (proj | (trans | rots)));
 }
 
 void Camera::move(float x, float y, float z)
 {
-  ShMatrix4x4f m;
+  Matrix4x4f m;
   m[0](3) = x;
   m[1](3) = y;
   m[2](3) = z;
@@ -108,7 +108,7 @@ void Camera::rotate(float a, float x, float y, float z)
 {
   float cosa = cos((M_PI/180)*a);
   float sina = sin((M_PI/180)*a);
-  ShMatrix4x4f m;
+  Matrix4x4f m;
     
   m[0](0) = x*x*(1-cosa) +   cosa;
   m[0](1) = x*y*(1-cosa) - z*sina;
@@ -127,12 +127,12 @@ void Camera::rotate(float a, float x, float y, float z)
 
 void Camera::orbit(int sx, int sy, int x, int y, int w, int h)
 {
-  ShTrackball t;
+  Trackball t;
   t.resize(w, h);
   rots = (t.rotate(sx, sy, x, y) | rots);
 }
 
-ShMatrix4x4f Camera::perspective(float fov, float aspect, float znear, float zfar)
+Matrix4x4f Camera::perspective(float fov, float aspect, float znear, float zfar)
 {
   float zmin = znear;
   float zmax = zfar;
@@ -141,7 +141,7 @@ ShMatrix4x4f Camera::perspective(float fov, float aspect, float znear, float zfa
   float xmin = ymin*aspect;
   float xmax = ymax*aspect;
 
-  ShMatrix4x4f ret;
+  Matrix4x4f ret;
 
   ret[0](0) = 2.0*zmin/(xmax-xmin);
   ret[0](1) = 0.0;

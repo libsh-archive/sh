@@ -23,46 +23,46 @@
 #include <iostream>
 #include <string>
 #include <map>
-#include "sh/ShError.hpp"
-#include "sh/ShException.hpp"
-#include "sh/ShDebug.hpp"
-#include "ShMesh.hpp"
+#include "sh/Error.hpp"
+#include "sh/Exception.hpp"
+#include "sh/Debug.hpp"
+#include "Mesh.hpp"
 
 namespace ShUtil {
 
-/** ShMeshVertex method definitions */
+/** MeshVertex method definitions */
 template<typename M>
-ShMeshVertex<M>::ShMeshVertex()
+MeshVertex<M>::MeshVertex()
   : edge(0) {}
 
 template<typename M>
-ShMeshVertex<M>::ShMeshVertex(const ShMeshVertex<M> &other)
+MeshVertex<M>::MeshVertex(const MeshVertex<M> &other)
   : edge(0) {}
 
 template<typename M>
-ShMeshFace<M>::ShMeshFace()
+MeshFace<M>::MeshFace()
   : edge(0) {}
 
 template<typename M>
-ShMeshFace<M>::ShMeshFace(const ShMeshFace<M> &other)
+MeshFace<M>::MeshFace(const MeshFace<M> &other)
   : edge(0) {}
 
-/** ShMeshEdge method definitions */
+/** MeshEdge method definitions */
 template<typename M>
-ShMeshEdge<M>::ShMeshEdge()
+MeshEdge<M>::MeshEdge()
   : start(0), end(0), face(0), sym(0), next(0), prev(0) {}
 
 template<typename M>
-ShMeshEdge<M>::ShMeshEdge(const ShMeshEdge<M> &other)
+MeshEdge<M>::MeshEdge(const MeshEdge<M> &other)
   : start(0), end(0), face(0), sym(0), next(0), prev(0) {} 
 
 template<typename M>
-void ShMeshEdge<M>::setLinks(Vertex *s, Vertex *e, Face *f,
+void MeshEdge<M>::setLinks(Vertex *s, Vertex *e, Face *f,
     Edge *next, Edge *prev, Edge *sym) {
   // TODO Figure out what to do here instead of shellacking
   // the user with a dumb error message.
   if(start || end) {
-    SH_DEBUG_WARN("Changing start/end vertex of an edge.  "
+    DEBUG_WARN("Changing start/end vertex of an edge.  "
       << "This is probably not a good idea.");
   }
 
@@ -75,49 +75,49 @@ void ShMeshEdge<M>::setLinks(Vertex *s, Vertex *e, Face *f,
 } 
 
 template<typename M>
-void ShMeshEdge<M>::setNext(Edge *n) {
+void MeshEdge<M>::setNext(Edge *n) {
   if( next ) next->prev = 0;
   next = n;
   if( next ) next->prev = reinterpret_cast<Edge*>(this);
 }
 
 template<typename M>
-void ShMeshEdge<M>::setPrev(Edge *p) {
+void MeshEdge<M>::setPrev(Edge *p) {
   if( prev ) prev->next = 0;
   prev = p;
   if( prev ) prev->next = reinterpret_cast<Edge*>(this);
 }
 
 template<typename M>
-void ShMeshEdge<M>::setSym(Edge *e) {
+void MeshEdge<M>::setSym(Edge *e) {
   if( sym ) sym->sym = 0;
   sym = e;
   if( sym ) sym->sym = reinterpret_cast<Edge*>(this);
 }
 
-/* ShMesh method definitions */
+/* Mesh method definitions */
 template<typename M>
-ShMesh<M>::ShMesh() {}
+Mesh<M>::Mesh() {}
 
 template<typename M>
-ShMesh<M>::ShMesh(const ShMesh<M> &other) {
+Mesh<M>::Mesh(const Mesh<M> &other) {
   *this = other;
 }
 
 template<typename M>
-ShMesh<M>::~ShMesh() {
+Mesh<M>::~Mesh() {
   clear();
 }
 
 template<typename M>
-ShMesh<M>& ShMesh<M>::operator=(const ShMesh<M> &other) {
+Mesh<M>& Mesh<M>::operator=(const Mesh<M> &other) {
   // TODO switch to hash_maps for O(V + E + F) runtime instead of
   // O(VlogV + ElogE + FlogF) run-time.
   VertexMap vmap;
   EdgeMap emap;
   FaceMap fmap;
 
-  SH_DEBUG_WARN("Assignment");
+  DEBUG_WARN("Assignment");
   clear();
 
   // mappings for null pointers
@@ -161,7 +161,7 @@ ShMesh<M>& ShMesh<M>::operator=(const ShMesh<M> &other) {
 }
 
 template<typename M>
-void ShMesh<M>::clear() {
+void Mesh<M>::clear() {
   for(typename VertexSet::iterator I = verts.begin(); I != verts.end(); ++I) {
     delete (*I);
   }
@@ -181,12 +181,12 @@ void ShMesh<M>::clear() {
 }
 
 template<typename M>
-typename ShMesh<M>::Face* 
-ShMesh<M>::addFace(const typename ShMesh<M>::VertexList &vl) {
+typename Mesh<M>::Face* 
+Mesh<M>::addFace(const typename Mesh<M>::VertexList &vl) {
   verts.insert(vl.begin(), vl.end());  
 
   if( vl.size() < 1 ) {
-    SH::shError(SH::ShException("ShMesh::addFace can only handle faces with >= 1 vertices")); 
+    SH::error(SH::Exception("Mesh::addFace can only handle faces with >= 1 vertices")); 
   }
   Face *newf = new Face();
   faces.insert(newf);
@@ -197,7 +197,7 @@ ShMesh<M>::addFace(const typename ShMesh<M>::VertexList &vl) {
     Vertex *start = *(I++);
     Vertex *end = (I == vl.end() ? first : *I); 
 
-    SH_DEBUG_ASSERT(start);
+    DEBUG_ASSERT(start);
 
     newe = new Edge();
     newe->setLinks(start, end, newf, 0, olde, 0);
@@ -212,7 +212,7 @@ ShMesh<M>::addFace(const typename ShMesh<M>::VertexList &vl) {
 
 
 template<typename M>
-void ShMesh<M>::removeFace(Face *f) {
+void Mesh<M>::removeFace(Face *f) {
   Edge *olde, *e;
   e = f->edge;
   //TODO this may fail if != is redefined to 
@@ -230,7 +230,7 @@ void ShMesh<M>::removeFace(Face *f) {
 
 template<typename M>
 template<typename VertLess>
-void ShMesh<M>::mergeVertices() {
+void Mesh<M>::mergeVertices() {
   typedef std::map<Vertex*, Vertex*, VertLess> MergedVertMap;
   MergedVertMap mvmap;
 
@@ -270,7 +270,7 @@ void ShMesh<M>::mergeVertices() {
 }
 
 template<typename M>
-void ShMesh<M>::mergeEdges() {
+void Mesh<M>::mergeEdges() {
   typedef std::map<Vertex*, std::map<Vertex*, Edge*> > EdgeMatchMap;
 
   EdgeMatchMap edgeMatch;
@@ -282,14 +282,14 @@ void ShMesh<M>::mergeEdges() {
     if(match) match->setSym(e);
 
     if( edgeMatch[e->start][e->end] != 0 ) {
-      SH_DEBUG_WARN("Duplicate edge found in mesh");
+      DEBUG_WARN("Duplicate edge found in mesh");
     }
     edgeMatch[e->start][e->end] = e;
   }
 }
 
 template<typename M>
-bool ShMesh<M>::earTriangulate() {
+bool Mesh<M>::earTriangulate() {
   bool changed = false;
   for(typename FaceSet::iterator I = faces.begin(); I != faces.end(); ++I) {
     Edge *e = (*I)->edge;
@@ -331,7 +331,7 @@ bool ShMesh<M>::earTriangulate() {
 }
 
 template<typename M>
-void ShMesh<M>::removeHalfEdge(Edge *e) {
+void Mesh<M>::removeHalfEdge(Edge *e) {
   edges.erase(e);
   e->setNext(0);
   e->setPrev(0);
@@ -356,9 +356,9 @@ void ShMesh<M>::removeHalfEdge(Edge *e) {
 }
 
 template<typename M>
-void ShMesh<M>::insertHalfEdge(Edge *e) {
+void Mesh<M>::insertHalfEdge(Edge *e) {
   edges.insert(e);
-  SH_DEBUG_ASSERT(e->start);
+  DEBUG_ASSERT(e->start);
   m_incidences.insert(Incidence(e->start, e));
 }
 

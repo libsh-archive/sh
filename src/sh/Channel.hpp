@@ -20,38 +20,38 @@
 #ifndef SHCHANNEL_HPP
 #define SHCHANNEL_HPP
 
-#include "ShChannelNode.hpp"
-#include "ShProgram.hpp"
-#include "ShGeneric.hpp"
+#include "ChannelNode.hpp"
+#include "Program.hpp"
+#include "Generic.hpp"
 
 namespace SH {
 
 /** The client interface to a single-channel typed data stream.
- * Really this hides an ShChannelNode which is the true representation
+ * Really this hides an ChannelNode which is the true representation
  * of the channel.   The template argument is the element type stored.
  * @todo copy constructor, operator=(), etc.
  */
 template<typename T>
-class ShChannel : public ShMetaForwarder {
+class Channel : public MetaForwarder {
 public:
   /// Construct a channel without any associated memory.
-  ShChannel();
+  Channel();
   /// Construct a channel with a memory containing \a count elements
-  ShChannel(int count);
+  Channel(int count);
   /// Construct a channel with \a count elements in \a memory
-  ShChannel(const ShMemoryPtr& memory, int count);
+  Channel(const MemoryPtr& memory, int count);
 
   /// Set this channel to use \a count elements in \a memory
-  void memory(const ShMemoryPtr& memory, int count);
+  void memory(const MemoryPtr& memory, int count);
 
   /// Return the number of elements in this channel
   int count() const;
   /// Set the number of elements in this channel
   void count(int c);
   /// Return this channel's memory
-  ShPointer<const ShMemory> memory() const;
+  Pointer<const Memory> memory() const;
   /// Return this channel's memory
-  ShMemoryPtr memory();
+  MemoryPtr memory();
 
   /// Set the stride on the elements of this channel
   void stride(int stride);
@@ -74,19 +74,19 @@ public:
 
   /// Indexed lookup from the stream
   template<typename T2>
-  T operator[](const ShGeneric<1, T2>& index) const;
+  T operator[](const Generic<1, T2>& index) const;
 
   /// Return the node internally wrapped by this channel object
-  ShChannelNodePtr node();
+  ChannelNodePtr node();
   /// Return the node internally wrapped by this channel object
-  const ShChannelNodePtr node() const;
+  const ChannelNodePtr node() const;
 
   /// Execute fully bound single-output stream program and place result in channel.
-  ShChannel& operator=(const ShProgram& program);
+  Channel& operator=(const Program& program);
   
 private:
   /// The node this object is a thin wrapper for
-  ShChannelNodePtr m_node;
+  ChannelNodePtr m_node;
 };
 
 /** Apply a programs to a single channel.
@@ -94,17 +94,17 @@ private:
  * supports currying, and returns a program with one less input.
  */
 template<typename T>
-ShProgram connect(const ShChannel<T>& channel, const ShProgram& program);
+Program connect(const Channel<T>& channel, const Program& program);
 
 /** Equivalent to connect(p,c). 
  * Bind a channel as an input to a program.   The implementation
  * supports currying, and returns a program with one less input.
  */
 template<typename T>
-ShProgram operator<<(const ShProgram& program, const ShChannel<T>& channel);
+Program operator<<(const Program& program, const Channel<T>& channel);
 
 }
 
-#include "ShChannelImpl.hpp"
+#include "ChannelImpl.hpp"
 
 #endif

@@ -21,9 +21,9 @@
 #include <iomanip>
 #include <sstream>
 #include <cctype>
-#include "ShObjMesh.hpp"
+#include "ObjMesh.hpp"
 
-// ShObjMesh converted from old ShObjFile
+// ObjMesh converted from old ObjFile
 
 namespace ShUtil {
 
@@ -39,7 +39,7 @@ struct Triple {
 
       if (in.peek() == '\n') return;
       
-      // each vertex spec must not have spaces (just copying what the old ShObjFile did...)
+      // each vertex spec must not have spaces (just copying what the old ObjFile did...)
       in >> std::noskipws;  
       for(int i = 0; i < 3;) {
         in >> idx[i];
@@ -62,25 +62,25 @@ struct Triple {
     int operator[](int i) { return idx[i]; }
 };
 
-typedef std::vector<Triple> ShObjIndexedFace;
+typedef std::vector<Triple> ObjIndexedFace;
 
-ShObjVertex::ShObjVertex(const ShPoint3f &p)
+ObjVertex::ObjVertex(const Point3f &p)
   : pos(p) {}
 
-ShObjMesh::ShObjMesh() {
+ObjMesh::ObjMesh() {
 }
 
-ShObjMesh::ShObjMesh(std::istream &in) {
+ObjMesh::ObjMesh(std::istream &in) {
   readObj(in);
 }
 
-std::istream& ShObjMesh::readObj(std::istream &in) {
+std::istream& ObjMesh::readObj(std::istream &in) {
   char ch = 0;
   typedef std::vector<Vertex*> VertexVec;
-  typedef std::vector<ShTexCoord2f> TexCoordVec;
-  typedef std::vector<ShNormal3f> NormalVec;
-  typedef std::vector<ShVector3f> TangentVec;
-  typedef std::vector<ShObjIndexedFace> FaceVec;
+  typedef std::vector<TexCoord2f> TexCoordVec;
+  typedef std::vector<Normal3f> NormalVec;
+  typedef std::vector<Vector3f> TangentVec;
+  typedef std::vector<ObjIndexedFace> FaceVec;
 
   VertexVec vertexVec;
   TexCoordVec tcVec;
@@ -104,20 +104,20 @@ std::istream& ShObjMesh::readObj(std::istream &in) {
           case ' ': { // vertex
             float x, y, z;
             in >> x >> y >> z;
-            vertexVec.push_back(new Vertex(ShPoint3f(x, y, z)));
+            vertexVec.push_back(new Vertex(Point3f(x, y, z)));
             break;
           }
           case 't': { // Texture coordinate
             float u, v;
             in >> u >> v;
-            tcVec.push_back(ShTexCoord2f(u, v));
+            tcVec.push_back(TexCoord2f(u, v));
             break;
           }
           case 'n': {
             // Normal
             float x, y, z;
             in >> x >> y >> z;
-            normVec.push_back(ShNormal3f(x, y, z));
+            normVec.push_back(Normal3f(x, y, z));
             break;
           }
         }
@@ -126,11 +126,11 @@ std::istream& ShObjMesh::readObj(std::istream &in) {
       case 'r': { // Tangent
         float x, y, z;
         in >> x >> y >> z;
-        tangentVec.push_back(ShVector3f(x, y, z));
+        tangentVec.push_back(Vector3f(x, y, z));
         break;
       }
       case 'f': { // Face
-        ShObjIndexedFace f;
+        ObjIndexedFace f;
         for(;;) {
           Triple triple(in);
           if( triple[0] == 0 ) break; 
@@ -156,12 +156,12 @@ std::istream& ShObjMesh::readObj(std::istream &in) {
   // convert faceVec to mesh
   for(std::size_t i = 0; i < faceVec.size(); ++i) {
     VertexList vl;
-    for(ShObjIndexedFace::iterator I = faceVec[i].begin(); I != faceVec[i].end(); ++I) {
+    for(ObjIndexedFace::iterator I = faceVec[i].begin(); I != faceVec[i].end(); ++I) {
       int vi = (*I)[0] - 1;
       if( vi == -1 || vi >= (int)vertexVec.size() ) {
         std::ostringstream os;
         os << "Invalid vertex index " << vi << " in OBJ file.";
-        shError( ShException(os.str()));
+        error( Exception(os.str()));
       }
       vl.push_back(vertexVec[vi]);
     }
@@ -169,7 +169,7 @@ std::istream& ShObjMesh::readObj(std::istream &in) {
 
     // go through face again and set up edge properties
     Edge* edge = face->edge;
-    for(ShObjIndexedFace::iterator I = faceVec[i].begin(); I != faceVec[i].end(); ++I, edge = edge->next) {
+    for(ObjIndexedFace::iterator I = faceVec[i].begin(); I != faceVec[i].end(); ++I, edge = edge->next) {
       int tci = (*I)[1] - 1;
       int ni = (*I)[2] - 1; 
 
@@ -177,7 +177,7 @@ std::istream& ShObjMesh::readObj(std::istream &in) {
         if( tci >= (int)tcVec.size() ) {
           std::ostringstream os;
           os << "Invalid texcoord index " << tci << " in OBJ file.";
-          shError( ShException(os.str()));
+          error( Exception(os.str()));
         }
         edge->texcoord = tcVec[tci]; 
       } else edge->texcoord *= 0.0f;
@@ -186,7 +186,7 @@ std::istream& ShObjMesh::readObj(std::istream &in) {
         if( ni >= (int)normVec.size() ) {
           std::ostringstream os;
           os << "Invalid normal index " << ni << " in OBJ file.";
-          shError( ShException(os.str()));
+          error( Exception(os.str()));
         }
         edge->normal = normVec[ni];
 
@@ -203,36 +203,36 @@ std::istream& ShObjMesh::readObj(std::istream &in) {
   generateFaceNormals();
 
   int badNorms = generateVertexNormals();
-  if(badNorms > 0) SH_DEBUG_WARN("OBJ file has " << badNorms << " vertices without normals"); 
+  if(badNorms > 0) DEBUG_WARN("OBJ file has " << badNorms << " vertices without normals"); 
 
   int badTangents = generateTangents();
-  if(badTangents > 0) SH_DEBUG_WARN("OBJ file has " << badTangents << " vertices without tangents"); 
+  if(badTangents > 0) DEBUG_WARN("OBJ file has " << badTangents << " vertices without tangents"); 
 
   int badTexCoords = generateSphericalTexCoords();
-  if(badTexCoords > 0) SH_DEBUG_WARN("OBJ file has " << badTexCoords << " vertices without texture coordinates.");
+  if(badTexCoords > 0) DEBUG_WARN("OBJ file has " << badTexCoords << " vertices without texture coordinates.");
 
   // TODO flip faces that have vert normals not matching the face normal
   return in;
 }
 
-void ShObjMesh::generateFaceNormals() {
+void ObjMesh::generateFaceNormals() {
   for(FaceSet::iterator I = faces.begin(); I != faces.end(); ++I) {
     Face& face = **I;
     Edge& e01 = *(face.edge);
     Edge& e02 = *(e01.next);
-    ShVector3f v01 = e01.end->pos - e01.start->pos;
-    ShVector3f v02 = e02.end->pos - e02.start->pos; 
+    Vector3f v01 = e01.end->pos - e01.start->pos;
+    Vector3f v02 = e02.end->pos - e02.start->pos; 
     face.normal = cross(v01, v02);  
   }
 }
 
-int ShObjMesh::generateVertexNormals(bool force) {
-  typedef std::map<Vertex*, ShPoint3f> NormalSumMap;
+int ObjMesh::generateVertexNormals(bool force) {
+  typedef std::map<Vertex*, Point3f> NormalSumMap;
   NormalSumMap nsm;
   for(EdgeSet::iterator I = edges.begin(); I != edges.end(); ++I) {
     Edge &e = **I;
     if( force || dot(e.normal, e.normal).getValue(0) == 0 ) { 
-      nsm[e.start] = ShConstAttrib3f(0.0f, 0.0f, 0.0f);
+      nsm[e.start] = ConstAttrib3f(0.0f, 0.0f, 0.0f);
     }
   }
   if( nsm.empty() ) return 0;
@@ -245,9 +245,9 @@ int ShObjMesh::generateVertexNormals(bool force) {
     if(nsm.count(v) > 0) {
       Edge* e1 = *I;
       Edge* e2 = e1->next;
-      ShVector3f ve1 = e1->end->pos - e1->start->pos;
-      ShVector3f ve2 = e2->end->pos - e2->start->pos;
-      ShAttrib1f scale = length(cross(ve1, ve2)) / ((ve1 | ve1) + (ve2 | ve2));
+      Vector3f ve1 = e1->end->pos - e1->start->pos;
+      Vector3f ve2 = e2->end->pos - e2->start->pos;
+      Attrib1f scale = length(cross(ve1, ve2)) / ((ve1 | ve1) + (ve2 | ve2));
       nsm[v] += scale * (*I)->face->normal; 
     }
   }
@@ -261,19 +261,19 @@ int ShObjMesh::generateVertexNormals(bool force) {
   return nsm.size();
 }
 
-int ShObjMesh::generateTangents(bool force) {
+int ObjMesh::generateTangents(bool force) {
   int changed = 0;
   for(EdgeSet::iterator I = edges.begin(); I != edges.end(); ++I) {
     Edge &e = **I;
     if( force || dot(e.tangent, e.tangent).getValue(0)  == 0) {
-      e.tangent = cross(e.normal, ShVector3f(0.0f, 1.0f, 0.0f));
+      e.tangent = cross(e.normal, Vector3f(0.0f, 1.0f, 0.0f));
       changed++;
     }
   }
   return changed; 
 }
 
-int ShObjMesh::generateSphericalTexCoords(bool force) {
+int ObjMesh::generateSphericalTexCoords(bool force) {
   if( !force ) {
     // If some vertex has texcoords, don't mess with them
     for(EdgeSet::iterator I = edges.begin(); I != edges.end(); ++I) {
@@ -285,7 +285,7 @@ int ShObjMesh::generateSphericalTexCoords(bool force) {
 
   // Find center and generate texture coordinates 
   int changed = 0;
-  ShPoint3f center;
+  Point3f center;
   for(VertexSet::iterator I = verts.begin(); I != verts.end(); ++I) {
     center += (*I)->pos;
   }
@@ -294,7 +294,7 @@ int ShObjMesh::generateSphericalTexCoords(bool force) {
   for(EdgeSet::iterator I = edges.begin(); I != edges.end(); ++I) {
     Edge &e = **I;
     if( force || dot(e.texcoord, e.texcoord).getValue(0) == 0) {
-      ShVector3f cv = normalize(e.start->pos - center);
+      Vector3f cv = normalize(e.start->pos - center);
       e.texcoord(0) = atan2(cv.getValue(2), cv.getValue(0));
       e.texcoord(1) = acos(cv.getValue(1));
       changed++; 
@@ -303,7 +303,7 @@ int ShObjMesh::generateSphericalTexCoords(bool force) {
   return changed; 
 }
 
-void ShObjMesh::normalizeNormals() {
+void ObjMesh::normalizeNormals() {
   for(EdgeSet::iterator I = edges.begin(); I != edges.end(); ++I) {
     (*I)->normal = normalize((*I)->normal);
   }
@@ -316,7 +316,7 @@ void ShObjMesh::normalizeNormals() {
 struct ObjVertLess {
  static const float EPS;
 
- bool operator()( const ShObjVertex *a, const ShObjVertex *b ) const {
+ bool operator()( const ObjVertex *a, const ObjVertex *b ) const {
    float aval[3], bval[3];
    a->pos.getValues(aval); b->pos.getValues(bval);
 
@@ -330,12 +330,12 @@ struct ObjVertLess {
 
 const float ObjVertLess::EPS = 1e-5;
 
-void ShObjMesh::consolidateVertices() {
+void ObjMesh::consolidateVertices() {
   mergeVertices<ObjVertLess>();
 }
 
 
-std::istream& operator>>(std::istream &in, ShObjMesh &mesh) {
+std::istream& operator>>(std::istream &in, ObjMesh &mesh) {
   return mesh.readObj(in); 
 }
 

@@ -24,35 +24,35 @@
 #include <cmath>
 #include <bitset>
 
-#include "ShVariable.hpp"
-#include "ShDebug.hpp"
-#include "ShLinearAllocator.hpp"
-#include "ShInternals.hpp"
-#include "ShOptimizations.hpp"
-#include "ShContext.hpp"
-#include "ShTypeInfo.hpp"
-#include "ShVariant.hpp"
-#include "ShTextureNode.hpp"
-#include "ShSyntax.hpp"
+#include "Variable.hpp"
+#include "Debug.hpp"
+#include "LinearAllocator.hpp"
+#include "Internals.hpp"
+#include "Optimizations.hpp"
+#include "Context.hpp"
+#include "TypeInfo.hpp"
+#include "Variant.hpp"
+#include "TextureNode.hpp"
+#include "Syntax.hpp"
 #include "ArbReg.hpp"
 #include "Arb.hpp"
-#include "ShAttrib.hpp"
-#include "ShCastManager.hpp"
-#include "ShError.hpp"
+#include "Attrib.hpp"
+#include "CastManager.hpp"
+#include "Error.hpp"
 
 namespace shgl {
 
 using namespace SH;
 using namespace std;
 
-#define shGlProgramStringARB glProgramStringARB
-#define shGlActiveTextureARB glActiveTextureARB
-#define shGlProgramLocalParameter4fvARB glProgramLocalParameter4fvARB
-#define shGlProgramEnvParameter4fvARB glProgramEnvParameter4fvARB
-#define shGlGetProgramivARB glGetProgramivARB
-#define shGlGenProgramsARB glGenProgramsARB
-#define shGlDeleteProgramsARB glDeleteProgramsARB
-#define shGlBindProgramARB glBindProgramARB
+#define glProgramStringARB glProgramStringARB
+#define glActiveTextureARB glActiveTextureARB
+#define glProgramLocalParameter4fvARB glProgramLocalParameter4fvARB
+#define glProgramEnvParameter4fvARB glProgramEnvParameter4fvARB
+#define glGetProgramivARB glGetProgramivARB
+#define glGenProgramsARB glGenProgramsARB
+#define glDeleteProgramsARB glDeleteProgramsARB
+#define glBindProgramARB glBindProgramARB
 
 // #define ARBCODE_DEBUG
 
@@ -60,40 +60,40 @@ class ArbBindingSpecs {
 public:
   ArbRegBinding binding;
   int maxBindings;
-  ShSemanticType semanticType;
+  SemanticType semanticType;
   bool allowGeneric;
 };
 
 ArbBindingSpecs arbVertexAttribBindingSpecs[] = {
-  {SH_ARB_REG_VERTEXPOS, 1, SH_POSITION, false},
-  {SH_ARB_REG_VERTEXNRM, 1, SH_NORMAL, false},
-  {SH_ARB_REG_VERTEXCOL, 1, SH_COLOR, false},
-  {SH_ARB_REG_VERTEXTEX, 8, SH_TEXCOORD, true},
-  {SH_ARB_REG_VERTEXFOG, 1, SH_ATTRIB, true},
-  {SH_ARB_REG_NONE, 0, SH_ATTRIB, true}
+  {ARB_REG_VERTEXPOS, 1, POSITION, false},
+  {ARB_REG_VERTEXNRM, 1, NORMAL, false},
+  {ARB_REG_VERTEXCOL, 1, COLOR, false},
+  {ARB_REG_VERTEXTEX, 8, TEXCOORD, true},
+  {ARB_REG_VERTEXFOG, 1, ATTRIB, true},
+  {ARB_REG_NONE, 0, ATTRIB, true}
 };
 
 ArbBindingSpecs arbFragmentAttribBindingSpecs[] = {
-  {SH_ARB_REG_FRAGMENTPOS, 1, SH_POSITION, false},
-  {SH_ARB_REG_FRAGMENTCOL, 1, SH_COLOR, false},
-  {SH_ARB_REG_FRAGMENTTEX, 8, SH_TEXCOORD, true},
-  {SH_ARB_REG_FRAGMENTFOG, 1, SH_ATTRIB, true},
-  {SH_ARB_REG_NONE, 0, SH_ATTRIB, true}
+  {ARB_REG_FRAGMENTPOS, 1, POSITION, false},
+  {ARB_REG_FRAGMENTCOL, 1, COLOR, false},
+  {ARB_REG_FRAGMENTTEX, 8, TEXCOORD, true},
+  {ARB_REG_FRAGMENTFOG, 1, ATTRIB, true},
+  {ARB_REG_NONE, 0, ATTRIB, true}
 };
 
 ArbBindingSpecs arbVertexOutputBindingSpecs[] = {
-  {SH_ARB_REG_RESULTPOS, 1, SH_POSITION, false},
-  {SH_ARB_REG_RESULTCOL, 1, SH_COLOR, false},
-  {SH_ARB_REG_RESULTTEX, 8, SH_TEXCOORD, true},
-  {SH_ARB_REG_RESULTFOG, 1, SH_ATTRIB, true},
-  {SH_ARB_REG_RESULTPTS, 1, SH_ATTRIB, true},
-  {SH_ARB_REG_NONE, 0, SH_ATTRIB}
+  {ARB_REG_RESULTPOS, 1, POSITION, false},
+  {ARB_REG_RESULTCOL, 1, COLOR, false},
+  {ARB_REG_RESULTTEX, 8, TEXCOORD, true},
+  {ARB_REG_RESULTFOG, 1, ATTRIB, true},
+  {ARB_REG_RESULTPTS, 1, ATTRIB, true},
+  {ARB_REG_NONE, 0, ATTRIB}
 };
 
 ArbBindingSpecs arbFragmentOutputBindingSpecs[] = {
-  {SH_ARB_REG_RESULTCOL, 1, SH_COLOR, true}, // modified by constructor if ATI_draw_buffers is present
-  {SH_ARB_REG_RESULTDPT, 1, SH_POSITION, false},
-  {SH_ARB_REG_NONE, 0, SH_ATTRIB}
+  {ARB_REG_RESULTCOL, 1, COLOR, true}, // modified by constructor if ATI_draw_buffers is present
+  {ARB_REG_RESULTDPT, 1, POSITION, false},
+  {ARB_REG_NONE, 0, ATTRIB}
 };
 
 ArbBindingSpecs* arbBindingSpecs(bool output, const string& unit)
@@ -105,25 +105,25 @@ ArbBindingSpecs* arbBindingSpecs(bool output, const string& unit)
   return 0;
 }
 
-ArbCode::ArbCode(const ShProgramNodeCPtr& shader, const string& unit,
+ArbCode::ArbCode(const ProgramNodeCPtr& shader, const string& unit,
                  TextureStrategy* texture)
   : m_texture(texture), m_shader(0), m_originalShader(0), m_unit(unit),
     m_numTemps(0), m_numHalfTemps(0), m_numInputs(0), m_numOutputs(0), m_numParams(0), m_numParamBindings(0),
     m_numConsts(0),
     m_numTextures(0), m_programId(0), m_environment(0), m_max_label(0),
-    m_address_register(new ShVariableNode(SH_TEMP, 1, SH_FLOAT))
+    m_address_register(new VariableNode(TEMP, 1, FLOAT))
 {
-  m_originalShader =  const_cast<ShProgramNode*>(shader.object());
+  m_originalShader =  const_cast<ProgramNode*>(shader.object());
 
   if (unit == "fragment") {
-    m_environment |= SH_ARB_FP;
+    m_environment |= ARB_FP;
   } else if (unit == "vertex") {
-    m_environment |= SH_ARB_VP;
+    m_environment |= ARB_VP;
   } else {
     stringstream s;
     s << "Cannot generate ARB code for the '" << unit
       << "' unit.  Valid units are 'vertex' and 'fragment'." << endl;
-    shError(ArbException(s.str()));
+    error(ArbException(s.str()));
   }
 
   const GLubyte* extensions = glGetString(GL_EXTENSIONS);
@@ -132,61 +132,61 @@ ArbCode::ArbCode(const ShProgramNodeCPtr& shader, const string& unit,
 
     if (unit == "fragment") {
       if (extstr.find("NV_fragment_program_option") != string::npos) {
-        m_environment |= SH_ARB_NVFP;
+        m_environment |= ARB_NVFP;
       }
       if (extstr.find("NV_fragment_program2") != string::npos) {
-        m_environment |= SH_ARB_NVFP2;
+        m_environment |= ARB_NVFP2;
       }
       if (extstr.find("ATI_draw_buffers") != string::npos) {
-        m_environment |= SH_ARB_ATIDB;
-	arbFragmentOutputBindingSpecs[0].binding = SH_ARB_REG_RESULTCOL_ATI;
+        m_environment |= ARB_ATIDB;
+	arbFragmentOutputBindingSpecs[0].binding = ARB_REG_RESULTCOL_ATI;
 
         GLint max_draw_buffers;
 #ifdef ATI_draw_buffers
-        SH_GL_CHECK_ERROR(glGetIntegerv(GL_MAX_DRAW_BUFFERS_ATI, &max_draw_buffers));
+        GL_CHECK_ERROR(glGetIntegerv(GL_MAX_DRAW_BUFFERS_ATI, &max_draw_buffers));
 #else 
-        SH_GL_CHECK_ERROR(glGetIntegerv(GL_MAX_DRAW_BUFFERS_ARB, &max_draw_buffers));
+        GL_CHECK_ERROR(glGetIntegerv(GL_MAX_DRAW_BUFFERS_ARB, &max_draw_buffers));
 #endif
         arbFragmentOutputBindingSpecs[0].maxBindings = max_draw_buffers;
       } 
       else if (extstr.find("ARB_draw_buffers") != string::npos) {
-        m_environment |= SH_ARB_ARBDB;
-	arbFragmentOutputBindingSpecs[0].binding = SH_ARB_REG_RESULTCOL_ATI;
+        m_environment |= ARB_ARBDB;
+	arbFragmentOutputBindingSpecs[0].binding = ARB_REG_RESULTCOL_ATI;
 
         GLint max_draw_buffers;
-        SH_GL_CHECK_ERROR(glGetIntegerv(GL_MAX_DRAW_BUFFERS_ARB, &max_draw_buffers));
+        GL_CHECK_ERROR(glGetIntegerv(GL_MAX_DRAW_BUFFERS_ARB, &max_draw_buffers));
         arbFragmentOutputBindingSpecs[0].maxBindings = max_draw_buffers;
       }
     }
     if (unit == "vertex") {
       if (extstr.find("NV_vertex_program2_option") != string::npos) {
-        m_environment |= SH_ARB_NVVP2;
+        m_environment |= ARB_NVVP2;
       }
       if (extstr.find("NV_vertex_program3") != string::npos) {
-        m_environment |= SH_ARB_NVVP3;
+        m_environment |= ARB_NVVP3;
       }
     }
   }
 
   // initialize m_convertMap
-  m_convertMap[SH_DOUBLE] = SH_FLOAT; 
+  m_convertMap[DOUBLE] = FLOAT; 
 
-  bool halfSupport = (m_environment & SH_ARB_NVFP) != 0;
-  if (!halfSupport) m_convertMap[SH_HALF] = SH_FLOAT;
+  bool halfSupport = (m_environment & ARB_NVFP) != 0;
+  if (!halfSupport) m_convertMap[HALF] = FLOAT;
 
-  m_convertMap[SH_INT] = SH_FLOAT;
-  m_convertMap[SH_SHORT] = halfSupport ? SH_HALF: SH_FLOAT;
-  m_convertMap[SH_BYTE] = halfSupport ? SH_HALF: SH_FLOAT;
-  m_convertMap[SH_UINT] = SH_FLOAT;
-  m_convertMap[SH_USHORT] = halfSupport ? SH_HALF: SH_FLOAT;
-  m_convertMap[SH_UBYTE] = halfSupport ? SH_HALF: SH_FLOAT;
+  m_convertMap[INT] = FLOAT;
+  m_convertMap[SHORT] = halfSupport ? HALF: FLOAT;
+  m_convertMap[BYTE] = halfSupport ? HALF: FLOAT;
+  m_convertMap[UINT] = FLOAT;
+  m_convertMap[USHORT] = halfSupport ? HALF: FLOAT;
+  m_convertMap[UBYTE] = halfSupport ? HALF: FLOAT;
 
-  m_convertMap[SH_FINT] = SH_FLOAT;
-  m_convertMap[SH_FSHORT] = SH_FLOAT;
-  m_convertMap[SH_FBYTE] = halfSupport ? SH_HALF : SH_FLOAT;
-  m_convertMap[SH_FUINT] = SH_FLOAT;
-  m_convertMap[SH_FUSHORT] = SH_FLOAT;
-  m_convertMap[SH_FUBYTE] = halfSupport ? SH_HALF : SH_FLOAT;
+  m_convertMap[FINT] = FLOAT;
+  m_convertMap[FSHORT] = FLOAT;
+  m_convertMap[FBYTE] = halfSupport ? HALF : FLOAT;
+  m_convertMap[FUINT] = FLOAT;
+  m_convertMap[FUSHORT] = FLOAT;
+  m_convertMap[FUBYTE] = halfSupport ? HALF : FLOAT;
 }
 
 ArbCode::~ArbCode()
@@ -197,7 +197,7 @@ ArbCode::~ArbCode()
    }
 }
 
-void dump(const ShProgramNodePtr& foo, string desc) {
+void dump(const ProgramNodePtr& foo, string desc) {
 #ifdef ARBCODE_DEBUG
   optimize(foo);
   foo->dump(desc + "_" + foo->name() + "_" + foo->target());
@@ -212,13 +212,13 @@ void ArbCode::generate()
   // Transform code to be ARB_fragment_program compatible
   // TODO: clone should update m_originalVarsMap to map our cloned variables
   // back to the originals in m_originalShader.
-  ShProgramNodePtr temp_shader = m_originalShader->clone();
+  ProgramNodePtr temp_shader = m_originalShader->clone();
   m_shader = temp_shader.object();
   m_shader->acquireRef();
   temp_shader = NULL;
 
-  ShContext::current()->enter(m_shader);
-  ShTransformer transform(m_shader);
+  Context::current()->enter(m_shader);
+  Transformer transform(m_shader);
 
   dump(m_shader, "arbcode_start");
   // Record changes that the transformer makes to the input/output variables
@@ -238,14 +238,14 @@ void ArbCode::generate()
     m_shader->releaseRef();
     m_shader = m_originalShader;
     m_originalVarsMap.clear();       // We're now pointing directly to the originals
-    ShContext::current()->exit();
-    ShContext::current()->enter(m_shader);
+    Context::current()->exit();
+    Context::current()->enter(m_shader);
   }
 
   try {
-    if (m_environment & SH_ARB_NVFP2) {
+    if (m_environment & ARB_NVFP2) {
       // In NV_fragment_program2, we actually generate structured code.
-      ShStructural str(m_shader->ctrlGraph);
+      Structural str(m_shader->ctrlGraph);
 
       genStructNode(str.head());
     
@@ -253,24 +253,24 @@ void ArbCode::generate()
       m_shader->ctrlGraph->entry()->clearMarked();
       genNode(m_shader->ctrlGraph->entry());
     
-      if (m_environment & SH_ARB_NVVP2) {
-        m_instructions.push_back(ArbInst(SH_ARB_LABEL, getLabel(m_shader->ctrlGraph->exit())));
+      if (m_environment & ARB_NVVP2) {
+        m_instructions.push_back(ArbInst(ARB_LABEL, getLabel(m_shader->ctrlGraph->exit())));
       }
     }
     m_shader->ctrlGraph->entry()->clearMarked();
     allocRegs();
   } catch (...) {
     m_shader->ctrlGraph->entry()->clearMarked();
-    ShContext::current()->exit();
+    Context::current()->exit();
     throw;
   }
-  ShContext::current()->exit();
+  Context::current()->exit();
 }
 
-bool ArbCode::allocateRegister(const ShVariableNodePtr& var)
+bool ArbCode::allocateRegister(const VariableNodePtr& var)
 {
   if (!var) return true;
-  if (var->kind() != SH_TEMP) return true;
+  if (var->kind() != TEMP) return true;
   if (var->uniform()) return true;
 
   if (m_tempRegs.empty()) {
@@ -281,35 +281,35 @@ bool ArbCode::allocateRegister(const ShVariableNodePtr& var)
 
   int idx = m_tempRegs.front();
   m_tempRegs.pop_front();
-  if (var->valueType() == SH_HALF) {
+  if (var->valueType() == HALF) {
     if (idx + 1 > m_numHalfTemps) m_numHalfTemps = idx + 1;
-    m_registers[var] = new ArbReg(SH_ARB_REG_HALF_TEMP, idx);
+    m_registers[var] = new ArbReg(ARB_REG_HALF_TEMP, idx);
   } else {
     if (idx + 1 > m_numTemps) m_numTemps = idx + 1;
-    m_registers[var] = new ArbReg(SH_ARB_REG_TEMP, idx);
+    m_registers[var] = new ArbReg(ARB_REG_TEMP, idx);
   }
   m_reglist.push_back(m_registers[var]);
   
   return true;
 }
 
-void ArbCode::freeRegister(const ShVariableNodePtr& var)
+void ArbCode::freeRegister(const VariableNodePtr& var)
 {
   if (!var) return;
-  if (var->kind() != SH_TEMP) return;
+  if (var->kind() != TEMP) return;
   if (var->uniform()) return;
 
-  SH_DEBUG_ASSERT(m_registers.find(var) != m_registers.end());
+  DEBUG_ASSERT(m_registers.find(var) != m_registers.end());
   m_tempRegs.push_front(m_registers[var]->index);
 }
 
 void ArbCode::upload()
 {
   if (!m_programId) {
-    SH_GL_CHECK_ERROR(shGlGenProgramsARB(1, &m_programId));
+    GL_CHECK_ERROR(glGenProgramsARB(1, &m_programId));
   }
 
-  SH_GL_CHECK_ERROR(shGlBindProgramARB(arbTarget(m_unit), m_programId));
+  GL_CHECK_ERROR(glBindProgramARB(arbTarget(m_unit), m_programId));
   
   ostringstream out;
   print(out);
@@ -319,17 +319,17 @@ void ArbCode::upload()
   fout << text;
   fout.close();
 #endif
-  shGlProgramStringARB(arbTarget(m_unit), GL_PROGRAM_FORMAT_ASCII_ARB,
+  glProgramStringARB(arbTarget(m_unit), GL_PROGRAM_FORMAT_ASCII_ARB,
                        (GLsizei)text.size(), text.c_str());
-  int error = glGetError();
+  int error_nb = glGetError();
   ostringstream error_os;
-  if (error == GL_NO_ERROR) return;
+  if (error_nb == GL_NO_ERROR) return;
   
   error_os << "Failed to upload ARB program." << endl;
-  if (error == GL_INVALID_OPERATION) {
+  if (error_nb == GL_INVALID_OPERATION) {
     error_os << "Program error:" << endl;
     GLint pos = -1;
-    SH_GL_CHECK_ERROR(glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &pos));
+    GL_CHECK_ERROR(glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &pos));
     if (pos >= 0){
       const unsigned char* message = glGetString(GL_PROGRAM_ERROR_STRING_ARB);
       error_os << "Error at character " << pos << endl;
@@ -341,7 +341,7 @@ void ArbCode::upload()
   } else {
     error_os << "Unknown error." << endl;
   }
-  shError(ArbException(error_os.str()));
+  error(ArbException(error_os.str()));
 }
 
 void ArbCode::bind()
@@ -350,15 +350,15 @@ void ArbCode::bind()
     upload();
   }
   
-  SH_GL_CHECK_ERROR(shGlBindProgramARB(arbTarget(m_unit), m_programId));
+  GL_CHECK_ERROR(glBindProgramARB(arbTarget(m_unit), m_programId));
   
-  ShContext::current()->set_binding(string("arb:") + m_unit, ShProgram(m_originalShader));
+  Context::current()->set_binding(string("arb:") + m_unit, Program(m_originalShader));
 
   // Initialize constants
   for (RegMap::const_iterator I = m_registers.begin(); I != m_registers.end(); ++I) {
-    ShVariableNodePtr node = I->first;
+    VariableNodePtr node = I->first;
     ArbReg reg = *I->second;
-    if (node->hasValues() && reg.type == SH_ARB_REG_PARAM) {
+    if (node->hasValues() && reg.type == ARB_REG_PARAM) {
       updateUniform(node);
     }
   }
@@ -367,20 +367,20 @@ void ArbCode::bind()
   bindTextures();
   
   if (m_unit == "vertex") {
-    SH_GL_CHECK_ERROR(glEnable(GL_VERTEX_PROGRAM_ARB));
+    GL_CHECK_ERROR(glEnable(GL_VERTEX_PROGRAM_ARB));
   } else if (m_unit == "fragment") {
-    SH_GL_CHECK_ERROR(glEnable(GL_FRAGMENT_PROGRAM_ARB));
+    GL_CHECK_ERROR(glEnable(GL_FRAGMENT_PROGRAM_ARB));
   }
 }
 
 void ArbCode::unbind()
 {
-  ShContext::current()->unset_binding(string("arb:") + m_unit);
+  Context::current()->unset_binding(string("arb:") + m_unit);
 
   if (m_unit == "vertex") {
-    SH_GL_CHECK_ERROR(glDisable(GL_VERTEX_PROGRAM_ARB));
+    GL_CHECK_ERROR(glDisable(GL_VERTEX_PROGRAM_ARB));
   } else if (m_unit == "fragment") {
-    SH_GL_CHECK_ERROR(glDisable(GL_FRAGMENT_PROGRAM_ARB));
+    GL_CHECK_ERROR(glDisable(GL_FRAGMENT_PROGRAM_ARB));
   }
 }
 
@@ -389,7 +389,7 @@ void ArbCode::update()
   bindTextures();
 }
 
-void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
+void ArbCode::updateUniform(const VariableNodePtr& uniform)
 {
   if (!uniform) return;
 
@@ -401,37 +401,37 @@ void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
 
   // TODO The "find" and "count" map accesses here are still bottlenecks.
   // There may be a good way to replace these with something faster.
-  const ShVariant *uniformVariant = uniform->getVariant();
+  const Variant *uniformVariant = uniform->getVariant();
   RegMap::const_iterator I = m_registers.find(uniform);
   if (I == m_registers.end()) { // perhaps uniform was split
     if (m_splits.count(uniform) > 0) {
-      ShTransformer::VarNodeVec &splitVec = m_splits[uniform];
+      Transformer::VarNodeVec &splitVec = m_splits[uniform];
 
       int offset = 0;
       int copySwiz[4];
-      for (ShTransformer::VarNodeVec::iterator it = splitVec.begin();
+      for (Transformer::VarNodeVec::iterator it = splitVec.begin();
            it != splitVec.end(); offset += (*it)->size(), ++it) {
         // TODO switch to properly swizzled version
         for (int i = 0; i < (*it)->size(); ++i) copySwiz[i] = i + offset;
-        (*it)->setVariant(uniformVariant->get(false, ShSwizzle(uniform->size(), (*it)->size(), copySwiz))); 
+        (*it)->setVariant(uniformVariant->get(false, Swizzle(uniform->size(), (*it)->size(), copySwiz))); 
         updateUniform(*it);
       }
     } 
     return;
   }
 
-  if (uniform->kind() == SH_TEXTURE) {
+  if (uniform->kind() == TEXTURE) {
     return;
   }
     
   const ArbReg& reg = *I->second;
   
   const int uniform_size = uniform->size();
-  SH_DEBUG_ASSERT(uniform_size <= 4);
+  DEBUG_ASSERT(uniform_size <= 4);
 
   GLfloat values[4];
   int i;
-  if (uniform->valueType() == SH_FLOAT) {
+  if (uniform->valueType() == FLOAT) {
     // Copy to a float array
     const float *variant = static_cast<const float *>(uniformVariant->array());
     for (i = 0; i < uniform_size; ++i)
@@ -439,7 +439,7 @@ void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
   }
   else {
     // Componentwise cast to float and copy
-    typedef ShDataVariant<GLfloat, SH_HOST> FloatVariant;
+    typedef DataVariant<GLfloat, HOST> FloatVariant;
     FloatVariant floatVariant(uniform_size);
     floatVariant.set(uniformVariant);
     for (i = 0; i < uniform_size; ++i)
@@ -451,19 +451,19 @@ void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
     values[i] = 0.0f;
   }
   
-  if (reg.type != SH_ARB_REG_PARAM) return;
+  if (reg.type != ARB_REG_PARAM) return;
   switch(reg.binding.type) {
-  case SH_ARB_REG_PROGRAMLOC:
-    SH_GL_CHECK_ERROR(shGlProgramLocalParameter4fvARB(arbTarget(m_unit), reg.binding.index, values));
+  case ARB_REG_PROGRAMLOC:
+    GL_CHECK_ERROR(glProgramLocalParameter4fvARB(arbTarget(m_unit), reg.binding.index, values));
     break;
-  case SH_ARB_REG_PROGRAMENV:
-    SH_GL_CHECK_ERROR(shGlProgramEnvParameter4fvARB(arbTarget(m_unit), reg.binding.index, values));
+  case ARB_REG_PROGRAMENV:
+    GL_CHECK_ERROR(glProgramEnvParameter4fvARB(arbTarget(m_unit), reg.binding.index, values));
     break;
-  case SH_ARB_REG_STATE:
+  case ARB_REG_STATE:
     {
       static bool warning_seen=false;
       if (!warning_seen) {
-        SH_DEBUG_WARN("Updating uniforms bound to OpenGL state is not currently supported.");
+        DEBUG_WARN("Updating uniforms bound to OpenGL state is not currently supported.");
         warning_seen = true;
       }
     }
@@ -472,13 +472,13 @@ void ArbCode::updateUniform(const ShVariableNodePtr& uniform)
   }
 }
 
-ostream& ArbCode::printVar(ostream& out, bool dest, const ShVariable& var,
-                           bool collectingOp, const ShSwizzle& destSwiz = ShSwizzle(4),
+ostream& ArbCode::printVar(ostream& out, bool dest, const Variable& var,
+                           bool collectingOp, const Swizzle& destSwiz = Swizzle(4),
                            bool do_swiz = true) const
 {
   RegMap::const_iterator I = m_registers.find(var.node());
   if (I == m_registers.end()) {
-    if ((1 == var.size()) && (SH_CONST == var.node()->kind())) {
+    if ((1 == var.size()) && (CONST == var.node()->kind())) {
       // Immediate value -- no need for a register
       out << var.getVariant()->encodeArray();
       return out; // no swizzling
@@ -541,27 +541,27 @@ ostream& operator<<(ostream& out, LineNumberer& l)
 
 bool ArbCode::printSamplingInstruction(ostream& out, const ArbInst& instr) const
 {
-  if (instr.op != SH_ARB_TEX && instr.op != SH_ARB_TXP && instr.op != SH_ARB_TXB
-      && instr.op != SH_ARB_TXD)
+  if (instr.op != ARB_TEX && instr.op != ARB_TXP && instr.op != ARB_TXB
+      && instr.op != ARB_TXD)
     return false;
 
-  ShTextureNodePtr texture = shref_dynamic_cast<ShTextureNode>(instr.src[1].node());
+  TextureNodePtr texture = shref_dynamic_cast<TextureNode>(instr.src[1].node());
   RegMap::const_iterator texRegIt = m_registers.find(instr.src[1].node());
   if (texRegIt == m_registers.end()) {
-    SH_DEBUG_PRINT("Unallocated texture found.");
-    SH_DEBUG_PRINT("Operation = " << arbOpInfo[instr.op].name);
-    SH_DEBUG_PRINT("Destination* = " << instr.dest.node().object());
+    DEBUG_PRINT("Unallocated texture found.");
+    DEBUG_PRINT("Operation = " << arbOpInfo[instr.op].name);
+    DEBUG_PRINT("Destination* = " << instr.dest.node().object());
     if (instr.dest.node()) {
-      SH_DEBUG_PRINT("Destination = " << instr.dest.name());
+      DEBUG_PRINT("Destination = " << instr.dest.name());
     }
-    SH_DEBUG_PRINT("Texture pointer = " << texture.object());
+    DEBUG_PRINT("Texture pointer = " << texture.object());
     if (texture) {
-      SH_DEBUG_PRINT("Texture = " << texture->name());
+      DEBUG_PRINT("Texture = " << texture->name());
     }
     out << "  INVALID TEX INSTRUCTION;";
     return true;
   }
-  //SH_DEBUG_ASSERT(texRegIt != m_registers.end());
+  //DEBUG_ASSERT(texRegIt != m_registers.end());
 
   const ArbReg& texReg = *texRegIt->second;
   
@@ -569,25 +569,25 @@ bool ArbCode::printSamplingInstruction(ostream& out, const ArbInst& instr) const
   out << arbOpInfo[instr.op].name << " ";
   printVar(out, true, instr.dest, false) << ", ";
   printVar(out, false, instr.src[0], true, instr.dest.swizzle()) << ", ";
-  if (instr.op == SH_ARB_TXD) {
+  if (instr.op == ARB_TXD) {
     printVar(out, false, instr.src[2], true, instr.dest.swizzle()) << ", ";
     printVar(out, false, instr.src[3], true, instr.dest.swizzle()) << ", ";
   }
   out << "texture[" << texReg.index << "], ";
   switch (texture->dims()) {
-  case SH_TEXTURE_1D:
+  case TEXTURE_1D:
     out << "1D";
     break;
-  case SH_TEXTURE_2D:
+  case TEXTURE_2D:
     out << "2D";
     break;
-  case SH_TEXTURE_3D:
+  case TEXTURE_3D:
     out << "3D";
     break;
-  case SH_TEXTURE_CUBE:
+  case TEXTURE_CUBE:
     out << "CUBE";
     break;
-  case SH_TEXTURE_RECT:
+  case TEXTURE_RECT:
     out << "RECT";
     break;
   }
@@ -603,18 +603,18 @@ ostream& ArbCode::print(ostream& out)
   // Print version header
   if (m_unit == "vertex") {
     out << "!!ARBvp1.0" << endl;
-    if (m_environment & SH_ARB_NVVP3) out << "OPTION NV_vertex_program3;" << endl;
-    else if (m_environment & SH_ARB_NVVP2) out << "OPTION NV_vertex_program2;" << endl;
+    if (m_environment & ARB_NVVP3) out << "OPTION NV_vertex_program3;" << endl;
+    else if (m_environment & ARB_NVVP2) out << "OPTION NV_vertex_program2;" << endl;
   }
   if (m_unit == "fragment") {
     out << "!!ARBfp1.0" << endl;
 
-    if (m_environment & SH_ARB_NVFP2) out << "OPTION NV_fragment_program2;" << endl;
-    else if (m_environment & SH_ARB_NVFP) out << "OPTION NV_fragment_program;" << endl;
+    if (m_environment & ARB_NVFP2) out << "OPTION NV_fragment_program2;" << endl;
+    else if (m_environment & ARB_NVFP) out << "OPTION NV_fragment_program;" << endl;
 
-    if (m_environment & SH_ARB_ATIDB) {
+    if (m_environment & ARB_ATIDB) {
       out << "OPTION ATI_draw_buffers;" << endl;
-    } else if (m_environment & SH_ARB_ARBDB) {
+    } else if (m_environment & ARB_ARBDB) {
       out << "OPTION ARB_draw_buffers;" << endl;
     }
   }
@@ -623,14 +623,14 @@ ostream& ArbCode::print(ostream& out)
   
   for (RegList::const_iterator I = m_reglist.begin();
        I != m_reglist.end(); ++I) {
-    if ((*I)->type == SH_ARB_REG_TEMP) continue;
-    if ((*I)->type == SH_ARB_REG_HALF_TEMP) continue;
-    if ((*I)->type == SH_ARB_REG_TEXTURE) continue;
+    if ((*I)->type == ARB_REG_TEMP) continue;
+    if ((*I)->type == ARB_REG_HALF_TEMP) continue;
+    if ((*I)->type == ARB_REG_TEXTURE) continue;
     out << "  ";
     (*I)->printDecl(out);
     out << endl;
   }
-  bool halfSupport = (m_environment & SH_ARB_NVFP) != 0;
+  bool halfSupport = (m_environment & ARB_NVFP) != 0;
   if (m_numTemps > 0) { 
     if (halfSupport) {
       out << "  LONG TEMP ";
@@ -639,17 +639,17 @@ ostream& ArbCode::print(ostream& out)
     }
     for (int i = 0; i < m_numTemps; i++) {
       if (i > 0) out << ", ";
-      out << ArbReg(SH_ARB_REG_TEMP, i);
+      out << ArbReg(ARB_REG_TEMP, i);
     }
     out << ";" << endl;
   }
 
   if (m_numHalfTemps > 0) { 
-    SH_DEBUG_ASSERT(halfSupport); // assume half support...
-    out << "  SHORT TEMP ";
+    DEBUG_ASSERT(halfSupport); // assume half support...
+    out << "  ORT TEMP ";
     for (int i = 0; i < m_numHalfTemps; i++) {
       if (i > 0) out << ", ";
-      out << ArbReg(SH_ARB_REG_HALF_TEMP, i);
+      out << ArbReg(ARB_REG_HALF_TEMP, i);
     }
     out << ";" << endl;
   }
@@ -659,15 +659,15 @@ ostream& ArbCode::print(ostream& out)
   // Print instructions
   for (ArbInstList::const_iterator I = m_instructions.begin();
        I != m_instructions.end(); ++I) {
-    if (I->op == SH_ARB_LABEL) {
+    if (I->op == ARB_LABEL) {
       out << "label" << I->label << ": ";
-    } else if (I->op == SH_ARB_COMMENT) {
+    } else if (I->op == ARB_COMMENT) {
       out << "### " << I->comment;
-    } else if (I->op == SH_ARB_ELSE) {
+    } else if (I->op == ARB_ELSE) {
       out << "  ELSE;";
-    } else if (I->op == SH_ARB_ENDIF) {
+    } else if (I->op == ARB_ENDIF) {
       out << "  ENDIF;";
-    } else if (I->op == SH_ARB_BRA) {
+    } else if (I->op == ARB_BRA) {
       out << "  BRA label" << I->label;
       if (I->src[0].node()) {
         out << "  (GT";
@@ -678,11 +678,11 @@ ostream& ArbCode::print(ostream& out)
         out << ")";
       }
       out << ";";
-    } else if (I->op == SH_ARB_REP) {
+    } else if (I->op == ARB_REP) {
       out << "  REP ";
       printVar(out, false, I->src[0], false, I->src[0].swizzle());
       out << ";";
-    } else if (I->op == SH_ARB_BRK) {
+    } else if (I->op == ARB_BRK) {
       out << "  BRK ";
       if (I->src[0].node()) {
         out << " (";
@@ -698,7 +698,7 @@ ostream& ArbCode::print(ostream& out)
         out << ")";
       }
       out << ";";
-    } else if (I->op == SH_ARB_RET) {
+    } else if (I->op == ARB_RET) {
       out << "  RET ";
       if (I->src[0].node()) {
         out << " (";
@@ -714,9 +714,9 @@ ostream& ArbCode::print(ostream& out)
         out << ")";
       }
       out << ";";
-    } else if (I->op == SH_ARB_ENDREP) {
+    } else if (I->op == ARB_ENDREP) {
       out << "  ENDREP;";
-    } else if (I->op == SH_ARB_IF) {
+    } else if (I->op == ARB_IF) {
       out << "  IF ";
       if (I->src[0].node()) {
         if (I->invert) {
@@ -732,11 +732,11 @@ ostream& ArbCode::print(ostream& out)
         out << "TR";
       }
       out << ";";
-    } else if (I->op == SH_ARB_ARRAYMOV) {
+    } else if (I->op == ARB_ARRAYMOV) {
       out << "  MOV ";
       printVar(out, true, I->dest, false);
       out << ", ";
-      printVar(out, false, I->src[0], false, ShSwizzle(4), false);
+      printVar(out, false, I->src[0], false, Swizzle(4), false);
       out << "[";
       printVar(out, false, I->src[1], false);
       out << "]";
@@ -784,7 +784,7 @@ ostream& ArbCode::print(ostream& out)
 ostream& ArbCode::describe_interface(ostream& out)
 {
   out << "Inputs:" << endl;
-  for (ShProgramNode::VarList::const_iterator I = m_shader->begin_inputs();
+  for (ProgramNode::VarList::const_iterator I = m_shader->begin_inputs();
        I != m_shader->end_inputs(); ++I) {
     out << "  ";
     m_registers[*I]->printDecl(out);
@@ -792,7 +792,7 @@ ostream& ArbCode::describe_interface(ostream& out)
   }
 
   out << "Outputs:" << endl;
-  for (ShProgramNode::VarList::const_iterator I = m_shader->begin_outputs();
+  for (ProgramNode::VarList::const_iterator I = m_shader->begin_outputs();
        I != m_shader->end_outputs(); ++I) {
     out << "  ";
     m_registers[*I]->printDecl(out);
@@ -804,20 +804,20 @@ ostream& ArbCode::describe_interface(ostream& out)
 ostream& ArbCode::describe_bindings(ostream& out)
 {
   out << "Inputs:" << endl;
-  for (ShProgramNode::VarList::const_iterator I = m_shader->begin_inputs();
+  for (ProgramNode::VarList::const_iterator I = m_shader->begin_inputs();
        I != m_shader->end_inputs(); ++I) {
     out << "  " << (*I)->name() << " => " << m_registers[*I]->binding_name() << endl;
   }
 
   out << "Outputs:" << endl;
-  for (ShProgramNode::VarList::const_iterator I = m_shader->begin_outputs();
+  for (ProgramNode::VarList::const_iterator I = m_shader->begin_outputs();
        I != m_shader->end_outputs(); ++I) {
     out << "  " << (*I)->name() << " => " << m_registers[*I]->binding_name() << endl;
   }
   return out;
 }
 
-int ArbCode::getLabel(const ShCtrlGraphNodePtr& node)
+int ArbCode::getLabel(const CtrlGraphNodePtr& node)
 {
   if (m_label_map.find(node) == m_label_map.end()) {
     m_label_map[node] = m_max_label++;
@@ -825,36 +825,36 @@ int ArbCode::getLabel(const ShCtrlGraphNodePtr& node)
   return m_label_map[node];
 }
 
-void ArbCode::genNode(const ShCtrlGraphNodePtr& node)
+void ArbCode::genNode(const CtrlGraphNodePtr& node)
 {
   if (!node || node->marked()) return;
   node->mark();
 
   if (node == m_shader->ctrlGraph->exit()) return;
   
-  if (m_environment & SH_ARB_NVVP2) {
-    m_instructions.push_back(ArbInst(SH_ARB_LABEL, getLabel(node)));
+  if (m_environment & ARB_NVVP2) {
+    m_instructions.push_back(ArbInst(ARB_LABEL, getLabel(node)));
   }
   
-  if (node->block) for (ShBasicBlock::ShStmtList::const_iterator I = node->block->begin();
+  if (node->block) for (BasicBlock::StmtList::const_iterator I = node->block->begin();
        I != node->block->end(); ++I) {
-    const ShStatement& stmt = *I;
+    const Statement& stmt = *I;
     emit(stmt);
   }
 
-  if (m_environment & SH_ARB_NVVP2) {
-    for (vector<ShCtrlGraphBranch>::iterator I = node->successors.begin();
+  if (m_environment & ARB_NVVP2) {
+    for (vector<CtrlGraphBranch>::iterator I = node->successors.begin();
 	I != node->successors.end(); I++) {
-      ShVariable dummy(new ShVariableNode(SH_TEMP, I->cond.size(), SH_FLOAT));
-      ArbInst updatecc(SH_ARB_MOV, dummy, I->cond);
+      Variable dummy(new VariableNode(TEMP, I->cond.size(), FLOAT));
+      ArbInst updatecc(ARB_MOV, dummy, I->cond);
       updatecc.update_cc = true;
       m_instructions.push_back(updatecc);
-      m_instructions.push_back(ArbInst(SH_ARB_BRA, getLabel(I->node), I->cond));
+      m_instructions.push_back(ArbInst(ARB_BRA, getLabel(I->node), I->cond));
     }
     if (!node->successors.empty() || node->follower->marked()) { // else it's next anyway, no need for bra
-      m_instructions.push_back(ArbInst(SH_ARB_BRA, getLabel(node->follower)));
+      m_instructions.push_back(ArbInst(ARB_BRA, getLabel(node->follower)));
     }
-    for (vector<ShCtrlGraphBranch>::iterator I = node->successors.begin();
+    for (vector<CtrlGraphBranch>::iterator I = node->successors.begin();
 	I != node->successors.end(); I++) {
       genNode(I->node);
     }
@@ -863,30 +863,30 @@ void ArbCode::genNode(const ShCtrlGraphNodePtr& node)
   genNode(node->follower);
 }
 
-void ArbCode::genStructNode(const ShStructuralNodePtr& node)
+void ArbCode::genStructNode(const StructuralNodePtr& node)
 {
   if (!node) return;
 
-  if (node->type == ShStructuralNode::UNREDUCED) {
-    ShBasicBlockPtr block = node->cfg_node->block;
-    if (block) for (ShBasicBlock::ShStmtList::const_iterator I = block->begin();
+  if (node->type == StructuralNode::UNREDUCED) {
+    BasicBlockPtr block = node->cfg_node->block;
+    if (block) for (BasicBlock::StmtList::const_iterator I = block->begin();
                     I != block->end(); ++I) {
-      const ShStatement& stmt = *I;
+      const Statement& stmt = *I;
       emit(stmt);
     }
   } 
-  else if (node->type == ShStructuralNode::BLOCK) {
-    for (ShStructuralNode::StructNodeList::const_iterator I = node->structnodes.begin();
+  else if (node->type == StructuralNode::BLOCK) {
+    for (StructuralNode::StructNodeList::const_iterator I = node->structnodes.begin();
          I != node->structnodes.end(); ++I) {
       genStructNode(*I);
     }
   } 
-  else if (node->type == ShStructuralNode::IFELSE) {
-    ShStructuralNodePtr header = node->structnodes.front();
+  else if (node->type == StructuralNode::IFELSE) {
+    StructuralNodePtr header = node->structnodes.front();
     
-    ShVariable cond;
-    ShStructuralNodePtr ifnode, elsenode;
-    for (ShStructuralNode::SuccessorList::iterator I = header->succs.begin();
+    Variable cond;
+    StructuralNodePtr ifnode, elsenode;
+    for (StructuralNode::SuccessorList::iterator I = header->succs.begin();
          I != header->succs.end(); ++I) {
       if (I->first.node()) {
         ifnode = I->second;
@@ -898,34 +898,34 @@ void ArbCode::genStructNode(const ShStructuralNodePtr& node)
     genStructNode(header);
     push_if(cond, false); {
       genStructNode(ifnode);
-    } m_instructions.push_back(ArbInst(SH_ARB_ELSE, ShVariable())); {
+    } m_instructions.push_back(ArbInst(ARB_ELSE, Variable())); {
       genStructNode(elsenode);
-    } m_instructions.push_back(ArbInst(SH_ARB_ENDIF, ShVariable()));
+    } m_instructions.push_back(ArbInst(ARB_ENDIF, Variable()));
   } 
-  else if (node->type == ShStructuralNode::WHILELOOP) {
-    ShStructuralNodePtr header = node->structnodes.front();
+  else if (node->type == StructuralNode::WHILELOOP) {
+    StructuralNodePtr header = node->structnodes.front();
 
-    ShVariable cond = header->succs.front().first;
+    Variable cond = header->succs.front().first;
     
-    ShStructuralNodePtr body = node->structnodes.back();
+    StructuralNodePtr body = node->structnodes.back();
 
     float maxloopval = 255.0f;
-    ShConstAttrib1f maxloop(maxloopval);
+    ConstAttrib1f maxloop(maxloopval);
 
     m_shader->constants.push_back(maxloop.node());
-    m_instructions.push_back(ArbInst(SH_ARB_REP, ShVariable(), maxloop));
+    m_instructions.push_back(ArbInst(ARB_REP, Variable(), maxloop));
     genStructNode(header);
     push_break(cond, true);
     genStructNode(body);
-    m_instructions.push_back(ArbInst(SH_ARB_ENDREP, ShVariable()));
+    m_instructions.push_back(ArbInst(ARB_ENDREP, Variable()));
   } 
-  else if (node->type == ShStructuralNode::SELFLOOP) {
-    ShStructuralNodePtr loopnode = node->structnodes.front();
+  else if (node->type == StructuralNode::SELFLOOP) {
+    StructuralNodePtr loopnode = node->structnodes.front();
 
     bool condexit = true; // true if the condition causes us to exit the
                           // loop, rather than continue it
-    ShVariable cond;
-    for (ShStructuralNode::SuccessorList::iterator I = loopnode->succs.begin();
+    Variable cond;
+    for (StructuralNode::SuccessorList::iterator I = loopnode->succs.begin();
          I != loopnode->succs.end(); ++I) {
       if (I->first.node()) {
         if (I->second == loopnode) condexit = false; else condexit = true;
@@ -934,42 +934,42 @@ void ArbCode::genStructNode(const ShStructuralNodePtr& node)
     }
     
     float maxloopval = 255.0f;
-    ShConstAttrib1f maxloop(maxloopval);
+    ConstAttrib1f maxloop(maxloopval);
 
     m_shader->constants.push_back(maxloop.node());
-    m_instructions.push_back(ArbInst(SH_ARB_REP, ShVariable(), maxloop));
+    m_instructions.push_back(ArbInst(ARB_REP, Variable(), maxloop));
     genStructNode(loopnode);
     push_break(cond, !condexit);
-    m_instructions.push_back(ArbInst(SH_ARB_ENDREP, ShVariable()));
+    m_instructions.push_back(ArbInst(ARB_ENDREP, Variable()));
   } 
-  else if (node->type == ShStructuralNode::IF) {
-    ShStructuralNodePtr header = node->structnodes.front();
+  else if (node->type == StructuralNode::IF) {
+    StructuralNodePtr header = node->structnodes.front();
     
-    ShStructuralNode::SuccessorList::iterator B = header->succs.begin();
-    ShVariable cond = B->first;
-    ShStructuralNodePtr ifnode = B->second;
+    StructuralNode::SuccessorList::iterator B = header->succs.begin();
+    Variable cond = B->first;
+    StructuralNodePtr ifnode = B->second;
     genStructNode(header);
     push_if(cond, false); {
       genStructNode(ifnode);
-    } m_instructions.push_back(ArbInst(SH_ARB_ENDIF, ShVariable()));
+    } m_instructions.push_back(ArbInst(ARB_ENDIF, Variable()));
   }
-  else if (ShStructuralNode::PROPINT == node->type) {
+  else if (StructuralNode::PROPINT == node->type) {
     float maxloopval = 255.0f;
-    ShConstAttrib1f maxloop(maxloopval);
+    ConstAttrib1f maxloop(maxloopval);
 
     m_shader->constants.push_back(maxloop.node());
-    m_instructions.push_back(ArbInst(SH_ARB_REP, ShVariable(), maxloop));
+    m_instructions.push_back(ArbInst(ARB_REP, Variable(), maxloop));
 
     int continue_levels=0;
-    ShStructuralNode* continue_destination=0;
+    StructuralNode* continue_destination=0;
 
-    set<ShStructuralNode*> seen; // keep track of the nodes we have seen already
-    ShStructuralNodePtr n = node->structnodes.front(); 
+    set<StructuralNode*> seen; // keep track of the nodes we have seen already
+    StructuralNodePtr n = node->structnodes.front(); 
     while (seen.find(n.object()) == seen.end()) {
       // Close the continue block if necessary
       if (continue_destination && n.object() == continue_destination) {
         for (int i=0; i < continue_levels; i++) {
-          m_instructions.push_back(ArbInst(SH_ARB_ENDIF, ShVariable()));
+          m_instructions.push_back(ArbInst(ARB_ENDIF, Variable()));
         }
         continue_levels = 0;
       }
@@ -978,14 +978,14 @@ void ArbCode::genStructNode(const ShStructuralNodePtr& node)
       genStructNode(n);
       if (n->succs.size() > 1) {
         // Figure out which branch is the conditional one
-        pair<ShVariable, ShStructuralNodePtr> branch_pair = n->succs.front(); // conditional successor
-        pair<ShVariable, ShStructuralNodePtr> default_pair = n->succs.back(); // non-conditional successor
+        pair<Variable, StructuralNodePtr> branch_pair = n->succs.front(); // conditional successor
+        pair<Variable, StructuralNodePtr> default_pair = n->succs.back(); // non-conditional successor
         if (!branch_pair.first.node()) {
           branch_pair = n->succs.back();
           default_pair = n->succs.front();
         }
-        ShVariable branch_cond = branch_pair.first;
-        const ShStructuralNodePtr branch_node = branch_pair.second;
+        Variable branch_cond = branch_pair.first;
+        const StructuralNodePtr branch_node = branch_pair.second;
 
         // Check if the non-conditional node leaves the PROPINT node
         if (default_pair.second == node->succs.front().second) {
@@ -1016,35 +1016,35 @@ void ArbCode::genStructNode(const ShStructuralNodePtr& node)
     
     // Close the continue block if it hasn't been done already
     for (int i=0; i < continue_levels; i++) {
-      m_instructions.push_back(ArbInst(SH_ARB_ENDIF, ShVariable()));
+      m_instructions.push_back(ArbInst(ARB_ENDIF, Variable()));
     }
 
-    m_instructions.push_back(ArbInst(SH_ARB_ENDREP, ShVariable()));
+    m_instructions.push_back(ArbInst(ARB_ENDREP, Variable()));
   } 
   else {
-    SH_DEBUG_WARN("Unknown ShStructuralNode type encountered.  Generated code may be incomplete.");
+    DEBUG_WARN("Unknown StructuralNode type encountered.  Generated code may be incomplete.");
   }
 }
 
-void ArbCode::push_break(ShVariable& cond, bool negate)
+void ArbCode::push_break(Variable& cond, bool negate)
 {
-  ShVariable dummy(new ShVariableNode(SH_TEMP, cond.size(), SH_FLOAT));
-  ArbInst updatecc(SH_ARB_MOV, dummy, cond);
+  Variable dummy(new VariableNode(TEMP, cond.size(), FLOAT));
+  ArbInst updatecc(ARB_MOV, dummy, cond);
   updatecc.update_cc = true;
   m_instructions.push_back(updatecc);
 
-  ArbInst brk(SH_ARB_BRK, ShVariable(), cond);
+  ArbInst brk(ARB_BRK, Variable(), cond);
   brk.invert = negate;
   m_instructions.push_back(brk);
 }
 
-void ArbCode::push_if(ShVariable& cond, bool negate)
+void ArbCode::push_if(Variable& cond, bool negate)
 {
-  ShVariable dummy(new ShVariableNode(SH_TEMP, cond.size(), SH_FLOAT));
-  ArbInst updatecc(SH_ARB_MOV, dummy, cond);
+  Variable dummy(new VariableNode(TEMP, cond.size(), FLOAT));
+  ArbInst updatecc(ARB_MOV, dummy, cond);
   updatecc.update_cc = true;
   m_instructions.push_back(updatecc);
-  ArbInst if_inst(SH_ARB_IF, ShVariable(), cond);
+  ArbInst if_inst(ARB_IF, Variable(), cond);
   if_inst.invert = negate;
   m_instructions.push_back(if_inst);
 }
@@ -1057,12 +1057,12 @@ void ArbCode::allocRegs()
   
   allocOutputs(limits);
 
-  for (ShProgramNode::PaletteList::const_iterator I = m_shader->begin_palettes();
+  for (ProgramNode::PaletteList::const_iterator I = m_shader->begin_palettes();
        I != m_shader->end_palettes(); ++I) {
     allocPalette(limits, *I);
   }
   
-  for (ShProgramNode::VarList::const_iterator I = m_shader->begin_parameters();
+  for (ProgramNode::VarList::const_iterator I = m_shader->begin_parameters();
        I != m_shader->end_parameters(); ++I) {
     allocParam(limits, *I);
   }
@@ -1071,7 +1071,7 @@ void ArbCode::allocRegs()
 
   try {
     allocTemps(limits, false);
-    bool halfSupport = (m_environment & SH_ARB_NVFP) != 0;
+    bool halfSupport = (m_environment & ARB_NVFP) != 0;
     if (halfSupport) {
       allocTemps(limits, true);
     }
@@ -1086,29 +1086,29 @@ void ArbCode::allocRegs()
 
   // Allocate array register
   if (m_shader->begin_palettes() != m_shader->end_palettes()) {
-    m_registers[m_address_register.node()] = new ArbReg(SH_ARB_REG_ADDRESS, 0);
+    m_registers[m_address_register.node()] = new ArbReg(ARB_REG_ADDRESS, 0);
     m_reglist.push_back(m_registers[m_address_register.node()]);
   }
 
   allocTextures(limits);
 }
 
-void ArbCode::bindSpecial(const ShProgramNode::VarList::const_iterator& begin,
-                          const ShProgramNode::VarList::const_iterator& end,
+void ArbCode::bindSpecial(const ProgramNode::VarList::const_iterator& begin,
+                          const ProgramNode::VarList::const_iterator& end,
                           bool is_output, map<ArbRegBinding, set<int> >& bindings,
                           ArbRegType type, int& num)
 {
   // Pass 1: bind the variables with a user-specified semantic_index
-  for (ShProgramNode::VarList::const_iterator I = begin; I != end; ++I) {
-    ShVariableNodePtr node = *I;
+  for (ProgramNode::VarList::const_iterator I = begin; I != end; ++I) {
+    VariableNodePtr node = *I;
 
     if (node->meta("opengl:semantic_index").empty()) continue;
     if (m_registers.find(node) != m_registers.end()) continue;
 
-    for (int i = 0; arbBindingSpecs(is_output, m_unit)[i].binding != SH_ARB_REG_NONE; ++i) {
+    for (int i = 0; arbBindingSpecs(is_output, m_unit)[i].binding != ARB_REG_NONE; ++i) {
       const ArbBindingSpecs& specs = arbBindingSpecs(is_output, m_unit)[i];
 
-      if (specs.semanticType == SH_ATTRIB) continue;
+      if (specs.semanticType == ATTRIB) continue;
       if (node->specialType() != specs.semanticType) continue;
 
       int index = -1;
@@ -1131,20 +1131,20 @@ void ArbCode::bindSpecial(const ShProgramNode::VarList::const_iterator& begin,
   }
 
   // Pass 2: map all other variables which match the semantic type of the built-in variable
-  for (ShProgramNode::VarList::const_iterator I = begin; I != end; ++I) {
-    ShVariableNodePtr node = *I;
+  for (ProgramNode::VarList::const_iterator I = begin; I != end; ++I) {
+    VariableNodePtr node = *I;
 
     if (m_registers.find(node) != m_registers.end()) continue;
 
-    for (int i = 0; arbBindingSpecs(is_output, m_unit)[i].binding != SH_ARB_REG_NONE; ++i) {
+    for (int i = 0; arbBindingSpecs(is_output, m_unit)[i].binding != ARB_REG_NONE; ++i) {
       const ArbBindingSpecs& specs = arbBindingSpecs(is_output, m_unit)[i];
 
-      if (specs.semanticType == SH_ATTRIB) continue;
+      if (specs.semanticType == ATTRIB) continue;
       if (node->specialType() != specs.semanticType) continue;
     
       string semantic_index = node->meta("opengl:semantic_index");
       if (!semantic_index.empty()) {
-        SH_DEBUG_WARN(string("Variable '") << node->name() 
+        DEBUG_WARN(string("Variable '") << node->name() 
                       << "' was assigned a semantic_index of " << semantic_index
                       << " but that index has already been used.  "
                       << "Ignoring user-specified index.");
@@ -1179,17 +1179,17 @@ void ArbCode::allocSemanticInputs(const ArbLimits& limits)
 {
   // First, try to assign some "special" input register bindings
   bindSpecial(m_shader->inputs.begin(), m_shader->inputs.end(), false,
-              m_inputBindings, SH_ARB_REG_ATTRIB, m_numInputs);
+              m_inputBindings, ARB_REG_ATTRIB, m_numInputs);
 
   int inputnb=0;
-  for (ShProgramNode::VarList::const_iterator I = m_shader->inputs.begin();
+  for (ProgramNode::VarList::const_iterator I = m_shader->inputs.begin();
        I != m_shader->inputs.end(); ++I, ++inputnb) {
-    ShVariableNodePtr node = *I;
+    VariableNodePtr node = *I;
     if (m_registers.find(node) != m_registers.end()) continue;
     
     // Binding
     bool bound = false;
-    for (int i = 0; arbBindingSpecs(false, m_unit)[i].binding != SH_ARB_REG_NONE; i++) {
+    for (int i = 0; arbBindingSpecs(false, m_unit)[i].binding != ARB_REG_NONE; i++) {
       const ArbBindingSpecs& specs = arbBindingSpecs(false, m_unit)[i];
 
       // Find the smallest unused index
@@ -1203,7 +1203,7 @@ void ArbCode::allocSemanticInputs(const ArbLimits& limits)
 
       if (specs.allowGeneric && (index > -1)) {
         cerr << node->name() << " was bound in allocSemanticInputs" << endl;
-        m_registers[node] = new ArbReg(SH_ARB_REG_ATTRIB, m_numInputs++, node->name());
+        m_registers[node] = new ArbReg(ARB_REG_ATTRIB, m_numInputs++, node->name());
         m_reglist.push_back(m_registers[node]);
         m_registers[node]->binding.type = specs.binding;
         m_registers[node]->binding.index = index;
@@ -1222,13 +1222,13 @@ void ArbCode::allocSemanticInputs(const ArbLimits& limits)
 void ArbCode::allocGenericInputs(const ArbLimits& limits)
 {
   // First look for a position variable and map it to generic attribute 0
-  for (ShProgramNode::VarList::const_iterator I = m_shader->inputs.begin();
+  for (ProgramNode::VarList::const_iterator I = m_shader->inputs.begin();
        I != m_shader->inputs.end(); ++I) {
-    ShVariableNodePtr node = *I;
+    VariableNodePtr node = *I;
     if (m_registers.find(node) == m_registers.end() &&
-        node->specialType() == SH_POSITION) {
-      m_registers[node] = new ArbReg(SH_ARB_REG_ATTRIB, m_numInputs++, node->name());
-      m_registers[node]->binding.type = SH_ARB_REG_VERTEXATR;
+        node->specialType() == POSITION) {
+      m_registers[node] = new ArbReg(ARB_REG_ATTRIB, m_numInputs++, node->name());
+      m_registers[node]->binding.type = ARB_REG_VERTEXATR;
       m_registers[node]->binding.index = 0;    // map to vertex.attrib[0]
       m_reglist.push_back(m_registers[node]);
 
@@ -1242,13 +1242,13 @@ void ArbCode::allocGenericInputs(const ArbLimits& limits)
 
   // Ok, now second pass, everything else we just do in order, using indices 1 and up
   int AttribIndex = 1;
-  for (ShProgramNode::VarList::const_iterator I = m_shader->inputs.begin();
+  for (ProgramNode::VarList::const_iterator I = m_shader->inputs.begin();
        I != m_shader->inputs.end(); ++I) {
-    ShVariableNodePtr node = *I;
+    VariableNodePtr node = *I;
     if (m_registers.find(node) != m_registers.end()) continue;
 
-    m_registers[node] = new ArbReg(SH_ARB_REG_ATTRIB, m_numInputs++, node->name());
-    m_registers[node]->binding.type = SH_ARB_REG_VERTEXATR;
+    m_registers[node] = new ArbReg(ARB_REG_ATTRIB, m_numInputs++, node->name());
+    m_registers[node]->binding.type = ARB_REG_VERTEXATR;
     m_registers[node]->binding.index = AttribIndex++;
     m_reglist.push_back(m_registers[node]);
 
@@ -1272,17 +1272,17 @@ void ArbCode::allocOutputs(const ArbLimits& limits)
 {
   // First, try to assign some "special" output register bindings
   bindSpecial(m_shader->outputs.begin(), m_shader->outputs.end(), true, 
-              m_outputBindings, SH_ARB_REG_OUTPUT, m_numOutputs);
+              m_outputBindings, ARB_REG_OUTPUT, m_numOutputs);
 
-  for (ShProgramNode::VarList::const_iterator I = m_shader->outputs.begin();
+  for (ProgramNode::VarList::const_iterator I = m_shader->outputs.begin();
        I != m_shader->outputs.end(); ++I) {
-    ShVariableNodePtr node = *I;
+    VariableNodePtr node = *I;
     if (m_registers.find(node) != m_registers.end()) continue;
-    m_registers[node] = new ArbReg(SH_ARB_REG_OUTPUT, m_numOutputs++, node->name());
+    m_registers[node] = new ArbReg(ARB_REG_OUTPUT, m_numOutputs++, node->name());
     m_reglist.push_back(m_registers[node]);
     
     // Binding
-    for (int i = 0; arbBindingSpecs(true, m_unit)[i].binding != SH_ARB_REG_NONE; i++) {
+    for (int i = 0; arbBindingSpecs(true, m_unit)[i].binding != ARB_REG_NONE; i++) {
       const ArbBindingSpecs& specs = arbBindingSpecs(true, m_unit)[i];
 
       // Find the smallest unused index
@@ -1304,21 +1304,21 @@ void ArbCode::allocOutputs(const ArbLimits& limits)
   }
 }
 
-void ArbCode::allocParam(const ArbLimits& limits, const ShVariableNodePtr& node)
+void ArbCode::allocParam(const ArbLimits& limits, const VariableNodePtr& node)
 {
   // TODO: Check if we reached maximum
   if (m_registers.find(node) != m_registers.end()) return;
 
-  m_registers[node] = new ArbReg(SH_ARB_REG_PARAM, m_numParams, node->name());
+  m_registers[node] = new ArbReg(ARB_REG_PARAM, m_numParams, node->name());
 
   if (!node->meta("opengl:state").empty())
     {
-    m_registers[node]->binding.type = SH_ARB_REG_STATE;
+    m_registers[node]->binding.type = ARB_REG_STATE;
     m_registers[node]->binding.name = node->meta("opengl:state");
     } 
   else
     {
-    m_registers[node]->binding.type = SH_ARB_REG_PROGRAMLOC;
+    m_registers[node]->binding.type = ARB_REG_PROGRAMLOC;
     m_registers[node]->binding.index = m_numParamBindings++;
     }
 
@@ -1326,22 +1326,22 @@ void ArbCode::allocParam(const ArbLimits& limits, const ShVariableNodePtr& node)
   m_numParams++;
 }
 
-void ArbCode::allocPalette(const ArbLimits& limits, const ShPaletteNodePtr& palette)
+void ArbCode::allocPalette(const ArbLimits& limits, const PaletteNodePtr& palette)
 {
   if (m_registers.find(palette) != m_registers.end()) return;
 
-  m_registers[palette] = new ArbReg(SH_ARB_REG_PARAM, m_numParams, palette->name());
-  m_registers[palette]->binding.type = SH_ARB_REG_PROGRAMLOC;
+  m_registers[palette] = new ArbReg(ARB_REG_PARAM, m_numParams, palette->name());
+  m_registers[palette]->binding.type = ARB_REG_PROGRAMLOC;
   m_registers[palette]->binding.index = m_numParamBindings;
   m_registers[palette]->binding.count = palette->palette_length();
   m_reglist.push_back(m_registers[palette]);
   m_numParams++;
   
   for (size_t i = 0; i < palette->palette_length(); i++) {
-    ShVariableNodePtr node = palette->get_node(i);
-    SH_DEBUG_ASSERT(m_registers.find(node) == m_registers.end());
-    m_registers[node] = new ArbReg(SH_ARB_REG_PARAM, m_numParams + i, node->name());
-    m_registers[node]->binding.type = SH_ARB_REG_PROGRAMLOC;
+    VariableNodePtr node = palette->get_node(i);
+    DEBUG_ASSERT(m_registers.find(node) == m_registers.end());
+    m_registers[node] = new ArbReg(ARB_REG_PARAM, m_numParams + i, node->name());
+    m_registers[node]->binding.type = ARB_REG_PROGRAMLOC;
     m_registers[node]->binding.index = m_numParamBindings + i;
     m_reglist.push_back(m_registers[node]);
   }
@@ -1352,20 +1352,20 @@ void ArbCode::allocPalette(const ArbLimits& limits, const ShPaletteNodePtr& pale
 
 void ArbCode::allocConsts(const ArbLimits& limits)
 {
-  for (ShProgramNode::VarList::const_iterator I = m_shader->constants.begin();
+  for (ProgramNode::VarList::const_iterator I = m_shader->constants.begin();
        I != m_shader->constants.end(); ++I) {
-    ShVariableNodePtr node = *I;
+    VariableNodePtr node = *I;
 
     // @todo type don't really need to copy here, or shold use the
     // ArbReg's array...but whatever
-    ShPointer<ShDataVariant<float, SH_HOST> > variant =
-        new ShDataVariant<float, SH_HOST>(node->size());
+    Pointer<DataVariant<float, HOST> > variant =
+        new DataVariant<float, HOST>(node->size());
     variant->set(node->getVariant());
 
     // TODO: improve efficiency
     RegMap::const_iterator J;
     for (J = m_registers.begin(); J != m_registers.end(); ++J) {
-      if (J->second->type != SH_ARB_REG_CONST) continue;
+      if (J->second->type != ARB_REG_CONST) continue;
       int f = 0;
       // TODO handle other stuff
       for (int i = 0; i < node->size(); i++) {
@@ -1374,7 +1374,7 @@ void ArbCode::allocConsts(const ArbLimits& limits)
       if (f == node->size()) break;
     }
     if (J == m_registers.end()) {
-      m_registers[node] = new ArbReg(SH_ARB_REG_CONST, m_numConsts, node->name());
+      m_registers[node] = new ArbReg(ARB_REG_CONST, m_numConsts, node->name());
       m_reglist.push_back(m_registers[node]);
       for (int i = 0; i < 4; i++) {
         m_registers[node]->binding.values[i] = (float)(i < node->size() ? (*variant)[i] : 0.0);
@@ -1386,21 +1386,21 @@ void ArbCode::allocConsts(const ArbLimits& limits)
   }
 }
 
-bool mark(ShLinearAllocator& allocator, const ShVariableNodePtr& node, int i, bool half)
+bool mark(LinearAllocator& allocator, const VariableNodePtr& node, int i, bool half)
 {
   if (!node) return false;
-  if (node->kind() != SH_TEMP) return false;
-  if (half && (node->valueType() != SH_HALF)) return false; 
+  if (node->kind() != TEMP) return false;
+  if (half && (node->valueType() != HALF)) return false; 
   if (node->hasValues()) return false;
   allocator.mark(node, i);
   return true;
 }
 
-bool markable(const ShVariableNodePtr& node, bool half)
+bool markable(const VariableNodePtr& node, bool half)
 {
   if (!node) return false;
-  if (node->kind() != SH_TEMP) return false;
-  if (half && (node->valueType() != SH_HALF)) return false; 
+  if (node->kind() != TEMP) return false;
+  if (half && (node->valueType() != HALF)) return false; 
   if (node->hasValues()) return false;
   return true;
 }
@@ -1411,9 +1411,9 @@ struct ArbScope {
   {
   }
   
-  typedef map< ShVariableNode*, bitset<4> > UsageMap;
+  typedef map< VariableNode*, bitset<4> > UsageMap;
 
-  typedef set<ShVariableNode*> MarkList;
+  typedef set<VariableNode*> MarkList;
   
   MarkList need_mark; // Need to mark at end of loop
   int start; // location where loop started
@@ -1430,7 +1430,7 @@ void ArbCode::allocTemps(const ArbLimits& limits, bool half)
   typedef list<ArbScope> ScopeStack;
   ScopeStack scopestack;
   
-  ShLinearAllocator allocator(this);
+  LinearAllocator allocator(this);
 
   {
     ScopeStack scopestack;
@@ -1443,10 +1443,10 @@ void ArbCode::allocTemps(const ArbLimits& limits, bool half)
     
     for (int i = (int)m_instructions.size() - 1; i >= 0; --i) {
       ArbInst instr = m_instructions[i];
-      if (instr.op == SH_ARB_ENDREP) {
+      if (instr.op == ARB_ENDREP) {
         scopestack.push_back((int)i);
       }
-      if (instr.op == SH_ARB_REP) {
+      if (instr.op == ARB_REP) {
         const ArbScope& scope = scopestack.back();
         for (ArbScope::MarkList::const_iterator I = scope.need_mark.begin();
              I != scope.need_mark.end(); ++I) {
@@ -1490,10 +1490,10 @@ void ArbCode::allocTemps(const ArbLimits& limits, bool half)
   
   for (size_t i = 0; i < m_instructions.size(); i++) {
     ArbInst instr = m_instructions[i];
-    if (instr.op == SH_ARB_REP) {
+    if (instr.op == ARB_REP) {
       scopestack.push_back((int)i);
     }
-    if (instr.op == SH_ARB_ENDREP) {
+    if (instr.op == ARB_ENDREP) {
       const ArbScope& scope = scopestack.back();
       for (ArbScope::MarkList::const_iterator I = scope.need_mark.begin();
            I != scope.need_mark.end(); ++I) {
@@ -1572,9 +1572,9 @@ void ArbCode::allocTextures(const ArbLimits& limits)
   }
   
   // reserve and allocate any preset texunits
-  for (ShProgramNode::TexList::const_iterator I = m_shader->textures.begin();
+  for (ProgramNode::TexList::const_iterator I = m_shader->textures.begin();
        I != m_shader->textures.end(); ++I) {
-    ShTextureNodePtr node = *I;
+    TextureNodePtr node = *I;
     
     if (!node->meta("opengl:texunit").empty() ||
 	!node->meta("opengl:preset").empty()) {
@@ -1590,7 +1590,7 @@ void ArbCode::allocTextures(const ArbLimits& limits)
       is >> index; // TODO: Check for errors
       
       if (find(reserved.begin(), reserved.end(), index) == reserved.end()) {
-	m_registers[node] = new ArbReg(SH_ARB_REG_TEXTURE, index, node->name());
+	m_registers[node] = new ArbReg(ARB_REG_TEXTURE, index, node->name());
 	m_registers[node]->preset = true;
 	m_reglist.push_back(m_registers[node]);
 	reserved.push_back(index);
@@ -1601,9 +1601,9 @@ void ArbCode::allocTextures(const ArbLimits& limits)
   }
   
   // allocate remaining textures units with respect to the reserved list
-  for (ShProgramNode::TexList::const_iterator I = m_shader->textures.begin();
+  for (ProgramNode::TexList::const_iterator I = m_shader->textures.begin();
        I != m_shader->textures.end(); ++I) {
-    ShTextureNodePtr node = *I;
+    TextureNodePtr node = *I;
     
     if (node->meta("opengl:texunit").empty() &&
 	node->meta("opengl:preset").empty()) {
@@ -1617,7 +1617,7 @@ void ArbCode::allocTextures(const ArbLimits& limits)
 	else index++;
       }
       
-      m_registers[node] = new ArbReg(SH_ARB_REG_TEXTURE, index, node->name());
+      m_registers[node] = new ArbReg(ARB_REG_TEXTURE, index, node->name());
       m_reglist.push_back(m_registers[node]);
       m_numTextures = index + 1;
     }
@@ -1626,7 +1626,7 @@ void ArbCode::allocTextures(const ArbLimits& limits)
 
 void ArbCode::bindTextures()
 {
-  for (ShProgramNode::TexList::const_iterator I = m_shader->textures.begin();
+  for (ProgramNode::TexList::const_iterator I = m_shader->textures.begin();
        I != m_shader->textures.end(); ++I) {
     if (!m_registers[*I]->preset) {
       m_texture->bindTexture(*I, GL_TEXTURE0 + m_registers[*I]->index, false);

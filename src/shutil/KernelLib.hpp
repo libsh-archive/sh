@@ -21,12 +21,12 @@
 #define SHUTIL_KERNELLIB_HPP 
 
 #include <string>
-#include "sh/ShLib.hpp"
-#include "sh/ShMatrix.hpp"
-#include "sh/ShTexture.hpp"
-#include "sh/ShProgram.hpp"
+#include "sh/Lib.hpp"
+#include "sh/Matrix.hpp"
+#include "sh/Texture.hpp"
+#include "sh/Program.hpp"
 
-/** \file ShKernelLib.hpp
+/** \file KernelLib.hpp
  * This is an implementation of useful kernels and nibbles (simple kernels).
  *
  * Much of this is bits and pieces gathered from smashtest & shdemo
@@ -47,40 +47,40 @@ namespace ShUtil {
 
 using namespace SH;
 
-class ShKernelLib {
+class KernelLib {
   private:
     // returns the string prefix concatenated with index
     static std::string makeName(std::string prefix, int index); 
 
   public:
 /// Kernels - some commonly used programs
-    /** Generates a passthrough program using the outputs of a given ShProgram
+    /** Generates a passthrough program using the outputs of a given Program
      * and keeps all the names.
      *
      * Useful in a cases where vsh outputs need to be duplicated before
      * being passed to fsh 
      */
-    static ShProgram outputPass( const ShProgram &p );
+    static Program outputPass( const Program &p );
 
-    /** Generates a passthrough program using the outputs of a given ShProgram
+    /** Generates a passthrough program using the outputs of a given Program
      * and keeps all the names.
      *
      * Useful in a cases where vsh outputs need to be duplicated before
      * being passed to fsh 
      */
-    static ShProgram inputPass( const ShProgram &p );
+    static Program inputPass( const Program &p );
 
     /** Basis Conversion program 
      * Takes 3 vectors for an orthonormal basis and converts the fourth 
      * vector.
      *
      * Hardcoded for 3f right now
-     * IN(0,1,2) ShVector3f b0Name, b1Name, b2Name 
-     * IN(3) ShVector3f name;
+     * IN(0,1,2) Vector3f b0Name, b1Name, b2Name 
+     * IN(3) Vector3f name;
      *
-     * OUT(0) ShVector3f name;
+     * OUT(0) Vector3f name;
      */
-    static ShProgram shChangeBasis(std::string name="vec", 
+    static Program change_basis(std::string name="vec", 
         std::string b0Name="b0", std::string b1Name="b1", std::string b2Name="b2"); 
 
 /// Cobs - Massive, general programs designed to be specialized  
@@ -93,45 +93,45 @@ class ShKernelLib {
      * If numTangent > 2, then both tangent and tangent2 are inputs.  
      *
      * (using new orthonormal bases {normal, tangent, tangent2} at each given point
-     *  IN(0) ShTexCoord2f texcoord   - texture coordinate
-     *  IN(1) ShNormal3f normal       - normal vector (MCS)
-     *  ShVector3f tangent            - primary tangent (MCS) (only included if numTangents > 0)
-     *  ShVector3f tangent2           - secondary tangent (MCS) (only included if numTangents > 1) 
-     *  ShPoint3f lightPosi           - light position (VCS), for i = 0..numLights - 1 
-     *  IN(-1) ShPosition4f posm       - position (MCS)
+     *  IN(0) TexCoord2f texcoord   - texture coordinate
+     *  IN(1) Normal3f normal       - normal vector (MCS)
+     *  Vector3f tangent            - primary tangent (MCS) (only included if numTangents > 0)
+     *  Vector3f tangent2           - secondary tangent (MCS) (only included if numTangents > 1) 
+     *  Point3f lightPosi           - light position (VCS), for i = 0..numLights - 1 
+     *  IN(-1) Position4f posm       - position (MCS)
      *
-     *  OUT(0) ShTexCoord2f texcoord   - texture coordinate
-     *  OUT(1) ShPoint3f posv          - output point (VCS)
-     *  OUT(2) ShPoint4f posm          - position (MCS)
+     *  OUT(0) TexCoord2f texcoord   - texture coordinate
+     *  OUT(1) Point3f posv          - output point (VCS)
+     *  OUT(2) Point4f posm          - position (MCS)
      *
-     *  ShNormal3f normal       - normal vector (VCS) 
-     *  ShVector3f tangent      - primary tangent (VCS) (only valid if numTangents > 0)
-     *  ShVector3f tangent2     - secondary tangent (VCS) (only valid if numTangents > 0) 
-     *  ShVector3f viewVec      - view vector (VCS)
-     *  ShVector3f halfVec       - half Vector (VCS) = halfVec0
-     *  ShVector3f halfVeci      - half Vector (VCS), for i = 0..numLights - 1 
-     *  ShVector3f lightVec      - light Vector (VCS) = lightVec0 
-     *  ShVector3f lightVeci     - light Vecor (VCS), for i = 0..numLights - 1 
-     *  ShVector3f lightPos      - light position (VCS) = lightPos0 
-     *  ShPoint3f lightPosi      - light position (VCS), for i = 0..numLights -1 
+     *  Normal3f normal       - normal vector (VCS) 
+     *  Vector3f tangent      - primary tangent (VCS) (only valid if numTangents > 0)
+     *  Vector3f tangent2     - secondary tangent (VCS) (only valid if numTangents > 0) 
+     *  Vector3f viewVec      - view vector (VCS)
+     *  Vector3f halfVec       - half Vector (VCS) = halfVec0
+     *  Vector3f halfVeci      - half Vector (VCS), for i = 0..numLights - 1 
+     *  Vector3f lightVec      - light Vector (VCS) = lightVec0 
+     *  Vector3f lightVeci     - light Vecor (VCS), for i = 0..numLights - 1 
+     *  Vector3f lightPos      - light position (VCS) = lightPos0 
+     *  Point3f lightPosi      - light position (VCS), for i = 0..numLights -1 
      *
-     *  ShNormal3f normalt       - normal vector (TCS) 
-     *  ShVector3f viewVec      - view vector (TCS)
-     *  ShVector3f halfVect      - half Vector (TCS) = halfVect0
-     *  ShVector3f halfVecti      - half Vector (TCS), for i = 0..numLights - 1 
-     *  ShVector3f lightVect      - light Vector (TCS) = lightVect0 
-     *  ShVector3f lightVecti     - light Vector (TCS), for i  0..numLights - 1 
+     *  Normal3f normalt       - normal vector (TCS) 
+     *  Vector3f viewVec      - view vector (TCS)
+     *  Vector3f halfVect      - half Vector (TCS) = halfVect0
+     *  Vector3f halfVecti      - half Vector (TCS), for i = 0..numLights - 1 
+     *  Vector3f lightVect      - light Vector (TCS) = lightVect0 
+     *  Vector3f lightVecti     - light Vector (TCS), for i  0..numLights - 1 
      *
-     *  OUT(-1) ShPosition4f posh       - position (HDCS)
+     *  OUT(-1) Position4f posh       - position (HDCS)
      */
-    template<int N, ShBindingType Binding, typename T>
-    static ShProgram shVsh(const ShMatrix<N, N, Binding, T> &mv,
-                           const ShMatrix<N, N, Binding, T> &mvp,
+    template<int N, BindingType Binding, typename T>
+    static Program vsh(const Matrix<N, N, Binding, T> &mv,
+                           const Matrix<N, N, Binding, T> &mvp,
                            int numTangents = 0, int numLights = 1); 
 };
 
 }
 
-#include "ShKernelLibImpl.hpp"
+#include "KernelLibImpl.hpp"
 
 #endif

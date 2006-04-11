@@ -26,9 +26,9 @@ using namespace std;
 
 int main() 
 {
-  shInit();
-  ShMatrix4x4f foo;
-  ShMatrix4x4f a;
+  init();
+  Matrix4x4f foo;
+  Matrix4x4f a;
 
   for(int i = 0; i < 4; ++i) for(int j = 0; j < 4; ++j) {
     foo[i][j] = i * M_PI / j;

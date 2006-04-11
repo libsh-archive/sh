@@ -21,54 +21,54 @@
 #include <sstream>
 #include <map>
 #include <list>
-#include "ShContext.hpp"
-#include "ShError.hpp"
-#include "ShDebug.hpp"
-#include "ShVariant.hpp"
-#include "ShVariableNode.hpp"
-#include "ShInternals.hpp"
-#include "ShTransformer.hpp"
-#include "ShTextureNode.hpp"
+#include "Context.hpp"
+#include "Error.hpp"
+#include "Debug.hpp"
+#include "Variant.hpp"
+#include "VariableNode.hpp"
+#include "Internals.hpp"
+#include "Transformer.hpp"
+#include "TextureNode.hpp"
 
-// #define SH_DBG_TRANSFORMER
+// #define DBG_TRANSFORMER
 
 #define Pi 3.14159265
 
 namespace SH {
 
-ShTransformer::ShTransformer(const ShProgramNodePtr& program)
+Transformer::Transformer(const ProgramNodePtr& program)
   : m_program(program), m_changed(false)
 {
 }
 
-ShTransformer::~ShTransformer()
+Transformer::~Transformer()
 {
 }
 
-bool ShTransformer::changed()  { return m_changed; }
+bool Transformer::changed()  { return m_changed; }
 
 // Variable splitting, marks statements for which some variable is split 
 struct VariableSplitter {
 
-  VariableSplitter(int maxTuple, ShTransformer::VarSplitMap& splits, bool& changed)
+  VariableSplitter(int maxTuple, Transformer::VarSplitMap& splits, bool& changed)
     : maxTuple(maxTuple), splits(splits), changed(changed) {}
 
   // assignment operator could not be generated: declaration only
   VariableSplitter& operator=(VariableSplitter const&);
 
-  void operator()(const ShCtrlGraphNodePtr& node) {
+  void operator()(const CtrlGraphNodePtr& node) {
     if (!node) return;
-    ShBasicBlockPtr block = node->block;
+    BasicBlockPtr block = node->block;
     if (!block) return;
-    for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
+    for (BasicBlock::StmtList::iterator I = block->begin(); I != block->end(); ++I) {
       splitVars(*I);
     }
   }
 
   // this must be called BEFORE running a DFS on the program
   // to split temporaries (otherwise the stupid hack marked (#) does not work)
-  void splitVarList(ShProgramNode::VarList &vars) {
-    for(ShProgramNode::VarList::iterator I = vars.begin();
+  void splitVarList(ProgramNode::VarList &vars) {
+    for(ProgramNode::VarList::iterator I = vars.begin();
         I != vars.end();) {
       if(split(*I)) {
         // (#) erase the stuff that split added to the end of the var list
@@ -81,7 +81,7 @@ struct VariableSplitter {
     }
   }
   
-  void splitVars(ShStatement& stmt) {
+  void splitVars(Statement& stmt) {
     stmt.marked = false;
     if(stmt.dest.node()) stmt.marked = split(stmt.dest.node()) || stmt.marked;
     for(int i = 0; i < 3; ++i) if(stmt.src[i].node()) stmt.marked = split(stmt.src[i].node()) || stmt.marked; 
@@ -91,41 +91,41 @@ struct VariableSplitter {
   // does not add variable to Program's VarList, so this must be handled manually 
   // (since this matters only for IN/OUT/INOUT types, splitVarList handles the
   // insertions nicely)
-  bool split(const ShVariableNodePtr& node)
+  bool split(const VariableNodePtr& node)
   {
     int i, offset;
     int n = node->size();
     if(n <= maxTuple ) return false;
     else if(splits.count(node) > 0) return true;
-    if( node->kind() == SH_TEXTURE || node->kind() == SH_STREAM ) {
-      shError( ShTransformerException(
+    if( node->kind() == TEXTURE || node->kind() == STREAM ) {
+      error( TransformerException(
             "Long tuple support is not implemented for textures or streams"));
             
     }
     changed = true;
-    ShTransformer::VarNodeVec &nodeVarNodeVec = splits[node];
-    ShVariableNodePtr newNode;
+    Transformer::VarNodeVec &nodeVarNodeVec = splits[node];
+    VariableNodePtr newNode;
     int* copySwiz = new int[maxTuple];
     for(offset = 0; n > 0; offset += maxTuple, n -= maxTuple) {
-      ShProgramNodePtr prev = ShContext::current()->parsing();
+      ProgramNodePtr prev = Context::current()->parsing();
       // @todo type should not be necessary any more
-      //if(node->uniform()) ShContext::current()->exit(); 
+      //if(node->uniform()) Context::current()->exit(); 
 
       int newSize = n < maxTuple ? n : maxTuple;
-      newNode = node->clone(SH_BINDINGTYPE_END, newSize, 
-          SH_VALUETYPE_END, SH_SEMANTICTYPE_END, false); 
+      newNode = node->clone(BINDINGTYPE_END, newSize, 
+          VALUETYPE_END, SEMANTICTYPE_END, false); 
       std::ostringstream sout;
       sout << node->name() << "_" << offset;
       newNode->name(sout.str());
 
       // @todo type should not be necessary any more
-      // if(node->uniform()) ShContext::current()->enter(0);
+      // if(node->uniform()) Context::current()->enter(0);
 
       if( node->hasValues() ) { 
         // @todo type set up dependent uniforms here 
         for(i = 0; i < newSize; ++i) copySwiz[i] = offset + i;
-        ShVariantCPtr subVariant = node->getVariant()->get(false,
-            ShSwizzle(node->size(), newSize, copySwiz));
+        VariantCPtr subVariant = node->getVariant()->get(false,
+            Swizzle(node->size(), newSize, copySwiz));
         newNode->setVariant(subVariant);
       }
       nodeVarNodeVec.push_back( newNode );
@@ -135,39 +135,39 @@ struct VariableSplitter {
   }
 
   int maxTuple;
-  ShTransformer::VarSplitMap &splits;
+  Transformer::VarSplitMap &splits;
   bool& changed;
 };
 
 struct StatementSplitter {
-  typedef std::vector<ShVariable> VarVec;
+  typedef std::vector<Variable> VarVec;
 
-  StatementSplitter(int maxTuple, ShTransformer::VarSplitMap &splits, bool& changed)
+  StatementSplitter(int maxTuple, Transformer::VarSplitMap &splits, bool& changed)
     : maxTuple(maxTuple), splits(splits), changed(changed) {}
 
   // assignment operator could not be generated: declaration only
   StatementSplitter& operator=(StatementSplitter const&);
 
-  void operator()(const ShCtrlGraphNodePtr& node) {
+  void operator()(const CtrlGraphNodePtr& node) {
     if (!node) return;
-    ShBasicBlockPtr block = node->block;
+    BasicBlockPtr block = node->block;
     if (!block) return;
-    for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end();) {
+    for (BasicBlock::StmtList::iterator I = block->begin(); I != block->end();) {
       splitStatement(block, I);
     }
   }
 
-  void makeSrcTemps(const ShVariable &v, VarVec &vv, ShBasicBlock::ShStmtList &stmts) {
+  void makeSrcTemps(const Variable &v, VarVec &vv, BasicBlock::StmtList &stmts) {
     if( v.size() <= maxTuple && v.node()->size() <= maxTuple ) {
       vv.push_back(v);
       return;
     }
     std::size_t i, j, k;
     int n;
-    const ShSwizzle &swiz = v.swizzle();
+    const Swizzle &swiz = v.swizzle();
     
     // get VarNodeVec for src
-    ShTransformer::VarNodeVec srcVec;
+    Transformer::VarNodeVec srcVec;
     if(splits.count(v.node()) > 0) {
       srcVec = splits[v.node()];
     } else srcVec.push_back(v.node());
@@ -181,7 +181,7 @@ struct StatementSplitter {
       // TODO check that uniforms don't get screwed
       // TODO check that typing works correctly - temporary should
       // have same type as the statement's operation type
-      ShVariable tempVar(resizeCloneNode(v.node(), tsize));
+      Variable tempVar(resizeCloneNode(v.node(), tsize));
       std::ostringstream sout;
       sout << v.name() << "_" << i << "_temp";
       tempVar.name(sout.str());
@@ -200,8 +200,8 @@ struct StatementSplitter {
           } 
         }
         if( tempSize > 0 ) {
-          ShVariable srcVar(srcVec[j]);
-          stmts.push_back(ShStatement(tempVar(tempSize, tempSwiz), SH_OP_ASN, srcVar(tempSize, srcSwiz)));
+          Variable srcVar(srcVec[j]);
+          stmts.push_back(Statement(tempVar(tempSize, tempSwiz), OP_ASN, srcVar(tempSize, srcSwiz)));
         }
       }
       delete [] tempSwiz;
@@ -210,8 +210,8 @@ struct StatementSplitter {
   }
 
   // moves the result to the destination based on the destination swizzle
-  void movToDest(ShTransformer::VarNodeVec &destVec, const ShSwizzle &destSwiz, 
-      const VarVec &resultVec, ShBasicBlock::ShStmtList &stmts) {
+  void movToDest(Transformer::VarNodeVec &destVec, const Swizzle &destSwiz, 
+      const VarVec &resultVec, BasicBlock::StmtList &stmts) {
     std::size_t j;
     int k;
     int offset = 0;
@@ -230,8 +230,8 @@ struct StatementSplitter {
           }
         }
         if( size > 0 ) {
-          ShVariable destVar(destVec[j]);
-          stmts.push_back(ShStatement(destVar(size, swizd), SH_OP_ASN, (*I)(size, swizr)));
+          Variable destVar(destVec[j]);
+          stmts.push_back(Statement(destVar(size, swizd), OP_ASN, (*I)(size, swizr)));
         }
       }
     }
@@ -239,18 +239,18 @@ struct StatementSplitter {
     delete [] swizr;
   }
 
-  ShVariableNodePtr resizeCloneNode(const ShVariableNodePtr& node, int newSize) {
-    return node->clone(SH_TEMP, newSize, SH_VALUETYPE_END, 
-        SH_SEMANTICTYPE_END, true, false);
+  VariableNodePtr resizeCloneNode(const VariableNodePtr& node, int newSize) {
+    return node->clone(TEMP, newSize, VALUETYPE_END, 
+        SEMANTICTYPE_END, true, false);
   }
   // works on two assumptions
   // 1) special cases for DOT, XPD (and any other future non-componentwise ops) implemented separately
   // 2) Everything else is in the form N = [1|N]+ in terms of tuple sizes involved in dest and src
-  void updateStatement(ShStatement &oldStmt, VarVec srcVec[3], ShBasicBlock::ShStmtList &stmts) {
+  void updateStatement(Statement &oldStmt, VarVec srcVec[3], BasicBlock::StmtList &stmts) {
     std::size_t i, j;
-    ShVariable &dest = oldStmt.dest;
-    const ShSwizzle &destSwiz = dest.swizzle();
-    ShTransformer::VarNodeVec destVec;
+    Variable &dest = oldStmt.dest;
+    const Swizzle &destSwiz = dest.swizzle();
+    Transformer::VarNodeVec destVec;
     VarVec resultVec;
 
     if(splits.count(dest.node()) > 0) {
@@ -258,62 +258,62 @@ struct StatementSplitter {
     } else destVec.push_back(dest.node());
 
     switch(oldStmt.op) {
-      case SH_OP_CSUM:
+      case OP_CSUM:
         {
-          SH_DEBUG_ASSERT(destSwiz.size() == 1);
-          ShVariable partialt = ShVariable(resizeCloneNode(dest.node(), 1));
-          ShVariable sumt = ShVariable(resizeCloneNode(dest.node(), 1));
+          DEBUG_ASSERT(destSwiz.size() == 1);
+          Variable partialt = Variable(resizeCloneNode(dest.node(), 1));
+          Variable sumt = Variable(resizeCloneNode(dest.node(), 1));
 
-          stmts.push_back(ShStatement(sumt, SH_OP_CSUM, srcVec[0][0]));
+          stmts.push_back(Statement(sumt, OP_CSUM, srcVec[0][0]));
           for(size_t i = 1; i < srcVec[0].size(); ++i) {
-            stmts.push_back(ShStatement(partialt, SH_OP_CSUM, srcVec[0][i]));
-            stmts.push_back(ShStatement(sumt, sumt, SH_OP_ADD, partialt));
+            stmts.push_back(Statement(partialt, OP_CSUM, srcVec[0][i]));
+            stmts.push_back(Statement(sumt, sumt, OP_ADD, partialt));
           }
           resultVec.push_back(sumt);
         }
         break;
-      case SH_OP_CMUL:
+      case OP_CMUL:
         {
-          SH_DEBUG_ASSERT(destSwiz.size() == 1);
-          ShVariable partialt = ShVariable(resizeCloneNode(dest.node(), 1));
-          ShVariable prodt = ShVariable(resizeCloneNode(dest.node(), 1));
+          DEBUG_ASSERT(destSwiz.size() == 1);
+          Variable partialt = Variable(resizeCloneNode(dest.node(), 1));
+          Variable prodt = Variable(resizeCloneNode(dest.node(), 1));
 
-          stmts.push_back(ShStatement(prodt, SH_OP_CMUL, srcVec[0][0]));
+          stmts.push_back(Statement(prodt, OP_CMUL, srcVec[0][0]));
           for(size_t i = 1; i < srcVec[0].size(); ++i) {
-            stmts.push_back(ShStatement(partialt, SH_OP_CMUL, srcVec[0][i]));
-            stmts.push_back(ShStatement(prodt, prodt, SH_OP_MUL, partialt));
+            stmts.push_back(Statement(partialt, OP_CMUL, srcVec[0][i]));
+            stmts.push_back(Statement(prodt, prodt, OP_MUL, partialt));
           }
           resultVec.push_back(prodt);
         }
         break;
-      case SH_OP_DOT:
+      case OP_DOT:
         { 
           // TODO for large tuples, may want to use another dot to sum up results instead of 
-          // SH_OP_ADD. For now, do naive method
-          SH_DEBUG_ASSERT(destSwiz.size() == 1);
+          // OP_ADD. For now, do naive method
+          DEBUG_ASSERT(destSwiz.size() == 1);
 
           // TODO check that this works correctly for weird types
-          // (temporaries should have same type as the ShStatement's operation type) 
-          ShVariable dott = ShVariable(resizeCloneNode(dest.node(), 1));
-          ShVariable sumt = ShVariable(resizeCloneNode(dest.node(), 1));
+          // (temporaries should have same type as the Statement's operation type) 
+          Variable dott = Variable(resizeCloneNode(dest.node(), 1));
+          Variable sumt = Variable(resizeCloneNode(dest.node(), 1));
 
-          stmts.push_back(ShStatement(sumt, srcVec[0][0], SH_OP_DOT, srcVec[1][0]));
+          stmts.push_back(Statement(sumt, srcVec[0][0], OP_DOT, srcVec[1][0]));
           for(i = 1; i < srcVec[0].size(); ++i) {
-            stmts.push_back(ShStatement(dott, srcVec[0][i], SH_OP_DOT, srcVec[1][i]));
-            stmts.push_back(ShStatement(sumt, sumt, SH_OP_ADD, dott));
+            stmts.push_back(Statement(dott, srcVec[0][i], OP_DOT, srcVec[1][i]));
+            stmts.push_back(Statement(sumt, sumt, OP_ADD, dott));
           }
           resultVec.push_back(sumt);
         }
         break;
-      case SH_OP_XPD:
+      case OP_XPD:
         {
-          SH_DEBUG_ASSERT( srcVec[0].size() == 1 && srcVec[0][0].size() == 3 &&
+          DEBUG_ASSERT( srcVec[0].size() == 1 && srcVec[0][0].size() == 3 &&
               srcVec[1].size() == 1 && srcVec[1][0].size() == 3); 
 
           // TODO check typing
-          ShVariable result = ShVariable(resizeCloneNode(dest.node(), 3));
+          Variable result = Variable(resizeCloneNode(dest.node(), 3));
 
-          stmts.push_back(ShStatement(result, srcVec[0][0], SH_OP_XPD, srcVec[1][0]));
+          stmts.push_back(Statement(result, srcVec[0][0], OP_XPD, srcVec[1][0]));
           resultVec.push_back(result);
         }
         break;
@@ -325,9 +325,9 @@ struct StatementSplitter {
           if( srcVec[2].size() > srcVec[maxi].size() ) maxi = 2;
           for(i = 0; i < srcVec[maxi].size(); ++i) {
             // TODO check typing
-            ShVariable resultPart(resizeCloneNode(dest.node(), srcVec[maxi][i].size()));
+            Variable resultPart(resizeCloneNode(dest.node(), srcVec[maxi][i].size()));
 
-            ShStatement newStmt(resultPart, oldStmt.op);
+            Statement newStmt(resultPart, oldStmt.op);
             for(j = 0; j < 3 && !srcVec[j].empty(); ++j) {
               newStmt.src[j] = srcVec[j].size() > i ? srcVec[j][i] : srcVec[j][0];
             }
@@ -342,8 +342,8 @@ struct StatementSplitter {
   
   /** splices a new sequence of resized tuples in to replace the original statement 
    * and ensures stit points at next statement in block*/
-  void splitStatement(const ShBasicBlockPtr& block, ShBasicBlock::ShStmtList::iterator &stit) {
-    ShStatement &stmt = *stit;
+  void splitStatement(const BasicBlockPtr& block, BasicBlock::StmtList::iterator &stit) {
+    Statement &stmt = *stit;
     int i;
     if(!stmt.marked && stmt.dest.size() <= maxTuple) {
       for(i = 0; i < 3; ++i) if(stmt.src[i].size() > maxTuple) break;
@@ -353,7 +353,7 @@ struct StatementSplitter {
       }
     }
     changed = true;
-    ShBasicBlock::ShStmtList newStmts;
+    BasicBlock::StmtList newStmts;
     VarVec srcVec[3];
 
     for(i = 0; i < 3; ++i) if(stmt.src[i].node()) makeSrcTemps(stmt.src[i], srcVec[i], newStmts);
@@ -365,13 +365,13 @@ struct StatementSplitter {
   }
 
   int maxTuple;
-  ShTransformer::VarSplitMap &splits;
+  Transformer::VarSplitMap &splits;
   bool& changed;
 };
 
-void ShTransformer::splitTuples(int maxTuple, ShTransformer::VarSplitMap &splits) {
-  SH_DEBUG_ASSERT(maxTuple > 0); 
-#ifdef SH_DBG_TRANSFORMER
+void Transformer::splitTuples(int maxTuple, Transformer::VarSplitMap &splits) {
+  DEBUG_ASSERT(maxTuple > 0); 
+#ifdef DBG_TRANSFORMER
   m_program->dump("splittupl_start");
 #endif
 
@@ -380,14 +380,14 @@ void ShTransformer::splitTuples(int maxTuple, ShTransformer::VarSplitMap &splits
   vs.splitVarList(m_program->outputs);
   m_program->ctrlGraph->dfs(vs);
 
-#ifdef SH_DBG_TRANSFORMER
+#ifdef DBG_TRANSFORMER
   m_program->dump("splittupl_vars");
 #endif
 
   StatementSplitter ss(maxTuple, splits, m_changed);
   m_program->ctrlGraph->dfs(ss);
 
-#ifdef SH_DBG_TRANSFORMER
+#ifdef DBG_TRANSFORMER
   m_program->dump("splittupl_done");
 #endif
 }
@@ -396,45 +396,45 @@ static int id = 0;
 
 // Output Convertion to temporaries 
 struct InputOutputConvertor {
-  InputOutputConvertor(const ShProgramNodePtr& program,
-                       ShVarMap &varMap, bool& changed)
+  InputOutputConvertor(const ProgramNodePtr& program,
+                       VarMap &varMap, bool& changed)
     : m_program(program), m_varMap( varMap ), m_changed(changed), m_id(++id)
   {}
 
   // assignment operator could not be generated: declaration only
   InputOutputConvertor& operator=(InputOutputConvertor const&);
 
-  void operator()(const ShCtrlGraphNodePtr& node) {
+  void operator()(const CtrlGraphNodePtr& node) {
     if (!node) return;
-    ShBasicBlockPtr block = node->block;
+    BasicBlockPtr block = node->block;
     if (!block) return;
-    for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
+    for (BasicBlock::StmtList::iterator I = block->begin(); I != block->end(); ++I) {
       convertIO(*I);
     }
   }
 
   // Turn node into a temporary, but do not update var list and do not keep
   // uniform
-  ShVariableNodePtr cloneNode(const ShVariableNodePtr& node, const char* suffix, ShBindingType binding_type=SH_TEMP) {
-    ShVariableNodePtr result = node->clone(binding_type, 0, SH_VALUETYPE_END, SH_SEMANTICTYPE_END, false, false);
+  VariableNodePtr cloneNode(const VariableNodePtr& node, const char* suffix, BindingType binding_type=TEMP) {
+    VariableNodePtr result = node->clone(binding_type, 0, VALUETYPE_END, SEMANTICTYPE_END, false, false);
     result->name(node->name() + suffix); 
     return result;
   }
 
   /* Convert all INOUT nodes that appear in a VarList (use std::for_each with this object)
    * (currently InOuts are always converted) */ 
-  void operator()(const ShVariableNodePtr& node) {
-    if (node->kind() != SH_INOUT || m_varMap.count(node) > 0) return;
+  void operator()(const VariableNodePtr& node) {
+    if (node->kind() != INOUT || m_varMap.count(node) > 0) return;
     m_varMap[node] = cloneNode(node, "_ioc-iot");
   }
 
   // Convert inputs, outputs only when they appear in incompatible locations
   // (inputs used as dest, outputs used as src)
-  void convertIO(ShStatement& stmt)
+  void convertIO(Statement& stmt)
   {
     if(!stmt.dest.null()) {
-      const ShVariableNodePtr &oldNode = stmt.dest.node();
-      if(oldNode->kind() == SH_INPUT) { 
+      const VariableNodePtr &oldNode = stmt.dest.node();
+      if(oldNode->kind() == INPUT) { 
         if(m_varMap.count(oldNode) == 0) {
           m_varMap[oldNode] = cloneNode(oldNode, "_ioc-it");
         }
@@ -447,8 +447,8 @@ struct InputOutputConvertor {
     }
     for(int i = 0; i < 3; ++i) {
       if(!stmt.src[i].null()) {
-        const ShVariableNodePtr &oldNode = stmt.src[i].node();
-        if(oldNode->kind() == SH_OUTPUT) { 
+        const VariableNodePtr &oldNode = stmt.src[i].node();
+        if(oldNode->kind() == OUTPUT) { 
           if(m_varMap.count(oldNode) == 0) {
             m_varMap[oldNode] = cloneNode(oldNode, "_ioc-ot");
           }
@@ -457,30 +457,30 @@ struct InputOutputConvertor {
     }
   }
 
-  void updateGraph(ShVarTransformMap *varTransMap) {
+  void updateGraph(VarTransformMap *varTransMap) {
     if(m_varMap.empty()) return;
     m_changed = true;
 
     // create block after exit
-    ShCtrlGraphNodePtr oldExit = m_program->ctrlGraph->appendExit(); 
-    ShCtrlGraphNodePtr oldEntry = m_program->ctrlGraph->prependEntry();
+    CtrlGraphNodePtr oldExit = m_program->ctrlGraph->appendExit(); 
+    CtrlGraphNodePtr oldEntry = m_program->ctrlGraph->prependEntry();
 
-    for(ShVarMap::const_iterator it = m_varMap.begin(); it != m_varMap.end(); ++it) {
+    for(VarMap::const_iterator it = m_varMap.begin(); it != m_varMap.end(); ++it) {
       // assign temporary to output
-      ShVariableNodePtr oldNode = it->first; 
-      if(oldNode->kind() == SH_OUTPUT) {
-        oldExit->block->addStatement(ShStatement(
-              ShVariable(oldNode), SH_OP_ASN, ShVariable(it->second)));
-      } else if(oldNode->kind() == SH_INPUT) {
-        oldEntry->block->addStatement(ShStatement(
-              ShVariable(it->second), SH_OP_ASN, ShVariable(oldNode)));
+      VariableNodePtr oldNode = it->first; 
+      if(oldNode->kind() == OUTPUT) {
+        oldExit->block->addStatement(Statement(
+              Variable(oldNode), OP_ASN, Variable(it->second)));
+      } else if(oldNode->kind() == INPUT) {
+        oldEntry->block->addStatement(Statement(
+              Variable(it->second), OP_ASN, Variable(oldNode)));
       } else if(oldNode->uniform()) {
-        oldEntry->block->addStatement(ShStatement(
-          ShVariable(it->second), SH_OP_ASN, ShVariable(oldNode)));
-      } else if(oldNode->kind() == SH_INOUT) {
+        oldEntry->block->addStatement(Statement(
+          Variable(it->second), OP_ASN, Variable(oldNode)));
+      } else if(oldNode->kind() == INOUT) {
         // replace INOUT nodes in input/output lists with INPUT and OUTPUT nodes
-        ShVariableNodePtr newInNode(cloneNode(oldNode, "_ioc-i", SH_INPUT));
-        ShVariableNodePtr newOutNode(cloneNode(oldNode, "_ioc-o", SH_OUTPUT));
+        VariableNodePtr newInNode(cloneNode(oldNode, "_ioc-i", INPUT));
+        VariableNodePtr newOutNode(cloneNode(oldNode, "_ioc-o", OUTPUT));
 
         std::replace(m_program->inputs.begin(), m_program->inputs.end(),
             oldNode, newInNode);
@@ -495,39 +495,39 @@ struct InputOutputConvertor {
         varTransMap->add_variable_transform(oldNode, newOutNode);
 
         // add mov statements to/from temporary 
-        oldEntry->block->addStatement(ShStatement(
-              ShVariable(it->second), SH_OP_ASN, ShVariable(newInNode)));
-        oldExit->block->addStatement(ShStatement(
-              ShVariable(newOutNode), SH_OP_ASN, ShVariable(it->second)));
+        oldEntry->block->addStatement(Statement(
+              Variable(it->second), OP_ASN, Variable(newInNode)));
+        oldExit->block->addStatement(Statement(
+              Variable(newOutNode), OP_ASN, Variable(it->second)));
       }
     }
   }
 
-  ShProgramNodePtr m_program;
-  ShVarMap &m_varMap; // maps from outputs used as srcs in computation to their temporary variables
+  ProgramNodePtr m_program;
+  VarMap &m_varMap; // maps from outputs used as srcs in computation to their temporary variables
   bool& m_changed;
   int m_id;
 };
 
-void ShTransformer::convertInputOutput(ShVarTransformMap *varTransMap)
+void Transformer::convertInputOutput(VarTransformMap *varTransMap)
 {
-#ifdef SH_DBG_TRANSFORMER
+#ifdef DBG_TRANSFORMER
   m_program->dump("ioconvert_start");
 #endif
-  ShVarMap varMap; // maps from outputs used as srcs in computation to their temporary variables
+  VarMap varMap; // maps from outputs used as srcs in computation to their temporary variables
 
   InputOutputConvertor ioc(m_program, varMap, m_changed);
   std::for_each(m_program->inputs.begin(), m_program->inputs.end(), ioc);
   std::for_each(m_program->outputs.begin(), m_program->outputs.end(), ioc);
   m_program->ctrlGraph->dfs(ioc);
 
-  ShVariableReplacer vr(varMap);
+  VariableReplacer vr(varMap);
   m_program->ctrlGraph->dfs(vr);
 
   // If they didn't provide a map, make a temporary one
   bool TempVarMap = false;
   if (!varTransMap) {
-    varTransMap = new ShVarTransformMap();
+    varTransMap = new VarTransformMap();
     TempVarMap = true;
   }
 
@@ -539,7 +539,7 @@ void ShTransformer::convertInputOutput(ShVarTransformMap *varTransMap)
     varTransMap = 0;
   }
 
-#ifdef SH_DBG_TRANSFORMER
+#ifdef DBG_TRANSFORMER
   m_program->dump("ioconvert_done");
 #endif
 }
@@ -547,43 +547,43 @@ void ShTransformer::convertInputOutput(ShVarTransformMap *varTransMap)
 struct TextureLookupConverter {
   TextureLookupConverter() : changed(false) {}
   
-  void operator()(const ShCtrlGraphNodePtr& node)
+  void operator()(const CtrlGraphNodePtr& node)
   {
     if (!node) return;
-    ShBasicBlockPtr block = node->block;
+    BasicBlockPtr block = node->block;
     if (!block) return;
-    for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
+    for (BasicBlock::StmtList::iterator I = block->begin(); I != block->end(); ++I) {
       convert(block, I);
     }
   }
 
-  ShVariableNodePtr cloneNode(const ShVariableNodePtr& node) {
-    return node->clone(SH_TEMP, 0, SH_VALUETYPE_END, SH_SEMANTICTYPE_END, true, false);
+  VariableNodePtr cloneNode(const VariableNodePtr& node) {
+    return node->clone(TEMP, 0, VALUETYPE_END, SEMANTICTYPE_END, true, false);
   }
 
-  void convert(const ShBasicBlockPtr& block, ShBasicBlock::ShStmtList::iterator& I)
+  void convert(const BasicBlockPtr& block, BasicBlock::StmtList::iterator& I)
   {
-    const ShStatement& stmt = *I;
-    if (stmt.op != SH_OP_TEX && stmt.op != SH_OP_TEXI) return;
-    ShTextureNodePtr tn = shref_dynamic_cast<ShTextureNode>(stmt.src[0].node());
+    const Statement& stmt = *I;
+    if (stmt.op != OP_TEX && stmt.op != OP_TEXI) return;
+    TextureNodePtr tn = shref_dynamic_cast<TextureNode>(stmt.src[0].node());
 
-    ShBasicBlock::ShStmtList newStmts;
+    BasicBlock::StmtList newStmts;
     
-    if (!tn) { SH_DEBUG_ERROR("TEX Instruction from non-texture"); return; }
-    if (stmt.op == SH_OP_TEX && tn->dims() == SH_TEXTURE_RECT) {
+    if (!tn) { DEBUG_ERROR("TEX Instruction from non-texture"); return; }
+    if (stmt.op == OP_TEX && tn->dims() == TEXTURE_RECT) {
       // TODO check typing
-      //ShVariable tc(new ShVariableNode(SH_TEMP, tn->texSizeVar().size()));
-      ShVariable tc(cloneNode(tn->texSizeVar().node()));
+      //Variable tc(new VariableNode(TEMP, tn->texSizeVar().size()));
+      Variable tc(cloneNode(tn->texSizeVar().node()));
 
-      newStmts.push_back(ShStatement(tc, stmt.src[1], SH_OP_MUL, tn->texSizeVar()));
-      newStmts.push_back(ShStatement(stmt.dest, stmt.src[0], SH_OP_TEXI, tc));
-    } else if (stmt.op == SH_OP_TEXI && tn->dims() != SH_TEXTURE_RECT) {
+      newStmts.push_back(Statement(tc, stmt.src[1], OP_MUL, tn->texSizeVar()));
+      newStmts.push_back(Statement(stmt.dest, stmt.src[0], OP_TEXI, tc));
+    } else if (stmt.op == OP_TEXI && tn->dims() != TEXTURE_RECT) {
       // TODO check typing
-      //ShVariable tc(new ShVariableNode(SH_TEMP, tn->texSizeVar().size()));
-      ShVariable tc(cloneNode(tn->texSizeVar().node()));
+      //Variable tc(new VariableNode(TEMP, tn->texSizeVar().size()));
+      Variable tc(cloneNode(tn->texSizeVar().node()));
 
-      newStmts.push_back(ShStatement(tc, stmt.src[1], SH_OP_DIV, tn->texSizeVar()));
-      newStmts.push_back(ShStatement(stmt.dest, stmt.src[0], SH_OP_TEX, tc));
+      newStmts.push_back(Statement(tc, stmt.src[1], OP_DIV, tn->texSizeVar()));
+      newStmts.push_back(Statement(stmt.dest, stmt.src[0], OP_TEX, tc));
     } else {
       return;
     }
@@ -597,9 +597,9 @@ struct TextureLookupConverter {
   bool changed;
 };
 
-void ShTransformer::convertTextureLookups()
+void Transformer::convertTextureLookups()
 {
-#ifdef SH_DBG_TRANSFORMER
+#ifdef DBG_TRANSFORMER
   m_program->dump("texlkup_start");
 #endif
 
@@ -607,17 +607,17 @@ void ShTransformer::convertTextureLookups()
   m_program->ctrlGraph->dfs(conv);
   if (conv.changed) m_changed = true;
 
-#ifdef SH_DBG_TRANSFORMER
+#ifdef DBG_TRANSFORMER
   m_program->dump("texlkup_done");
 #endif
 }
 
-struct DummyOpStripperBase: public ShTransformerParent 
+struct DummyOpStripperBase: public TransformerParent 
 {
- bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, const ShCtrlGraphNodePtr& node) { 
+ bool handleStmt(BasicBlock::StmtList::iterator &I, const CtrlGraphNodePtr& node) { 
    switch(I->op) {
-     case SH_OP_STARTSEC:
-     case SH_OP_ENDSEC:
+     case OP_STARTSEC:
+     case OP_ENDSEC:
        I = node->block->erase(I);
        m_changed = true;
        return true;
@@ -627,93 +627,93 @@ struct DummyOpStripperBase: public ShTransformerParent
    return false; 
  }
 };
-typedef ShDefaultTransformer<DummyOpStripperBase> DummyOpStripper;
+typedef DefaultTransformer<DummyOpStripperBase> DummyOpStripper;
 
-void ShTransformer::stripDummyOps()
+void Transformer::stripDummyOps()
 {
   DummyOpStripper dos;
   m_changed |= dos.transform(m_program);
 }
 
-ShVariableNodePtr allocate_constant(const ShVariable& dest, double constant)
+VariableNodePtr allocate_constant(const Variable& dest, double constant)
 {
-  const ShVariableNodePtr& dest_node = dest.node();
-  ShVariableNode* node = new ShVariableNode(SH_CONST, dest_node->size(), 
+  const VariableNodePtr& dest_node = dest.node();
+  VariableNode* node = new VariableNode(CONST, dest_node->size(), 
                                             dest_node->valueType(), 
                                             dest_node->specialType());
     
-  ShDataVariant<double>* variant = new ShDataVariant<double>(dest_node->size(), 
+  DataVariant<double>* variant = new DataVariant<double>(dest_node->size(), 
                                                              constant);
-  ShVariantCPtr variant_ptr = variant;
+  VariantCPtr variant_ptr = variant;
   node->setVariant(variant_ptr);
   
-  ShVariableNodePtr node_ptr = ShPointer<ShVariableNode>(node);
+  VariableNodePtr node_ptr = Pointer<VariableNode>(node);
   return node_ptr;
 }
 
-ShVariableNodePtr allocate_constant(unsigned int size, float* constants)
+VariableNodePtr allocate_constant(unsigned int size, float* constants)
 {
-  ShVariableNode* node = new ShVariableNode(SH_CONST, size,
-                                            SH_FLOAT,
-                                            SH_ATTRIB);
+  VariableNode* node = new VariableNode(CONST, size,
+                                            FLOAT,
+                                            ATTRIB);
     
-  ShDataVariant<float>* variant = new ShDataVariant<float>(size,
+  DataVariant<float>* variant = new DataVariant<float>(size,
                                                            constants);
-  ShVariantCPtr variant_ptr = variant;
+  VariantCPtr variant_ptr = variant;
   node->setVariant(variant_ptr);
   
-  ShVariableNodePtr node_ptr = ShPointer<ShVariableNode>(node);
+  VariableNodePtr node_ptr = Pointer<VariableNode>(node);
   return node_ptr;
 }
 
-ShVariableNodePtr allocate_temp(const ShVariable& dest)
+VariableNodePtr allocate_temp(const Variable& dest)
 {
-  const ShVariableNodePtr& dest_node = dest.node();
-  ShVariableNode* node = new ShVariableNode(SH_TEMP, dest_node->size(), 
+  const VariableNodePtr& dest_node = dest.node();
+  VariableNode* node = new VariableNode(TEMP, dest_node->size(), 
                                             dest_node->valueType(), 
                                             dest_node->specialType());
-  ShVariableNodePtr node_ptr = ShPointer<ShVariableNode>(node);
+  VariableNodePtr node_ptr = Pointer<VariableNode>(node);
   return node_ptr;
 }
 
-ShVariableNodePtr allocate_scalar_temp(const ShVariable& dest)
+VariableNodePtr allocate_scalar_temp(const Variable& dest)
 {
-  const ShVariableNodePtr& dest_node = dest.node();
-  ShVariableNode* node = new ShVariableNode(SH_TEMP, 1, 
+  const VariableNodePtr& dest_node = dest.node();
+  VariableNode* node = new VariableNode(TEMP, 1, 
                                             dest_node->valueType(), 
                                             dest_node->specialType());
-  ShVariableNodePtr node_ptr = ShPointer<ShVariableNode>(node);
+  VariableNodePtr node_ptr = Pointer<VariableNode>(node);
   return node_ptr;
 }
 
-struct ATan2ExpanderBase: public ShTransformerParent 
+struct ATan2ExpanderBase: public TransformerParent 
 {
-  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNodePtr node)
+  bool handleStmt(BasicBlock::StmtList::iterator &I, CtrlGraphNodePtr node)
   { 
-    if (SH_OP_ATAN2 == I->op) {
-      ShBasicBlock::ShStmtList new_stmts;
+    if (OP_ATAN2 == I->op) {
+      BasicBlock::StmtList new_stmts;
       
-      ShVariable tmp1(allocate_temp(I->dest));
-      ShVariable tmp2(allocate_temp(I->dest));
-      ShVariable tmp3(allocate_temp(I->dest));
+      Variable tmp1(allocate_temp(I->dest));
+      Variable tmp2(allocate_temp(I->dest));
+      Variable tmp3(allocate_temp(I->dest));
 
-      ShVariable zero(allocate_constant(I->dest, 0.0));
-      ShVariable pi_over_two(allocate_constant(I->dest, Pi/2.0));
-      ShVariable pi(allocate_constant(I->dest, Pi));
+      Variable zero(allocate_constant(I->dest, 0.0));
+      Variable pi_over_two(allocate_constant(I->dest, Pi/2.0));
+      Variable pi(allocate_constant(I->dest, Pi));
 
       // tmp1 = (b != 0) ? atan(a/b) : sign(a) * Pi/2
-      new_stmts.push_back(ShStatement(tmp1, I->src[0], SH_OP_DIV, I->src[1]));
-      new_stmts.push_back(ShStatement(tmp1, SH_OP_ATAN, tmp1));
-      new_stmts.push_back(ShStatement(tmp2, SH_OP_SGN, I->src[0]));
-      new_stmts.push_back(ShStatement(tmp2, tmp2, SH_OP_MUL, pi_over_two));
-      new_stmts.push_back(ShStatement(tmp3, I->src[1], SH_OP_SNE, zero));
-      new_stmts.push_back(ShStatement(tmp1, SH_OP_COND, tmp3, tmp1, tmp2));
+      new_stmts.push_back(Statement(tmp1, I->src[0], OP_DIV, I->src[1]));
+      new_stmts.push_back(Statement(tmp1, OP_ATAN, tmp1));
+      new_stmts.push_back(Statement(tmp2, OP_SGN, I->src[0]));
+      new_stmts.push_back(Statement(tmp2, tmp2, OP_MUL, pi_over_two));
+      new_stmts.push_back(Statement(tmp3, I->src[1], OP_SNE, zero));
+      new_stmts.push_back(Statement(tmp1, OP_COND, tmp3, tmp1, tmp2));
 
       // atan2(a, b) = (b < 0) * (a >=0 ? Pi : -Pi) + tmp1
-      new_stmts.push_back(ShStatement(tmp3, I->src[1], SH_OP_SLT, zero));
-      new_stmts.push_back(ShStatement(tmp2, I->src[0], SH_OP_SGE, zero));
-      new_stmts.push_back(ShStatement(tmp2, SH_OP_COND, tmp2, pi, -pi));
-      new_stmts.push_back(ShStatement(I->dest, SH_OP_MAD, tmp3, tmp2, tmp1));
+      new_stmts.push_back(Statement(tmp3, I->src[1], OP_SLT, zero));
+      new_stmts.push_back(Statement(tmp2, I->src[0], OP_SGE, zero));
+      new_stmts.push_back(Statement(tmp2, OP_COND, tmp2, pi, -pi));
+      new_stmts.push_back(Statement(I->dest, OP_MAD, tmp3, tmp2, tmp1));
 
       I = node->block->erase(I);
       node->block->splice(I, new_stmts);
@@ -725,48 +725,48 @@ struct ATan2ExpanderBase: public ShTransformerParent
   }
 };
 
-typedef ShDefaultTransformer<ATan2ExpanderBase> ATan2Expander;
-void ShTransformer::expand_atan2()
+typedef DefaultTransformer<ATan2ExpanderBase> ATan2Expander;
+void Transformer::expand_atan2()
 {
   ATan2Expander expander;
   m_changed |= expander.transform(m_program);
 }
 
 
-struct TexdToTexlodBase : public ShTransformerParent 
+struct TexdToTexlodBase : public TransformerParent 
 {
-  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNodePtr node)
+  bool handleStmt(BasicBlock::StmtList::iterator &I, CtrlGraphNodePtr node)
   { 
-    if (SH_OP_TEXD == I->op) {
-      ShBasicBlock::ShStmtList new_stmts;
+    if (OP_TEXD == I->op) {
+      BasicBlock::StmtList new_stmts;
       
-      ShVariable tmp1(allocate_scalar_temp(I->dest));
-      ShVariable tmp2(allocate_scalar_temp(I->dest));
-      ShVariable tmp3(allocate_temp(I->src[2]));
+      Variable tmp1(allocate_scalar_temp(I->dest));
+      Variable tmp2(allocate_scalar_temp(I->dest));
+      Variable tmp3(allocate_temp(I->src[2]));
 
-      ShTextureNodePtr texnode = shref_dynamic_cast<ShTextureNode>(I->src[0].node());
+      TextureNodePtr texnode = shref_dynamic_cast<TextureNode>(I->src[0].node());
 
       int size_indices[6];
       for (int i = 0; i < texnode->texSizeVar().size(); i++) {
         size_indices[i] = i;
         size_indices[texnode->texSizeVar().size() + i] = i;
       }
-      ShVariable size_var(texnode->texSizeVar().node(), ShSwizzle(texnode->texSizeVar().size(), texnode->texSizeVar().size() * 2, size_indices), texnode->texSizeVar().neg());
+      Variable size_var(texnode->texSizeVar().node(), Swizzle(texnode->texSizeVar().size(), texnode->texSizeVar().size() * 2, size_indices), texnode->texSizeVar().neg());
 
-      new_stmts.push_back(ShStatement(tmp3, I->src[2], SH_OP_MUL, size_var));
+      new_stmts.push_back(Statement(tmp3, I->src[2], OP_MUL, size_var));
 
       int indices[] = {0, 1, 2, 3, 4, 5};
-      ShVariable dx(tmp3.node(), ShSwizzle(tmp3.size(), tmp3.size()/2, indices), tmp3.neg());
-      ShVariable dy(tmp3.node(), ShSwizzle(tmp3.size(), tmp3.size()/2, indices + tmp3.size()/2), tmp3.neg());
+      Variable dx(tmp3.node(), Swizzle(tmp3.size(), tmp3.size()/2, indices), tmp3.neg());
+      Variable dy(tmp3.node(), Swizzle(tmp3.size(), tmp3.size()/2, indices + tmp3.size()/2), tmp3.neg());
 
 
-      new_stmts.push_back(ShStatement(tmp1, dx, SH_OP_DOT, dx));
-      new_stmts.push_back(ShStatement(tmp2, dy, SH_OP_DOT, dy));
-      new_stmts.push_back(ShStatement(tmp1, tmp1, SH_OP_MAX, tmp2));
-      new_stmts.push_back(ShStatement(tmp1, SH_OP_SQRT, tmp1));
-      new_stmts.push_back(ShStatement(tmp1, SH_OP_LOG2, tmp1));
+      new_stmts.push_back(Statement(tmp1, dx, OP_DOT, dx));
+      new_stmts.push_back(Statement(tmp2, dy, OP_DOT, dy));
+      new_stmts.push_back(Statement(tmp1, tmp1, OP_MAX, tmp2));
+      new_stmts.push_back(Statement(tmp1, OP_SQRT, tmp1));
+      new_stmts.push_back(Statement(tmp1, OP_LOG2, tmp1));
 
-      new_stmts.push_back(ShStatement(I->dest, SH_OP_TEXLOD, I->src[0], I->src[1], tmp1));
+      new_stmts.push_back(Statement(I->dest, OP_TEXLOD, I->src[0], I->src[1], tmp1));
 
       I = node->block->erase(I);
       node->block->splice(I, new_stmts);
@@ -778,25 +778,25 @@ struct TexdToTexlodBase : public ShTransformerParent
   }
 };
 
-typedef ShDefaultTransformer<TexdToTexlodBase> TexdToTexlod;
-void ShTransformer::texd_to_texlod()
+typedef DefaultTransformer<TexdToTexlodBase> TexdToTexlod;
+void Transformer::texd_to_texlod()
 {
   TexdToTexlod t2t;
   m_changed |= t2t.transform(m_program);
 }
 
-struct ExpandNormalizeBase : public ShTransformerParent 
+struct ExpandNormalizeBase : public TransformerParent 
 {
-  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNodePtr node)
+  bool handleStmt(BasicBlock::StmtList::iterator &I, CtrlGraphNodePtr node)
   { 
-    if (SH_OP_NORM == I->op) {
-      ShBasicBlock::ShStmtList new_stmts;
+    if (OP_NORM == I->op) {
+      BasicBlock::StmtList new_stmts;
       
-      ShVariable tmp1(allocate_scalar_temp(I->dest));
+      Variable tmp1(allocate_scalar_temp(I->dest));
 
-      new_stmts.push_back(ShStatement(tmp1, I->src[0], SH_OP_DOT, I->src[0]));
-      new_stmts.push_back(ShStatement(tmp1, SH_OP_RSQ, tmp1));
-      new_stmts.push_back(ShStatement(I->dest, tmp1, SH_OP_MUL, I->src[0]));
+      new_stmts.push_back(Statement(tmp1, I->src[0], OP_DOT, I->src[0]));
+      new_stmts.push_back(Statement(tmp1, OP_RSQ, tmp1));
+      new_stmts.push_back(Statement(I->dest, tmp1, OP_MUL, I->src[0]));
 
       I = node->block->erase(I);
       node->block->splice(I, new_stmts);
@@ -808,25 +808,25 @@ struct ExpandNormalizeBase : public ShTransformerParent
   }
 };
 
-typedef ShDefaultTransformer<ExpandNormalizeBase> ExpandNormalize;
-void ShTransformer::expand_normalize()
+typedef DefaultTransformer<ExpandNormalizeBase> ExpandNormalize;
+void Transformer::expand_normalize()
 {
   ExpandNormalize en;
   m_changed |= en.transform(m_program);
 }
 
 
-struct ReciprocateSqrtBase : public ShTransformerParent 
+struct ReciprocateSqrtBase : public TransformerParent 
 {
-  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNodePtr node)
+  bool handleStmt(BasicBlock::StmtList::iterator &I, CtrlGraphNodePtr node)
   { 
-    if (SH_OP_SQRT == I->op) {
-      ShBasicBlock::ShStmtList new_stmts;
+    if (OP_SQRT == I->op) {
+      BasicBlock::StmtList new_stmts;
       
-      ShVariable tmp1(allocate_temp(I->dest));
+      Variable tmp1(allocate_temp(I->dest));
 
-      new_stmts.push_back(ShStatement(tmp1, SH_OP_RSQ, I->src[0]));
-      new_stmts.push_back(ShStatement(I->dest, SH_OP_RCP, tmp1));
+      new_stmts.push_back(Statement(tmp1, OP_RSQ, I->src[0]));
+      new_stmts.push_back(Statement(I->dest, OP_RCP, tmp1));
 
       I = node->block->erase(I);
       node->block->splice(I, new_stmts);
@@ -838,24 +838,24 @@ struct ReciprocateSqrtBase : public ShTransformerParent
   }
 };
 
-typedef ShDefaultTransformer<ReciprocateSqrtBase> ReciprocateSqrt;
-void ShTransformer::reciprocate_sqrt()
+typedef DefaultTransformer<ReciprocateSqrtBase> ReciprocateSqrt;
+void Transformer::reciprocate_sqrt()
 {
   ReciprocateSqrt rs;
   m_changed |= rs.transform(m_program);
 }
 
-struct ExpandDivBase : public ShTransformerParent 
+struct ExpandDivBase : public TransformerParent 
 {
-  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNodePtr node)
+  bool handleStmt(BasicBlock::StmtList::iterator &I, CtrlGraphNodePtr node)
   { 
-    if (SH_OP_DIV == I->op) {
-      ShBasicBlock::ShStmtList new_stmts;
+    if (OP_DIV == I->op) {
+      BasicBlock::StmtList new_stmts;
       
-      ShVariable tmp1(allocate_temp(I->src[1]));
+      Variable tmp1(allocate_temp(I->src[1]));
 
-      new_stmts.push_back(ShStatement(tmp1, SH_OP_RCP, I->src[1]));
-      new_stmts.push_back(ShStatement(I->dest, I->src[0], SH_OP_MUL, tmp1));
+      new_stmts.push_back(Statement(tmp1, OP_RCP, I->src[1]));
+      new_stmts.push_back(Statement(I->dest, I->src[0], OP_MUL, tmp1));
 
       I = node->block->erase(I);
       node->block->splice(I, new_stmts);
@@ -867,60 +867,60 @@ struct ExpandDivBase : public ShTransformerParent
   }
 };
 
-typedef ShDefaultTransformer<ExpandDivBase> ExpandDiv;
-void ShTransformer::expand_div()
+typedef DefaultTransformer<ExpandDivBase> ExpandDiv;
+void Transformer::expand_div()
 {
   ExpandDiv ed;
   m_changed |= ed.transform(m_program);
 }
 
 
-struct InverseHyperbolicExpanderBase: public ShTransformerParent 
+struct InverseHyperbolicExpanderBase: public TransformerParent 
 {
-  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, const ShCtrlGraphNodePtr& node)
+  bool handleStmt(BasicBlock::StmtList::iterator &I, const CtrlGraphNodePtr& node)
   { 
-    ShBasicBlock::ShStmtList new_stmts;
+    BasicBlock::StmtList new_stmts;
     switch (I->op) {
-    case SH_OP_ACOSH:
+    case OP_ACOSH:
       {
         // acosh(x) = ln(x + sqrt(x^2 - 1))
-        ShVariable minus_one(allocate_constant(I->src[0], -1));
-        ShVariable tmp(allocate_temp(I->src[0]));
+        Variable minus_one(allocate_constant(I->src[0], -1));
+        Variable tmp(allocate_temp(I->src[0]));
                 
-        new_stmts.push_back(ShStatement(tmp, I->src[0], SH_OP_MUL, I->src[0]));
-        new_stmts.push_back(ShStatement(tmp, tmp, SH_OP_ADD, minus_one));
-        new_stmts.push_back(ShStatement(tmp, SH_OP_SQRT, tmp));
-        new_stmts.push_back(ShStatement(tmp, I->src[0], SH_OP_ADD, tmp));
-        new_stmts.push_back(ShStatement(I->dest, SH_OP_LOG, tmp));
+        new_stmts.push_back(Statement(tmp, I->src[0], OP_MUL, I->src[0]));
+        new_stmts.push_back(Statement(tmp, tmp, OP_ADD, minus_one));
+        new_stmts.push_back(Statement(tmp, OP_SQRT, tmp));
+        new_stmts.push_back(Statement(tmp, I->src[0], OP_ADD, tmp));
+        new_stmts.push_back(Statement(I->dest, OP_LOG, tmp));
         break;
       }
-    case SH_OP_ASINH:
+    case OP_ASINH:
       {
         // asinh(x) = ln(x + sqrt(x^2 + 1))
-        ShVariable one(allocate_constant(I->src[0], 1));
-        ShVariable tmp(allocate_temp(I->src[0]));
+        Variable one(allocate_constant(I->src[0], 1));
+        Variable tmp(allocate_temp(I->src[0]));
                 
-        new_stmts.push_back(ShStatement(tmp, I->src[0], SH_OP_MUL, I->src[0]));
-        new_stmts.push_back(ShStatement(tmp, tmp, SH_OP_ADD, one));
-        new_stmts.push_back(ShStatement(tmp, SH_OP_SQRT, tmp));
-        new_stmts.push_back(ShStatement(tmp, I->src[0], SH_OP_ADD, tmp));
-        new_stmts.push_back(ShStatement(I->dest, SH_OP_LOG, tmp));
+        new_stmts.push_back(Statement(tmp, I->src[0], OP_MUL, I->src[0]));
+        new_stmts.push_back(Statement(tmp, tmp, OP_ADD, one));
+        new_stmts.push_back(Statement(tmp, OP_SQRT, tmp));
+        new_stmts.push_back(Statement(tmp, I->src[0], OP_ADD, tmp));
+        new_stmts.push_back(Statement(I->dest, OP_LOG, tmp));
         break;
       }
-    case SH_OP_ATANH:
+    case OP_ATANH:
       {
         // atanh(x) = 1/2 * ln((1+x) / (1-x))
-        ShVariable one(allocate_constant(I->src[0], 1));
-        ShVariable tmp1(allocate_temp(I->src[0]));
-        ShVariable tmp2(allocate_temp(I->src[0]));
-        ShVariable half(allocate_constant(I->src[0], 0.5));
+        Variable one(allocate_constant(I->src[0], 1));
+        Variable tmp1(allocate_temp(I->src[0]));
+        Variable tmp2(allocate_temp(I->src[0]));
+        Variable half(allocate_constant(I->src[0], 0.5));
 
-        new_stmts.push_back(ShStatement(tmp1, one, SH_OP_ADD, I->src[0]));
-        new_stmts.push_back(ShStatement(tmp2, SH_OP_NEG, I->src[0]));
-        new_stmts.push_back(ShStatement(tmp2, one, SH_OP_ADD, tmp2));
-        new_stmts.push_back(ShStatement(tmp1, tmp1, SH_OP_DIV, tmp2));
-        new_stmts.push_back(ShStatement(tmp1, SH_OP_LOG, tmp1));
-        new_stmts.push_back(ShStatement(I->dest, half, SH_OP_MUL, tmp1));
+        new_stmts.push_back(Statement(tmp1, one, OP_ADD, I->src[0]));
+        new_stmts.push_back(Statement(tmp2, OP_NEG, I->src[0]));
+        new_stmts.push_back(Statement(tmp2, one, OP_ADD, tmp2));
+        new_stmts.push_back(Statement(tmp1, tmp1, OP_DIV, tmp2));
+        new_stmts.push_back(Statement(tmp1, OP_LOG, tmp1));
+        new_stmts.push_back(Statement(I->dest, half, OP_MUL, tmp1));
         break;
       }
     default:
@@ -938,15 +938,15 @@ struct InverseHyperbolicExpanderBase: public ShTransformerParent
   }
 };
 
-typedef ShDefaultTransformer<InverseHyperbolicExpanderBase> InverseHyperbolicExpander;
-void ShTransformer::expand_inverse_hyperbolic()
+typedef DefaultTransformer<InverseHyperbolicExpanderBase> InverseHyperbolicExpander;
+void Transformer::expand_inverse_hyperbolic()
 {
   InverseHyperbolicExpander expander;
   m_changed |= expander.transform(m_program);
 }
 
 
-bool ordered(const ShSwizzle& s)
+bool ordered(const Swizzle& s)
 {
   int m = -1;
 
@@ -958,18 +958,18 @@ bool ordered(const ShSwizzle& s)
   return true;
 }
 
-struct DestSwizzleOrdererBase : public ShTransformerParent 
+struct DestSwizzleOrdererBase : public TransformerParent 
 {
-  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, const ShCtrlGraphNodePtr& node)
+  bool handleStmt(BasicBlock::StmtList::iterator &I, const CtrlGraphNodePtr& node)
   { 
     if (I->dest.node() && !I->dest.swizzle().identity() && !ordered(I->dest.swizzle())) {
-      ShBasicBlock::ShStmtList new_stmts;
+      BasicBlock::StmtList new_stmts;
 
-      ShVariable tmp1(new ShVariableNode(SH_TEMP, I->dest.size(), I->dest.node()->valueType(), I->dest.node()->specialType()));
+      Variable tmp1(new VariableNode(TEMP, I->dest.size(), I->dest.node()->valueType(), I->dest.node()->specialType()));
 
       // First, run the original statement, but into an
       // unmasked/swizzled temp.
-      ShStatement orig = *I;
+      Statement orig = *I;
       orig.dest = tmp1;
       new_stmts.push_back(orig);
 
@@ -991,13 +991,13 @@ struct DestSwizzleOrdererBase : public ShTransformerParent
         }
       }
       
-      ShVariable swizzled_temp(tmp1.node(), ShSwizzle(tmp1.node()->size(), I->dest.size(), indices), false);
-      ShVariable ordered_dest(I->dest.node(), ShSwizzle(I->dest.node()->size(), I->dest.size(), new_mask), false);
+      Variable swizzled_temp(tmp1.node(), Swizzle(tmp1.node()->size(), I->dest.size(), indices), false);
+      Variable ordered_dest(I->dest.node(), Swizzle(I->dest.node()->size(), I->dest.size(), new_mask), false);
 
       delete [] indices;
       delete [] new_mask;
 
-      new_stmts.push_back(ShStatement(ordered_dest, SH_OP_ASN, swizzled_temp));
+      new_stmts.push_back(Statement(ordered_dest, OP_ASN, swizzled_temp));
       
       I = node->block->erase(I);
       node->block->splice(I, new_stmts);
@@ -1009,25 +1009,25 @@ struct DestSwizzleOrdererBase : public ShTransformerParent
   }
 };
 
-typedef ShDefaultTransformer<DestSwizzleOrdererBase> DestSwizzleOrderer;
-void ShTransformer::order_dest_swizzles()
+typedef DefaultTransformer<DestSwizzleOrdererBase> DestSwizzleOrderer;
+void Transformer::order_dest_swizzles()
 {
   DestSwizzleOrderer orderer;
   m_changed |= orderer.transform(m_program);
 }
 
-struct RemoveWritemasksBase : public ShTransformerParent 
+struct RemoveWritemasksBase : public TransformerParent 
 {
-  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, const ShCtrlGraphNodePtr& node)
+  bool handleStmt(BasicBlock::StmtList::iterator &I, const CtrlGraphNodePtr& node)
   { 
     if (I->dest.node() && I->dest.swizzle().size() < I->dest.node()->size()) {
-      ShBasicBlock::ShStmtList new_stmts;
+      BasicBlock::StmtList new_stmts;
 
-      ShVariable tmp1(new ShVariableNode(SH_TEMP, I->dest.size(), I->dest.node()->valueType(), I->dest.node()->specialType()));
+      Variable tmp1(new VariableNode(TEMP, I->dest.size(), I->dest.node()->valueType(), I->dest.node()->specialType()));
 
       // First, run the original statement, but into an
       // unmasked temp.
-      ShStatement orig = *I;
+      Statement orig = *I;
       orig.dest = tmp1;
       new_stmts.push_back(orig);
 
@@ -1049,11 +1049,11 @@ struct RemoveWritemasksBase : public ShTransformerParent
         }
       }
       
-      ShVariable mask(allocate_constant(I->dest.node()->size(), mask_values));
-      ShVariable dest_nomask(I->dest.node());
-      ShVariable tmp1_rightsize(tmp1.node(), ShSwizzle(tmp1.size(), I->dest.node()->size(), tmp1_expand), false);
+      Variable mask(allocate_constant(I->dest.node()->size(), mask_values));
+      Variable dest_nomask(I->dest.node());
+      Variable tmp1_rightsize(tmp1.node(), Swizzle(tmp1.size(), I->dest.node()->size(), tmp1_expand), false);
 
-      new_stmts.push_back(ShStatement(dest_nomask, SH_OP_COND, mask, tmp1_rightsize, dest_nomask));
+      new_stmts.push_back(Statement(dest_nomask, OP_COND, mask, tmp1_rightsize, dest_nomask));
 
       delete [] mask_values;
       delete [] tmp1_expand;
@@ -1068,8 +1068,8 @@ struct RemoveWritemasksBase : public ShTransformerParent
   }
 };
 
-typedef ShDefaultTransformer<RemoveWritemasksBase> RemoveWritemasks;
-void ShTransformer::remove_writemasks()
+typedef DefaultTransformer<RemoveWritemasksBase> RemoveWritemasks;
+void Transformer::remove_writemasks()
 {
   RemoveWritemasks r;
   m_changed |= r.transform(m_program);

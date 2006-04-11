@@ -20,31 +20,31 @@
 #ifndef SHPNGIMAGE_HPP
 #define SHPNGIMAGE_HPP
 
-#include "sh/ShImage.hpp"
+#include "sh/Image.hpp"
 
 namespace ShUtil {
 
 /** Libpng wrapper functions
- * Allows ShImage objects to load their data from or save to a PNG file.
+ * Allows Image objects to load their data from or save to a PNG file.
  * @{
  */
 
 /// Load the PNG file into this image
 template<typename T>
-void load_PNG(SH::ShTypedImage<T>& image, const std::string& filename);
+void load_PNG(SH::TypedImage<T>& image, const std::string& filename);
 
 /// Save the PNG image into this file
 template<typename T>
-void save_PNG(const SH::ShTypedImage<T>& image, const std::string& filename, int inverse_alpha=0);
+void save_PNG(const SH::TypedImage<T>& image, const std::string& filename, int inverse_alpha=0);
 
 /// Save the PNG image into this file
 template<typename T>
-void save_PNG16(const SH::ShTypedImage<T>& image, const std::string& filename, int inverse_alpha=0);
+void save_PNG16(const SH::TypedImage<T>& image, const std::string& filename, int inverse_alpha=0);
 
 // @}
 
 } // namespace
 
-#include "ShPngImageImpl.hpp"
+#include "PngImageImpl.hpp"
 
 #endif // SHPNGIMAGE_HPP

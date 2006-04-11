@@ -23,19 +23,19 @@
 #include <list>
 #include <utility>
 #include <iosfwd>
-#include "ShDllExport.hpp"
-#include "ShRefCount.hpp"
-#include "ShInfo.hpp"
-#include "ShCtrlGraph.hpp"
-#include "ShVariable.hpp"
-#include "ShStatement.hpp"
+#include "DllExport.hpp"
+#include "RefCount.hpp"
+#include "Info.hpp"
+#include "CtrlGraph.hpp"
+#include "Variable.hpp"
+#include "Statement.hpp"
 
 namespace SH {
 
 class
-SH_DLLEXPORT ShStructuralNode : public virtual ShRefCountable /*, public virtual ShInfo */ {
+DLLEXPORT StructuralNode : public virtual RefCountable /*, public virtual Info */ {
 public:
-  friend class ShStructural;
+  friend class Structural;
   
   enum NodeType {
     UNREDUCED,
@@ -48,25 +48,25 @@ public:
     PROPINT
   };
 
-  ShStructuralNode(const ShCtrlGraphNodePtr& node);
-  ShStructuralNode(NodeType type);
+  StructuralNode(const CtrlGraphNodePtr& node);
+  StructuralNode(NodeType type);
 
   // Graphviz-format dump of this node and its children
   std::ostream& dump(std::ostream& out, int nodes = -1) const;
 
   // Structural information
   NodeType type;
-  ShStructuralNode* container;
-  typedef std::list< ShPointer< ShStructuralNode> > StructNodeList;
+  StructuralNode* container;
+  typedef std::list< Pointer< StructuralNode> > StructNodeList;
   StructNodeList structnodes; ///< Nodes in this region
-  bool contains(const ShCtrlGraphNodePtr& node) const; ///< Contains the cfg_node in this region
+  bool contains(const CtrlGraphNodePtr& node) const; ///< Contains the cfg_node in this region
   
   // Graph structure
-  ShCtrlGraphNodePtr cfg_node;
-  typedef std::pair<ShVariable, ShPointer<ShStructuralNode> > SuccessorEdge;
+  CtrlGraphNodePtr cfg_node;
+  typedef std::pair<Variable, Pointer<StructuralNode> > SuccessorEdge;
   typedef std::list<SuccessorEdge> SuccessorList;
   SuccessorList succs;
-  typedef std::pair<ShVariable, ShStructuralNode*> PredecessorEdge;
+  typedef std::pair<Variable, StructuralNode*> PredecessorEdge;
   typedef std::list<PredecessorEdge> PredecessorList;
   PredecessorList preds;
 
@@ -76,21 +76,21 @@ public:
    * exit marked by an ENDSEC that has not already been
    * handled in a SECTION reduced block 
    * Remember to set these when building reduced nodes */
-  ShStatement *secStart, *secEnd; 
+  Statement *secStart, *secEnd; 
  
  
   /** Describes a cfg edge.
    * Used in searching for cfg edges that match criteria in the structural
    * graph.
    */
-  struct SH_DLLEXPORT CfgMatch {
-    ShCtrlGraphNodePtr from, to;
-    ShCtrlGraphNode::SuccessorList::iterator S; //< set to succ.end() if edge is from->follower 
+  struct DLLEXPORT CfgMatch {
+    CtrlGraphNodePtr from, to;
+    CtrlGraphNode::SuccessorList::iterator S; //< set to succ.end() if edge is from->follower 
 
     CfgMatch();
-    CfgMatch(const ShCtrlGraphNodePtr& from); //< for a follower
-    CfgMatch(const ShCtrlGraphNodePtr& from, 
-        ShCtrlGraphNode::SuccessorList::iterator S); //< for a successor 
+    CfgMatch(const CtrlGraphNodePtr& from); //< for a follower
+    CfgMatch(const CtrlGraphNodePtr& from, 
+        CtrlGraphNode::SuccessorList::iterator S); //< for a successor 
         
     bool isFollower(); 
   };
@@ -102,42 +102,42 @@ public:
   
   // Retrieves all successors from CFG in this node that leave the given node 
   // node = 0 indicates the typical case of node = this;
-  void getExits(CfgMatchList &result, ShPointer<ShStructuralNode> node = 0);
+  void getExits(CfgMatchList &result, Pointer<StructuralNode> node = 0);
 
   // Retrieves all successor edges from CFG in this node that enter the given node 
   // node = 0 indicates the typical case of node = this
-  void getEntries(CfgMatchList &result, ShPointer<ShStructuralNode> node = 0);
+  void getEntries(CfgMatchList &result, Pointer<StructuralNode> node = 0);
 
 
   // Spanning tree
-  ShStructuralNode* parent;
-  typedef std::list< ShPointer<ShStructuralNode> > ChildList;
+  StructuralNode* parent;
+  typedef std::list< Pointer<StructuralNode> > ChildList;
   ChildList children;
 
 };
 
-typedef ShPointer<ShStructuralNode> ShStructuralNodePtr;
-typedef ShPointer<const ShStructuralNode> ShStructuralNodeCPtr;
+typedef Pointer<StructuralNode> StructuralNodePtr;
+typedef Pointer<const StructuralNode> StructuralNodeCPtr;
 
 class
-SH_DLLEXPORT ShStructural {
+DLLEXPORT Structural {
 public:
-  ShStructural(const ShCtrlGraphPtr& graph);
+  Structural(const CtrlGraphPtr& graph);
 
   // Graphviz-format dump of the structural tree.
   std::ostream& dump(std::ostream& out) const;
 
-  const ShStructuralNodePtr& head();
+  const StructuralNodePtr& head();
   
 private:
-  ShCtrlGraphPtr m_graph;
-  ShStructuralNodePtr m_head;
+  CtrlGraphPtr m_graph;
+  StructuralNodePtr m_head;
 
-  typedef std::list<ShStructuralNode*> PostorderList;
+  typedef std::list<StructuralNode*> PostorderList;
   PostorderList m_postorder;
 
-  ShStructuralNodePtr build_tree(const ShCtrlGraphNodePtr& node, std::map<ShCtrlGraphNodePtr, ShStructuralNodePtr>& nodemap);
-  void build_postorder(const ShStructuralNodePtr& node);
+  StructuralNodePtr build_tree(const CtrlGraphNodePtr& node, std::map<CtrlGraphNodePtr, StructuralNodePtr>& nodemap);
+  void build_postorder(const StructuralNodePtr& node);
 };
 
 }

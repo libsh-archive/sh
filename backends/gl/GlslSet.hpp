@@ -20,17 +20,17 @@
 #ifndef GLSLSET_HPP
 #define GLSLSET_HPP
 
-#include "ShBackend.hpp"
+#include "Backend.hpp"
 
 namespace shgl {
 
 class GlslCode;
 
-class GlslSet : public SH::ShBackendSet {
+class GlslSet : public SH::BackendSet {
 public:
   GlslSet();
-  GlslSet(const SH::ShPointer<GlslCode>& code);
-  GlslSet(const SH::ShProgramSet& s);
+  GlslSet(const SH::Pointer<GlslCode>& code);
+  GlslSet(const SH::ProgramSet& s);
   GlslSet(const GlslSet& s);
   ~GlslSet();
 
@@ -43,15 +43,15 @@ public:
   bool empty() const;
   bool bound() const;
   
-  void attach(const SH::ShPointer<GlslCode>& code);
-  void detach(const SH::ShPointer<GlslCode>& code);
-  void replace(const SH::ShPointer<GlslCode>& code);
+  void attach(const SH::Pointer<GlslCode>& code);
+  void detach(const SH::Pointer<GlslCode>& code);
+  void replace(const SH::Pointer<GlslCode>& code);
 
   // Currently bound set
   static GlslSet* current() { return m_current; }
   
 private:
-  SH::ShPointer<GlslCode> m_shaders[2];
+  SH::Pointer<GlslCode> m_shaders[2];
   GLhandleARB m_arb_program;
 
   bool m_linked;
@@ -59,8 +59,8 @@ private:
   static GlslSet* m_current;
 };
 
-typedef SH::ShPointer<GlslSet> GlslSetPtr;
-typedef SH::ShPointer<const GlslSet> GlslSetCPtr;
+typedef SH::Pointer<GlslSet> GlslSetPtr;
+typedef SH::Pointer<const GlslSet> GlslSetCPtr;
 
 }
 #endif

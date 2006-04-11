@@ -23,59 +23,59 @@
 #include <climits>
 #include <cmath>
 #include <algorithm>
-#include "ShStorageType.hpp"
+#include "StorageType.hpp"
 
 namespace SH {
 
-inline bool shIsFloat(ShValueType value_type)
+inline bool isFloat(ValueType value_type)
 {
-  return !shIsInvalidValueType(value_type) && 
-    (value_type & SH_VALUETYPE_TYPE_MASK) == SH_VALUETYPE_TYPE_FLOAT; 
+  return !isInvalidValueType(value_type) && 
+    (value_type & VALUETYPE_TYPE_MASK) == VALUETYPE_TYPE_FLOAT; 
 }
 
-inline bool shIsInteger(ShValueType value_type)
+inline bool isInteger(ValueType value_type)
 {
-  return !shIsInvalidValueType(value_type) && 
-    (value_type & SH_VALUETYPE_TYPE_MASK) == SH_VALUETYPE_TYPE_INT; 
+  return !isInvalidValueType(value_type) && 
+    (value_type & VALUETYPE_TYPE_MASK) == VALUETYPE_TYPE_INT; 
 }
 
-inline bool shIsFraction(ShValueType value_type)
+inline bool isFraction(ValueType value_type)
 {
-  return !shIsInvalidValueType(value_type) && 
-    (value_type & SH_VALUETYPE_TYPE_MASK) == SH_VALUETYPE_TYPE_FRAC; 
+  return !isInvalidValueType(value_type) && 
+    (value_type & VALUETYPE_TYPE_MASK) == VALUETYPE_TYPE_FRAC; 
 }
 
-inline bool shIsSigned(ShValueType value_type)
+inline bool isSigned(ValueType value_type)
 {
-  return !shIsInvalidValueType(value_type) && 
-    (value_type & SH_VALUETYPE_SIGNED_MASK) == SH_VALUETYPE_SIGNED;
+  return !isInvalidValueType(value_type) && 
+    (value_type & VALUETYPE_SIGNED_MASK) == VALUETYPE_SIGNED;
 }
 
-inline bool shIsRegularValueType(ShValueType value_type)
+inline bool isRegularValueType(ValueType value_type)
 {
-  return !shIsInvalidValueType(value_type) &&
-    (value_type & SH_VALUETYPE_SPECIAL_MASK) == SH_VALUETYPE_SPECIAL_NONE;
+  return !isInvalidValueType(value_type) &&
+    (value_type & VALUETYPE_SPECIAL_MASK) == VALUETYPE_SPECIAL_NONE;
 }
 
-inline bool shIsInvalidValueType(ShValueType value_type)
+inline bool isInvalidValueType(ValueType value_type)
 {
-  return value_type == SH_VALUETYPE_END; 
+  return value_type == VALUETYPE_END; 
 }
 
 inline 
-ShValueType shRegularValueType(ShValueType value_type)
+ValueType regularValueType(ValueType value_type)
 {
-  return shIsInvalidValueType(value_type) ? value_type :  
-         (value_type & ~SH_VALUETYPE_SPECIAL_MASK); 
+  return isInvalidValueType(value_type) ? value_type :  
+         (value_type & ~VALUETYPE_SPECIAL_MASK); 
 }
 
 /*** Implementation of the automatic promotion tree lookup
  * This decides the argument conversions used in operators
  * and the result type given by operators (and library funcs).
- * (The tree is built explicitly in ShTypeInfoCasts.cpp as well,
+ * (The tree is built explicitly in TypeInfoCasts.cpp as well,
  * and this should match those tree edges)
  *
- * @see ShTypeInfoCasts.cpp
+ * @see TypeInfoCasts.cpp
  *
  * Rules (checked in order until one matches)
  * 1) If either is double, use double
@@ -84,27 +84,27 @@ ShValueType shRegularValueType(ShValueType value_type)
  * 4) Use int 
  */
 template<typename T1, typename T2>
-struct ShCommonType {
-  static const ShValueType V1 = ShStorageTypeInfo<T1>::value_type;
-  static const ShValueType V2 = ShStorageTypeInfo<T2>::value_type;
+struct CommonType {
+  static const ValueType V1 = StorageTypeInfo<T1>::value_type;
+  static const ValueType V2 = StorageTypeInfo<T2>::value_type;
 
-  static const bool eitherDouble = V1 == SH_DOUBLE || V2 == SH_DOUBLE; 
-  static const bool eitherFloat = V1 == SH_FLOAT || V2 == SH_FLOAT; 
-  static const bool eitherFraction = ShIsFraction<T1>::matches || ShIsFraction<T2>::matches;
-  static const bool bothHalf = V1 == SH_HALF && V2 == SH_HALF;  
+  static const bool eitherDouble = V1 == DOUBLE || V2 == DOUBLE; 
+  static const bool eitherFloat = V1 == FLOAT || V2 == FLOAT; 
+  static const bool eitherFraction = IsFraction<T1>::matches || IsFraction<T2>::matches;
+  static const bool bothHalf = V1 == HALF && V2 == HALF;  
 
-  static const ShValueType value_type = 
+  static const ValueType value_type = 
           (eitherDouble ?
-            SH_DOUBLE :
+            DOUBLE :
           ((eitherFloat || eitherFraction) ?
-            SH_FLOAT :
+            FLOAT :
           (bothHalf ?
-            SH_HALF :
-            SH_INT)));
+            HALF :
+            INT)));
 
-  typedef typename ShValueTypeInfo<value_type>::storage_type type;
+  typedef typename ValueTypeInfo<value_type>::storage_type type;
 };
-#undef SH_MATCH
+#undef MATCH
 
 
 }

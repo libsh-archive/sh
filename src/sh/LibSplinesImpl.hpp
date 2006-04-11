@@ -20,17 +20,17 @@
 #ifndef SHLIBSPLINESIMPL_HPP
 #define SHLIBSPLINESIMPL_HPP
 
-#include "ShLibSplines.hpp"
-#include "ShDebug.hpp"
+#include "LibSplines.hpp"
+#include "Debug.hpp"
 
 namespace SH {
 
 template<int N, typename T>
-ShGeneric<N, T> bernstein(const ShGeneric<1, T>& a)
+Generic<N, T> bernstein(const Generic<1, T>& a)
 {
-  ShAttrib<N, SH_TEMP, T> result;
+  Attrib<N, TEMP, T> result;
   if (4 == N) {
-    ShAttrib<1, SH_TEMP, T> it = ShAttrib<1,SH_TEMP, T>(1.0f) - a;
+    Attrib<1, TEMP, T> it = Attrib<1,TEMP, T>(1.0f) - a;
     result(0) = it*it*it;
     result(1) = 3.0*it*it*a;
     result(2) = 3.0*it*a*a;
@@ -38,7 +38,7 @@ ShGeneric<N, T> bernstein(const ShGeneric<1, T>& a)
   }
   else {
     // TODO: implement the real thing for the general case
-    SH_DEBUG_WARN("bernstein is not fully implemented yet");
+    DEBUG_WARN("bernstein is not fully implemented yet");
     for (int i=0; i < N; i++) {
       result[i] = a[0];
     }
@@ -47,10 +47,10 @@ ShGeneric<N, T> bernstein(const ShGeneric<1, T>& a)
 }
 
 template <int N, typename T>
-ShGeneric<N, T> bezier(const ShGeneric<1, T>& t, const ShGeneric<N, T>& p)
+Generic<N, T> bezier(const Generic<1, T>& t, const Generic<N, T>& p)
 {
-  ShAttrib<N, SH_TEMP, T> B = bernstein<N>(t(0));
-  ShAttrib<N, SH_TEMP, T> r;
+  Attrib<N, TEMP, T> B = bernstein<N>(t(0));
+  Attrib<N, TEMP, T> r;
   r(0) = B[0] * p[0];
   for (int i=1; i < N; i++) {
     r(i) = B[i] * p[i];
@@ -59,14 +59,14 @@ ShGeneric<N, T> bezier(const ShGeneric<1, T>& t, const ShGeneric<N, T>& p)
 }
 
 template <int N, typename T>
-ShGeneric<N, T> hermite(const ShGeneric<1, T>& a, const ShGeneric<N, T>& b, 
-                        const ShGeneric<N, T>& c, const ShGeneric<N, T>& d, 
-                        const ShGeneric<N, T>& e)
+Generic<N, T> hermite(const Generic<1, T>& a, const Generic<N, T>& b, 
+                        const Generic<N, T>& c, const Generic<N, T>& d, 
+                        const Generic<N, T>& e)
 {
-  ShAttrib<N, SH_TEMP, T> result;
+  Attrib<N, TEMP, T> result;
 
   // TODO: implement the real thing
-  SH_DEBUG_WARN("hermite is not implemented yet");
+  DEBUG_WARN("hermite is not implemented yet");
   for (int i=0; i < N; i++) {
     result[i] = a[0];
   }

@@ -20,9 +20,9 @@
 #ifndef SHVARIABLETYPE_HPP
 #define SHVARIABLETYPE_HPP
 
-#include "ShDllExport.hpp"
+#include "DllExport.hpp"
 
-/** @file ShVariableType.hpp
+/** @file VariableType.hpp
  * 
  * Lists the binding, semantic, and Value types available in Sh
  * and their associated C++ data types for host computation and 
@@ -35,44 +35,44 @@
  * 
  * For more information on operations dealing with the data types such as
  * allocation of arrays, automatic promotions, and casting.
- * @see ShTypeInfo.hpp
+ * @see TypeInfo.hpp
  */
 
 namespace SH {
 
 /** The various ways variables can be bound.
  */
-enum ShBindingType {
-  SH_INPUT, 
-  SH_OUTPUT, 
-  SH_INOUT,
-  SH_TEMP,
-  SH_CONST, 
-  SH_TEXTURE, 
-  SH_STREAM, 
-  SH_PALETTE, 
+enum BindingType {
+  INPUT, 
+  OUTPUT, 
+  INOUT,
+  TEMP,
+  CONST, 
+  TEXTURE, 
+  STREAM, 
+  PALETTE, 
 
-  SH_BINDINGTYPE_END
+  BINDINGTYPE_END
 };
 
-SH_DLLEXPORT extern const char* bindingTypeName[];
+DLLEXPORT extern const char* bindingTypeName[];
 
 /** The various ways semantic types for variables.
  */
-enum ShSemanticType {
-  SH_ATTRIB,
-  SH_POINT,
-  SH_VECTOR,
-  SH_NORMAL,
-  SH_COLOR,
-  SH_TEXCOORD,
-  SH_POSITION,
-  SH_PLANE,
+enum SemanticType {
+  ATTRIB,
+  POINT,
+  VECTOR,
+  NORMAL,
+  COLOR,
+  TEXCOORD,
+  POSITION,
+  PLANE,
   
-  SH_SEMANTICTYPE_END
+  SEMANTICTYPE_END
 };
 
-SH_DLLEXPORT extern const char* semanticTypeName[];
+DLLEXPORT extern const char* semanticTypeName[];
 
 
 }

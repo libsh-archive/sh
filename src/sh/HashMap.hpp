@@ -32,7 +32,7 @@
 
 namespace SH {
 
-/** @file ShHashMap.hpp
+/** @file HashMap.hpp
  * A wrapper around hash_map that behaves properly under both GNU libstdc++ 
  * and Microsoft's VS .NET libraries. The interface is the common subset
  * of functionality available in both implementations.
@@ -44,10 +44,10 @@ namespace SH {
  * used under libstdc++.
  */
 #if defined(_MSC_VER)
-#define SH_STD_HASH(T) stdext::hash_compare<T>
+#define STD_HASH(T) stdext::hash_compare<T>
 /** Implementation of hash_compare interface */
 template<class Key, class Hash, class Less>
-class ShHashCompare {
+class HashCompare {
   public:
     static const size_t bucket_size = 4;
     static const size_t min_buckets = 8;
@@ -60,19 +60,19 @@ class ShHashCompare {
 };
 
 #else
-#define SH_STD_HASH(T) ShHashFunc<T> 
+#define STD_HASH(T) HashFunc<T> 
 template<typename T>
-struct ShHashFunc {
+struct HashFunc {
   size_t operator()(const T& data) const
   { return size_t(data); }
 };
 #endif
 
-template<class Key, class Data, class Hash=SH_STD_HASH(Key),
+template<class Key, class Data, class Hash=STD_HASH(Key),
   class Less=std::less<Key>, class Equal=std::equal_to<Key> >
-class ShHashMap {
+class HashMap {
 #if defined(_MSC_VER)
-    typedef stdext::hash_map<Key, Data, ShHashCompare<Key, Hash, Less> > map_type;
+    typedef stdext::hash_map<Key, Data, HashCompare<Key, Hash, Less> > map_type;
 #elif defined(__SGI_STL_PORT)
     typedef std::hash_map<Key, Data, Hash, Equal> map_type;
 #else
@@ -156,7 +156,7 @@ class ShHashMap {
     { return m_map.equal_range(key); }
 
     /** Copy/assign */
-    void swap(ShHashMap &other) 
+    void swap(HashMap &other) 
     { m_map.swap(other.m_map); }
 
     data_type& operator[](const key_type &key) 
@@ -167,8 +167,8 @@ class ShHashMap {
 };
 
 /** Some useful stuff */
-template<class Key1, class Key2, class Hash1=SH_STD_HASH(Key1), class Hash2=SH_STD_HASH(Key2)>
-struct ShPairHash {
+template<class Key1, class Key2, class Hash1=STD_HASH(Key1), class Hash2=STD_HASH(Key2)>
+struct PairHash {
   typedef std::pair<Key1, Key2> key_type;
   Hash1 m_hash1;
   Hash2 m_hash2;
@@ -176,8 +176,8 @@ struct ShPairHash {
   { return m_hash1(key.first) | ~m_hash2(key.second); } 
 };
 
-template<class Key1, class Key2, class Data, class Hash1=SH_STD_HASH(Key1), class Hash2=SH_STD_HASH(Key2)>
-class ShPairHashMap: public ShHashMap<std::pair<Key1, Key2>, Data, ShPairHash<Key1, Key2, Hash1, Hash2> > {
+template<class Key1, class Key2, class Data, class Hash1=STD_HASH(Key1), class Hash2=STD_HASH(Key2)>
+class PairHashMap: public HashMap<std::pair<Key1, Key2>, Data, PairHash<Key1, Key2, Hash1, Hash2> > {
   typedef std::pair<Key1, Key2> key_type; 
   public:
     Data& operator()(const Key1& key1, const Key2& key2) 
@@ -187,19 +187,19 @@ class ShPairHashMap: public ShHashMap<std::pair<Key1, Key2>, Data, ShPairHash<Ke
 };
 
 template<class T1, class T2, class T3>
-struct ShTriple
+struct Triple
 {
   T1 v1;
   T2 v2;
   T3 v3;
 
-  ShTriple(const T1 &v1, const T2 &v2, const T3 &v3)
+  Triple(const T1 &v1, const T2 &v2, const T3 &v3)
     : v1(v1), v2(v2), v3(v3) {}
 
-  bool operator==(const ShTriple &b) const
+  bool operator==(const Triple &b) const
   { return v1 == b.v1 && v2 == b.v2 && v3 == b.v3; } 
 
-  bool operator<(const ShTriple &b) const
+  bool operator<(const Triple &b) const
   { 
     return v1 < b.v1 || 
            (v1 == b.v1 && 
@@ -210,10 +210,10 @@ struct ShTriple
 };
 
 template<class Key1, class Key2, class Key3, 
-  class Hash1=SH_STD_HASH(Key1), class Hash2=SH_STD_HASH(Key2), 
-  class Hash3=SH_STD_HASH(Key3)> 
-struct ShTripleHash {
-  typedef ShTriple<Key1, Key2, Key3> key_type;
+  class Hash1=STD_HASH(Key1), class Hash2=STD_HASH(Key2), 
+  class Hash3=STD_HASH(Key3)> 
+struct TripleHash {
+  typedef Triple<Key1, Key2, Key3> key_type;
   Hash1 hash1;
   Hash2 hash2;
   Hash3 hash3;
@@ -222,12 +222,12 @@ struct ShTripleHash {
 };
 
 template<class Key1, class Key2, class Key3, class Data, 
-  class Hash1=SH_STD_HASH(Key1), class Hash2=SH_STD_HASH(Key2), 
-  class Hash3=SH_STD_HASH(Key3)> 
-class ShTripleHashMap: public ShHashMap<ShTriple<Key1, Key2, Key3>, Data,
-    ShTripleHash<Key1, Key2, Key3, Hash1, Hash2, Hash3> > {
+  class Hash1=STD_HASH(Key1), class Hash2=STD_HASH(Key2), 
+  class Hash3=STD_HASH(Key3)> 
+class TripleHashMap: public HashMap<Triple<Key1, Key2, Key3>, Data,
+    TripleHash<Key1, Key2, Key3, Hash1, Hash2, Hash3> > {
   public:
-    typedef ShTriple<Key1, Key2, Key3> key_type;
+    typedef Triple<Key1, Key2, Key3> key_type;
     Data& operator()(const Key1 &key1, const Key2 &key2, const Key3 &key3)
     {
       return operator[](key_type(key1, key2, key3));
@@ -235,20 +235,20 @@ class ShTripleHashMap: public ShHashMap<ShTriple<Key1, Key2, Key3>, Data,
 };
 
 template<class T1, class T2, class T3, class T4>
-struct ShPairPair
+struct PairPair
 {
   T1 v1;
   T2 v2;
   T3 v3;
   T4 v4;
 
-  ShPairPair(const T1 &v1, const T2 &v2, const T3 &v3, const T4 &v4)
+  PairPair(const T1 &v1, const T2 &v2, const T3 &v3, const T4 &v4)
     : v1(v1), v2(v2), v3(v3), v4(v4) {}
 
-  bool operator==(const ShPairPair &b) const
+  bool operator==(const PairPair &b) const
   { return v1 == b.v1 && v2 == b.v2 && v3 == b.v3 && v4 == b.v4; }
 
-  bool operator<(const ShPairPair &b) const
+  bool operator<(const PairPair &b) const
   { 
     return v1 < b.v1 || 
            (v1 == b.v1 && 
@@ -261,10 +261,10 @@ struct ShPairPair
 };
 
 template<class Key1, class Key2, class Key3, class Key4, 
-  class Hash1=SH_STD_HASH(Key1), class Hash2=SH_STD_HASH(Key2), 
-  class Hash3=SH_STD_HASH(Key3), class Hash4=SH_STD_HASH(Key4)>
-struct ShPairPairHash {
-  typedef ShPairPair<Key1, Key2, Key3, Key4> key_type;
+  class Hash1=STD_HASH(Key1), class Hash2=STD_HASH(Key2), 
+  class Hash3=STD_HASH(Key3), class Hash4=STD_HASH(Key4)>
+struct PairPairHash {
+  typedef PairPair<Key1, Key2, Key3, Key4> key_type;
   Hash1 hash1;
   Hash2 hash2;
   Hash3 hash3;
@@ -274,19 +274,19 @@ struct ShPairPairHash {
 };
 
 template<class Key1, class Key2, class Key3, class Key4, class Data, 
-  class Hash1=SH_STD_HASH(Key1), class Hash2=SH_STD_HASH(Key2), 
-  class Hash3=SH_STD_HASH(Key3), class Hash4=SH_STD_HASH(Key4)>
-class ShPairPairHashMap: public ShHashMap<ShPairPair<Key1, Key2, Key3, Key4>, Data,
-    ShPairPairHash<Key1, Key2, Key3, Key4, Hash1, Hash2, Hash3, Hash4> > {
+  class Hash1=STD_HASH(Key1), class Hash2=STD_HASH(Key2), 
+  class Hash3=STD_HASH(Key3), class Hash4=STD_HASH(Key4)>
+class PairPairHashMap: public HashMap<PairPair<Key1, Key2, Key3, Key4>, Data,
+    PairPairHash<Key1, Key2, Key3, Key4, Hash1, Hash2, Hash3, Hash4> > {
   public:
-    typedef ShPairPair<Key1, Key2, Key3, Key4> key_type;
+    typedef PairPair<Key1, Key2, Key3, Key4> key_type;
     Data& operator()(const Key1 &key1, const Key2 &key2, const Key3 &key3, const Key4 &key4) 
     {
       return operator[](key_type(key1, key2, key3, key4));
     }
 };
 
-#undef SH_STD_HASH
+#undef STD_HASH
 
 }
 

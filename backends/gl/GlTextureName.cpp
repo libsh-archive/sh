@@ -25,8 +25,8 @@ using namespace SH;
 
 GlTextureName::GlTextureName(GLenum target)
   : m_target(target),
-    m_params(0, SH::ShTextureTraits::SH_FILTER_NONE,
-             SH::ShTextureTraits::SH_WRAP_CLAMP),
+    m_params(0, SH::TextureTraits::FILTER_NONE,
+             SH::TextureTraits::WRAP_CLAMP),
     m_managed(true)
 {
   glGenTextures(1, &m_name);
@@ -36,8 +36,8 @@ GlTextureName::GlTextureName(GLenum target)
 GlTextureName::GlTextureName(GLenum target, GLuint name)
   : m_target(target),
     m_name(name),
-    m_params(0, SH::ShTextureTraits::SH_FILTER_NONE,
-             SH::ShTextureTraits::SH_WRAP_CLAMP),
+    m_params(0, SH::TextureTraits::FILTER_NONE,
+             SH::TextureTraits::WRAP_CLAMP),
     m_managed(false)
 {
   m_names->push_back(this);
@@ -51,51 +51,51 @@ GlTextureName::~GlTextureName()
   }
 }
 
-void GlTextureName::addStorage(SH::ShStorage* storage)
+void GlTextureName::addStorage(SH::Storage* storage)
 {
   m_storages.push_back(storage);
 }
 
-void GlTextureName::removeStorage(SH::ShStorage* storage)
+void GlTextureName::removeStorage(SH::Storage* storage)
 {
   m_storages.erase(std::remove(m_storages.begin(), m_storages.end(), storage));
 }
 
-void GlTextureName::params(const SH::ShTextureTraits& params)
+void GlTextureName::params(const SH::TextureTraits& params)
 {
   Binding binding(this);
 
   if (params.interpolation() == 0) {
-    SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
-    SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+    GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+    GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
   } else if (params.interpolation() == 1) {
-    SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-    SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+    GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+    GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
   }
-  if (params.wrapping() == SH::ShTextureTraits::SH_WRAP_CLAMP) {
-    SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_WRAP_S, GL_CLAMP));
-    SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_WRAP_T, GL_CLAMP));
-    SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_WRAP_R, GL_CLAMP));
-  } else if (params.wrapping() == SH::ShTextureTraits::SH_WRAP_CLAMP_TO_EDGE) {
-    SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
-    SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
-    SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE));
-  } else if (params.wrapping() == SH::ShTextureTraits::SH_WRAP_REPEAT) {
-    SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_WRAP_S, GL_REPEAT));
-    SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_WRAP_T, GL_REPEAT));
-    SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_WRAP_R, GL_REPEAT));
+  if (params.wrapping() == SH::TextureTraits::WRAP_CLAMP) {
+    GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_WRAP_S, GL_CLAMP));
+    GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_WRAP_T, GL_CLAMP));
+    GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_WRAP_R, GL_CLAMP));
+  } else if (params.wrapping() == SH::TextureTraits::WRAP_CLAMP_TO_EDGE) {
+    GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+    GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+    GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE));
+  } else if (params.wrapping() == SH::TextureTraits::WRAP_REPEAT) {
+    GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_WRAP_S, GL_REPEAT));
+    GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_WRAP_T, GL_REPEAT));
+    GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_WRAP_R, GL_REPEAT));
   }
-  if (params.filtering() == SH::ShTextureTraits::SH_FILTER_MIPMAP_LINEAR) {
+  if (params.filtering() == SH::TextureTraits::FILTER_MIPMAP_LINEAR) {
     if (0 == params.interpolation()) {
-      SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR));
+      GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR));
     } else {
-      SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
+      GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
     }
-  } else if (params.filtering() == SH::ShTextureTraits::SH_FILTER_MIPMAP_NEAREST) {
+  } else if (params.filtering() == SH::TextureTraits::FILTER_MIPMAP_NEAREST) {
     if (0 == params.interpolation()) {
-      SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST));
+      GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST));
     } else {
-      SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST));
+      GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST));
     }
   }
   
@@ -104,42 +104,42 @@ void GlTextureName::params(const SH::ShTextureTraits& params)
 
 GlTextureName::NameList* GlTextureName::m_names = new GlTextureName::NameList();
 
-GlTextureName::Binding::Binding(const ShPointer<const GlTextureName>& name)
+GlTextureName::Binding::Binding(const Pointer<const GlTextureName>& name)
 {
   target = name->target();
   
   switch(target) {
   case GL_TEXTURE_1D:
-    SH_GL_CHECK_ERROR(glGetIntegerv(GL_TEXTURE_BINDING_1D, &last));
+    GL_CHECK_ERROR(glGetIntegerv(GL_TEXTURE_BINDING_1D, &last));
     break;
   case GL_TEXTURE_2D:
-    SH_GL_CHECK_ERROR(glGetIntegerv(GL_TEXTURE_BINDING_2D, &last));
+    GL_CHECK_ERROR(glGetIntegerv(GL_TEXTURE_BINDING_2D, &last));
     break;
   case GL_TEXTURE_CUBE_MAP:
-    SH_GL_CHECK_ERROR(glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &last));
+    GL_CHECK_ERROR(glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &last));
     break;
 #if defined( __APPLE__ )
   case GL_TEXTURE_RECTANGLE_EXT:
-    SH_GL_CHECK_ERROR(glGetIntegerv(GL_TEXTURE_BINDING_RECTANGLE_EXT, &last));
+    GL_CHECK_ERROR(glGetIntegerv(GL_TEXTURE_BINDING_RECTANGLE_EXT, &last));
 #else
   case GL_TEXTURE_RECTANGLE_NV:
-    SH_GL_CHECK_ERROR(glGetIntegerv(GL_TEXTURE_BINDING_RECTANGLE_NV, &last));
+    GL_CHECK_ERROR(glGetIntegerv(GL_TEXTURE_BINDING_RECTANGLE_NV, &last));
 #endif // __APPLE__
     break;
   case GL_TEXTURE_3D:
-    SH_GL_CHECK_ERROR(glGetIntegerv(GL_TEXTURE_BINDING_3D, &last));
+    GL_CHECK_ERROR(glGetIntegerv(GL_TEXTURE_BINDING_3D, &last));
     break;
   default:
-    SH_DEBUG_WARN("Texture target not handled by GL backend");
+    DEBUG_WARN("Texture target not handled by GL backend");
     break;
   }
     
-  SH_GL_CHECK_ERROR(glBindTexture(target, name->value()));
+  GL_CHECK_ERROR(glBindTexture(target, name->value()));
 }
 
 GlTextureName::Binding::~Binding()
 {
-  SH_GL_CHECK_ERROR(glBindTexture(target, last));
+  GL_CHECK_ERROR(glBindTexture(target, last));
 }
 
 

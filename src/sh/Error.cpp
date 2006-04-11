@@ -17,14 +17,14 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#include "ShError.hpp"
-#include "ShContext.hpp"
+#include "Error.hpp"
+#include "Context.hpp"
 #include <iostream>
 
 namespace SH {
 
-void shError(const ShException& exception ) {
-  if (ShContext::current()->throw_errors()) {
+void error(const Exception& exception ) {
+  if (Context::current()->throw_errors()) {
     throw exception;
   } else {
     std::cerr << exception.message() << std::endl;

@@ -20,138 +20,138 @@
 #ifndef SHLIBCLAMPIMPL_HPP
 #define SHLIBCLAMPIMPL_HPP
 
-#include "ShLibClamp.hpp"
-#include "ShInstructions.hpp"
-#include "ShAttrib.hpp"
-#include "ShLibMiscImpl.hpp"
+#include "LibClamp.hpp"
+#include "Instructions.hpp"
+#include "Attrib.hpp"
+#include "LibMiscImpl.hpp"
 
 namespace SH {
 
 template<int N, typename T>
-ShGeneric<N, T> abs(const ShGeneric<N, T>& var)
+Generic<N, T> abs(const Generic<N, T>& var)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  Attrib<N, TEMP, T> t;
   shABS(t, var);
   return t;
 }
 
 template<int N, typename T>
-ShGeneric<N, T> ceil(const ShGeneric<N, T>& var)
+Generic<N, T> ceil(const Generic<N, T>& var)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  Attrib<N, TEMP, T> t;
   shCEIL(t, var);
   return t;
 }
 
 template<int N, typename T>
-ShGeneric<N, T> floor(const ShGeneric<N, T>& var)
+Generic<N, T> floor(const Generic<N, T>& var)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  Attrib<N, TEMP, T> t;
   shFLR(t, var);
   return t;
 }
 
 template<int N, typename T>
-ShGeneric<N, T> round(const ShGeneric<N, T>& var)
+Generic<N, T> round(const Generic<N, T>& var)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  Attrib<N, TEMP, T> t;
   shRND(t, var);
   return t;
 }
 
 template<int N, typename T1, typename T2>
-ShGeneric<N, CT1T2> mod(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right)
+Generic<N, CT1T2> mod(const Generic<N, T1>& left, const Generic<N, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CT1T2> t;
+  Attrib<N, TEMP, CT1T2> t;
   shMOD(t, left, right);
   return t;
 }
 template<int N, typename T1, typename T2>
-ShGeneric<N, CT1T2> mod(const ShGeneric<N, T1>& left, const ShGeneric<1, T2>& right)
+Generic<N, CT1T2> mod(const Generic<N, T1>& left, const Generic<1, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CT1T2> t;
+  Attrib<N, TEMP, CT1T2> t;
   shMOD(t, left, right);
   return t;
 }
 template<int N, typename T1, typename T2>
-ShGeneric<N, CT1T2> mod(const ShGeneric<1, T1>& left, const ShGeneric<N, T2>& right)
+Generic<N, CT1T2> mod(const Generic<1, T1>& left, const Generic<N, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CT1T2> t;
+  Attrib<N, TEMP, CT1T2> t;
   shMOD(t, left, right);
   return t;
 }
 template<typename T1, typename T2>
-ShGeneric<1, CT1T2> mod(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right)
+Generic<1, CT1T2> mod(const Generic<1, T1>& left, const Generic<1, T2>& right)
 {
-  ShAttrib<1, SH_TEMP, CT1T2> t;
+  Attrib<1, TEMP, CT1T2> t;
   shMOD(t, left, right);
   return t;
 }
 
 template<int N, typename T1, typename T2>
 inline
-ShGeneric<N, CT1T2> operator%(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right)
+Generic<N, CT1T2> operator%(const Generic<N, T1>& left, const Generic<N, T2>& right)
 {
   return mod(left, right);
 }
 template<int N, typename T1, typename T2>
 inline
-ShGeneric<N, CT1T2> operator%(const ShGeneric<N, T1>& left, const ShGeneric<1, T2>& right)
+Generic<N, CT1T2> operator%(const Generic<N, T1>& left, const Generic<1, T2>& right)
 {
   return mod(left, right);
 }
 template<int N, typename T1, typename T2>
 inline
-ShGeneric<N, CT1T2> operator%(const ShGeneric<1, T1>& left, const ShGeneric<N, T2>& right)
+Generic<N, CT1T2> operator%(const Generic<1, T1>& left, const Generic<N, T2>& right)
 {
   return mod(left, right);
 }
 template<typename T1, typename T2>
 inline
-ShGeneric<1, CT1T2> operator%(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right)
+Generic<1, CT1T2> operator%(const Generic<1, T1>& left, const Generic<1, T2>& right)
 {
   return mod(left, right);
 }
-SH_SHLIB_CONST_SCALAR_OP(mod);
-SH_SHLIB_CONST_N_OP_LEFT(mod);
-SH_SHLIB_CONST_SCALAR_OP(operator%);
-SH_SHLIB_CONST_N_OP_LEFT(operator%);
+SHLIB_CONST_SCALAR_OP(mod);
+SHLIB_CONST_N_OP_LEFT(mod);
+SHLIB_CONST_SCALAR_OP(operator%);
+SHLIB_CONST_N_OP_LEFT(operator%);
 
 template<int N, typename T>
-ShGeneric<N, T> frac(const ShGeneric<N, T>& var)
+Generic<N, T> frac(const Generic<N, T>& var)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  Attrib<N, TEMP, T> t;
   shFRAC(t, var);
   return t;
 }
 
 template<int N, typename T>
 inline
-ShGeneric<N, T> pos(const ShGeneric<N, T>& var)
+Generic<N, T> pos(const Generic<N, T>& var)
 {
   return max(var, fillcast<N>(0.0f));
 }
 
 template<int N, typename T1, typename T2>
-ShGeneric<N,  CT1T2> max(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right)
+Generic<N,  CT1T2> max(const Generic<N, T1>& left, const Generic<N, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CT1T2> t;
+  Attrib<N, TEMP, CT1T2> t;
   shMAX(t, left, right);
   return t;
 }
-SH_SHLIB_CONST_SCALAR_OP(max);
+SHLIB_CONST_SCALAR_OP(max);
 
 template<int N, typename T1, typename T2>
-ShGeneric<N,  CT1T2> min(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right)
+Generic<N,  CT1T2> min(const Generic<N, T1>& left, const Generic<N, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CT1T2> t;
+  Attrib<N, TEMP, CT1T2> t;
   shMIN(t, left, right);
   return t;
 }
-SH_SHLIB_CONST_SCALAR_OP(min);
+SHLIB_CONST_SCALAR_OP(min);
 
 template<int N, typename T>
-ShGeneric<1, T> max(const ShGeneric<N, T>& a)
+Generic<1, T> max(const Generic<N, T>& a)
 {
   int lhswz[N/2 + N%2];
   for (int i = 0; i < N/2 + N%2; i++) {
@@ -167,13 +167,13 @@ ShGeneric<1, T> max(const ShGeneric<N, T>& a)
 
 template<typename T>
 inline
-ShGeneric<1, T> max(const ShGeneric<1, T>& a)
+Generic<1, T> max(const Generic<1, T>& a)
 {
   return a;
 }
 
 template<int N, typename T>
-ShGeneric<1, T> min(const ShGeneric<N, T>& a)
+Generic<1, T> min(const Generic<N, T>& a)
 {
   int lhswz[N/2 + N%2];
   for (int i = 0; i < N/2 + N%2; i++) {
@@ -189,73 +189,73 @@ ShGeneric<1, T> min(const ShGeneric<N, T>& a)
 
 template<typename T>
 inline
-ShGeneric<1, T> min(const ShGeneric<1, T>& a)
+Generic<1, T> min(const Generic<1, T>& a)
 {
   return a;
 }
 
 template<int N, typename T1, typename T2, typename T3>
 inline
-ShGeneric<N, CT1T2T3> clamp(const ShGeneric<N, T1>& a,
-                      const ShGeneric<N, T2>& b, const ShGeneric<N, T3>& c)
+Generic<N, CT1T2T3> clamp(const Generic<N, T1>& a,
+                      const Generic<N, T2>& b, const Generic<N, T3>& c)
 {
   return min(max(a, b), c);
 }
 template<int N, typename T1, typename T2, typename T3>
 inline
-ShGeneric<N, CT1T2T3> clamp(const ShGeneric<N, T1>& a,
-                      const ShGeneric<1, T2>& b, const ShGeneric<1, T3>& c)
+Generic<N, CT1T2T3> clamp(const Generic<N, T1>& a,
+                      const Generic<1, T2>& b, const Generic<1, T3>& c)
 {
   return min(max(a, fillcast<N>(b)), fillcast<N>(c));
 }
 
 template<typename T1, typename T2, typename T3>
 inline
-ShGeneric<1, CT1T2T3> clamp(const ShGeneric<1, T1>& a,
-                      const ShGeneric<1, T2>& b, const ShGeneric<1, T3>& c)
+Generic<1, CT1T2T3> clamp(const Generic<1, T1>& a,
+                      const Generic<1, T2>& b, const Generic<1, T3>& c)
 {
   return min(max(a, b), c);
 }
-SH_SHLIB_CONST_TRINARY_OP_011(clamp);
+SHLIB_CONST_TRINARY_OP_011(clamp);
 
 template<int N, typename T>
 inline
-ShGeneric<N, T> sat(const ShGeneric<N, T>& var)
+Generic<N, T> sat(const Generic<N, T>& var)
 {
-  return min(var, fillcast<N>(ShConstAttrib1f(1.0)));
+  return min(var, fillcast<N>(ConstAttrib1f(1.0)));
 }
 
 template<int N, typename T>
-ShGeneric<N, T> sign(const ShGeneric<N, T>& var)
+Generic<N, T> sign(const Generic<N, T>& var)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  Attrib<N, TEMP, T> t;
   shSGN(t, var);
   return t;
 }
 
 template <int N, typename T>
 inline
-ShGeneric<N, T>
-linstep(const ShGeneric<N, T>& t, const ShGeneric<N, T>& c, const ShGeneric<N, T>& w)
+Generic<N, T>
+linstep(const Generic<N, T>& t, const Generic<N, T>& c, const Generic<N, T>& w)
 {
    return clamp((t - c)/w + 0.5f, 0.0f, 1.0f);
 }
 
 template<int N, typename T>
-ShGeneric<N, T> 
-smoothstep(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b, const ShGeneric<N, T>& x)
+Generic<N, T> 
+smoothstep(const Generic<N, T>& a, const Generic<N, T>& b, const Generic<N, T>& x)
 {
-  ShGeneric<N, T> t = (x - a) / (b - a);
+  Generic<N, T> t = (x - a) / (b - a);
   // TODO fix this for other types
   t = clamp(t, 0.0f, 1.0f); 
-  return t * t * mad(ShConstAttrib1f(-2.0f), t, ShConstAttrib1f(3.0f));
+  return t * t * mad(ConstAttrib1f(-2.0f), t, ConstAttrib1f(3.0f));
 }
 
 template <int N, typename T>
 inline
-ShGeneric<N, T>
-smoothpulse(const ShGeneric<N, T>& t, const ShGeneric<N, T>& r0, 
-	     const ShGeneric<N, T>& r1, const ShGeneric<N, T>& w)
+Generic<N, T>
+smoothpulse(const Generic<N, T>& t, const Generic<N, T>& r0, 
+	     const Generic<N, T>& r1, const Generic<N, T>& w)
 {
    return smoothstep(t,r0,w) - smoothstep(t,r1,w);
 }

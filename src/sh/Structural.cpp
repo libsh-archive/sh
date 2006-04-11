@@ -17,21 +17,21 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#include "ShStructural.hpp"
+#include "Structural.hpp"
 #include <iostream>
 #include <sstream>
 #include <map>
 #include <set>
 #include <algorithm>
-#include "ShCtrlGraph.hpp"
-#include "ShDebug.hpp"
+#include "CtrlGraph.hpp"
+#include "Debug.hpp"
 
-// #define SH_STRUCTURAL_DEBUG
+// #define STRUCTURAL_DEBUG
 
-#ifdef SH_STRUCTURAL_DEBUG
-#  define SH_STR_DEBUG_PRINT(x) SH_DEBUG_PRINT(x)
+#ifdef STRUCTURAL_DEBUG
+#  define STR_DEBUG_PRINT(x) DEBUG_PRINT(x)
 #else
-#  define SH_STR_DEBUG_PRINT(x)
+#  define STR_DEBUG_PRINT(x)
 #endif
 
 namespace {
@@ -46,10 +46,10 @@ const char* nodetypename[] ={
   "PROPINT"
 };
 
-std::string gvname(const SH::ShStructuralNode* p)
+std::string gvname(const SH::StructuralNode* p)
 {
   std::ostringstream s;
-  if (p->type == SH::ShStructuralNode::UNREDUCED) {
+  if (p->type == SH::StructuralNode::UNREDUCED) {
     s << '\"';
     s << p;
     s << '\"';
@@ -60,18 +60,18 @@ std::string gvname(const SH::ShStructuralNode* p)
   return s.str();
 }
 
-std::string gvfrom(const SH::ShStructuralNode* p)
+std::string gvfrom(const SH::StructuralNode* p)
 {
-  if (p->type == SH::ShStructuralNode::UNREDUCED) {
+  if (p->type == SH::StructuralNode::UNREDUCED) {
     return gvname(p);
   } else {
     return gvname(p) + "_exit_node";
   }
 }
 
-std::string gvto(const SH::ShStructuralNode* p)
+std::string gvto(const SH::StructuralNode* p)
 {
-  if (p->type == SH::ShStructuralNode::UNREDUCED) {
+  if (p->type == SH::StructuralNode::UNREDUCED) {
     return gvname(p);
   } else {
     return gvname(p) + "_entry_node";
@@ -79,10 +79,10 @@ std::string gvto(const SH::ShStructuralNode* p)
 }
 
 // Return true if b is a descendent of a
-bool descendent(const SH::ShStructuralNodePtr& a,
-                const SH::ShStructuralNodePtr& b)
+bool descendent(const SH::StructuralNodePtr& a,
+                const SH::StructuralNodePtr& b)
 {
-  SH::ShStructuralNode* n = b.object();
+  SH::StructuralNode* n = b.object();
 
   while (n && n != a.object()) {
     n = n->parent;
@@ -99,29 +99,29 @@ bool contains(const Container& c,
 }
 
 template<typename Container>
-void reach_under_traverse(SH::ShStructuralNode* head,
-                          SH::ShStructuralNode* node,
+void reach_under_traverse(SH::StructuralNode* head,
+                          SH::StructuralNode* node,
                           Container& r)
 {
   if (contains(r, node)) return;
   if (node == head) return;
 
   r.push_front(node);
-  for (SH::ShStructuralNode::PredecessorList::iterator I = node->preds.begin();
+  for (SH::StructuralNode::PredecessorList::iterator I = node->preds.begin();
        I != node->preds.end(); ++I) {
     reach_under_traverse(head, I->second, r);
   }
 }
 
 template<typename T>
-void reach_under(const SH::ShStructuralNodePtr& a,
+void reach_under(const SH::StructuralNodePtr& a,
                  T& container)
 {
   using namespace SH;
   bool backedge = false;
-  for (ShStructuralNode::PredecessorList::iterator I = a->preds.begin();
+  for (StructuralNode::PredecessorList::iterator I = a->preds.begin();
        I != a->preds.end(); ++I) {
-    ShStructuralNode* p = I->second;
+    StructuralNode* p = I->second;
     // Check that p->a is a backedge
 
     if (!descendent(a, p)) continue;
@@ -138,26 +138,26 @@ void reach_under(const SH::ShStructuralNodePtr& a,
 
 namespace SH {
 
-ShStructuralNode::CfgMatch::CfgMatch() {}
+StructuralNode::CfgMatch::CfgMatch() {}
 
-ShStructuralNode::CfgMatch::CfgMatch(const ShCtrlGraphNodePtr& from)
+StructuralNode::CfgMatch::CfgMatch(const CtrlGraphNodePtr& from)
   : from(from), to(from->follower), S(from->successors.end())
 {
-  SH_DEBUG_ASSERT(to);
+  DEBUG_ASSERT(to);
 }
 
-ShStructuralNode::CfgMatch::CfgMatch(const ShCtrlGraphNodePtr& from, 
-    ShCtrlGraphNode::SuccessorList::iterator S)
+StructuralNode::CfgMatch::CfgMatch(const CtrlGraphNodePtr& from, 
+    CtrlGraphNode::SuccessorList::iterator S)
   : from(from), to(S->node), S(S)
 {
 }
 
-bool ShStructuralNode::CfgMatch::isFollower()
+bool StructuralNode::CfgMatch::isFollower()
 {
   return S == from->successors.end();
 }
 
-ShStructuralNode::ShStructuralNode(const ShCtrlGraphNodePtr& node)
+StructuralNode::StructuralNode(const CtrlGraphNodePtr& node)
   : type(UNREDUCED),
     container(0),
     cfg_node(node),
@@ -166,16 +166,16 @@ ShStructuralNode::ShStructuralNode(const ShCtrlGraphNodePtr& node)
     parent(0)
 {
   if(node->block && !node->block->empty()) {
-    if(node->block->begin()->op == SH_OP_STARTSEC) {
+    if(node->block->begin()->op == OP_STARTSEC) {
       secStart = &*node->block->begin();
     }
-    if(node->block->rbegin()->op == SH_OP_ENDSEC) {
+    if(node->block->rbegin()->op == OP_ENDSEC) {
       secEnd = &*node->block->rbegin();
     }
   }
 }
 
-ShStructuralNode::ShStructuralNode(NodeType type)
+StructuralNode::StructuralNode(NodeType type)
   : type(type),
     container(0),
     cfg_node(0),
@@ -185,7 +185,7 @@ ShStructuralNode::ShStructuralNode(NodeType type)
 {
 }
 
-bool ShStructuralNode::contains(const ShCtrlGraphNodePtr& node) const
+bool StructuralNode::contains(const CtrlGraphNodePtr& node) const
 {
   if(cfg_node == node) return true;
   for(StructNodeList::const_iterator S = structnodes.begin();
@@ -196,7 +196,7 @@ bool ShStructuralNode::contains(const ShCtrlGraphNodePtr& node) const
 }
 
 
-std::ostream& ShStructuralNode::dump(std::ostream& out, int noedges) const
+std::ostream& StructuralNode::dump(std::ostream& out, int noedges) const
 {
   if (noedges != 0) {
     if (type == UNREDUCED) {
@@ -262,14 +262,14 @@ std::ostream& ShStructuralNode::dump(std::ostream& out, int noedges) const
 //
 // And an operator that returns true if a given branch conditoin var matches the predicate.
 struct SuccEdgePred {
-  const ShStructuralNode::SuccessorEdge &edge;
-  SuccEdgePred(const ShStructuralNode::SuccessorEdge &edge): edge(edge) {}
+  const StructuralNode::SuccessorEdge &edge;
+  SuccEdgePred(const StructuralNode::SuccessorEdge &edge): edge(edge) {}
   SuccEdgePred& operator=(SuccEdgePred const&);
-  bool operator()(const ShCtrlGraphNodePtr& from, const ShCtrlGraphNodePtr& to, const ShVariable& var) const 
+  bool operator()(const CtrlGraphNodePtr& from, const CtrlGraphNodePtr& to, const Variable& var) const 
   {
     return (edge.first == var && edge.second->contains(to));
   }
-  bool operator()(const ShVariable &var) const 
+  bool operator()(const Variable &var) const 
   {
     return var == edge.first;
   }
@@ -277,14 +277,14 @@ struct SuccEdgePred {
 
 // returns true if to node->contains(to) == in 
 struct SuccNodePred {
-  ShStructuralNodePtr node;
+  StructuralNodePtr node;
   bool in;
-  SuccNodePred(const ShStructuralNodePtr& node, bool in): node(node), in(in) {}
-  bool operator()(const ShCtrlGraphNodePtr& from, const ShCtrlGraphNodePtr& to, const ShVariable& var) const 
+  SuccNodePred(const StructuralNodePtr& node, bool in): node(node), in(in) {}
+  bool operator()(const CtrlGraphNodePtr& from, const CtrlGraphNodePtr& to, const Variable& var) const 
   {
     return node->contains(to) == in; 
   }
-  bool operator()(const ShVariable &var) const 
+  bool operator()(const Variable &var) const 
   {
     return true; 
   }
@@ -292,41 +292,41 @@ struct SuccNodePred {
 
 
 template<typename P>
-void getStructuralSuccs(ShStructuralNode::CfgMatchList &result, const ShStructuralNodePtr& node, const P &predicate) 
+void getStructuralSuccs(StructuralNode::CfgMatchList &result, const StructuralNodePtr& node, const P &predicate) 
 {
-  ShCtrlGraphNodePtr cfg = node->cfg_node;
+  CtrlGraphNodePtr cfg = node->cfg_node;
   if(cfg) {
-    if(cfg->follower && predicate(cfg, cfg->follower, ShVariable())) {
-      result.push_back(ShStructuralNode::CfgMatch(cfg));
+    if(cfg->follower && predicate(cfg, cfg->follower, Variable())) {
+      result.push_back(StructuralNode::CfgMatch(cfg));
     }
-    for(ShCtrlGraphNode::SuccessorList::iterator S = cfg->successors.begin();
+    for(CtrlGraphNode::SuccessorList::iterator S = cfg->successors.begin();
         S != cfg->successors.end(); ++S) {
       if(predicate(cfg, S->node, S->cond)) {
-        result.push_back(ShStructuralNode::CfgMatch(cfg, S));
+        result.push_back(StructuralNode::CfgMatch(cfg, S));
       }
     }
   }
-  ShStructuralNode::StructNodeList::iterator I = node->structnodes.begin(); 
+  StructuralNode::StructNodeList::iterator I = node->structnodes.begin(); 
   for(;I != node->structnodes.end(); ++I) {
     getStructuralSuccs(result, *I, predicate);
   }
 }
 
-void ShStructuralNode::getSuccs(CfgMatchList &result, const SuccessorEdge &edge) 
+void StructuralNode::getSuccs(CfgMatchList &result, const SuccessorEdge &edge) 
 {
   getStructuralSuccs(result, this, SuccEdgePred(edge));
 }
 
-void ShStructuralNode::getExits(CfgMatchList &result, ShStructuralNodePtr node) 
+void StructuralNode::getExits(CfgMatchList &result, StructuralNodePtr node) 
 {
   if(!node) node = this;
   getStructuralSuccs(result, this, SuccNodePred(node, false));
 }
 
 template<typename P>
-void getStructuralPreds(ShStructuralNode::CfgMatchList &result, const ShStructuralNodePtr& node, const P &predicate) 
+void getStructuralPreds(StructuralNode::CfgMatchList &result, const StructuralNodePtr& node, const P &predicate) 
 {
-  ShStructuralNode::PredecessorList::iterator I = node->preds.begin();
+  StructuralNode::PredecessorList::iterator I = node->preds.begin();
   for(; I != node->preds.end(); ++I) {
     if(predicate(I->first)) {
       getStructuralSuccs(result, I->second, predicate);
@@ -334,26 +334,26 @@ void getStructuralPreds(ShStructuralNode::CfgMatchList &result, const ShStructur
   }
 }
 
-void ShStructuralNode::getPreds(CfgMatchList &result, const PredecessorEdge &edge) 
+void StructuralNode::getPreds(CfgMatchList &result, const PredecessorEdge &edge) 
 {
   SuccEdgePred predicate(SuccessorEdge(edge.first, this));
   getStructuralPreds(result, this, predicate);
 }
 
-void ShStructuralNode::getEntries(CfgMatchList &result, ShStructuralNodePtr node) 
+void StructuralNode::getEntries(CfgMatchList &result, StructuralNodePtr node) 
 {
   if(!node) node = this;
   SuccNodePred predicate(node, true);
   getStructuralPreds(result, this, predicate);
 }
 
-ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
+Structural::Structural(const CtrlGraphPtr& graph)
   : m_graph(graph),
     m_head(0)
 {
   // Build DFS spanning tree, and postorder traversal stack
 
-  std::map<ShCtrlGraphNodePtr, ShStructuralNodePtr> nodemap;
+  std::map<CtrlGraphNodePtr, StructuralNodePtr> nodemap;
   graph->entry()->clearMarked();
   m_head = build_tree(graph->entry(), nodemap);
   graph->entry()->clearMarked();
@@ -364,19 +364,19 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
     build_postorder(m_head);
 
     while (!m_postorder.empty()) {
-      SH_STR_DEBUG_PRINT("Considering a node");
+      STR_DEBUG_PRINT("Considering a node");
       
-      ShStructuralNode* node = m_postorder.front();
+      StructuralNode* node = m_postorder.front();
       m_postorder.pop_front();
       
-      typedef std::list<ShStructuralNodePtr> NodeSet;
+      typedef std::list<StructuralNodePtr> NodeSet;
       NodeSet nodeset;
-      ShStructuralNodePtr newnode = 0;
+      StructuralNodePtr newnode = 0;
    
       if (!newnode) {
         // Check for blocks
 
-        ShStructuralNodePtr n = node;
+        StructuralNodePtr n = node;
         bool p = true;
         bool s = n->succs.size() == 1;
         
@@ -406,22 +406,22 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
           if((*S)->secStart) {
             for(E = S;; ++E) {
               if(E == nodeset.end()) {
-                SH_STR_DEBUG_PRINT("Found STARTSEC with no ENDSEC!");
-                SH_DEBUG_ASSERT(0);
+                STR_DEBUG_PRINT("Found STARTSEC with no ENDSEC!");
+                DEBUG_ASSERT(0);
                 break;
               }
 
               // great...have a section, erase other nodes, and make a newnode
               if((*E)->secEnd) { 
-                newnode = new ShStructuralNode(ShStructuralNode::SECTION);
+                newnode = new StructuralNode(StructuralNode::SECTION);
                 // @todo range - do we need to check if these are empty
                 // ranges?
                 ++E;
                 nodeset.erase(E, nodeset.end());
                 nodeset.erase(nodeset.begin(), S);
-                SH_STR_DEBUG_PRINT("FOUND SECTION of size " << nodeset.size());
+                STR_DEBUG_PRINT("FOUND SECTION of size " << nodeset.size());
                 for (NodeSet::iterator I = nodeset.begin(); I != nodeset.end(); ++I) {
-                  SH_STR_DEBUG_PRINT("  node " << I->object());
+                  STR_DEBUG_PRINT("  node " << I->object());
                 }
                 break;
               }
@@ -433,75 +433,75 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
         // otherwise may be block
         if(!newnode) {
           if (nodeset.size() >= 2) {
-            SH_STR_DEBUG_PRINT("FOUND BLOCK of size " << nodeset.size());
+            STR_DEBUG_PRINT("FOUND BLOCK of size " << nodeset.size());
             for (NodeSet::iterator I = nodeset.begin(); I != nodeset.end(); ++I) {
-              SH_STR_DEBUG_PRINT("  node " << I->object());
+              STR_DEBUG_PRINT("  node " << I->object());
             }
             //node = n.object();
-            newnode = new ShStructuralNode(ShStructuralNode::BLOCK);
+            newnode = new StructuralNode(StructuralNode::BLOCK);
             newnode->secStart = nodeset.front()->secStart;
             newnode->secEnd = nodeset.back()->secEnd;
-            SH_DEBUG_ASSERT(!(newnode->secStart && newnode->secEnd));
+            DEBUG_ASSERT(!(newnode->secStart && newnode->secEnd));
           } else {
             nodeset.clear();
           }
         }
       } else {
-        SH_STR_DEBUG_PRINT("Not a block. |succs| = " << node->succs.size());
+        STR_DEBUG_PRINT("Not a block. |succs| = " << node->succs.size());
         if (!node->succs.empty()) {
-          ShStructuralNodePtr next = (node->succs.begin()->second);
-          SH_STR_DEBUG_PRINT("|next->preds| = " << next->preds.size());
-          for (ShStructuralNode::PredecessorList::iterator P = next->preds.begin();
+          StructuralNodePtr next = (node->succs.begin()->second);
+          STR_DEBUG_PRINT("|next->preds| = " << next->preds.size());
+          for (StructuralNode::PredecessorList::iterator P = next->preds.begin();
                P != next->preds.end(); ++P) {
-            SH_STR_DEBUG_PRINT("next pred = " << P->second);
+            STR_DEBUG_PRINT("next pred = " << P->second);
           }
         }
       }
       if (!newnode
           && node->succs.size() == 2) {
         // Check for if-else
-        ShStructuralNode::SuccessorList::iterator S = node->succs.begin();
-        ShStructuralNodePtr m = S->second;
-        ShStructuralNodePtr n = (++S)->second;
+        StructuralNode::SuccessorList::iterator S = node->succs.begin();
+        StructuralNodePtr m = S->second;
+        StructuralNodePtr n = (++S)->second;
         if (m->succs == n->succs && m->succs.size() == 1) {
-          SH_STR_DEBUG_PRINT("FOUND IF-ELSE");
+          STR_DEBUG_PRINT("FOUND IF-ELSE");
           nodeset.push_back(node);
           nodeset.push_back(m);
           nodeset.push_back(n);
-          newnode = new ShStructuralNode(ShStructuralNode::IFELSE);
+          newnode = new StructuralNode(StructuralNode::IFELSE);
           newnode->secStart = node->secStart;
         } else if (m->succs.size() == 1 && m->succs.front().second == n) {
-          SH_STR_DEBUG_PRINT("FOUND IF");
+          STR_DEBUG_PRINT("FOUND IF");
           nodeset.push_back(node);
           nodeset.push_back(m);
-          newnode = new ShStructuralNode(ShStructuralNode::IF);
+          newnode = new StructuralNode(StructuralNode::IF);
           newnode->secStart = node->secStart;
         }
       }
 
       // Find cyclic regions
       if (!newnode) {
-        typedef std::list<ShStructuralNode*> ReachUnder;
+        typedef std::list<StructuralNode*> ReachUnder;
         //        typedef NodeSet ReachUnder;
         ReachUnder ru;
         reach_under(node, ru);
-        SH_STR_DEBUG_PRINT("Reach under set for " << node);
+        STR_DEBUG_PRINT("Reach under set for " << node);
         for (ReachUnder::iterator I = ru.begin(); I != ru.end(); ++I) {
-          SH_STR_DEBUG_PRINT("  " << *I);
+          STR_DEBUG_PRINT("  " << *I);
         }
 
         if (ru.size() == 1) {
-          SH_STR_DEBUG_PRINT("FOUND SELFLOOP");
-          SH_DEBUG_ASSERT(ru.front() == node);
-          newnode = new ShStructuralNode(ShStructuralNode::SELFLOOP);
+          STR_DEBUG_PRINT("FOUND SELFLOOP");
+          DEBUG_ASSERT(ru.front() == node);
+          newnode = new StructuralNode(StructuralNode::SELFLOOP);
         } else if (ru.size() == 2 && ru.back()->succs.size() == 1) {
-          SH_STR_DEBUG_PRINT("FOUND WHILELOOP");
-          SH_DEBUG_ASSERT(ru.front() == node);
-          SH_DEBUG_ASSERT(ru.back() != node);
-          newnode = new ShStructuralNode(ShStructuralNode::WHILELOOP);
+          STR_DEBUG_PRINT("FOUND WHILELOOP");
+          DEBUG_ASSERT(ru.front() == node);
+          DEBUG_ASSERT(ru.back() != node);
+          newnode = new StructuralNode(StructuralNode::WHILELOOP);
         } else if (ru.size() > 0) {
-          SH_STR_DEBUG_PRINT("FOUND PROPINT");
-          newnode = new ShStructuralNode(ShStructuralNode::PROPINT);
+          STR_DEBUG_PRINT("FOUND PROPINT");
+          newnode = new StructuralNode(StructuralNode::PROPINT);
         }
 
         if (newnode) {
@@ -520,19 +520,19 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
           (*N)->container = newnode.object();
         }
 
-        SH_STR_DEBUG_PRINT("Parent, preds and succs");
+        STR_DEBUG_PRINT("Parent, preds and succs");
         
         newnode->parent = nodeset.front()->parent;
 
         
         for (NodeSet::iterator N = nodeset.begin(); N != nodeset.end(); ++N) {
-          ShStructuralNodePtr n = *N;
+          StructuralNodePtr n = *N;
           
-          for (ShStructuralNode::PredecessorList::iterator P = n->preds.begin();
+          for (StructuralNode::PredecessorList::iterator P = n->preds.begin();
                P != n->preds.end(); ++P) {
-            if (N == nodeset.begin() && newnode->type == ShStructuralNode::BLOCK
+            if (N == nodeset.begin() && newnode->type == StructuralNode::BLOCK
                 && P->second == nodeset.back().object()) {
-              ShStructuralNode::PredecessorEdge e = *P;
+              StructuralNode::PredecessorEdge e = *P;
               e.second = newnode.object();
               newnode->preds.push_back(e);
               continue;
@@ -542,12 +542,12 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
 
             newnode->preds.push_back(*P);
           }
-          for (ShStructuralNode::SuccessorList::iterator S = n->succs.begin();
+          for (StructuralNode::SuccessorList::iterator S = n->succs.begin();
                S != n->succs.end(); ++S) {
             if (contains(newnode->succs, *S)) continue;
-            if (n == nodeset.back() && newnode->type == ShStructuralNode::BLOCK
+            if (n == nodeset.back() && newnode->type == StructuralNode::BLOCK
                 && S->second == nodeset.front()) {
-              ShStructuralNode::SuccessorEdge e = *S;
+              StructuralNode::SuccessorEdge e = *S;
               e.second = newnode;
               newnode->succs.push_back(e);
               continue;
@@ -555,7 +555,7 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
             if (contains(nodeset, S->second)) continue;
             newnode->succs.push_back(*S);
           }
-          for (ShStructuralNode::ChildList::iterator C = n->children.begin();
+          for (StructuralNode::ChildList::iterator C = n->children.begin();
                C != n->children.end(); ++C) {
             if (contains(nodeset, *C)) continue;
             newnode->children.push_back(*C);
@@ -563,8 +563,8 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
 
           // Replace children of parent
           if (n->parent && !contains(nodeset, n->parent)) {
-            SH_STR_DEBUG_PRINT("Replace children of parent");
-            for (ShStructuralNode::ChildList::iterator I = n->parent->children.begin();
+            STR_DEBUG_PRINT("Replace children of parent");
+            for (StructuralNode::ChildList::iterator I = n->parent->children.begin();
                  I != n->parent->children.end(); ++I) {
               if (*I == n) *I = newnode;
             }
@@ -573,9 +573,9 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
         }
 
         // Remove duplicate successors from newnode
-        for (ShStructuralNode::SuccessorList::iterator J = newnode->succs.begin();
+        for (StructuralNode::SuccessorList::iterator J = newnode->succs.begin();
              J != newnode->succs.end(); ++J) {
-          ShStructuralNode::SuccessorList::iterator K = J;
+          StructuralNode::SuccessorList::iterator K = J;
           for (K++; K != newnode->succs.end(); ++K) {
             if (K->second == J->second) {
               // Favour conditional edges for deletion in order to
@@ -592,26 +592,26 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
           }
         }
 
-        SH_STR_DEBUG_PRINT("Replace parent of children");
+        STR_DEBUG_PRINT("Replace parent of children");
         // Replace parent of children
-        for (ShStructuralNode::ChildList::iterator I = newnode->children.begin();
+        for (StructuralNode::ChildList::iterator I = newnode->children.begin();
              I != newnode->children.end(); ++I) {
           (*I)->parent = newnode.object();
         }
 
-        SH_STR_DEBUG_PRINT("Replace preds of succs");
+        STR_DEBUG_PRINT("Replace preds of succs");
         // Replace preds of succs
-        for (ShStructuralNode::SuccessorList::iterator I = newnode->succs.begin();
+        for (StructuralNode::SuccessorList::iterator I = newnode->succs.begin();
              I != newnode->succs.end(); ++I) {
-          ShStructuralNodePtr s = I->second;
-          for (ShStructuralNode::PredecessorList::iterator J = s->preds.begin();
+          StructuralNodePtr s = I->second;
+          for (StructuralNode::PredecessorList::iterator J = s->preds.begin();
                J != s->preds.end(); ++J) {
             if (contains(nodeset, J->second)) J->second = newnode.object();
           }
           // Make preds unique.
-          for (ShStructuralNode::PredecessorList::iterator J = s->preds.begin();
+          for (StructuralNode::PredecessorList::iterator J = s->preds.begin();
                J != s->preds.end(); ++J) {
-            ShStructuralNode::PredecessorList::iterator K = J;
+            StructuralNode::PredecessorList::iterator K = J;
             for (++K; K != s->preds.end(); ++K) {
               if (K->second == J->second) {
                 J = s->preds.erase(J);
@@ -622,19 +622,19 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
           }
         }
 
-        SH_STR_DEBUG_PRINT("Replace succs of preds");
+        STR_DEBUG_PRINT("Replace succs of preds");
         // Replace succs of preds
-        for (ShStructuralNode::PredecessorList::iterator I = newnode->preds.begin();
+        for (StructuralNode::PredecessorList::iterator I = newnode->preds.begin();
              I != newnode->preds.end(); ++I) {
-          ShStructuralNode* p = I->second;
-          for (ShStructuralNode::SuccessorList::iterator J = p->succs.begin();
+          StructuralNode* p = I->second;
+          for (StructuralNode::SuccessorList::iterator J = p->succs.begin();
              J != p->succs.end(); ++J) {
             if (contains(nodeset, J->second)) J->second = newnode;
           }
           // Make succs unique.
-          for (ShStructuralNode::SuccessorList::iterator J = p->succs.begin();
+          for (StructuralNode::SuccessorList::iterator J = p->succs.begin();
                J != p->succs.end(); ++J) {
-            ShStructuralNode::SuccessorList::iterator K = J;
+            StructuralNode::SuccessorList::iterator K = J;
             for (K++; K != p->succs.end(); ++K) {
               if (K->second == J->second) {
                 J = p->succs.erase(J);
@@ -645,11 +645,11 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
           }
         }
         
-        SH_STR_DEBUG_PRINT("Add to postorder");
+        STR_DEBUG_PRINT("Add to postorder");
         m_postorder.push_back(newnode.object());
 
         if (nodeset.front() == m_head) {
-          SH_STR_DEBUG_PRINT("Replace head");
+          STR_DEBUG_PRINT("Replace head");
           m_head = newnode;
         }
       }
@@ -657,7 +657,7 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
   } while (changed);
 }
 
-std::ostream& ShStructural::dump(std::ostream& out) const
+std::ostream& Structural::dump(std::ostream& out) const
 {
   out << "digraph structural {" << std::endl;
   m_head->dump(out);
@@ -671,7 +671,7 @@ std::ostream& ShStructural::dump(std::ostream& out) const
   return out;
 }
 
-ShStructuralNodePtr ShStructural::build_tree(const ShCtrlGraphNodePtr& node, std::map<ShCtrlGraphNodePtr, ShStructuralNodePtr>& nodemap)
+StructuralNodePtr Structural::build_tree(const CtrlGraphNodePtr& node, std::map<CtrlGraphNodePtr, StructuralNodePtr>& nodemap)
 {
   using std::make_pair;
   
@@ -679,14 +679,14 @@ ShStructuralNodePtr ShStructural::build_tree(const ShCtrlGraphNodePtr& node, std
   if (node->marked()) return 0;
   node->mark();
   
-  ShStructuralNodePtr snode = new ShStructuralNode(node);
+  StructuralNodePtr snode = new StructuralNode(node);
 
   nodemap[node] = snode;
   
-  for (ShCtrlGraphNode::SuccessorList::iterator I = node->successors.begin();
+  for (CtrlGraphNode::SuccessorList::iterator I = node->successors.begin();
        I != node->successors.end(); ++I) {
     if (!I->node) continue; // should never happen
-    ShStructuralNodePtr child = build_tree(I->node, nodemap);
+    StructuralNodePtr child = build_tree(I->node, nodemap);
     if (child) {
       child->parent = snode.object();
       snode->children.push_back(child);
@@ -697,25 +697,25 @@ ShStructuralNodePtr ShStructural::build_tree(const ShCtrlGraphNodePtr& node, std
   }
 
   if (node->follower) {
-    ShStructuralNodePtr fchild = build_tree(node->follower, nodemap);
+    StructuralNodePtr fchild = build_tree(node->follower, nodemap);
     if (fchild) {
       fchild->parent = snode.object();
       snode->children.push_back(fchild);
     }
-    snode->succs.push_back(make_pair(ShVariable(), nodemap[node->follower]));
-    nodemap[node->follower]->preds.push_back(make_pair(ShVariable(), snode.object()));
+    snode->succs.push_back(make_pair(Variable(), nodemap[node->follower]));
+    nodemap[node->follower]->preds.push_back(make_pair(Variable(), snode.object()));
   }
 
   return snode;
 }
 
-void ShStructural::build_postorder(const ShStructuralNodePtr& node)
+void Structural::build_postorder(const StructuralNodePtr& node)
 {
   if (node == m_head) {
     m_postorder.clear();
   }
 
-  for (ShStructuralNode::ChildList::iterator I = node->children.begin();
+  for (StructuralNode::ChildList::iterator I = node->children.begin();
        I != node->children.end(); ++I) {
     build_postorder(*I);
   }
@@ -723,7 +723,7 @@ void ShStructural::build_postorder(const ShStructuralNodePtr& node)
   m_postorder.push_back(node.object());
 }
 
-const ShStructuralNodePtr& ShStructural::head()
+const StructuralNodePtr& Structural::head()
 {
   return m_head;
 }

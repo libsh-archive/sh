@@ -17,12 +17,12 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#include "ShBaseTexture.hpp"
+#include "BaseTexture.hpp"
 
 namespace SH {
 
-ShBaseTexture::ShBaseTexture(const ShTextureNodePtr& node)
-  : ShMetaForwarder(node.object()),
+BaseTexture::BaseTexture(const TextureNodePtr& node)
+  : MetaForwarder(node.object()),
     m_node(node)
 {
 }

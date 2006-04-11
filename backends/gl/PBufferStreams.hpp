@@ -20,7 +20,7 @@
 #ifndef PBUFFERSTREAMS_HPP
 #define PBUFFERSTREAMS_HPP
 
-#include "ShProgram.hpp"
+#include "Program.hpp"
 #include "GlBackend.hpp"
 
 namespace shgl {
@@ -29,15 +29,15 @@ struct PBufferStreams : public StreamStrategy {
   PBufferStreams();
   virtual ~PBufferStreams();
 
-  void execute(const SH::ShProgramNodeCPtr& program, 
-               SH::ShStream& dest, TextureStrategy* texture);
+  void execute(const SH::ProgramNodeCPtr& program, 
+               SH::Stream& dest, TextureStrategy* texture);
 
   virtual StreamStrategy* create();
 
 private:
-  SH::ShProgramSet* m_shaders;
+  SH::ProgramSet* m_shaders;
   bool m_setup_vp;
-  SH::ShProgram m_vp;
+  SH::Program m_vp;
 };
 
 }

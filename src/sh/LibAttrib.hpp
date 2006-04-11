@@ -20,15 +20,15 @@
 #ifndef SHLIBATTRIB_HPP
 #define SHLIBATTRIB_HPP
 
-#include "ShAttrib.hpp"
-#include "ShLib.hpp"
+#include "Attrib.hpp"
+#include "Lib.hpp"
 
 namespace SH {
 
-SH_SHLIB_USUAL_OPERATIONS(SH_ATTRIB);
-SH_SHLIB_USUAL_SUBTRACT(SH_ATTRIB);
+SHLIB_USUAL_OPERATIONS(ATTRIB);
+SHLIB_USUAL_SUBTRACT(ATTRIB);
 
-SH_SHLIB_LEFT_MATRIX_OPERATION(SH_ATTRIB, operator|, M);
+SHLIB_LEFT_MATRIX_OPERATION(ATTRIB, operator|, M);
 
 }
 

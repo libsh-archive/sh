@@ -20,7 +20,7 @@
 #ifndef SHMATH_HPP
 #define SHMATH_HPP
 
-/** @file ShMath.hpp
+/** @file Math.hpp
  * Some C99 math functions that windows/apple don't have
  */
 

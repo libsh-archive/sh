@@ -30,7 +30,7 @@ namespace SH {
 /* Framework for building directed graph classes and
  * algorithms on directed graph classes
  *
- * Built along the same lines as ShMesh.hpp, except
+ * Built along the same lines as Mesh.hpp, except
  * instead of a half-edge data structure this 
  * uses an ordered edge adjacency list.
  *
@@ -57,22 +57,22 @@ namespace SH {
 // or build a subclass that uses a specific indexing scheme
 
 template<typename VertexType, typename EdgeType>
-struct ShGraphType {
+struct GraphType {
   typedef VertexType Vertex;
   typedef EdgeType Edge;
 
 };
 
 template<typename G>
-struct ShGraphVertex {
+struct GraphVertex {
   typedef typename G::Edge Edge;
   typedef std::list<Edge*> EdgeList;
 
   /** \brief Builds an unmarked graph vertex with no children. */
-  ShGraphVertex();
+  GraphVertex();
 
   /** \brief Clones the vertex.  Default version only copies marked field */
-  ShGraphVertex(const ShGraphVertex<G> &other);
+  GraphVertex(const GraphVertex<G> &other);
 
   std::ostream& graphvizDump(std::ostream& out) const;
 
@@ -81,18 +81,18 @@ struct ShGraphVertex {
 };
 
 template<typename G>
-struct ShGraphEdge {
+struct GraphEdge {
   typedef typename G::Vertex Vertex;
 
   /** \brief Builds an edge with null endpoints 
    * TODO should not have this?*/ 
-  ShGraphEdge(); 
+  GraphEdge(); 
 
   /** \brief Builds an edge with the given endpoints */
-  ShGraphEdge(Vertex *start, Vertex *end);
+  GraphEdge(Vertex *start, Vertex *end);
 
   /** \brief Clones the edge, but leaves start, end empty */
-  ShGraphEdge(const ShGraphEdge<G> &other);
+  GraphEdge(const GraphEdge<G> &other);
 
   std::ostream& graphvizDump(std::ostream& out) const;
 
@@ -103,7 +103,7 @@ struct ShGraphEdge {
 // TODO may want to not bother with memory management - use smart pointers for
 // verts/edges
 template<typename G>
-class ShGraph {
+class Graph {
   public:
     // TODO maybe these typedefs should go somewhere else?
     typedef typename G::Vertex Vertex;
@@ -126,13 +126,13 @@ class ShGraph {
       const T& operator()(Vertex* u, Vertex *v) const { return (*this)[VertexPair(u, v)]; }
     };
 
-    ShGraph();
+    Graph();
 
     /** \brief Makes a copy of the graph using operator= */ 
-    ShGraph(const ShGraph<G> &other);
+    Graph(const Graph<G> &other);
 
-    /** Destroys ShGraph and deletes any added vertices/edges */
-    ~ShGraph();
+    /** Destroys Graph and deletes any added vertices/edges */
+    ~Graph();
 
     /** \brief Adds a vertex to the graph */
     void addVertex(Vertex *v);
@@ -154,7 +154,7 @@ class ShGraph {
     void clearMarked();
 
     /** \brief Clones the vertices and edges in this graph */ 
-    ShGraph<G>& operator=(const ShGraph<G> &other);
+    Graph<G>& operator=(const Graph<G> &other);
 
     /** Some useful graph algorithms */
     /** TODO may want to separate these out */
@@ -265,7 +265,7 @@ class ShGraph {
  * that outputs information per vertex and per edge.
  *
  * The default dump functor uses the built in graphvizDump functions in 
- * ShGraphVertex and ShGraphEdge.
+ * GraphVertex and GraphEdge.
  *
  * You can either override the function sin the vertex/edge or here
  * to change the dump behaviour (changing the vertex/edge is useful
@@ -274,19 +274,19 @@ class ShGraph {
  * a specific algorithm on the graph)
  */
 template<typename G>
-struct ShGraphDefaultDumper {
+struct GraphDefaultDumper {
   std::ostream& operator()(std::ostream& out, const typename G::Vertex *v);
   std::ostream& operator()(std::ostream& out, const typename G::Edge *e);
 };
 
 template<typename G>
-std::ostream& graphvizDump(std::ostream &out, const ShGraph<G> &g); 
+std::ostream& graphvizDump(std::ostream &out, const Graph<G> &g); 
 
 template<typename G, typename D>
-std::ostream& graphvizDump(std::ostream &out, const ShGraph<G> &g, D &dumpFunctor); 
+std::ostream& graphvizDump(std::ostream &out, const Graph<G> &g, D &dumpFunctor); 
 
 }
 
-#include "ShGraphImpl.hpp"
+#include "GraphImpl.hpp"
 
 #endif

@@ -3,12 +3,12 @@ import common, semantic
 common.header()
 
 common.guard("SHNORMAL_HPP")
-common.inprint('#include "ShVector.hpp"')
+common.inprint('#include "Vector.hpp"')
 common.namespace()
 
-decl = semantic.Class("Normal", "normal", "SH_NORMAL",
+decl = semantic.Class("Normal", "normal", "NORMAL",
                       """An n-normal.
-""", "ShVector")
+""", "Vector")
 
 decl.declare_parametrization()
 

@@ -20,47 +20,47 @@
 #ifndef SHTRANSFORMER_HPP
 #define SHTRANSFORMER_HPP
 
-#include "ShDllExport.hpp"
-#include "ShBackend.hpp"
-#include "ShProgram.hpp"
-#include "ShCtrlGraph.hpp"
-#include "ShInternals.hpp"
-#include "ShVariableType.hpp"
+#include "DllExport.hpp"
+#include "Backend.hpp"
+#include "Program.hpp"
+#include "CtrlGraph.hpp"
+#include "Internals.hpp"
+#include "VariableType.hpp"
 
 namespace SH {
 
 /** Program transformer. 
- * Platform-specific transformations on ShProgram objects.
+ * Platform-specific transformations on Program objects.
  *
  * These may change the variable lists (inputs, outputs, etc.)
- * and control graph of the ShProgram, so they should be done
- * on a copy of the ShProgram just before code generation instead
+ * and control graph of the Program, so they should be done
+ * on a copy of the Program just before code generation instead
  * of the original. (Otherwise, future algebra operations on 
  * the original may not give the expected results since the variables
  * will no longer be the same)
  *
- * Global requirements for running ShTransformer:
- * ShContext::current()->parsing() == program
+ * Global requirements for running Transformer:
+ * Context::current()->parsing() == program
  */
 class 
-SH_DLLEXPORT ShTransformer {
+DLLEXPORT Transformer {
 public:
-  ShTransformer(const ShProgramNodePtr& program);
-  ~ShTransformer();
+  Transformer(const ProgramNodePtr& program);
+  ~Transformer();
   bool changed(); //< returns true iff one of the transformations changed the shader
 
   /**@name Tuple splitting when backend canot support arbitrary 
    * length tuples.
    *
    * If any tuples are split, this adds entries to the splits map
-   * to map from original long tuple ShVariableNode
-   * to a vector of ShVariableNodes all <= max tuple size of the backend.
+   * to map from original long tuple VariableNode
+   * to a vector of VariableNodes all <= max tuple size of the backend.
    * All long tuples in the intermediate representation are split up into
    * shorter tuples.
    */
   //@{
-  typedef std::vector<ShVariableNodePtr> VarNodeVec;
-  typedef std::map<ShVariableNodePtr, VarNodeVec> VarSplitMap;
+  typedef std::vector<VariableNodePtr> VarNodeVec;
+  typedef std::map<VariableNodePtr, VarNodeVec> VarSplitMap;
   friend struct VariableSplitter;
   friend struct StatementSplitter;
   void splitTuples(int maxTuple, VarSplitMap &splits);
@@ -71,7 +71,7 @@ public:
    * variable in computation and inputs cannot be used as a dest, and
    * inout variables are not supported directly.
    *
-   * Optionally one can provide a ShVarTransformMap that the function will
+   * Optionally one can provide a VarTransformMap that the function will
    * update with any new variable transformations that it makes.
    *
    * @todo currently all or none approach to conversion.
@@ -79,7 +79,7 @@ public:
    */
   //@{
   friend struct InputOutputConvertor;
-  void convertInputOutput(ShVarTransformMap *varTransMap = 0);
+  void convertInputOutput(VarTransformMap *varTransMap = 0);
   //@}
   
   /**@name Texture lookup conversion
@@ -90,7 +90,7 @@ public:
   void convertTextureLookups();
   //@}
 
-  typedef std::map<ShValueType, ShValueType> ValueTypeMap;  
+  typedef std::map<ValueType, ValueType> ValueTypeMap;  
   /**@name Arithmetic type conversions
    * Converts ops on other basic non-float Sh types to float storage types based on the
    * floatMapping.  
@@ -104,7 +104,7 @@ public:
   void convertToFloat(ValueTypeMap &typeMap, bool preserve_casts = false);
 
   //@todo  use dependent uniforms in conversion and spliting functions
-  //instead of separate VarSplitMaps and ShVarMaps
+  //instead of separate VarSplitMaps and VarMaps
 
   /** Strips out dummy statements (SECTION in particular) 
    */
@@ -141,27 +141,27 @@ public:
   
 private:
   /// NOT IMPLEMENTED
-  ShTransformer(const ShTransformer& other);
+  Transformer(const Transformer& other);
   /// NOT IMPLEMENTED
-  ShTransformer& operator=(const ShTransformer& other);
+  Transformer& operator=(const Transformer& other);
 
-  ShProgramNodePtr m_program;
+  ProgramNodePtr m_program;
   bool m_changed;
 };
 
 /* A default transformer.
- * T can overload any of the methods in ShTransformerParent 
+ * T can overload any of the methods in TransformerParent 
  *
- * - void start(const ShProgramNodePtr&)
+ * - void start(const ProgramNodePtr&)
  *   Does whatever initialization may be necessary.  Initializes changed() to
  *   false.
  *
- * - void handleVarList(ShProgramNode::VarList &varlist, ShBindingType type); 
+ * - void handleVarList(ProgramNode::VarList &varlist, BindingType type); 
  *   This is called first and fixes anything that needs to be fixed in the
  *   variable lists. 
  * - handleTexList, handleChannelList, handlePaletteList are similar
  *
- * - bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, const ShCtrlGraphNodePtr& node);
+ * - bool handleStmt(BasicBlock::StmtList::iterator &I, const CtrlGraphNodePtr& node);
  *   This performs some kind of per-statement transformation during a dfs
  *   through the cfg.  Returns true iff the transformation has already
  *   incremented I (or deleted I and moved I to the next element). 
@@ -185,34 +185,34 @@ private:
  * that doesn't fit in.
  */ 
 template<typename T>
-struct ShDefaultTransformer: public T {
+struct DefaultTransformer: public T {
   // Applies transformation to the given ctrl graph node. 
-  void operator()(const ShCtrlGraphNodePtr& node); 
+  void operator()(const CtrlGraphNodePtr& node); 
 
-  // Applies transformation to the given ShProgram 
-  bool transform(const ShProgramNodePtr& p); 
+  // Applies transformation to the given Program 
+  bool transform(const ProgramNodePtr& p); 
 };
 
-struct ShTransformerParent {
- ShTransformerParent() : m_changed(false) {}
- void start(const ShProgramNodePtr& program) { m_program = program; }
- void handleVarList(ShProgramNode::VarList &varlist, ShBindingType type) {}
- void handleTexList(ShProgramNode::TexList &texlist) {}
- void handleChannelList(ShProgramNode::ChannelList &chanlist) {}
- void handlePaletteList(ShProgramNode::PaletteList &palettelist) {}
+struct TransformerParent {
+ TransformerParent() : m_changed(false) {}
+ void start(const ProgramNodePtr& program) { m_program = program; }
+ void handleVarList(ProgramNode::VarList &varlist, BindingType type) {}
+ void handleTexList(ProgramNode::TexList &texlist) {}
+ void handleChannelList(ProgramNode::ChannelList &chanlist) {}
+ void handlePaletteList(ProgramNode::PaletteList &palettelist) {}
 
- bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, const ShCtrlGraphNodePtr& node) { return false; }
+ bool handleStmt(BasicBlock::StmtList::iterator &I, const CtrlGraphNodePtr& node) { return false; }
  void finish() {}
  bool changed() 
  { return m_changed; }
 
  protected:
-   ShProgramNodePtr m_program;
+   ProgramNodePtr m_program;
    bool m_changed;
 };
 
 }
 
-#include "ShTransformerImpl.hpp"
+#include "TransformerImpl.hpp"
 
 #endif

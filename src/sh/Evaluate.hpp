@@ -20,17 +20,17 @@
 #ifndef SHEVALUATE_HPP
 #define SHEVALUATE_HPP
 
-#include "ShStatement.hpp"
-#include "ShProgramNode.hpp"
+#include "Statement.hpp"
+#include "ProgramNode.hpp"
 
-// @todo merge this with ShEval.hpp, ShEval.cpp
+// @todo merge this with Eval.hpp, Eval.cpp
 namespace SH {
 // Evaluate the given statement.
-SH_DLLEXPORT
-void evaluate(ShStatement& stmt);
+DLLEXPORT
+void evaluate(Statement& stmt);
 
-SH_DLLEXPORT
-void evaluate(const ShProgramNodePtr& p);
+DLLEXPORT
+void evaluate(const ProgramNodePtr& p);
 
 }
 

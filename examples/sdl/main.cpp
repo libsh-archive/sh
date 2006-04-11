@@ -32,26 +32,26 @@
 using namespace SH;
 using namespace std;
 
-ShMatrix4x4f mv, mvd;
-ShPoint3f lightPos;
+Matrix4x4f mv, mvd;
+Point3f lightPos;
 Camera camera;
-ShProgram vsh, fsh;
-ShProgramSet* shaders;
-ShColor3f diffusecolor;
+Program vsh, fsh;
+ProgramSet* shaders;
+Color3f diffusecolor;
 
-ShColor3f color1 = ShColor3f(0.5, 0.7, 0.9);
-ShColor3f color2 = ShColor3f(0.0, 0.9, 0.3);
-ShPoint3f light1 = ShPoint3f(5.0, 5.0, 5.0);
-ShPoint3f light2 = ShPoint3f(-5.0, 5.0, 5.0);
+Color3f color1 = Color3f(0.5, 0.7, 0.9);
+Color3f color2 = Color3f(0.0, 0.9, 0.3);
+Point3f light1 = Point3f(5.0, 5.0, 5.0);
+Point3f light2 = Point3f(-5.0, 5.0, 5.0);
 
 void initShaders()
 {
   vsh = SH_BEGIN_VERTEX_PROGRAM {
-    ShInOutPosition4f pos;
-    ShInOutNormal3f normal;
-    ShOutputVector3f lightv;
+    InOutPosition4f pos;
+    InOutNormal3f normal;
+    OutputVector3f lightv;
 
-    ShPoint3f posv = (mv | pos)(0,1,2); // Compute viewspace position
+    Point3f posv = (mv | pos)(0,1,2); // Compute viewspace position
     lightv = lightPos - posv; // Compute light direction
     
     pos = mvd | pos; // Project position
@@ -59,11 +59,11 @@ void initShaders()
   } SH_END;
 
   fsh = SH_BEGIN_FRAGMENT_PROGRAM {
-    ShInputPosition4f pos;
-    ShInputNormal3f normal;
-    ShInputVector3f lightv;
+    InputPosition4f pos;
+    InputNormal3f normal;
+    InputVector3f lightv;
 
-    ShOutputColor3f color;
+    OutputColor3f color;
 
     normal = normalize(normal);
     lightv = normalize(lightv);
@@ -71,28 +71,28 @@ void initShaders()
     color = (normal | lightv) * diffusecolor;
   } SH_END;
 
-  shaders = new ShProgramSet(vsh, fsh);
+  shaders = new ProgramSet(vsh, fsh);
 }
 
 void display()
 {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  shBind(*shaders);
+  bind(*shaders);
 
   glFrontFace(GL_CW);
   glutSolidTeapot(2.5);
   glFrontFace(GL_CCW);
 
-  shUnbind(*shaders);
+  unbind(*shaders);
   
   SDL_GL_SwapBuffers();
 }
 
 void setupView()
 {
-  mv = camera.shModelView();
-  mvd = camera.shModelViewProjection(ShMatrix4x4f());
+  mv = camera.modelView();
+  mvd = camera.modelViewProjection(Matrix4x4f());
 }
 
 void reshape(int w, int h)
@@ -169,7 +169,7 @@ int main(int argc, char* argv[])
   SDL_WM_SetCaption("Sh SDL Example", NULL);
   
   if (argc > 1) {
-    shUseBackend(argv[1]);
+    useBackend(argv[1]);
   }
 
   glEnable(GL_DEPTH_TEST);
@@ -182,7 +182,7 @@ int main(int argc, char* argv[])
 
   initShaders();
 
-  shBind(*shaders);
+  bind(*shaders);
 
 #if 0
   cout << "Vertex Unit:" << endl;

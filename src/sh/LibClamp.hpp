@@ -17,12 +17,12 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#include "ShLib.hpp" // ShLibClamp needs to be included from within ShLib
+#include "Lib.hpp" // LibClamp needs to be included from within Lib
 
 #ifndef SHLIBCLAMP_HPP
 #define SHLIBCLAMP_HPP
 
-#include "ShGeneric.hpp"
+#include "Generic.hpp"
 
 #ifndef _WIN32
 namespace SH {
@@ -41,117 +41,117 @@ namespace SH {
  * Operates componentwise on tuples.
  */
 template<int N, typename T>
-ShGeneric<N, T> abs(const ShGeneric<N, T>& var);
+Generic<N, T> abs(const Generic<N, T>& var);
 
 /** Ceiling.
  * Returns the least integer >= argument. 
  * Operates componentwise on tuples.
  */
 template<int N, typename T>
-ShGeneric<N, T> ceil(const ShGeneric<N, T>& var);
+Generic<N, T> ceil(const Generic<N, T>& var);
 
 /** Floor.
  * Returns the greatest integer <= argument.
  * Operates componentwise on tuples.
  */
 template<int N, typename T>
-ShGeneric<N, T> floor(const ShGeneric<N, T>& var);
+Generic<N, T> floor(const Generic<N, T>& var);
 
 /** Round.
  * Returns the nearest integer to the argument.
  * Operates componentwise on tuples.
  */
 template<int N, typename T>
-ShGeneric<N, T> round(const ShGeneric<N, T>& var);
+Generic<N, T> round(const Generic<N, T>& var);
 
 /** Float modulus. 
  * The result is always positive.
  */
 template<int N, typename T1, typename T2>
-ShGeneric<N, CT1T2>
-mod(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right);
+Generic<N, CT1T2>
+mod(const Generic<N, T1>& left, const Generic<N, T2>& right);
 template<int N, typename T1, typename T2>
-ShGeneric<N, CT1T2>
-mod(const ShGeneric<N, T1>& left, const ShGeneric<1, T2>& right);
+Generic<N, CT1T2>
+mod(const Generic<N, T1>& left, const Generic<1, T2>& right);
 template<typename T1, typename T2>
-ShGeneric<1, CT1T2>
-mod(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right);
+Generic<1, CT1T2>
+mod(const Generic<1, T1>& left, const Generic<1, T2>& right);
 template<int N, typename T1, typename T2>
-ShGeneric<N, CT1T2>
-operator%(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right);
+Generic<N, CT1T2>
+operator%(const Generic<N, T1>& left, const Generic<N, T2>& right);
 template<int N, typename T1, typename T2>
-ShGeneric<N, CT1T2>
-operator%(const ShGeneric<N, T1>& left, const ShGeneric<1, T2>& right);
+Generic<N, CT1T2>
+operator%(const Generic<N, T1>& left, const Generic<1, T2>& right);
 template<typename T1, typename T2>
-ShGeneric<1, CT1T2>
-operator%(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right);
+Generic<1, CT1T2>
+operator%(const Generic<1, T1>& left, const Generic<1, T2>& right);
 
-SH_SHLIB_CONST_SCALAR_OP_DECL(mod);
-SH_SHLIB_CONST_N_OP_LEFT_DECL(mod);
-SH_SHLIB_CONST_SCALAR_OP_DECL(operator%);
-SH_SHLIB_CONST_N_OP_LEFT_DECL(operator%);
+SHLIB_CONST_SCALAR_OP_DECL(mod);
+SHLIB_CONST_N_OP_LEFT_DECL(mod);
+SHLIB_CONST_SCALAR_OP_DECL(operator%);
+SHLIB_CONST_N_OP_LEFT_DECL(operator%);
 
 /** Fractional part.
  * Discards the integer part of each componenent in var.
  */
 template<int N, typename T>
-ShGeneric<N, T> frac(const ShGeneric<N, T>& var);
+Generic<N, T> frac(const Generic<N, T>& var);
 
 /** Take positive part. 
  * Clamps a value to zero if it is negative.   
  * This is useful to wrap dot products in lighting models.
  */
 template<int N, typename T>
-ShGeneric<N, T> pos(const ShGeneric<N, T>& x);
+Generic<N, T> pos(const Generic<N, T>& x);
 
 /** Maximum.
  * Creates a tuple of componentwise maximums of a pair of input tuples.
  */
 template<int N, typename T1, typename T2>
-ShGeneric<N, CT1T2>
-max(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right);
+Generic<N, CT1T2>
+max(const Generic<N, T1>& left, const Generic<N, T2>& right);
 
-SH_SHLIB_CONST_SCALAR_OP_DECL(max);
+SHLIB_CONST_SCALAR_OP_DECL(max);
 
 /** Minimum.
  * Creates a tuple of componentwise minimums of a pair of input tuples.
  */
 template<int N, typename T1, typename T2>
-ShGeneric<N, CT1T2>
-min(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right);
+Generic<N, CT1T2>
+min(const Generic<N, T1>& left, const Generic<N, T2>& right);
 
-SH_SHLIB_CONST_SCALAR_OP_DECL(min);
+SHLIB_CONST_SCALAR_OP_DECL(min);
 
 /** Maximum of all components
  */
 template<int N, typename T>
-ShGeneric<1, T> max(const ShGeneric<N, T>& a);
+Generic<1, T> max(const Generic<N, T>& a);
 
 /** Minimum of all components
  */
 template<int N, typename T>
-ShGeneric<1, T> min(const ShGeneric<N, T>& a);
+Generic<1, T> min(const Generic<N, T>& a);
 
 /** Componentwise clamping.
  * Clamps a between b and c.
  */
 template<int N, typename T1, typename T2, typename T3>
-ShGeneric<N, CT1T2T3> 
-clamp(const ShGeneric<N, T1>& a, const ShGeneric<N, T2>& b, const ShGeneric<N, T3>& c);
+Generic<N, CT1T2T3> 
+clamp(const Generic<N, T1>& a, const Generic<N, T2>& b, const Generic<N, T3>& c);
 template<int N, typename T1, typename T2, typename T3>
-ShGeneric<N, CT1T2T3> 
-clamp(const ShGeneric<N, T1>& a, const ShGeneric<1, T2>& b, const ShGeneric<1, T3>& c);
+Generic<N, CT1T2T3> 
+clamp(const Generic<N, T1>& a, const Generic<1, T2>& b, const Generic<1, T3>& c);
 template<typename T1, typename T2, typename T3>
-ShGeneric<1, CT1T2T3> 
-clamp(const ShGeneric<1, T1>& a, const ShGeneric<1, T2>& b, const ShGeneric<1, T3>& c);
+Generic<1, CT1T2T3> 
+clamp(const Generic<1, T1>& a, const Generic<1, T2>& b, const Generic<1, T3>& c);
 
-SH_SHLIB_CONST_TRINARY_OP_011_DECL(clamp);
+SHLIB_CONST_TRINARY_OP_011_DECL(clamp);
 
 /** Componentwise saturation.
  * Equivalent to componentwise minimum with 1.
  */
 template<int N, typename T>
-ShGeneric<N, T> sat(const ShGeneric<N, T>& a);
+Generic<N, T> sat(const Generic<N, T>& a);
 
 /** Componentwise sign.
  * Returns -1.0 if argument is less than 0.0, 1.0 if argument is greater
@@ -159,15 +159,15 @@ ShGeneric<N, T> sat(const ShGeneric<N, T>& a);
  * Operates componentwise on tuples.
  */
 template<int N, typename T>
-ShGeneric<N, T> sign(const ShGeneric<N, T>& var);
+Generic<N, T> sign(const Generic<N, T>& var);
 
 
 /** Linear step.
  * Linear step of t centered around c with width w.
  */
 template <int N, typename T>
-ShGeneric<N, T> linstep(const ShGeneric<N, T>& t, const ShGeneric<N, T>& c,
-                        const ShGeneric<N, T>& w);
+Generic<N, T> linstep(const Generic<N, T>& t, const Generic<N, T>& c,
+                        const Generic<N, T>& w);
 
 /** \brief Cubic interpolated step between 0 and 1. 
  * Returns:
@@ -176,21 +176,21 @@ ShGeneric<N, T> linstep(const ShGeneric<N, T>& t, const ShGeneric<N, T>& c,
  * cubic interpolation between 0 and 1 otherwise
  */
 template<int N, typename T>
-ShGeneric<N, T> smoothstep(const ShGeneric<N, T>& a, const ShGeneric<N, T>& b,
-                           const ShGeneric<N, T>& x);
+Generic<N, T> smoothstep(const Generic<N, T>& a, const Generic<N, T>& b,
+                           const Generic<N, T>& x);
 
 /** Linear smooth pulse.
  * Linear smooth pulse of t between r0 and r1 with width w.
  */
 template <int N, typename T>
-ShGeneric<N, T> smoothpulse(const ShGeneric<N, T>& t, const ShGeneric<N, T>& r0, 
-                            const ShGeneric<N, T>& r1, const ShGeneric<N, T>& w);
+Generic<N, T> smoothpulse(const Generic<N, T>& t, const Generic<N, T>& r0, 
+                            const Generic<N, T>& r1, const Generic<N, T>& w);
 
 /*@}*/
 
 }
 #endif
 
-#include "ShLibClampImpl.hpp"
+#include "LibClampImpl.hpp"
 
 #endif

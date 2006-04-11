@@ -18,61 +18,61 @@
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 #include <cassert>
-#include "ShTextureNode.hpp"
-#include "ShDebug.hpp"
-#include "ShGeneric.hpp"
-#include "ShAttrib.hpp"
+#include "TextureNode.hpp"
+#include "Debug.hpp"
+#include "Generic.hpp"
+#include "Attrib.hpp"
 
 namespace SH {
 
 using namespace std;
 
-ShTextureNode::ShTextureNode(ShTextureDims dims, int size,
-                             ShValueType valueType,
-                             const ShTextureTraits& traits,
+TextureNode::TextureNode(TextureDims dims, int size,
+                             ValueType valueType,
+                             const TextureTraits& traits,
                              int width, int height, int depth, int max_nb_elements)
-  : ShVariableNode(SH_TEXTURE, size, valueType), m_count(max_nb_elements),
-    m_dims(dims), m_nb_memories(SH_TEXTURE_CUBE == dims ? 6 : 1), m_mipmap_levels(1), m_traits(traits),
+  : VariableNode(TEXTURE, size, valueType), m_count(max_nb_elements),
+    m_dims(dims), m_nb_memories(TEXTURE_CUBE == dims ? 6 : 1), m_mipmap_levels(1), m_traits(traits),
     m_width(width), m_height(height), m_depth(depth), m_old_filtering(traits.filtering())
 {
-  ShContext::current()->enter(0); // need m_texSizeVar to be uniform
+  Context::current()->enter(0); // need m_texSizeVar to be uniform
 
-  if (m_dims == SH_TEXTURE_1D) {
-    ShAttrib1f v = ShAttrib1f(width);
-    m_texSizeVar = ShVariable(v.node());
-  } else if (m_dims == SH_TEXTURE_3D) {
-    ShAttrib3f v = ShAttrib3f(width, height, depth);
-    m_texSizeVar = ShVariable(v.node());
+  if (m_dims == TEXTURE_1D) {
+    Attrib1f v = Attrib1f(width);
+    m_texSizeVar = Variable(v.node());
+  } else if (m_dims == TEXTURE_3D) {
+    Attrib3f v = Attrib3f(width, height, depth);
+    m_texSizeVar = Variable(v.node());
   } else {
-    ShAttrib2f v = ShAttrib2f(width, height);
-    m_texSizeVar = ShVariable(v.node());
+    Attrib2f v = Attrib2f(width, height);
+    m_texSizeVar = Variable(v.node());
   }
 
   // will be destroyed in initialize_memories()
-  m_memory = new ShMemoryPtr[m_nb_memories];
+  m_memory = new MemoryPtr[m_nb_memories];
   for (int i=0; i < m_nb_memories; i++) {
     m_memory[i] = NULL;
   }
 
   initialize_memories(true);
 
-  ShContext::current()->exit(); // need m_texSizeVar to be uniform
+  Context::current()->exit(); // need m_texSizeVar to be uniform
 }
 
-ShTextureNode::~ShTextureNode()
+TextureNode::~TextureNode()
 {
   delete [] m_memory;
 }
 
-void ShTextureNode::initialize_memories(bool force_initialization)
+void TextureNode::initialize_memories(bool force_initialization)
 {
   if ((m_traits.filtering() == m_old_filtering) && !force_initialization) {
     return; // skip initialization if the filtering trait didn't change
   }
 
   // make a copy of the base textures
-  ShMemoryPtr* old_memory = new ShMemoryPtr[6];
-  if (SH_TEXTURE_CUBE == m_dims) {
+  MemoryPtr* old_memory = new MemoryPtr[6];
+  if (TEXTURE_CUBE == m_dims) {
     for (int i=0; i < 6; i++) {
       old_memory[i] = m_memory[i * m_mipmap_levels];
     }
@@ -82,17 +82,17 @@ void ShTextureNode::initialize_memories(bool force_initialization)
   
   // update m_mipmap_levels and m_nb_memories
   m_mipmap_levels = 1;
-  if ((m_traits.filtering() == ShTextureTraits::SH_FILTER_MIPMAP_NEAREST) ||
-      (m_traits.filtering() == ShTextureTraits::SH_FILTER_MIPMAP_LINEAR)) {
+  if ((m_traits.filtering() == TextureTraits::FILTER_MIPMAP_NEAREST) ||
+      (m_traits.filtering() == TextureTraits::FILTER_MIPMAP_LINEAR)) {
     for (int w = m_width; w > 1; w >>= 1) {
       ++m_mipmap_levels;
     }
   }
-  m_nb_memories = (SH_TEXTURE_CUBE == m_dims) ? 6 * m_mipmap_levels : m_mipmap_levels;
+  m_nb_memories = (TEXTURE_CUBE == m_dims) ? 6 * m_mipmap_levels : m_mipmap_levels;
 
   // reset all textures
   delete [] m_memory;
-  m_memory = new ShMemoryPtr[m_nb_memories];
+  m_memory = new MemoryPtr[m_nb_memories];
   for (int i=0; i < m_nb_memories; i++) {
     m_memory[i] = NULL;
   }
@@ -102,7 +102,7 @@ void ShTextureNode::initialize_memories(bool force_initialization)
   }
 
   // restore base textures
-  if (SH_TEXTURE_CUBE == m_dims) {
+  if (TEXTURE_CUBE == m_dims) {
     for (int i=0; i < 6; i++) {
       m_memory[i * m_mipmap_levels] = old_memory[i];
     }
@@ -114,32 +114,32 @@ void ShTextureNode::initialize_memories(bool force_initialization)
   m_old_filtering = m_traits.filtering();
 }
 
-int ShTextureNode::mipmap_levels()
+int TextureNode::mipmap_levels()
 {
   initialize_memories(false);
   return m_mipmap_levels;
 }
 
-int ShTextureNode::num_memories() const
+int TextureNode::num_memories() const
 {
   return m_nb_memories;
 }
 
-ShTextureDims ShTextureNode::dims() const
+TextureDims TextureNode::dims() const
 {
   return m_dims;
 }
 
-ShMemoryPtr ShTextureNode::memory_error(int n) const
+MemoryPtr TextureNode::memory_error(int n) const
 {
   stringstream s;
   s << n << " is not a valid memory number (nb_memories = " << m_nb_memories 
     << ", mipmapping = " << m_traits.filtering() <<")";
-  shError(ShException(s.str()));
+  error(Exception(s.str()));
   return NULL;
 }
 
-ShMemoryPtr ShTextureNode::memory(int n)
+MemoryPtr TextureNode::memory(int n)
 {
   initialize_memories(false); // nb_memories will change if filtering was changed
   if (n < m_nb_memories) {
@@ -149,7 +149,7 @@ ShMemoryPtr ShTextureNode::memory(int n)
   }
 }
 
-ShPointer<const ShMemory> ShTextureNode::memory(int n) const
+Pointer<const Memory> TextureNode::memory(int n) const
 {
   if (n < m_nb_memories) {
     return m_memory[n];
@@ -158,7 +158,7 @@ ShPointer<const ShMemory> ShTextureNode::memory(int n) const
   }
 }
 
-void ShTextureNode::memory(const ShMemoryPtr& memory, int n)
+void TextureNode::memory(const MemoryPtr& memory, int n)
 {
   initialize_memories(0 == n); // nb_memories will change if filtering was changed
   if (n < m_nb_memories) {
@@ -168,95 +168,95 @@ void ShTextureNode::memory(const ShMemoryPtr& memory, int n)
   }
 }
 
-ShMemoryPtr ShTextureNode::memory(ShCubeDirection dir, int n)
+MemoryPtr TextureNode::memory(CubeDirection dir, int n)
 {
   return memory(static_cast<int>(dir) * mipmap_levels() + n);
 }
 
-ShPointer<const ShMemory> ShTextureNode::memory(ShCubeDirection dir, int n) const
+Pointer<const Memory> TextureNode::memory(CubeDirection dir, int n) const
 {
   return memory(static_cast<int>(dir) * m_mipmap_levels + n);
 }
 
-void ShTextureNode::memory(const ShMemoryPtr& mem, ShCubeDirection dir, int n)
+void TextureNode::memory(const MemoryPtr& mem, CubeDirection dir, int n)
 {
   memory(mem, static_cast<int>(dir) * mipmap_levels() + n);
 }
 
-const ShTextureTraits& ShTextureNode::traits() const
+const TextureTraits& TextureNode::traits() const
 {
   return m_traits;
 }
 
-ShTextureTraits& ShTextureNode::traits()
+TextureTraits& TextureNode::traits()
 {
   return m_traits;
 }
 
-void ShTextureNode::setTexSize(int w)
+void TextureNode::setTexSize(int w)
 {
   m_width = w;
-  ShContext::current()->enter(0);
-  ShAttrib1f s(m_texSizeVar.node(), ShSwizzle(m_texSizeVar().size()), false);
+  Context::current()->enter(0);
+  Attrib1f s(m_texSizeVar.node(), Swizzle(m_texSizeVar().size()), false);
   s = static_cast<float>(w);
   initialize_memories(true);
-  ShContext::current()->exit();
+  Context::current()->exit();
 }
 
-void ShTextureNode::setTexSize(int w, int h)
+void TextureNode::setTexSize(int w, int h)
 {
   m_width = w;
   m_height = h;
-  ShContext::current()->enter(0);
-  ShAttrib2f s(m_texSizeVar.node(), ShSwizzle(m_texSizeVar().size()), false);
-  s = ShAttrib2f(w, h);
+  Context::current()->enter(0);
+  Attrib2f s(m_texSizeVar.node(), Swizzle(m_texSizeVar().size()), false);
+  s = Attrib2f(w, h);
   initialize_memories(true);
-  ShContext::current()->exit();
+  Context::current()->exit();
 }
 
-void ShTextureNode::setTexSize(int w, int h, int d)
+void TextureNode::setTexSize(int w, int h, int d)
 {
   m_width = w;
   m_height = h;
   m_depth = d;
-  ShContext::current()->enter(0);
-  ShAttrib3f s(m_texSizeVar.node(), ShSwizzle(m_texSizeVar().size()), false);
-  s = ShAttrib3f(w, h, d);
+  Context::current()->enter(0);
+  Attrib3f s(m_texSizeVar.node(), Swizzle(m_texSizeVar().size()), false);
+  s = Attrib3f(w, h, d);
   initialize_memories(true);
-  ShContext::current()->exit();
+  Context::current()->exit();
 }
 
-int ShTextureNode::width() const
+int TextureNode::width() const
 {
   return m_width;
 }
 
-int ShTextureNode::height() const
+int TextureNode::height() const
 {
   return m_height;
 }
 
-int ShTextureNode::depth() const
+int TextureNode::depth() const
 {
   return m_depth;
 }
 
-int ShTextureNode::count() const
+int TextureNode::count() const
 {
   return (m_count != -1) ? m_count : m_width * m_height * m_depth;
 }
 
-void ShTextureNode::count(int n)
+void TextureNode::count(int n)
 {
   m_count = n;
 }
 
-const ShVariable& ShTextureNode::texSizeVar() const
+const Variable& TextureNode::texSizeVar() const
 {
   return m_texSizeVar;
 }
 
-float ShTextureNode::interpolate1D(float* base_data, int scale,
+float TextureNode::interpolate1D(float* base_data, int scale,
 				   int x, int component)
 {
   float sum = 0;
@@ -266,7 +266,7 @@ float ShTextureNode::interpolate1D(float* base_data, int scale,
   return static_cast<unsigned char>(sum / scale);
 }
 
-float ShTextureNode::interpolate2D(float* base_data, int scale,
+float TextureNode::interpolate2D(float* base_data, int scale,
 				   int x, int y, int component)
 {
   float sum = 0;
@@ -278,7 +278,7 @@ float ShTextureNode::interpolate2D(float* base_data, int scale,
   return sum / (scale * scale);
 }
 
-float ShTextureNode::interpolate3D(float* base_data, int scale,
+float TextureNode::interpolate3D(float* base_data, int scale,
 				   int x, int y, int z, int component)
 {
   float sum = 0;
@@ -292,7 +292,7 @@ float ShTextureNode::interpolate3D(float* base_data, int scale,
   return sum / (scale * scale * scale);
 }
 
-bool ShTextureNode::build_mipmaps(ShCubeDirection dir)
+bool TextureNode::build_mipmaps(CubeDirection dir)
 {
   if (m_mipmap_levels <= 1) return false; // mipmapping not enabled
 
@@ -316,50 +316,50 @@ bool ShTextureNode::build_mipmaps(ShCubeDirection dir)
 
   // Check for supported texture sizes
   switch (m_dims) {
-  case SH_TEXTURE_RECT:
-    shError(ShException("Rect textures cannot be mipmapped."));
+  case TEXTURE_RECT:
+    error(Exception("Rect textures cannot be mipmapped."));
     break;
-  case SH_TEXTURE_1D:
+  case TEXTURE_1D:
     break; // no check necessary
-  case SH_TEXTURE_3D: {
+  case TEXTURE_3D: {
     if (depth != height || width != height || width != depth) {
-      shError(ShException("The width, height and depth of mipmapped 3D textures must all be the same size."));
+      error(Exception("The width, height and depth of mipmapped 3D textures must all be the same size."));
     }
     break;
   }
-  case SH_TEXTURE_2D:
-  case SH_TEXTURE_CUBE: {
+  case TEXTURE_2D:
+  case TEXTURE_CUBE: {
     if (width != height) {
-      shError(ShException("The width and height of mipmapped 2D textures must be of the same size."));
+      error(Exception("The width and height of mipmapped 2D textures must be of the same size."));
     }
     break;
   }
   }
 
   // Create a float copy of the base storage
-  int base_memsize = m_size * m_width * m_height * m_depth * shTypeInfo(SH_FLOAT)->datasize();
-  ShHostMemoryPtr base_memory = new ShHostMemory(base_memsize, SH_FLOAT);
+  int base_memsize = m_size * m_width * m_height * m_depth * typeInfo(FLOAT)->datasize();
+  HostMemoryPtr base_memory = new HostMemory(base_memsize, FLOAT);
   float* base_data = reinterpret_cast<float*>(base_memory->hostStorage()->data());
-  ShHostStoragePtr base_storage = shref_dynamic_cast<ShHostStorage>(m_memory[direction * levels]->findStorage("host"));
-  if (!ShStorage::transfer(base_storage.object(), base_memory->hostStorage().object())) {
-    SH_DEBUG_ASSERT(0);
+  HostStoragePtr base_storage = shref_dynamic_cast<HostStorage>(m_memory[direction * levels]->findStorage("host"));
+  if (!Storage::transfer(base_storage.object(), base_memory->hostStorage().object())) {
+    DEBUG_ASSERT(0);
     return false;
   }
 
   for (int i=1; i < levels; i++) {
     switch (m_dims) {
-    case SH_TEXTURE_3D:
+    case TEXTURE_3D:
       depth >>= 1;
-    case SH_TEXTURE_2D:
-    case SH_TEXTURE_RECT:
-    case SH_TEXTURE_CUBE:
+    case TEXTURE_2D:
+    case TEXTURE_RECT:
+    case TEXTURE_CUBE:
       height >>= 1;
-    case SH_TEXTURE_1D:
+    case TEXTURE_1D:
       width >>= 1;
     }
 
-    int memsize = m_size * width * height * depth * shTypeInfo(SH_FLOAT)->datasize();
-    ShHostMemoryPtr memory = new ShHostMemory(memsize, SH_FLOAT);
+    int memsize = m_size * width * height * depth * typeInfo(FLOAT)->datasize();
+    HostMemoryPtr memory = new HostMemory(memsize, FLOAT);
     float* new_data = reinterpret_cast<float*>(memory->hostStorage()->data());
 
     // Nb of texels (for each axis) in the base texture used to
@@ -371,16 +371,16 @@ bool ShTextureNode::build_mipmaps(ShCubeDirection dir)
     int scale = 1 << i;
 
     switch (m_dims) {
-    case SH_TEXTURE_1D:
+    case TEXTURE_1D:
       for (int x=0; x < width; x++) {
 	for (int c=0; c < m_size; c++) {
 	  new_data[m_size * x + c] = interpolate1D(base_data, scale, x, c);
 	}
       }
       break;
-    case SH_TEXTURE_2D:
-    case SH_TEXTURE_RECT:
-    case SH_TEXTURE_CUBE:
+    case TEXTURE_2D:
+    case TEXTURE_RECT:
+    case TEXTURE_CUBE:
       for (int y=0; y < height; y++) {
 	for (int x=0; x < width; x++) {
 	  for (int c=0; c < m_size; c++) {
@@ -389,7 +389,7 @@ bool ShTextureNode::build_mipmaps(ShCubeDirection dir)
 	}
       }
       break;
-    case SH_TEXTURE_3D:
+    case TEXTURE_3D:
       for (int z=0; z < depth; z++) {
 	for (int y=0; y < height; y++) {
 	  for (int x=0; x < width; x++) {

@@ -17,31 +17,31 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#include "ShGeneric.hpp"
-#include "ShGenericImpl.hpp"
+#include "Generic.hpp"
+#include "GenericImpl.hpp"
 
 namespace SH {
 
-template class ShGeneric<1, float>;
-template class ShGeneric<2, float>;
-template class ShGeneric<3, float>;
-template class ShGeneric<4, float>;
+template class Generic<1, float>;
+template class Generic<2, float>;
+template class Generic<3, float>;
+template class Generic<4, float>;
 
-template ShGeneric<1, float> ShGeneric<1, float>::swiz<1>(int[]) const;
-template ShGeneric<2, float> ShGeneric<1, float>::swiz<2>(int[]) const;
-template ShGeneric<3, float> ShGeneric<1, float>::swiz<3>(int[]) const;
-template ShGeneric<4, float> ShGeneric<1, float>::swiz<4>(int[]) const;
-template ShGeneric<1, float> ShGeneric<2, float>::swiz<1>(int[]) const;
-template ShGeneric<2, float> ShGeneric<2, float>::swiz<2>(int[]) const;
-template ShGeneric<3, float> ShGeneric<2, float>::swiz<3>(int[]) const;
-template ShGeneric<4, float> ShGeneric<2, float>::swiz<4>(int[]) const;
-template ShGeneric<1, float> ShGeneric<3, float>::swiz<1>(int[]) const;
-template ShGeneric<2, float> ShGeneric<3, float>::swiz<2>(int[]) const;
-template ShGeneric<3, float> ShGeneric<3, float>::swiz<3>(int[]) const;
-template ShGeneric<4, float> ShGeneric<3, float>::swiz<4>(int[]) const;
-template ShGeneric<1, float> ShGeneric<4, float>::swiz<1>(int[]) const;
-template ShGeneric<2, float> ShGeneric<4, float>::swiz<2>(int[]) const;
-template ShGeneric<3, float> ShGeneric<4, float>::swiz<3>(int[]) const;
-template ShGeneric<4, float> ShGeneric<4, float>::swiz<4>(int[]) const;
+template Generic<1, float> Generic<1, float>::swiz<1>(int[]) const;
+template Generic<2, float> Generic<1, float>::swiz<2>(int[]) const;
+template Generic<3, float> Generic<1, float>::swiz<3>(int[]) const;
+template Generic<4, float> Generic<1, float>::swiz<4>(int[]) const;
+template Generic<1, float> Generic<2, float>::swiz<1>(int[]) const;
+template Generic<2, float> Generic<2, float>::swiz<2>(int[]) const;
+template Generic<3, float> Generic<2, float>::swiz<3>(int[]) const;
+template Generic<4, float> Generic<2, float>::swiz<4>(int[]) const;
+template Generic<1, float> Generic<3, float>::swiz<1>(int[]) const;
+template Generic<2, float> Generic<3, float>::swiz<2>(int[]) const;
+template Generic<3, float> Generic<3, float>::swiz<3>(int[]) const;
+template Generic<4, float> Generic<3, float>::swiz<4>(int[]) const;
+template Generic<1, float> Generic<4, float>::swiz<1>(int[]) const;
+template Generic<2, float> Generic<4, float>::swiz<2>(int[]) const;
+template Generic<3, float> Generic<4, float>::swiz<3>(int[]) const;
+template Generic<4, float> Generic<4, float>::swiz<4>(int[]) const;
 
 }

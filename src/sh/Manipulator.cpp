@@ -20,11 +20,11 @@
 #include <cstdarg>
 #include <cassert>
 #include <sstream>
-#include "ShVariableNode.hpp"
-#include "ShError.hpp"
-#include "ShDebug.hpp"
-#include "ShAlgebra.hpp"
-#include "ShManipulator.hpp"
+#include "VariableNode.hpp"
+#include "Error.hpp"
+#include "Debug.hpp"
+#include "Algebra.hpp"
+#include "Manipulator.hpp"
 
 namespace SH {
 
@@ -40,8 +40,8 @@ namespace SH {
  */
 /* int versions */
 template<>
-SH_DLLEXPORT
-int OffsetRange<int>::absIndex( int index, int offset, const ShProgramNode::VarList &v ) const {
+DLLEXPORT
+int OffsetRange<int>::absIndex( int index, int offset, const ProgramNode::VarList &v ) const {
   if( offset == _FIRST ) return 0;
   else if( offset == _SECOND ) return 1;
   else if( offset == _LAST ) return v.size() - 1;
@@ -55,9 +55,9 @@ int OffsetRange<int>::absIndex( int index, int offset, const ShProgramNode::VarL
 
 /* string versions */
 template<>
-SH_DLLEXPORT
+DLLEXPORT
 int OffsetRange<std::string>::absIndex( std::string index, int offset, 
-    const ShProgramNode::VarList &v ) const {
+    const ProgramNode::VarList &v ) const {
   if( offset == _FIRST ) return 0;
   else if( offset == _SECOND ) return 1;
   else if( offset == _LAST ) return v.size() - 1;
@@ -66,7 +66,7 @@ int OffsetRange<std::string>::absIndex( std::string index, int offset,
   result = OFFSET_RANGE_BAD_INDEX;
 
   // match first occurrence of the index name
-  ShProgramNode::VarList::const_iterator it = v.begin();
+  ProgramNode::VarList::const_iterator it = v.begin();
   for( int i = 0; it != v.end(); ++it, ++i ) {
     if( (*it)->name() == index && result == OFFSET_RANGE_BAD_INDEX ) {
       result = i; 
@@ -78,8 +78,8 @@ int OffsetRange<std::string>::absIndex( std::string index, int offset,
     std::ostringstream os;
     os << "Could not find index " << index << (offset >= 0 ? "+" : "")
       << offset << " in variable channels:";
-    ShProgramNode::print(os, v) << std::endl;
-    shError( ShAlgebraException( os.str()));
+    ProgramNode::print(os, v) << std::endl;
+    error( AlgebraException( os.str()));
   }
 
   result += offset;

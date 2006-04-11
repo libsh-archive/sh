@@ -17,19 +17,19 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#include "ShLib.hpp" // ShLibWorley needs to be included from within ShLib
+#include "Lib.hpp" // LibWorley needs to be included from within Lib
 
 #ifndef SHLIBWORLEY_HPP 
 #define SHLIBWORLEY_HPP
 
 #include <vector>
-#include "ShAttrib.hpp"
-#include "ShColor.hpp"
+#include "Attrib.hpp"
+#include "Color.hpp"
 
 namespace SH {
 
-/** \file ShLibWorley.hpp
- * This is an implementation of 2D ShWorley texture.  A Worley
+/** \file LibWorley.hpp
+ * This is an implementation of 2D Worley texture.  A Worley
  * texture is made by distributing a set of points in a space and
  * taking a weighted sum of basis functions for the k-nearest 
  * neighbours of a lookup point p.  These basis functions can 
@@ -47,8 +47,8 @@ namespace SH {
  * The generators are sorted by the first component in the N-tuple, 
  * so this should typically be a distance.
  *
- * In the future, when it's possible to "call" an ShProgram object
- * directly, Property Factories should actually be ShProgram objects
+ * In the future, when it's possible to "call" an Program object
+ * directly, Property Factories should actually be Program objects
  * that take a integer cell position as an input and output 
  * the desired properties. 
  *
@@ -63,9 +63,9 @@ namespace SH {
 template<int D, typename T>
 struct Generator {
   Generator() {}
-  ShAttrib<D, SH_TEMP, T> pos; // position 
-  ShAttrib<D, SH_TEMP, T> offset; // offset of the cell relative to lookup point's cell
-  ShAttrib<D, SH_TEMP, T> cell; // integer cell (this should actually be typed T = int, but not possible yet) 
+  Attrib<D, TEMP, T> pos; // position 
+  Attrib<D, TEMP, T> offset; // offset of the cell relative to lookup point's cell
+  Attrib<D, TEMP, T> cell; // integer cell (this should actually be typed T = int, but not possible yet) 
 };
 
 // Generator Factory 
@@ -75,7 +75,7 @@ template<int P, int D, typename T>
 struct GeneratorFactory {
   static const int NUM_POINTS = P;
   virtual ~GeneratorFactory() {}
-  virtual void operator()(const ShGeneric<D, T> &p, Generator<D, T> result[]) const = 0;
+  virtual void operator()(const Generic<D, T> &p, Generator<D, T> result[]) const = 0;
 };
 
 // Property Factory
@@ -89,7 +89,7 @@ struct PropertyFactory {
   typedef T PropType; 
   
   virtual ~PropertyFactory() {} 
-  virtual ShGeneric<N, T> operator()(const ShGeneric<D, T> &p, const Generator<D, T> &g) const = 0; 
+  virtual Generic<N, T> operator()(const Generic<D, T> &p, const Generator<D, T> &g) const = 0; 
 };
 
 #ifndef _WIN32
@@ -100,29 +100,29 @@ struct PropertyFactory {
  * @{
  */
 template<int K, int D, typename T>
-ShGeneric<K, T> worley(const ShGeneric<D, T> &p, bool useTexture = true); 
+Generic<K, T> worley(const Generic<D, T> &p, bool useTexture = true); 
 //@}
 
 /** \brief Worley texture generator.
  * This uses a GeneratorFactory and PropertyFactory of your choice.
  */
 template<int K, int L, int P, int D, typename T>
-void worley(ShGeneric<K, T> result[], const ShGeneric<D, T> &p, 
+void worley(Generic<K, T> result[], const Generic<D, T> &p, 
             const GeneratorFactory<P, D, T> *genFactory,
             const PropertyFactory<L, D, T> *propFactory);
 
 /** Makes a shader that takes 
- *  IN(1) ShTexCoord<D,T> texcoord; // texture lookup coordinates
+ *  IN(1) TexCoord<D,T> texcoord; // texture lookup coordinates
  *
  * TODO make Output a struct of some kind when Sh supports structs
- *  OUT(0) ShAttrib<K, T> result[N]; // properties of k-nearest neighbours 
+ *  OUT(0) Attrib<K, T> result[N]; // properties of k-nearest neighbours 
  * @{
  */
 template<int K, int D, typename T>
-ShProgram shWorley(bool useTexture);
+Program worley(bool useTexture);
 
 template<int K, int N, int P, int D, typename T>
-ShProgram shWorley(const GeneratorFactory<P, D, T> *genFactory,
+Program worley(const GeneratorFactory<P, D, T> *genFactory,
                    const PropertyFactory<N, D, T> *propFactory);
 //@}
 
@@ -130,6 +130,6 @@ ShProgram shWorley(const GeneratorFactory<P, D, T> *genFactory,
 
 } // namespace SH
 
-#include "ShLibWorleyImpl.hpp"
+#include "LibWorleyImpl.hpp"
 
 #endif // SHLIBWORLEY_HPP

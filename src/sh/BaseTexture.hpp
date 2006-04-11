@@ -21,56 +21,56 @@
 #define SHBASETEXTURE_HPP
 
 #include <string>
-#include "ShDllExport.hpp"
-#include "ShTextureNode.hpp"
-#include "ShMemory.hpp"
-#include "ShVariable.hpp"
+#include "DllExport.hpp"
+#include "TextureNode.hpp"
+#include "Memory.hpp"
+#include "Variable.hpp"
 #ifndef SH_DO_NOT_INCLUDE_GENERIC_IMPL
 #define SH_DO_NOT_INCLUDE_GENERIC_IMPL
-#include "ShAttrib.hpp"
+#include "Attrib.hpp"
 #undef  SH_DO_NOT_INCLUDE_GENERIC_IMPL
 #else
-#include "ShAttrib.hpp"
+#include "Attrib.hpp"
 #endif
-#include "ShMetaForwarder.hpp"
-#include "ShTexData.hpp"
+#include "MetaForwarder.hpp"
+#include "TexData.hpp"
 
 namespace SH {
 
 class
-SH_DLLEXPORT ShBaseTexture : public ShMetaForwarder {
+DLLEXPORT BaseTexture : public MetaForwarder {
 public:
-  ShBaseTexture(const ShTextureNodePtr& node);
+  BaseTexture(const TextureNodePtr& node);
 
   void build_mipmaps() { m_node->build_mipmaps(); }
 
   /// Obtain access to the node that this texture refers to
-  const ShTextureNodePtr & node() const { return m_node; }
+  const TextureNodePtr & node() const { return m_node; }
 
 protected:
-  ShTextureNodePtr m_node;
+  TextureNodePtr m_node;
 };
 
 /** Base type for 1D Textures.
  */
 template<typename T>
-class ShBaseTexture1D : public ShBaseTexture {
+class BaseTexture1D : public BaseTexture {
 public:
-  ShBaseTexture1D(const ShTextureTraits& traits);
-  ShBaseTexture1D(int width, const ShTextureTraits& traits);
+  BaseTexture1D(const TextureTraits& traits);
+  BaseTexture1D(int width, const TextureTraits& traits);
 
   template<typename T2>
-  ShTexData<T, 1, T2> operator()(const ShGeneric<1, T2>& coords) const;
+  TexData<T, 1, T2> operator()(const Generic<1, T2>& coords) const;
 
   template<typename T2>
-  ShTexData<T, 1, T2> operator[](const ShGeneric<1, T2>& coords) const;
+  TexData<T, 1, T2> operator[](const Generic<1, T2>& coords) const;
 
-  ShMemoryPtr memory(int mipmap_level=0);
-  ShMemoryCPtr memory(int mipmap_level=0) const;
-  void memory(const ShMemoryPtr& memory, int mipmap_level=0);
+  MemoryPtr memory(int mipmap_level=0);
+  MemoryCPtr memory(int mipmap_level=0) const;
+  void memory(const MemoryPtr& memory, int mipmap_level=0);
   void size(int width);
 
-  ShAttrib1f size() const;
+  Attrib1f size() const;
   int width() const { return m_node->width(); }
 
   typedef T return_type;
@@ -79,29 +79,29 @@ public:
 /** Base type for 2D Textures.
  */
 template<typename T>
-class ShBaseTexture2D : public ShBaseTexture  {
+class BaseTexture2D : public BaseTexture  {
 public:
-  ShBaseTexture2D(const ShTextureTraits& traits);
-  ShBaseTexture2D(int width, int height, const ShTextureTraits& traits);
+  BaseTexture2D(const TextureTraits& traits);
+  BaseTexture2D(int width, int height, const TextureTraits& traits);
 
   template<typename T2>
-  ShTexData<T, 2, T2> operator()(const ShGeneric<2, T2>& coords) const;
+  TexData<T, 2, T2> operator()(const Generic<2, T2>& coords) const;
 
   /// Texture lookup with derivatives
   template<typename T2>
-  ShTexData<T, 2, T2> operator()(const ShGeneric<2, T2>& coords,
-                                 const ShGeneric<2, T2>& dx,
-                                 const ShGeneric<2, T2>& dy) const;
+  TexData<T, 2, T2> operator()(const Generic<2, T2>& coords,
+                                 const Generic<2, T2>& dx,
+                                 const Generic<2, T2>& dy) const;
   
   template<typename T2>
-  ShTexData<T, 2, T2> operator[](const ShGeneric<2, T2>& coords) const;
+  TexData<T, 2, T2> operator[](const Generic<2, T2>& coords) const;
 
-  ShMemoryPtr memory(int mipmap_level=0);
-  ShMemoryCPtr memory(int mipmap_level=0) const;
-  void memory(const ShMemoryPtr& memory, int mipmap_level=0);
+  MemoryPtr memory(int mipmap_level=0);
+  MemoryCPtr memory(int mipmap_level=0) const;
+  void memory(const MemoryPtr& memory, int mipmap_level=0);
   void size(int width, int height);
 
-  ShAttrib2f size() const;
+  Attrib2f size() const;
 
   int width() const { return m_node->width(); }
   int height() const { return m_node->height(); }
@@ -112,23 +112,23 @@ public:
 /** Base type for Rectangular Textures.
  */
 template<typename T>
-class ShBaseTextureRect : public ShBaseTexture  {
+class BaseTextureRect : public BaseTexture  {
 public:
-  ShBaseTextureRect(const ShTextureTraits& traits);
-  ShBaseTextureRect(int width, int height, const ShTextureTraits& traits);
+  BaseTextureRect(const TextureTraits& traits);
+  BaseTextureRect(int width, int height, const TextureTraits& traits);
 
   template<typename T2>
-  ShTexData<T, 2, T2> operator()(const ShGeneric<2, T2>& coords) const;
+  TexData<T, 2, T2> operator()(const Generic<2, T2>& coords) const;
 
   template<typename T2>
-  ShTexData<T, 2, T2> operator[](const ShGeneric<2, T2>& coords) const;
+  TexData<T, 2, T2> operator[](const Generic<2, T2>& coords) const;
 
-  ShMemoryPtr memory(int mipmap_level=0);
-  ShMemoryCPtr memory(int mipmap_level=0) const;
-  void memory(const ShMemoryPtr& memory, int mipmap_level=0);
+  MemoryPtr memory(int mipmap_level=0);
+  MemoryCPtr memory(int mipmap_level=0) const;
+  void memory(const MemoryPtr& memory, int mipmap_level=0);
   void size(int width, int height);
 
-  ShAttrib2f size() const;
+  Attrib2f size() const;
 
   int width() const { return m_node->width(); }
   int height() const { return m_node->height(); }
@@ -139,23 +139,23 @@ public:
 /** Base type for 3D Textures.
  */
 template<typename T>
-class ShBaseTexture3D : public ShBaseTexture  {
+class BaseTexture3D : public BaseTexture  {
 public:
-  ShBaseTexture3D(const ShTextureTraits& traits);
-  ShBaseTexture3D(int width, int height, int depth, const ShTextureTraits& traits);
+  BaseTexture3D(const TextureTraits& traits);
+  BaseTexture3D(int width, int height, int depth, const TextureTraits& traits);
 
   template<typename T2>
-  ShTexData<T, 3, T2> operator()(const ShGeneric<3, T2>& coords) const;
+  TexData<T, 3, T2> operator()(const Generic<3, T2>& coords) const;
 
   template<typename T2>
-  ShTexData<T, 3, T2> operator[](const ShGeneric<3, T2>& coords) const;
+  TexData<T, 3, T2> operator[](const Generic<3, T2>& coords) const;
 
-  ShMemoryPtr memory(int mipmap_level=0);
-  ShMemoryCPtr memory(int mipmap_level=0) const;
-  void memory(const ShMemoryPtr& memory, int mipmap_level=0);
+  MemoryPtr memory(int mipmap_level=0);
+  MemoryCPtr memory(int mipmap_level=0) const;
+  void memory(const MemoryPtr& memory, int mipmap_level=0);
   void size(int width, int height, int depth);
 
-  ShAttrib3f size() const;
+  Attrib3f size() const;
   int width() const { return m_node->width(); }
   int height() const { return m_node->height(); }
   int depth() const { return m_node->depth(); }
@@ -166,20 +166,20 @@ public:
 /** Base type for Cube Textures.
  */
 template<typename T>
-class ShBaseTextureCube : public ShBaseTexture {
+class BaseTextureCube : public BaseTexture {
 public:
-  ShBaseTextureCube(const ShTextureTraits& traits);
-  ShBaseTextureCube(int width, int height, const ShTextureTraits& traits);
+  BaseTextureCube(const TextureTraits& traits);
+  BaseTextureCube(int width, int height, const TextureTraits& traits);
 
   template<typename T2>
-  ShTexData<T, 3, T2> operator()(const ShGeneric<3, T2>& coords) const;
+  TexData<T, 3, T2> operator()(const Generic<3, T2>& coords) const;
 
-  ShMemoryPtr memory(ShCubeDirection face, int mipmap_level=0);
-  ShMemoryCPtr memory(ShCubeDirection face, int mipmap_level=0) const;
-  void memory(const ShMemoryPtr& memory, ShCubeDirection face, int mipmap_level=0);
+  MemoryPtr memory(CubeDirection face, int mipmap_level=0);
+  MemoryCPtr memory(CubeDirection face, int mipmap_level=0) const;
+  void memory(const MemoryPtr& memory, CubeDirection face, int mipmap_level=0);
   void size(int width, int height);
 
-  ShAttrib2f size() const;
+  Attrib2f size() const;
 
   int width() const { return m_node->width(); }
   int height() const { return m_node->height(); }
@@ -189,6 +189,6 @@ public:
 
 }
 
-#include "ShBaseTextureImpl.hpp"
+#include "BaseTextureImpl.hpp"
 
 #endif

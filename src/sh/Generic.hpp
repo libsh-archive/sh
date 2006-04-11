@@ -20,127 +20,127 @@
 #ifndef SHGENERIC_HPP
 #define SHGENERIC_HPP
 
-#include "ShVariableType.hpp"
-#include "ShDataType.hpp"
-#include "ShVariable.hpp"
-#include "ShVariant.hpp"
+#include "VariableType.hpp"
+#include "DataType.hpp"
+#include "Variable.hpp"
+#include "Variant.hpp"
 
 namespace SH {
 
-class ShProgram;
+class Program;
 
 /** A variable of length N.
  *
  * This class is provided to make definition of functions that work
  * over n-tuples of particular types easier.
  *
- * ShAttrib derives from ShGeneric. Unlike ShGeneric, which only has
- * two template parameters, ShAttrib has four template
+ * Attrib derives from Generic. Unlike Generic, which only has
+ * two template parameters, Attrib has four template
  * parameters. This would make writing functions quite ugly. E.g.:
  *
  * Without Generic:
  *
- * template<int N, typename T, ShBindingType B1, ShBindingType B2,
+ * template<int N, typename T, BindingType B1, BindingType B2,
  *          bool S1, bool S2>
- * ShAttrib<N, SH_TEMP, T> add(const ShAttrib<N, B1, T, S1>& a,
- *                             const ShAttrib<N, B2, T, S2>& b);
+ * Attrib<N, TEMP, T> add(const Attrib<N, B1, T, S1>& a,
+ *                             const Attrib<N, B2, T, S2>& b);
  *
  * With Generic:
  *
  * template<int N, typename T>
- * ShAttrib<N, SH_TEMP, T> add(const ShGeneric<N, T>& a,
- *                             const ShGeneric<N, T>& b);
+ * Attrib<N, TEMP, T> add(const Generic<N, T>& a,
+ *                             const Generic<N, T>& b);
  *
  * This class is explicitly instantiated for T = float with 1 <= N <= 4.
  */
 template<int N, typename T>
-class ShGeneric : public ShVariable 
+class Generic : public Variable 
 {
 public:
   typedef T storage_type;
-  static const ShValueType value_type = ShStorageTypeInfo<T>::value_type;
-  typedef typename ShHostType<T>::type host_type; 
-  typedef typename ShMemType<T>::type mem_type; 
+  static const ValueType value_type = StorageTypeInfo<T>::value_type;
+  typedef typename HostType<T>::type host_type; 
+  typedef typename MemType<T>::type mem_type; 
   static const int typesize = N;
 
-  typedef ShDataVariant<T, SH_HOST> VariantType; 
-  typedef ShPointer<VariantType> VariantTypePtr;
-  typedef ShPointer<const VariantType> VariantTypeCPtr;
+  typedef DataVariant<T, HOST> VariantType; 
+  typedef Pointer<VariantType> VariantTypePtr;
+  typedef Pointer<const VariantType> VariantTypeCPtr;
 
 
-  ShGeneric(const ShVariableNodePtr& node, ShSwizzle swizzle, bool neg);
-  ~ShGeneric();
+  Generic(const VariableNodePtr& node, Swizzle swizzle, bool neg);
+  ~Generic();
 
   // Copy constructor 
   // This should only be used internally.
-  // It generates a ShVariableNode of type SH_TEMP 
+  // It generates a VariableNode of type TEMP 
   // @{
 
   // @todo type get rid of this. default should be okay for 
   // internal usage
-  // ShGeneric(const ShGeneric<N, T> &other);
+  // Generic(const Generic<N, T> &other);
 
   template<typename T2>
-  ShGeneric(const ShGeneric<N, T2> &other);
+  Generic(const Generic<N, T2> &other);
   // @}
 
   // This is needed because the templated assignment op is 
   // non-default, hence C++ spec 12.8.10 says the default
   // is implicitly defined.  Here that doesn't work so well. 
-  ShGeneric& operator=(const ShGeneric& other);
+  Generic& operator=(const Generic& other);
 
   template<typename T2>
-  ShGeneric& operator=(const ShGeneric<N, T2>& other);
+  Generic& operator=(const Generic<N, T2>& other);
 
-  ShGeneric& operator=(const ShProgram& other);
+  Generic& operator=(const Program& other);
 
-  ShGeneric& operator++();
-  ShGeneric& operator--();
+  Generic& operator++();
+  Generic& operator--();
   
   template<typename T2>
-  ShGeneric& operator+=(const ShGeneric<N, T2>& right);
+  Generic& operator+=(const Generic<N, T2>& right);
 
   template<typename T2>
-  ShGeneric& operator-=(const ShGeneric<N, T2>& right);
+  Generic& operator-=(const Generic<N, T2>& right);
 
   template<typename T2>
-  ShGeneric& operator*=(const ShGeneric<N, T2>& right);
+  Generic& operator*=(const Generic<N, T2>& right);
 
   template<typename T2>
-  ShGeneric& operator/=(const ShGeneric<N, T2>& right);
+  Generic& operator/=(const Generic<N, T2>& right);
 
   template<typename T2>
-  ShGeneric& operator%=(const ShGeneric<N, T2>& right);
+  Generic& operator%=(const Generic<N, T2>& right);
 
   template<typename T2>
-  ShGeneric& operator+=(const ShGeneric<1, T2>& right);
+  Generic& operator+=(const Generic<1, T2>& right);
 
   template<typename T2>
-  ShGeneric& operator-=(const ShGeneric<1, T2>& right);
+  Generic& operator-=(const Generic<1, T2>& right);
 
   template<typename T2>
-  ShGeneric& operator*=(const ShGeneric<1, T2>& right);
+  Generic& operator*=(const Generic<1, T2>& right);
 
   template<typename T2>
-  ShGeneric& operator/=(const ShGeneric<1, T2>& right);
+  Generic& operator/=(const Generic<1, T2>& right);
 
   template<typename T2>
-  ShGeneric& operator%=(const ShGeneric<1, T2>& right);
+  Generic& operator%=(const Generic<1, T2>& right);
 
-  ShGeneric& operator+=(host_type);
-  ShGeneric& operator-=(host_type);
-  ShGeneric& operator*=(host_type);
-  ShGeneric& operator/=(host_type);
-  ShGeneric& operator%=(host_type);
+  Generic& operator+=(host_type);
+  Generic& operator-=(host_type);
+  Generic& operator*=(host_type);
+  Generic& operator/=(host_type);
+  Generic& operator%=(host_type);
 
-  ShGeneric operator-() const;
+  Generic operator-() const;
 
-  ShGeneric operator()() const; ///< Identity swizzle
-  ShGeneric<1, T> operator()(int) const;
-  ShGeneric<1, T> operator[](int) const;
-  ShGeneric<2, T> operator()(int, int) const;
-  ShGeneric<3, T> operator()(int, int, int) const;
-  ShGeneric<4, T> operator()(int, int, int, int) const;
+  Generic operator()() const; ///< Identity swizzle
+  Generic<1, T> operator()(int) const;
+  Generic<1, T> operator[](int) const;
+  Generic<2, T> operator()(int, int) const;
+  Generic<3, T> operator()(int, int, int) const;
+  Generic<4, T> operator()(int, int, int, int) const;
 
   /// Range Metadata
   void range(host_type low, host_type high);
@@ -153,7 +153,7 @@ public:
   
   // Arbitrary Swizzle
   template<int N2>
-  ShGeneric<N2, T> swiz(int indices[]) const;
+  Generic<N2, T> swiz(int indices[]) const;
 
   /// Get the values of this variable, with swizzling taken into account
   void getValues(host_type dest[]) const;
@@ -166,81 +166,81 @@ public:
 
 
 protected:
-  ShGeneric(const ShVariableNodePtr& node);
+  Generic(const VariableNodePtr& node);
 
 };
 
 template<typename T>
-class ShGeneric<1, T> : public ShVariable 
+class Generic<1, T> : public Variable 
 {
 public:
   typedef T storage_type;
-  static const ShValueType value_type = ShStorageTypeInfo<T>::value_type;
-  typedef typename ShHostType<T>::type host_type; 
-  typedef typename ShMemType<T>::type mem_type; 
+  static const ValueType value_type = StorageTypeInfo<T>::value_type;
+  typedef typename HostType<T>::type host_type; 
+  typedef typename MemType<T>::type mem_type; 
   static const int typesize = 1;
 
-  typedef ShDataVariant<T, SH_HOST> VariantType; 
-  typedef ShPointer<VariantType> VariantTypePtr;
-  typedef ShPointer<const VariantType> VariantTypeCPtr;
+  typedef DataVariant<T, HOST> VariantType; 
+  typedef Pointer<VariantType> VariantTypePtr;
+  typedef Pointer<const VariantType> VariantTypeCPtr;
 
 
-  ShGeneric(const ShVariableNodePtr& node, ShSwizzle swizzle, bool neg);
-  ~ShGeneric();
+  Generic(const VariableNodePtr& node, Swizzle swizzle, bool neg);
+  ~Generic();
 
   // Copy constructor 
-  // This should only be used internally.  It generates a SH_TEMP, 
-  // SH_ATTRIB, with the only characteristic copied from other being
+  // This should only be used internally.  It generates a TEMP, 
+  // ATTRIB, with the only characteristic copied from other being
   // the storage type.
   // @{
 
   // @todo type get rid of this
-  // ShGeneric(const ShGeneric<1, T> &other);
+  // Generic(const Generic<1, T> &other);
 
   template<typename T2>
-  ShGeneric(const ShGeneric<1, T2> &other);
+  Generic(const Generic<1, T2> &other);
   // @}
 
-  ShGeneric& operator=(const ShGeneric<1, T>& other);
+  Generic& operator=(const Generic<1, T>& other);
 
   template<typename T2>
-  ShGeneric& operator=(const ShGeneric<1, T2>& other);
+  Generic& operator=(const Generic<1, T2>& other);
 
-  ShGeneric& operator=(host_type);
-  ShGeneric& operator=(const ShProgram& other);
+  Generic& operator=(host_type);
+  Generic& operator=(const Program& other);
   
-  ShGeneric& operator++();
-  ShGeneric& operator--();
+  Generic& operator++();
+  Generic& operator--();
 
   template<typename T2>
-  ShGeneric& operator+=(const ShGeneric<1, T2>& right);
+  Generic& operator+=(const Generic<1, T2>& right);
 
   template<typename T2>
-  ShGeneric& operator-=(const ShGeneric<1, T2>& right);
+  Generic& operator-=(const Generic<1, T2>& right);
 
   template<typename T2>
-  ShGeneric& operator*=(const ShGeneric<1, T2>& right);
+  Generic& operator*=(const Generic<1, T2>& right);
 
   template<typename T2>
-  ShGeneric& operator/=(const ShGeneric<1, T2>& right);
+  Generic& operator/=(const Generic<1, T2>& right);
 
   template<typename T2>
-  ShGeneric& operator%=(const ShGeneric<1, T2>& right);
+  Generic& operator%=(const Generic<1, T2>& right);
 
-  ShGeneric& operator+=(host_type);
-  ShGeneric& operator-=(host_type);
-  ShGeneric& operator*=(host_type);
-  ShGeneric& operator/=(host_type);
-  ShGeneric& operator%=(host_type);
+  Generic& operator+=(host_type);
+  Generic& operator-=(host_type);
+  Generic& operator*=(host_type);
+  Generic& operator/=(host_type);
+  Generic& operator%=(host_type);
 
-  ShGeneric operator-() const;
+  Generic operator-() const;
 
-  ShGeneric operator()() const; ///< Identity swizzle
-  ShGeneric<1, T> operator()(int) const;
-  ShGeneric<1, T> operator[](int) const;
-  ShGeneric<2, T> operator()(int, int) const;
-  ShGeneric<3, T> operator()(int, int, int) const;
-  ShGeneric<4, T> operator()(int, int, int, int) const;
+  Generic operator()() const; ///< Identity swizzle
+  Generic<1, T> operator()(int) const;
+  Generic<1, T> operator[](int) const;
+  Generic<2, T> operator()(int, int) const;
+  Generic<3, T> operator()(int, int, int) const;
+  Generic<4, T> operator()(int, int, int, int) const;
 
   /// Range Metadata
   void range(host_type low, host_type high);
@@ -253,7 +253,7 @@ public:
   
   // Arbitrary Swizzle
   template<int N2>
-  ShGeneric<N2, T> swiz(int indices[]) const;
+  Generic<N2, T> swiz(int indices[]) const;
 
   /// Get the values of this variable, with swizzling taken into account
   void getValues(host_type dest[]) const;
@@ -265,91 +265,91 @@ public:
   void setValues(const host_type values[]);
 
 protected:
-  ShGeneric(const ShVariableNodePtr& node);
+  Generic(const VariableNodePtr& node);
 
 };
 
-typedef ShGeneric<1, ShFracUShort> ShGeneric1fus;
-typedef ShGeneric<2, ShFracUShort> ShGeneric2fus;
-typedef ShGeneric<3, ShFracUShort> ShGeneric3fus;
-typedef ShGeneric<4, ShFracUShort> ShGeneric4fus;
+typedef Generic<1, FracUShort> Generic1fus;
+typedef Generic<2, FracUShort> Generic2fus;
+typedef Generic<3, FracUShort> Generic3fus;
+typedef Generic<4, FracUShort> Generic4fus;
 
-typedef ShGeneric<1, short> ShGeneric1s;
-typedef ShGeneric<2, short> ShGeneric2s;
-typedef ShGeneric<3, short> ShGeneric3s;
-typedef ShGeneric<4, short> ShGeneric4s;
+typedef Generic<1, short> Generic1s;
+typedef Generic<2, short> Generic2s;
+typedef Generic<3, short> Generic3s;
+typedef Generic<4, short> Generic4s;
 
-typedef ShGeneric<1, ShFracUInt> ShGeneric1fui;
-typedef ShGeneric<2, ShFracUInt> ShGeneric2fui;
-typedef ShGeneric<3, ShFracUInt> ShGeneric3fui;
-typedef ShGeneric<4, ShFracUInt> ShGeneric4fui;
+typedef Generic<1, FracUInt> Generic1fui;
+typedef Generic<2, FracUInt> Generic2fui;
+typedef Generic<3, FracUInt> Generic3fui;
+typedef Generic<4, FracUInt> Generic4fui;
 
-typedef ShGeneric<1, ShFracByte> ShGeneric1fb;
-typedef ShGeneric<2, ShFracByte> ShGeneric2fb;
-typedef ShGeneric<3, ShFracByte> ShGeneric3fb;
-typedef ShGeneric<4, ShFracByte> ShGeneric4fb;
+typedef Generic<1, FracByte> Generic1fb;
+typedef Generic<2, FracByte> Generic2fb;
+typedef Generic<3, FracByte> Generic3fb;
+typedef Generic<4, FracByte> Generic4fb;
 
-typedef ShGeneric<1, int> ShGeneric1i;
-typedef ShGeneric<2, int> ShGeneric2i;
-typedef ShGeneric<3, int> ShGeneric3i;
-typedef ShGeneric<4, int> ShGeneric4i;
+typedef Generic<1, int> Generic1i;
+typedef Generic<2, int> Generic2i;
+typedef Generic<3, int> Generic3i;
+typedef Generic<4, int> Generic4i;
 
-typedef ShGeneric<1, double> ShGeneric1d;
-typedef ShGeneric<2, double> ShGeneric2d;
-typedef ShGeneric<3, double> ShGeneric3d;
-typedef ShGeneric<4, double> ShGeneric4d;
+typedef Generic<1, double> Generic1d;
+typedef Generic<2, double> Generic2d;
+typedef Generic<3, double> Generic3d;
+typedef Generic<4, double> Generic4d;
 
-typedef ShGeneric<1, unsigned char> ShGeneric1ub;
-typedef ShGeneric<2, unsigned char> ShGeneric2ub;
-typedef ShGeneric<3, unsigned char> ShGeneric3ub;
-typedef ShGeneric<4, unsigned char> ShGeneric4ub;
+typedef Generic<1, unsigned char> Generic1ub;
+typedef Generic<2, unsigned char> Generic2ub;
+typedef Generic<3, unsigned char> Generic3ub;
+typedef Generic<4, unsigned char> Generic4ub;
 
-typedef ShGeneric<1, float> ShGeneric1f;
-typedef ShGeneric<2, float> ShGeneric2f;
-typedef ShGeneric<3, float> ShGeneric3f;
-typedef ShGeneric<4, float> ShGeneric4f;
+typedef Generic<1, float> Generic1f;
+typedef Generic<2, float> Generic2f;
+typedef Generic<3, float> Generic3f;
+typedef Generic<4, float> Generic4f;
 
-typedef ShGeneric<1, char> ShGeneric1b;
-typedef ShGeneric<2, char> ShGeneric2b;
-typedef ShGeneric<3, char> ShGeneric3b;
-typedef ShGeneric<4, char> ShGeneric4b;
+typedef Generic<1, char> Generic1b;
+typedef Generic<2, char> Generic2b;
+typedef Generic<3, char> Generic3b;
+typedef Generic<4, char> Generic4b;
 
-typedef ShGeneric<1, unsigned short> ShGeneric1us;
-typedef ShGeneric<2, unsigned short> ShGeneric2us;
-typedef ShGeneric<3, unsigned short> ShGeneric3us;
-typedef ShGeneric<4, unsigned short> ShGeneric4us;
+typedef Generic<1, unsigned short> Generic1us;
+typedef Generic<2, unsigned short> Generic2us;
+typedef Generic<3, unsigned short> Generic3us;
+typedef Generic<4, unsigned short> Generic4us;
 
-typedef ShGeneric<1, ShFracUByte> ShGeneric1fub;
-typedef ShGeneric<2, ShFracUByte> ShGeneric2fub;
-typedef ShGeneric<3, ShFracUByte> ShGeneric3fub;
-typedef ShGeneric<4, ShFracUByte> ShGeneric4fub;
+typedef Generic<1, FracUByte> Generic1fub;
+typedef Generic<2, FracUByte> Generic2fub;
+typedef Generic<3, FracUByte> Generic3fub;
+typedef Generic<4, FracUByte> Generic4fub;
 
-typedef ShGeneric<1, ShHalf> ShGeneric1h;
-typedef ShGeneric<2, ShHalf> ShGeneric2h;
-typedef ShGeneric<3, ShHalf> ShGeneric3h;
-typedef ShGeneric<4, ShHalf> ShGeneric4h;
+typedef Generic<1, Half> Generic1h;
+typedef Generic<2, Half> Generic2h;
+typedef Generic<3, Half> Generic3h;
+typedef Generic<4, Half> Generic4h;
 
-typedef ShGeneric<1, ShFracShort> ShGeneric1fs;
-typedef ShGeneric<2, ShFracShort> ShGeneric2fs;
-typedef ShGeneric<3, ShFracShort> ShGeneric3fs;
-typedef ShGeneric<4, ShFracShort> ShGeneric4fs;
+typedef Generic<1, FracShort> Generic1fs;
+typedef Generic<2, FracShort> Generic2fs;
+typedef Generic<3, FracShort> Generic3fs;
+typedef Generic<4, FracShort> Generic4fs;
 
-typedef ShGeneric<1, ShFracInt> ShGeneric1fi;
-typedef ShGeneric<2, ShFracInt> ShGeneric2fi;
-typedef ShGeneric<3, ShFracInt> ShGeneric3fi;
-typedef ShGeneric<4, ShFracInt> ShGeneric4fi;
+typedef Generic<1, FracInt> Generic1fi;
+typedef Generic<2, FracInt> Generic2fi;
+typedef Generic<3, FracInt> Generic3fi;
+typedef Generic<4, FracInt> Generic4fi;
 
-typedef ShGeneric<1, unsigned int> ShGeneric1ui;
-typedef ShGeneric<2, unsigned int> ShGeneric2ui;
-typedef ShGeneric<3, unsigned int> ShGeneric3ui;
-typedef ShGeneric<4, unsigned int> ShGeneric4ui;
+typedef Generic<1, unsigned int> Generic1ui;
+typedef Generic<2, unsigned int> Generic2ui;
+typedef Generic<3, unsigned int> Generic3ui;
+typedef Generic<4, unsigned int> Generic4ui;
 
 }
 
-// This is a hack for ShAttrib.hpp in particular.
+// This is a hack for Attrib.hpp in particular.
 // A little dirty, but it works well.
 #ifndef SH_DO_NOT_INCLUDE_GENERIC_IMPL
-#include "ShGenericImpl.hpp"
+#include "GenericImpl.hpp"
 #endif
 
 #endif

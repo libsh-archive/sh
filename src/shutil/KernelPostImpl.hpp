@@ -21,16 +21,16 @@
 #define SHUTIL_KERNELPOSTIMPL_HPP 
 
 #include <sstream>
-#include "sh/ShSyntax.hpp"
-#include "sh/ShPosition.hpp"
-#include "sh/ShManipulator.hpp"
-#include "sh/ShAlgebra.hpp"
-#include "sh/ShProgram.hpp"
-#include "sh/ShNibbles.hpp"
-#include "ShKernelPost.hpp"
-#include "ShFunc.hpp"
+#include "sh/Syntax.hpp"
+#include "sh/Position.hpp"
+#include "sh/Manipulator.hpp"
+#include "sh/Algebra.hpp"
+#include "sh/Program.hpp"
+#include "sh/Nibbles.hpp"
+#include "KernelPost.hpp"
+#include "Func.hpp"
 
-/** \file ShKernelPostImpl.hpp
+/** \file KernelPostImpl.hpp
  * This is an implementation of useful postprocessing kernels 
  */
 
@@ -39,12 +39,12 @@ namespace ShUtil {
 using namespace SH;
 
 template<typename T>
-ShProgram shHalftone(const ShBaseTexture2D<T> &tex) {
-  ShProgram kernel = SH_BEGIN_FRAGMENT_PROGRAM {
-    typename T::InputType SH_NAMEDECL(in, "result");
-    ShInputTexCoord2f SH_NAMEDECL(tc, "texcoord");
+Program halftone(const BaseTexture2D<T> &tex) {
+  Program kernel = SH_BEGIN_FRAGMENT_PROGRAM {
+    typename T::InputType NAMEDECL(in, "result");
+    InputTexCoord2f NAMEDECL(tc, "texcoord");
 
-    typename T::OutputType SH_NAMEDECL(out, "result");
+    typename T::OutputType NAMEDECL(out, "result");
 
     // TODO rotate color components...
     // TODO decide whether this frac should stay
@@ -54,13 +54,13 @@ ShProgram shHalftone(const ShBaseTexture2D<T> &tex) {
 }
 
 template<int N, typename T>
-ShProgram shNoisify(bool useTexture) {
-  ShProgram kernel = SH_BEGIN_FRAGMENT_PROGRAM {
-    ShInputAttrib1f SH_DECL(noise_scale);
-    typename T::InputType SH_NAMEDECL(in, "result");
-    ShAttrib<N, SH_INPUT, typename T::storage_type> SH_NAMEDECL(tc, "texcoord");
+Program noisify(bool useTexture) {
+  Program kernel = SH_BEGIN_FRAGMENT_PROGRAM {
+    InputAttrib1f DECL(noise_scale);
+    typename T::InputType NAMEDECL(in, "result");
+    Attrib<N, INPUT, typename T::storage_type> NAMEDECL(tc, "texcoord");
 
-    typename T::OutputType SH_NAMEDECL(out, "result");
+    typename T::OutputType NAMEDECL(out, "result");
 
     out = in + cellnoise<T::typesize>(tc, useTexture)*noise_scale; 
   } SH_END;

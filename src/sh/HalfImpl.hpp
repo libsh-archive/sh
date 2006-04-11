@@ -22,23 +22,23 @@
 
 #include <iostream>
 #include <cmath>
-#include "ShMath.hpp"
-#include "ShHalf.hpp"
+#include "Math.hpp"
+#include "Half.hpp"
 
 namespace SH {
 
 inline
-ShHalf::ShHalf()
+Half::Half()
 {}
 
 inline
-ShHalf::ShHalf(double value)
+Half::Half(double value)
   : m_val(to_val(value))
 {
 }
 
 inline
-ShHalf::operator double() const
+Half::operator double() const
 {
   return get_double();
 }
@@ -46,84 +46,84 @@ ShHalf::operator double() const
 
 /** Arithmetic operators **/
 inline
-ShHalf& ShHalf::operator=(double value)
+Half& Half::operator=(double value)
 {
   m_val = to_val(value);
   return *this;
 }
 
 inline
-ShHalf& ShHalf::operator=(const ShHalf& other)
+Half& Half::operator=(const Half& other)
 {
   m_val = other.m_val;
   return *this;
 }
 
 inline
-ShHalf& ShHalf::operator+=(double value)
+Half& Half::operator+=(double value)
 {
   set_val(get_double() + value); 
   return *this;
 }
 
 inline
-ShHalf& ShHalf::operator+=(const ShHalf& other)
+Half& Half::operator+=(const Half& other)
 {
   set_val(get_double() + other.get_double());
   return *this;
 }
 
 inline
-ShHalf& ShHalf::operator-=(double value)
+Half& Half::operator-=(double value)
 {
   set_val(get_double() - value);
   return *this; 
 }
 
 inline
-ShHalf& ShHalf::operator-=(const ShHalf& other)
+Half& Half::operator-=(const Half& other)
 {
   set_val(get_double() - other.get_double());
   return *this; 
 }
 
 inline
-ShHalf& ShHalf::operator*=(double value)
+Half& Half::operator*=(double value)
 {
   set_val(get_double() * value);
   return *this; 
 }
 
 inline
-ShHalf& ShHalf::operator*=(const ShHalf& other)
+Half& Half::operator*=(const Half& other)
 {
   set_val(get_double() * other.get_double());
   return *this;
 }
 
 inline
-ShHalf& ShHalf::operator/=(double value)
+Half& Half::operator/=(double value)
 {
   set_val(get_double() / value);
   return *this; 
 }
 
 inline
-ShHalf& ShHalf::operator/=(const ShHalf& other)
+Half& Half::operator/=(const Half& other)
 {
   set_val(get_double() / other.get_double());
   return *this;
 }
 
 inline
-ShHalf& ShHalf::operator%=(double value)
+Half& Half::operator%=(double value)
 {
   set_val(std::fmod(get_double(), value));
   return *this; 
 }
 
 inline
-ShHalf& ShHalf::operator%=(const ShHalf& other)
+Half& Half::operator%=(const Half& other)
 {
   set_val(std::fmod(get_double(), other.get_double()));
   return *this;
@@ -131,7 +131,7 @@ ShHalf& ShHalf::operator%=(const ShHalf& other)
 
 /** Negation **/
 inline
-ShHalf ShHalf::operator-() const 
+Half Half::operator-() const 
 {
   //twiddle sign bit
   T result = m_val ^ S;
@@ -139,14 +139,14 @@ ShHalf ShHalf::operator-() const
 }
 
 inline
-std::ostream& operator<<(std::ostream &out, const ShHalf &value)
+std::ostream& operator<<(std::ostream &out, const Half &value)
 {
   out << double(value); 
   return out;
 }
 
 inline
-std::istream& operator>>(std::istream &in, ShHalf &value)
+std::istream& operator>>(std::istream &in, Half &value)
 {
   double temp;
   in >> temp;
@@ -155,15 +155,15 @@ std::istream& operator>>(std::istream &in, ShHalf &value)
 }
 
 inline
-ShHalf ShHalf::make_half(T value)
+Half Half::make_half(T value)
 {
-  ShHalf result;
+  Half result;
   result.m_val = value; 
   return result;
 }
 
 inline
-ShHalf::T ShHalf::to_val(double value) {
+Half::T Half::to_val(double value) {
   int exponent;
   double fraction = frexp(value, &exponent);
   short sign = fraction < 0;
@@ -187,12 +187,12 @@ ShHalf::T ShHalf::to_val(double value) {
 }
 
 inline
-void ShHalf::set_val(double value) {
+void Half::set_val(double value) {
   m_val = to_val(value);
 }
 
 inline
-double ShHalf::get_double() const {
+double Half::get_double() const {
   // @todo range - use OpenEXR's version since this is probably slow
   short sign = -((m_val >> 14) & 2) + 1; // -1 for negative, +1 for positive                   
   short exponent = (m_val >> 10) & 0x1F;

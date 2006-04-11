@@ -35,13 +35,13 @@
 using namespace SH;
 using namespace std;
 
-ShMatrix4x4f mv, mvd;
-ShPoint3f lightPos;
+Matrix4x4f mv, mvd;
+Point3f lightPos;
 Camera camera;
-ShProgram vsh, fsh;
-ShProgramSetPtr shaders;
+Program vsh, fsh;
+ProgramSetPtr shaders;
 
-ShColor3f diffusecolor;
+Color3f diffusecolor;
 
 // Glut data
 int buttons[5] = {GLUT_UP, GLUT_UP, GLUT_UP, GLUT_UP, GLUT_UP};
@@ -54,11 +54,11 @@ bool show_help = false;
 void initShaders()
 {
   vsh = SH_BEGIN_VERTEX_PROGRAM {
-    ShInOutPosition4f pos;
-    ShInOutNormal3f normal;
-    ShOutputVector3f lightv;
+    InOutPosition4f pos;
+    InOutNormal3f normal;
+    OutputVector3f lightv;
 
-    ShPoint3f posv = (mv | pos)(0,1,2); // Compute viewspace position
+    Point3f posv = (mv | pos)(0,1,2); // Compute viewspace position
     lightv = lightPos - posv; // Compute light direction
     
     pos = mvd | pos; // Project position
@@ -66,11 +66,11 @@ void initShaders()
   } SH_END;
 
   fsh = SH_BEGIN_FRAGMENT_PROGRAM {
-    ShInputPosition4f pos;
-    ShInputNormal3f normal;
-    ShInputVector3f lightv;
+    InputPosition4f pos;
+    InputNormal3f normal;
+    InputVector3f lightv;
 
-    ShOutputColor3f color;
+    OutputColor3f color;
 
     normal = normalize(normal);
     lightv = normalize(lightv);
@@ -78,20 +78,20 @@ void initShaders()
     color = (normal | lightv) * diffusecolor;
   } SH_END;
 
-  shaders = new ShProgramSet(vsh, fsh);
+  shaders = new ProgramSet(vsh, fsh);
 }
 
 void display()
 {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  shBind(*shaders);
+  bind(*shaders);
 
   glFrontFace(GL_CW);
   glutSolidTeapot(2.5);
   glFrontFace(GL_CCW);
 
-  shUnbind(*shaders);
+  unbind(*shaders);
   
   // Help information
   if (show_help) {
@@ -110,8 +110,8 @@ void display()
 
 void setupView()
 {
-  mv = camera.shModelView();
-  mvd = camera.shModelViewProjection(ShMatrix4x4f());
+  mv = camera.modelView();
+  mvd = camera.modelViewProjection(Matrix4x4f());
 }
 
 void reshape(int width, int height)
@@ -160,16 +160,16 @@ void keyboard(unsigned char k, int x, int y)
 {
   switch(k) {
   case '1':
-    diffusecolor = ShColor3f(0.5, 0.1, 0.2);
+    diffusecolor = Color3f(0.5, 0.1, 0.2);
     break;
   case '2':
-    diffusecolor = ShColor3f(0.5, 0.7, 0.9);
+    diffusecolor = Color3f(0.5, 0.7, 0.9);
     break;
   case '3':
-    lightPos = ShPoint3f(5.0, 5.0, 5.0);
+    lightPos = Point3f(5.0, 5.0, 5.0);
     break;
   case '4':
-    lightPos = ShPoint3f(20.0, 20.0, 20.0);
+    lightPos = Point3f(20.0, 20.0, 20.0);
     break;
   case 'h':
   case 'H':
@@ -241,7 +241,7 @@ int main(int argc, char** argv)
   glutKeyboardFunc(keyboard);
 
   if (argc > 1) {
-    shUseBackend(argv[1]);
+    useBackend(argv[1]);
   }
 
   glEnable(GL_DEPTH_TEST);
@@ -250,12 +250,12 @@ int main(int argc, char** argv)
 
   // Initial values for the uniforms
   camera.move(0.0, 0.0, -15.0);
-  lightPos = ShPoint3f(5.0, 5.0, 5.0);
-  diffusecolor = ShColor3f(0.5, 0.1, 0.2);
+  lightPos = Point3f(5.0, 5.0, 5.0);
+  diffusecolor = Color3f(0.5, 0.1, 0.2);
 
   try {
     initShaders();
-    shBind(*shaders);
+    bind(*shaders);
   }
   catch (const std::exception &e) {
     cerr << e.what() << endl;

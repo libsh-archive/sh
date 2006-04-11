@@ -20,7 +20,7 @@
 #include "GlslCode.hpp"
 #include <iostream>
 
-#define SH_DEBUG_GLSL_BACKEND
+#define DEBUG_GLSL_BACKEND
 
 namespace shgl {
 
@@ -30,21 +30,21 @@ using namespace std;
 GlslSet::GlslSet()
   : m_linked(false)
 {
-  SH_GL_CHECK_ERROR(m_arb_program = glCreateProgramObjectARB());
+  GL_CHECK_ERROR(m_arb_program = glCreateProgramObjectARB());
   if (!m_arb_program) {
-    shError(ShBackendException("Cannot create a glsl program object. Is glsl supported by your GPU/drivers ?"));
+    error(BackendException("Cannot create a glsl program object. Is glsl supported by your GPU/drivers ?"));
   }
 
   m_shaders[0] = 0;
   m_shaders[1] = 0;
 }
 
-GlslSet::GlslSet(const SH::ShPointer<GlslCode>& code)
+GlslSet::GlslSet(const SH::Pointer<GlslCode>& code)
   : m_linked(false)
 {
-  SH_GL_CHECK_ERROR(m_arb_program = glCreateProgramObjectARB());
+  GL_CHECK_ERROR(m_arb_program = glCreateProgramObjectARB());
   if (!m_arb_program) {
-    shError(ShBackendException("Cannot create a glsl program object. Is glsl supported by your GPU/drivers ?"));
+    error(BackendException("Cannot create a glsl program object. Is glsl supported by your GPU/drivers ?"));
   }
 
   m_shaders[0] = 0;
@@ -52,23 +52,23 @@ GlslSet::GlslSet(const SH::ShPointer<GlslCode>& code)
   attach(code);
 }
 
-GlslSet::GlslSet(const SH::ShProgramSet& s)
+GlslSet::GlslSet(const SH::ProgramSet& s)
   : m_linked(false)
 {
-  SH_GL_CHECK_ERROR(m_arb_program = glCreateProgramObjectARB());
+  GL_CHECK_ERROR(m_arb_program = glCreateProgramObjectARB());
   if (!m_arb_program) {
-    shError(ShBackendException("Cannot create a glsl program object. Is glsl supported by your GPU/drivers ?"));
+    error(BackendException("Cannot create a glsl program object. Is glsl supported by your GPU/drivers ?"));
   }
 
   m_shaders[0] = 0;
   m_shaders[1] = 0;
-  for (ShProgramSet::const_iterator I = s.begin(); I != s.end(); ++I) {
+  for (ProgramSet::const_iterator I = s.begin(); I != s.end(); ++I) {
     // TODO: use the glsl backend
     GlslCodePtr code = shref_dynamic_cast<GlslCode>((*I)->code());
 
-    // TODO: use shError()
-    SH_DEBUG_ASSERT(code);
-    SH_DEBUG_ASSERT(!m_shaders[code->glsl_unit()]);
+    // TODO: use error()
+    DEBUG_ASSERT(code);
+    DEBUG_ASSERT(!m_shaders[code->glsl_unit()]);
 
     attach(code);
   }
@@ -77,9 +77,9 @@ GlslSet::GlslSet(const SH::ShProgramSet& s)
 GlslSet::GlslSet(const GlslSet& other)
   : m_linked(false)
 {
-  SH_GL_CHECK_ERROR(m_arb_program = glCreateProgramObjectARB());
+  GL_CHECK_ERROR(m_arb_program = glCreateProgramObjectARB());
   if (!m_arb_program) {
-    shError(ShBackendException("Cannot create a glsl program object. Is glsl supported by your GPU/drivers ?"));
+    error(BackendException("Cannot create a glsl program object. Is glsl supported by your GPU/drivers ?"));
   }
 
   m_shaders[0] = 0;
@@ -107,13 +107,13 @@ GlslSet& GlslSet::operator=(const GlslSet& other)
 GlslSet::~GlslSet()
 {
   unbind(); // this is necessary
-  SH_GL_CHECK_ERROR(glDeleteObjectARB(m_arb_program));
+  GL_CHECK_ERROR(glDeleteObjectARB(m_arb_program));
   m_arb_program = 0;
 }
 
-void GlslSet::attach(const SH::ShPointer<GlslCode>& code)
+void GlslSet::attach(const SH::Pointer<GlslCode>& code)
 {
-  SH_DEBUG_ASSERT(m_arb_program);
+  DEBUG_ASSERT(m_arb_program);
 
   if (!code) return;
   if (m_shaders[code->glsl_unit()] == code) return;
@@ -121,35 +121,35 @@ void GlslSet::attach(const SH::ShPointer<GlslCode>& code)
   // Unbind old shader
   unbind();
   if (m_shaders[code->glsl_unit()]) {
-    SH_GL_CHECK_ERROR(glDetachObjectARB(m_arb_program, m_shaders[code->glsl_unit()]->glsl_shader()));
+    GL_CHECK_ERROR(glDetachObjectARB(m_arb_program, m_shaders[code->glsl_unit()]->glsl_shader()));
   }
 
   // Bind new shader
-  SH_GL_CHECK_ERROR(glAttachObjectARB(m_arb_program, code->glsl_shader()));
+  GL_CHECK_ERROR(glAttachObjectARB(m_arb_program, code->glsl_shader()));
   m_shaders[code->glsl_unit()] = code;
   code->bind_generic_attributes(m_arb_program);
 
   m_linked = false; // will need to relink
 }
 
-void GlslSet::detach(const SH::ShPointer<GlslCode>& code)
+void GlslSet::detach(const SH::Pointer<GlslCode>& code)
 {
   if (!code) return;
   if (m_shaders[code->glsl_unit()] != code) return;
 
   unbind();
 
-  SH_DEBUG_ASSERT(m_arb_program);
-  SH_GL_CHECK_ERROR(glDetachObjectARB(m_arb_program, code->glsl_shader()));
+  DEBUG_ASSERT(m_arb_program);
+  GL_CHECK_ERROR(glDetachObjectARB(m_arb_program, code->glsl_shader()));
   m_shaders[code->glsl_unit()] = 0;
 
   // Need to relink
   m_linked = false;
 }
 
-void GlslSet::replace(const SH::ShPointer<GlslCode>& code)
+void GlslSet::replace(const SH::Pointer<GlslCode>& code)
 {
-  SH_DEBUG_ASSERT(code);
+  DEBUG_ASSERT(code);
   if (m_shaders[code->glsl_unit()] == code && !m_shaders[1 - code->glsl_unit()]) return;
 
   detach(m_shaders[0]);
@@ -160,9 +160,9 @@ void GlslSet::replace(const SH::ShPointer<GlslCode>& code)
 
 void GlslSet::link()
 {
-  SH_DEBUG_ASSERT(m_arb_program);
+  DEBUG_ASSERT(m_arb_program);
 
-  SH_GL_CHECK_ERROR(glLinkProgramARB(m_arb_program));
+  GL_CHECK_ERROR(glLinkProgramARB(m_arb_program));
 
   // Check linking
   GLint linked;
@@ -191,7 +191,7 @@ bool GlslSet::bound() const
 {
   // Query GL to see if we are bound
   GLhandleARB currently_bound = 0;
-  SH_GL_CHECK_ERROR(currently_bound = glGetHandleARB(GL_PROGRAM_OBJECT_ARB));
+  GL_CHECK_ERROR(currently_bound = glGetHandleARB(GL_PROGRAM_OBJECT_ARB));
   return (currently_bound == m_arb_program);
 }
 
@@ -201,9 +201,9 @@ void GlslSet::bind()
 
   if (current() && current() != this) current()->unbind();
   
-  SH_GL_CHECK_ERROR(glUseProgramObjectARB(m_arb_program));
+  GL_CHECK_ERROR(glUseProgramObjectARB(m_arb_program));
 
-#ifdef SH_DEBUG_GLSL_BACKEND
+#ifdef DEBUG_GLSL_BACKEND
   // This could be slow, it should not be enabled in release code
   glValidateProgramARB(m_arb_program);
   GLint validated;
@@ -231,7 +231,7 @@ void GlslSet::unbind()
 {
   if (!bound()) return;
 
-  SH_GL_CHECK_ERROR(glUseProgramObjectARB(0));
+  GL_CHECK_ERROR(glUseProgramObjectARB(0));
 
   for (int i = 0; i < 2; i++) {
     if (!m_shaders[i]) continue;

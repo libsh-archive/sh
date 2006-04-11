@@ -21,9 +21,9 @@
 #define SHPARSER_HPP
 
 #include <stack>
-#include "ShDllExport.hpp"
-#include "ShCtrlGraph.hpp"
-#include "ShToken.hpp"
+#include "DllExport.hpp"
+#include "CtrlGraph.hpp"
+#include "Token.hpp"
 
 namespace SH {
 
@@ -32,45 +32,45 @@ namespace SH {
  * blocks and parses it into a control graph.
  */
 class
-SH_DLLEXPORT ShParser {
+DLLEXPORT Parser {
 public:
   /// Return a pointer to the singleton instance
-  static ShParser* instance();
+  static Parser* instance();
 
   /** Parse blocks into the control graph between head and tail.
    */
-  void parse(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail, const ShBlockListPtr& blocks);
+  void parse(CtrlGraphNodePtr& head, CtrlGraphNodePtr& tail, const BlockListPtr& blocks);
   
 private:
   // This class is a singleton
-  ShParser() {}
+  Parser() {}
 
-  void parseBlock(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail, const ShBasicBlockPtr& block);
-  void parseStmts(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail, const ShBlockListPtr& blocks);
-  void parseIf(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail, const ShBlockListPtr& blocks);
-  void parseFor(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail, const ShBlockListPtr& blocks);
-  void parseWhile(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail, const ShBlockListPtr& blocks);
-  void parseDo(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail, const ShBlockListPtr& blocks);
-  void parseSection(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail, const ShBlockListPtr& blocks);
-  void parse_break(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail, const ShBlockListPtr& blocks);
-  void parse_continue(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail, const ShBlockListPtr& blocks);
+  void parseBlock(CtrlGraphNodePtr& head, CtrlGraphNodePtr& tail, const BasicBlockPtr& block);
+  void parseStmts(CtrlGraphNodePtr& head, CtrlGraphNodePtr& tail, const BlockListPtr& blocks);
+  void parseIf(CtrlGraphNodePtr& head, CtrlGraphNodePtr& tail, const BlockListPtr& blocks);
+  void parseFor(CtrlGraphNodePtr& head, CtrlGraphNodePtr& tail, const BlockListPtr& blocks);
+  void parseWhile(CtrlGraphNodePtr& head, CtrlGraphNodePtr& tail, const BlockListPtr& blocks);
+  void parseDo(CtrlGraphNodePtr& head, CtrlGraphNodePtr& tail, const BlockListPtr& blocks);
+  void parseSection(CtrlGraphNodePtr& head, CtrlGraphNodePtr& tail, const BlockListPtr& blocks);
+  void parse_break(CtrlGraphNodePtr& head, CtrlGraphNodePtr& tail, const BlockListPtr& blocks);
+  void parse_continue(CtrlGraphNodePtr& head, CtrlGraphNodePtr& tail, const BlockListPtr& blocks);
 
   /// Just pops a token
-  ShTokenPtr popToken(const ShBlockListPtr& blocks);
+  TokenPtr popToken(const BlockListPtr& blocks);
   /// Checks if front of block list matches expected, pops, and returns
-  ShTokenPtr popToken(const ShBlockListPtr& blocks, ShTokenType expectedType, unsigned int expectedArgs=0);
+  TokenPtr popToken(const BlockListPtr& blocks, TokenType expectedType, unsigned int expectedArgs=0);
 
   /// Push the break and continue scope
-  void push_scope(ShCtrlGraphNodePtr& break_node, ShCtrlGraphNodePtr& continue_node);
+  void push_scope(CtrlGraphNodePtr& break_node, CtrlGraphNodePtr& continue_node);
   /// Pop the break and continue scope
   void pop_scope();
 
   // Stacks that keep track of the current scope
-  std::stack<ShCtrlGraphNodePtr> m_break_node;    // for SH_BREAK
-  std::stack<ShCtrlGraphNodePtr> m_continue_node; // for SH_CONTINUE
+  std::stack<CtrlGraphNodePtr> m_break_node;    // for SH_BREAK
+  std::stack<CtrlGraphNodePtr> m_continue_node; // for SH_CONTINUE
 
   // NOT IMPLEMENTED
-  ShParser(const ShParser&);
+  Parser(const Parser&);
 };
  
 }

@@ -17,108 +17,108 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#include "ShStream.hpp"
-#include "ShProgram.hpp"
-#include "ShChannelNode.hpp"
-#include "ShSyntax.hpp"
-#include "ShAlgebra.hpp"
-#include "ShContext.hpp"
+#include "Stream.hpp"
+#include "Program.hpp"
+#include "ChannelNode.hpp"
+#include "Syntax.hpp"
+#include "Algebra.hpp"
+#include "Context.hpp"
 
 namespace SH {
 
 // May want to move this elsewhere
-ShProgram connect(const ShChannelNodePtr& node, const ShProgram& program)
+Program connect(const ChannelNodePtr& node, const Program& program)
 {
-  ShProgram nibble = SH_BEGIN_PROGRAM() {
-    ShVariable out(node->clone(SH_OUTPUT));
+  Program nibble = SH_BEGIN_PROGRAM() {
+    Variable out(node->clone(OUTPUT));
 
-    ShVariable streamVar(node);
-    ShStatement stmt(out, SH_OP_FETCH, streamVar);
-    ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
+    Variable streamVar(node);
+    Statement stmt(out, OP_FETCH, streamVar);
+    Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
   } SH_END_PROGRAM;
   return connect(nibble, program);
 }
 
-ShStream::ShStream()
+Stream::Stream()
 {
 }
-ShStream::ShStream(const ShChannelNodePtr& channel)
+Stream::Stream(const ChannelNodePtr& channel)
 {
   append(channel);
 }
 
-ShStream::const_iterator ShStream::begin() const
+Stream::const_iterator Stream::begin() const
 {
   return m_nodes.begin();
 }
 
-ShStream::const_iterator ShStream::end() const
+Stream::const_iterator Stream::end() const
 {
   return m_nodes.end();
 }
 
-ShStream::iterator ShStream::begin() 
+Stream::iterator Stream::begin() 
 {
   return m_nodes.begin();
 }
 
-ShStream::iterator ShStream::end() 
+Stream::iterator Stream::end() 
 {
   return m_nodes.end();
 }
 
-int ShStream::size() const
+int Stream::size() const
 {
   return m_nodes.size();
 }
 
-void ShStream::append(const ShChannelNodePtr& node)
+void Stream::append(const ChannelNodePtr& node)
 {
   m_nodes.push_back(node);
 }
 
-void ShStream::prepend(const ShChannelNodePtr& node)
+void Stream::prepend(const ChannelNodePtr& node)
 {
   m_nodes.push_front(node);
 }
 
-ShStream combine(const ShStream& left, const ShStream& right)
+Stream combine(const Stream& left, const Stream& right)
 {
-  ShStream stream = left;
-  for (ShStream::NodeList::const_iterator I = right.begin(); I != right.end();
+  Stream stream = left;
+  for (Stream::NodeList::const_iterator I = right.begin(); I != right.end();
        ++I) {
     stream.append(*I);
   }
   return stream;
 }
 
-ShStream operator&(const ShStream& left, const ShStream& right)
+Stream operator&(const Stream& left, const Stream& right)
 {
   return combine(left, right);
 }
 
 // Connecting (currying) streams onto programs
-ShProgram connect(const ShStream& stream, const ShProgram& program)
+Program connect(const Stream& stream, const Program& program)
 {
-  ShProgram p;
+  Program p;
   p = program;
-  for (ShStream::NodeList::const_iterator I = stream.begin();
+  for (Stream::NodeList::const_iterator I = stream.begin();
        I != stream.end(); ++I) {
     p = connect(*I, p);
   }
   return p;
 }
 
-ShProgram operator<<(const ShProgram& program, const ShStream& stream)
+Program operator<<(const Program& program, const Stream& stream)
 {
   return connect(stream, program);
 }
 
-ShStream& ShStream::operator=(const ShProgram& program)
+Stream& Stream::operator=(const Program& program)
 {
-  SH_DEBUG_ASSERT(program.node());
-  ShBackendPtr backend = ShBackend::get_backend(program.target());
-  SH_DEBUG_ASSERT(backend);
+  DEBUG_ASSERT(program.node());
+  BackendPtr backend = Backend::get_backend(program.target());
+  DEBUG_ASSERT(backend);
   backend->execute(program.node(), *this);
   return *this;
 }

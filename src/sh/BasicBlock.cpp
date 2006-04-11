@@ -18,36 +18,36 @@
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 #include <iostream>
-#include "ShBasicBlock.hpp"
-#include "ShInfo.hpp"
-#include "ShUtility.hpp"
+#include "BasicBlock.hpp"
+#include "Info.hpp"
+#include "Utility.hpp"
 
 namespace SH {
 
-ShBasicBlock::~ShBasicBlock()
+BasicBlock::~BasicBlock()
 {
 }
 
-void ShBasicBlock::print(std::ostream& out, int indent) const
+void BasicBlock::print(std::ostream& out, int indent) const
 {
   using std::endl;
   
-  shPrintIndent(out, indent);
+  printIndent(out, indent);
   out << "{" << endl;
   for (const_iterator I = m_statements.begin();
        I != m_statements.end(); ++I) {
-    shPrintIndent(out, indent + 2);
+    printIndent(out, indent + 2);
     out << *I << endl;
   }
-  shPrintIndent(out, indent);
+  printIndent(out, indent);
   out << "}" << endl;
 }
 
-void ShBasicBlock::graphvizDump(std::ostream& out) const
+void BasicBlock::graphvizDump(std::ostream& out) const
 {
   for (const_iterator I = m_statements.begin();
        I != m_statements.end(); ++I) {
-    const ShInfoComment* comment = I->get_info<ShInfoComment>();    
+    const InfoComment* comment = I->get_info<InfoComment>();    
     out << *I; 
     if(comment) {
       out << " // " << comment->comment;
@@ -56,12 +56,12 @@ void ShBasicBlock::graphvizDump(std::ostream& out) const
   }
 }
 
-void ShBasicBlock::addStatement(const ShStatement& stmt)
+void BasicBlock::addStatement(const Statement& stmt)
 {
   m_statements.push_back(stmt);
 }
 
-void ShBasicBlock::prependStatement(const ShStatement& stmt)
+void BasicBlock::prependStatement(const Statement& stmt)
 {
   m_statements.push_front(stmt);
 }

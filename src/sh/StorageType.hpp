@@ -20,12 +20,12 @@
 #ifndef SHSTORAGETYPE_HPP
 #define SHSTORAGETYPE_HPP
 
-#include "ShUtility.hpp"
-#include "ShVariableType.hpp"
-#include "ShHalf.hpp"
-#include "ShFraction.hpp"
+#include "Utility.hpp"
+#include "VariableType.hpp"
+#include "Half.hpp"
+#include "Fraction.hpp"
 
-/** @file ShDataType.hpp
+/** @file DataType.hpp
  * Defines the host computation and memory storage c++ types associated with
  * each Sh value type.
  *
@@ -34,7 +34,7 @@
 namespace SH {
 
 /** A special C++ type used to represent an invalid storage type */
-struct ShInvalidStorageType {};
+struct InvalidStorageType {};
 
 /**  The various value type integers correspond to storage types. 
  *
@@ -48,127 +48,127 @@ struct ShInvalidStorageType {};
  * iv) bits 8-14 = 0 for regular, 1 for interval, 2 for affine 
  * v) bit 15 = 0 for valid type, 1 for invalid type
  * @{ */
-typedef unsigned int ShValueType;
-enum __ShValueTypeEnum {
-  SH_HALF       = 0x0001, 
-  SH_FLOAT      = 0x0002, 
-  SH_DOUBLE     = 0x0003, 
+typedef unsigned int ValueType;
+enum __ValueTypeEnum {
+  HALF       = 0x0001, 
+  FLOAT      = 0x0002, 
+  DOUBLE     = 0x0003, 
 
-  SH_BYTE       = 0x0010,
-  SH_SHORT      = 0x0011,
-  SH_INT        = 0x0012,
+  BYTE       = 0x0010,
+  SHORT      = 0x0011,
+  INT        = 0x0012,
 
-  SH_UBYTE      = 0x0018,
-  SH_USHORT     = 0x0019,
-  SH_UINT       = 0x001A,
+  UBYTE      = 0x0018,
+  USHORT     = 0x0019,
+  UINT       = 0x001A,
 
-  SH_FBYTE      = 0x0020,
-  SH_FSHORT     = 0x0021,
-  SH_FINT       = 0x0022,
+  FBYTE      = 0x0020,
+  FSHORT     = 0x0021,
+  FINT       = 0x0022,
 
-  SH_FUBYTE     = 0x0028,
-  SH_FUSHORT    = 0x0029,
-  SH_FUINT      = 0x002A,
+  FUBYTE     = 0x0028,
+  FUSHORT    = 0x0029,
+  FUINT      = 0x002A,
 
-  SH_I_HALF    = 0x0101,
-  SH_I_FLOAT   = 0x0102,
-  SH_I_DOUBLE  = 0x0103,
+  I_HALF    = 0x0101,
+  I_FLOAT   = 0x0102,
+  I_DOUBLE  = 0x0103,
 
-  SH_A_HALF    = 0x0201,
-  SH_A_FLOAT   = 0x0202,
-  SH_A_DOUBLE  = 0x0203,
+  A_HALF    = 0x0201,
+  A_FLOAT   = 0x0202,
+  A_DOUBLE  = 0x0203,
 
-  SH_VALUETYPE_SIZE_MASK = 0x0007,
+  VALUETYPE_SIZE_MASK = 0x0007,
 
-  SH_VALUETYPE_SIGNED_MASK = 0x0008,
-  SH_VALUETYPE_SIGNED = 0x0000,
+  VALUETYPE_SIGNED_MASK = 0x0008,
+  VALUETYPE_SIGNED = 0x0000,
 
-  SH_VALUETYPE_TYPE_MASK = 0x00F0,
-  SH_VALUETYPE_TYPE_FLOAT = 0x0000,
-  SH_VALUETYPE_TYPE_INT   = 0x0010,
-  SH_VALUETYPE_TYPE_FRAC  = 0x0020,
+  VALUETYPE_TYPE_MASK = 0x00F0,
+  VALUETYPE_TYPE_FLOAT = 0x0000,
+  VALUETYPE_TYPE_INT   = 0x0010,
+  VALUETYPE_TYPE_FRAC  = 0x0020,
 
-  SH_VALUETYPE_SPECIAL_MASK = 0x7F00, 
-  SH_VALUETYPE_SPECIAL_NONE = 0x0000, 
-  SH_VALUETYPE_SPECIAL_I    = 0x0100, 
-  SH_VALUETYPE_SPECIAL_A    = 0x0200, 
+  VALUETYPE_SPECIAL_MASK = 0x7F00, 
+  VALUETYPE_SPECIAL_NONE = 0x0000, 
+  VALUETYPE_SPECIAL_I    = 0x0100, 
+  VALUETYPE_SPECIAL_A    = 0x0200, 
 
-  SH_VALUETYPE_END = 0xFFFF
+  VALUETYPE_END = 0xFFFF
 };
 // @}
 
-/** Functions to retrieve traits about storage types from their ShValueType 
+/** Functions to retrieve traits about storage types from their ValueType 
  *
  * @todo range - these should check for user defined value types later
  * and return false.
  * @{ */
-bool shIsFloat(ShValueType value_type);
-bool shIsInteger(ShValueType value_type);
-bool shIsFraction(ShValueType value_type);
+bool isFloat(ValueType value_type);
+bool isInteger(ValueType value_type);
+bool isFraction(ValueType value_type);
 
-bool shIsSigned(ShValueType value_type);
+bool isSigned(ValueType value_type);
 
-bool shIsRegularValueType(ShValueType value_type);
+bool isRegularValueType(ValueType value_type);
 
-bool shIsInvalidValueType(ShValueType value_type);
+bool isInvalidValueType(ValueType value_type);
 // @}
 
 /** Mappings from value type to storage type and back. 
  * @{ */ 
-template<ShValueType V> struct __ShValueToStorageType { typedef ShInvalidStorageType type; };
-template<typename T> struct __ShStorageToValueType { static const ShValueType type = SH_VALUETYPE_END; };
+template<ValueType V> struct __ValueToStorageType { typedef InvalidStorageType type; };
+template<typename T> struct __StorageToValueType { static const ValueType type = VALUETYPE_END; };
 
-#define SH_VALUE_STORAGE_TYPE_MAPPING(V, T)\
-  template<> struct __ShValueToStorageType<V >    { typedef T type; }; \
-  template<> struct __ShStorageToValueType<T >    { static const ShValueType type = V; }; 
+#define VALUE_STORAGE_TYPE_MAPPING(V, T)\
+  template<> struct __ValueToStorageType<V >    { typedef T type; }; \
+  template<> struct __StorageToValueType<T >    { static const ValueType type = V; }; 
 
-SH_VALUE_STORAGE_TYPE_MAPPING(SH_HALF,    ShHalf); 
-SH_VALUE_STORAGE_TYPE_MAPPING(SH_FLOAT,   float); 
-SH_VALUE_STORAGE_TYPE_MAPPING(SH_DOUBLE,  double); 
+VALUE_STORAGE_TYPE_MAPPING(HALF,    Half); 
+VALUE_STORAGE_TYPE_MAPPING(FLOAT,   float); 
+VALUE_STORAGE_TYPE_MAPPING(DOUBLE,  double); 
 
-SH_VALUE_STORAGE_TYPE_MAPPING(SH_BYTE,    char); 
-SH_VALUE_STORAGE_TYPE_MAPPING(SH_SHORT,   short); 
-SH_VALUE_STORAGE_TYPE_MAPPING(SH_INT,     int); 
-SH_VALUE_STORAGE_TYPE_MAPPING(SH_UBYTE,   unsigned char); 
-SH_VALUE_STORAGE_TYPE_MAPPING(SH_USHORT,  unsigned short); 
-SH_VALUE_STORAGE_TYPE_MAPPING(SH_UINT,    unsigned int); 
+VALUE_STORAGE_TYPE_MAPPING(BYTE,    char); 
+VALUE_STORAGE_TYPE_MAPPING(SHORT,   short); 
+VALUE_STORAGE_TYPE_MAPPING(INT,     int); 
+VALUE_STORAGE_TYPE_MAPPING(UBYTE,   unsigned char); 
+VALUE_STORAGE_TYPE_MAPPING(USHORT,  unsigned short); 
+VALUE_STORAGE_TYPE_MAPPING(UINT,    unsigned int); 
 
-SH_VALUE_STORAGE_TYPE_MAPPING(SH_FBYTE,   ShFracByte); 
-SH_VALUE_STORAGE_TYPE_MAPPING(SH_FSHORT,  ShFracShort); 
-SH_VALUE_STORAGE_TYPE_MAPPING(SH_FINT,    ShFracInt); 
-SH_VALUE_STORAGE_TYPE_MAPPING(SH_FUBYTE,  ShFracUByte); 
-SH_VALUE_STORAGE_TYPE_MAPPING(SH_FUSHORT, ShFracUShort); 
-SH_VALUE_STORAGE_TYPE_MAPPING(SH_FUINT,   ShFracUInt); 
+VALUE_STORAGE_TYPE_MAPPING(FBYTE,   FracByte); 
+VALUE_STORAGE_TYPE_MAPPING(FSHORT,  FracShort); 
+VALUE_STORAGE_TYPE_MAPPING(FINT,    FracInt); 
+VALUE_STORAGE_TYPE_MAPPING(FUBYTE,  FracUByte); 
+VALUE_STORAGE_TYPE_MAPPING(FUSHORT, FracUShort); 
+VALUE_STORAGE_TYPE_MAPPING(FUINT,   FracUInt); 
 
 // @}
 
 /** Mapping from Storage Type to a name 
  * @{*/
-template<typename T> struct __ShStorageTypeName { static const char* name; };
-template<typename T> const char* __ShStorageTypeName<T>::name = "unknown";
+template<typename T> struct __StorageTypeName { static const char* name; };
+template<typename T> const char* __StorageTypeName<T>::name = "unknown";
 
-#define SH_STORAGETYPE_NAME_SPEC(T)\
-  template<> struct SH_DLLEXPORT __ShStorageTypeName<T > { static const char* name; };
+#define STORAGETYPE_NAME_SPEC(T)\
+  template<> struct DLLEXPORT __StorageTypeName<T > { static const char* name; };
 
-SH_STORAGETYPE_NAME_SPEC(ShHalf);
-SH_STORAGETYPE_NAME_SPEC(float);
-SH_STORAGETYPE_NAME_SPEC(double);
+STORAGETYPE_NAME_SPEC(Half);
+STORAGETYPE_NAME_SPEC(float);
+STORAGETYPE_NAME_SPEC(double);
 
-SH_STORAGETYPE_NAME_SPEC(char);
-SH_STORAGETYPE_NAME_SPEC(short);
-SH_STORAGETYPE_NAME_SPEC(int);
-SH_STORAGETYPE_NAME_SPEC(unsigned char);
-SH_STORAGETYPE_NAME_SPEC(unsigned short);
-SH_STORAGETYPE_NAME_SPEC(unsigned int);
+STORAGETYPE_NAME_SPEC(char);
+STORAGETYPE_NAME_SPEC(short);
+STORAGETYPE_NAME_SPEC(int);
+STORAGETYPE_NAME_SPEC(unsigned char);
+STORAGETYPE_NAME_SPEC(unsigned short);
+STORAGETYPE_NAME_SPEC(unsigned int);
 
-SH_STORAGETYPE_NAME_SPEC(ShFracByte);
-SH_STORAGETYPE_NAME_SPEC(ShFracShort);
-SH_STORAGETYPE_NAME_SPEC(ShFracInt);
-SH_STORAGETYPE_NAME_SPEC(ShFracUByte);
-SH_STORAGETYPE_NAME_SPEC(ShFracUShort);
-SH_STORAGETYPE_NAME_SPEC(ShFracUInt);
+STORAGETYPE_NAME_SPEC(FracByte);
+STORAGETYPE_NAME_SPEC(FracShort);
+STORAGETYPE_NAME_SPEC(FracInt);
+STORAGETYPE_NAME_SPEC(FracUByte);
+STORAGETYPE_NAME_SPEC(FracUShort);
+STORAGETYPE_NAME_SPEC(FracUInt);
 
-#undef SH_STORAGETYPE_NAME_SPEC
+#undef STORAGETYPE_NAME_SPEC
 //@}
 
 
@@ -176,45 +176,45 @@ SH_STORAGETYPE_NAME_SPEC(ShFracUInt);
 /** Returns whether a type is a fraction type
  * @{ */
 template<typename T>
-struct ShIsFraction: public MatchTemplateType<T, ShFraction> {};
+struct IsFraction: public MatchTemplateType<T, Fraction> {};
 //@}
 
 /** Returns the regular value type corresponding to a special templated value type
  * (interval or affine) so far 
  * @{ */
-template<ShValueType V>
-struct __ShRegularValueType 
+template<ValueType V>
+struct __RegularValueType 
 {
-  static const ShValueType type = (V & ~SH_VALUETYPE_SPECIAL_MASK); 
+  static const ValueType type = (V & ~VALUETYPE_SPECIAL_MASK); 
 };
 
 template<typename T>
-struct __ShRegularStorageType
+struct __RegularStorageType
 {
-  static const ShValueType range_value_type = __ShStorageToValueType<T>::type;
-  static const ShValueType value_type = __ShRegularValueType<range_value_type>::type; 
-  typedef typename __ShValueToStorageType<value_type>::type type; 
+  static const ValueType range_value_type = __StorageToValueType<T>::type;
+  static const ValueType value_type = __RegularValueType<range_value_type>::type; 
+  typedef typename __ValueToStorageType<value_type>::type type; 
 };
 
 inline 
-ShValueType shRegularValueType(ShValueType value_type); 
+ValueType regularValueType(ValueType value_type); 
 // @}
 
 /** Provides a least common ancestor in the automatic promotion tree
  * for use in immediate mode
  * @{ */
 template<typename T1, typename T2>
-struct ShCommonType;
+struct CommonType;
 
 template<typename T1, typename T2, typename T3>
-struct ShCommonType3 {
-  typedef typename ShCommonType<typename ShCommonType<T1, T2>::type, T3>::type type; 
+struct CommonType3 {
+  typedef typename CommonType<typename CommonType<T1, T2>::type, T3>::type type; 
 };
 
 template<typename T1, typename T2, typename T3, typename T4>
-struct ShCommonType4 {
-  typedef typename ShCommonType<typename ShCommonType<T1, T2>::type, 
-                                typename ShCommonType<T3, T4>::type>::type type; 
+struct CommonType4 {
+  typedef typename CommonType<typename CommonType<T1, T2>::type, 
+                                typename CommonType<T3, T4>::type>::type type; 
 };
 // @}
 
@@ -222,14 +222,14 @@ struct ShCommonType4 {
  * This is the class to specialize for user-defined types
  * @{ */
 template<typename T>
-struct ShStorageTypeInfo {
+struct StorageTypeInfo {
   typedef T storage_type;
-  static const ShValueType value_type = __ShStorageToValueType<T>::type; 
+  static const ValueType value_type = __StorageToValueType<T>::type; 
 
 
   /** Non-special storage type corresponding to T */
-  typedef typename __ShRegularStorageType<T>::type RegularType;
-  static const ShValueType RegularValueType = __ShStorageToValueType<RegularType>::type;
+  typedef typename __RegularStorageType<T>::type RegularType;
+  static const ValueType RegularValueType = __StorageToValueType<RegularType>::type;
 
   // @todo not sure we want all of these here, since there could be user-defined 
   // special types too.  This might be too restrictive if we depend on these. 
@@ -238,7 +238,7 @@ struct ShStorageTypeInfo {
 
   // @todo type include here the ability to set available operations 
 
-  // @todo type include here ShPrograms for transforming from this
+  // @todo type include here Programs for transforming from this
   // storage type to a set of different ones, allowing the transformers
   // to choose the best conversions.
 
@@ -247,20 +247,20 @@ struct ShStorageTypeInfo {
 };
 
 template<typename T>
-const char* ShStorageTypeInfo<T>::name = __ShStorageTypeName<T>::name;
+const char* StorageTypeInfo<T>::name = __StorageTypeName<T>::name;
 
 
 //@}
 
-/** Subclass of ShStorageTypeInfo so we can lookup the same things with a
- * ShValueType.  This is probably not necessary though since most of the time
- * ShValueType is used only internally in the bowels of Sh. */
-template<ShValueType V>
-struct ShValueTypeInfo: public ShStorageTypeInfo<typename __ShValueToStorageType<V>::type> {
+/** Subclass of StorageTypeInfo so we can lookup the same things with a
+ * ValueType.  This is probably not necessary though since most of the time
+ * ValueType is used only internally in the bowels of Sh. */
+template<ValueType V>
+struct ValueTypeInfo: public StorageTypeInfo<typename __ValueToStorageType<V>::type> {
 };
 
 }
 
-#include "ShStorageTypeImpl.hpp"
+#include "StorageTypeImpl.hpp"
 
 #endif

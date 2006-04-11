@@ -17,18 +17,18 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#include "ShTypeInfo.hpp"
-#include "ShEval.hpp"
+#include "TypeInfo.hpp"
+#include "Eval.hpp"
 
-// @file ShTypeInfoOps.cpp
-// Implements the addOps method in ShTypeInfo.  This is separated out into 
+// @file TypeInfoOps.cpp
+// Implements the addOps method in TypeInfo.  This is separated out into 
 // a different file so that distributed compilers can split up  
-// ShTypeInfo. 
+// TypeInfo. 
 //
-// @see ShTypeInfo
+// @see TypeInfo
 namespace SH {
 
-void ShTypeInfo::addOps()
+void TypeInfo::addOps()
 {
   /// not all TxTx... -> ops are implemented.  The way things work is similar to
   /// C++ in spirit (except for the way the i x ui case is handled.  C++
@@ -39,10 +39,10 @@ void ShTypeInfo::addOps()
   /// 1) else if either operand is d, use d 
   /// 2) else if either operand is f, h, or fractional, use f
   /// 3) otherwise, use int
-  _shInitFloatOps<double>();
-  _shInitFloatOps<float>();
+  _initFloatOps<double>();
+  _initFloatOps<float>();
 
-  _shInitIntOps<int>();
+  _initIntOps<int>();
 }
 
 }

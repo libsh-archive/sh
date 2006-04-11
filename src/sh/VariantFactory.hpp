@@ -21,62 +21,62 @@
 #define SHVARIANTFACTORY_HPP
 
 #include <string>
-#include "ShDllExport.hpp"
-#include "ShRefCount.hpp"
-#include "ShTypeInfo.hpp"
+#include "DllExport.hpp"
+#include "RefCount.hpp"
+#include "TypeInfo.hpp"
 
 namespace SH {
 
-class ShVariant;
+class Variant;
 
 struct 
-SH_DLLEXPORT 
-ShVariantFactory {
-  virtual ~ShVariantFactory() {}
+DLLEXPORT 
+VariantFactory {
+  virtual ~VariantFactory() {}
 
-  /// Creates a ShDataVariant object with N components 
-  virtual ShVariant* generate(int N) const = 0; 
+  /// Creates a DataVariant object with N components 
+  virtual Variant* generate(int N) const = 0; 
 
-  /// Creates a ShDataVariant object by using the 
+  /// Creates a DataVariant object by using the 
   // decode method from the Variant type corresponding
   // to this factory
-  virtual ShVariant* generate(std::string s) const = 0;
+  virtual Variant* generate(std::string s) const = 0;
 
-  /// Creates an ShDataVariant object with the existing
+  /// Creates an DataVariant object with the existing
   /// array as data
   /// @param managed Set to true iff this should make a copy
   //                 rather than using the given array internally.
-  virtual ShVariant* generate(int N, void *data, bool managed = true) const = 0;  
+  virtual Variant* generate(int N, void *data, bool managed = true) const = 0;  
 
-  /// Creates an ShDataVariant object with N elements set to zero.
-  virtual ShVariant* generateZero(int N = 1) const = 0;
+  /// Creates an DataVariant object with N elements set to zero.
+  virtual Variant* generateZero(int N = 1) const = 0;
 
-  /// Creates an ShDataVariant object with N elements set to one. 
-  virtual ShVariant* generateOne(int N = 1) const = 0;
+  /// Creates an DataVariant object with N elements set to one. 
+  virtual Variant* generateOne(int N = 1) const = 0;
 };
 
-template<typename T, ShDataType DT>
-struct ShDataVariantFactory: public ShVariantFactory {
-  ShVariant* generate(int N) const;
+template<typename T, DataType DT>
+struct DataVariantFactory: public VariantFactory {
+  Variant* generate(int N) const;
 
-  ShVariant* generate(std::string s) const; 
+  Variant* generate(std::string s) const; 
 
-  ShVariant* generate(int N, void *data, bool managed = true) const;  
+  Variant* generate(int N, void *data, bool managed = true) const;  
 
-  ShVariant* generateZero(int N = 1) const;
-  ShVariant* generateOne(int N = 1) const;
+  Variant* generateZero(int N = 1) const;
+  Variant* generateOne(int N = 1) const;
 
-  static const ShDataVariantFactory* instance();
+  static const DataVariantFactory* instance();
 
   protected:
-    static ShDataVariantFactory *m_instance;
+    static DataVariantFactory *m_instance;
 
-    ShDataVariantFactory();
+    DataVariantFactory();
 };
 
 
 }
 
-#include "ShVariantFactoryImpl.hpp"
+#include "VariantFactoryImpl.hpp"
 
 #endif

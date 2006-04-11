@@ -17,15 +17,15 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#include "ShEvaluate.hpp"
-#include "ShEval.hpp"
-#include "ShDebug.hpp"
-#include "ShContext.hpp"
-#include "ShVariant.hpp"
+#include "Evaluate.hpp"
+#include "Eval.hpp"
+#include "Debug.hpp"
+#include "Context.hpp"
+#include "Variant.hpp"
 
 namespace SH {
 
-void evaluate(ShStatement& stmt)
+void evaluate(Statement& stmt)
 {
   if(stmt.dest.null()) return;
   // TODO: Maybe not do this _every_ time we call evaluate...
@@ -35,11 +35,11 @@ void evaluate(ShStatement& stmt)
     stmt.src[i].node()->addVariant();
   }
   // Make sure we are outside of a program definition
-  ShContext::current()->enter(0);
-  ShVariant *dv, *sv[3];
+  Context::current()->enter(0);
+  Variant *dv, *sv[3];
   dv = sv[0] = sv[1] = sv[2] = 0;
   bool newd, news[3];
-  if(stmt.op == SH_OP_KIL) {
+  if(stmt.op == OP_KIL) {
     newd = false;
   } else {
     newd = stmt.dest.loadVariant(dv);
@@ -47,7 +47,7 @@ void evaluate(ShStatement& stmt)
   for(int i = 0; i < arity; ++i) {
     news[i] = stmt.src[i].loadVariant(sv[i]);
   }
-  (*ShEval::instance())(stmt.op, dv, sv[0], sv[1], sv[2]);
+  (*Eval::instance())(stmt.op, dv, sv[0], sv[1], sv[2]);
   if(newd) {
     stmt.dest.setVariant(dv);
     delete dv;
@@ -57,26 +57,26 @@ void evaluate(ShStatement& stmt)
   for(int i = 0; i < arity; ++i) {
     if(news[i]) delete sv[i];
   }
-  ShContext::current()->exit();
+  Context::current()->exit();
 }
 
-void evaluate(const ShProgramNodePtr& p)
+void evaluate(const ProgramNodePtr& p)
 {
-  ShCtrlGraphNodePtr node = p->ctrlGraph->entry();
+  CtrlGraphNodePtr node = p->ctrlGraph->entry();
 
   while (node != p->ctrlGraph->exit()) {
     if (!node) break; // Should never happen!
     
-    ShBasicBlockPtr block = node->block;
+    BasicBlockPtr block = node->block;
     if (block) {
-      for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
+      for (BasicBlock::StmtList::iterator I = block->begin(); I != block->end(); ++I) {
         evaluate(*I);
       }
     }
 
     bool done = false;
     
-    for (std::vector<ShCtrlGraphBranch>::const_iterator I = node->successors.begin();
+    for (std::vector<CtrlGraphBranch>::const_iterator I = node->successors.begin();
          I != node->successors.end(); ++I) {
       I->cond.node()->addVariant(); // Make sure the condition has values.
       bool jmp = false;

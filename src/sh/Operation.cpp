@@ -18,109 +18,109 @@
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 #include <iostream>
-#include "ShOperation.hpp"
+#include "Operation.hpp"
 
 namespace SH {
 
-/** Update this if you add or change operations in ShOperation.
- * @see ShOperation
+/** Update this if you add or change operations in Operation.
+ * @see Operation
  */
-const ShOperationInfo opInfo[] = {
-  {"ASN", 1, ShOperationInfo::LINEAR, false},
+const OperationInfo opInfo[] = {
+  {"ASN", 1, OperationInfo::LINEAR, false},
   
-  {"NEG", 1, ShOperationInfo::LINEAR, false},
-  {"ADD", 2, ShOperationInfo::LINEAR, true},
-  {"MUL", 2, ShOperationInfo::LINEAR, true},
-  {"DIV", 2, ShOperationInfo::LINEAR, false},
+  {"NEG", 1, OperationInfo::LINEAR, false},
+  {"ADD", 2, OperationInfo::LINEAR, true},
+  {"MUL", 2, OperationInfo::LINEAR, true},
+  {"DIV", 2, OperationInfo::LINEAR, false},
 
-  {"SLT", 2, ShOperationInfo::LINEAR, false},
-  {"SLE", 2, ShOperationInfo::LINEAR, false},
-  {"SGT", 2, ShOperationInfo::LINEAR, false},
-  {"SGE", 2, ShOperationInfo::LINEAR, false},
-  {"SEQ", 2, ShOperationInfo::LINEAR, false},
-  {"SNE", 2, ShOperationInfo::LINEAR, false},
+  {"SLT", 2, OperationInfo::LINEAR, false},
+  {"SLE", 2, OperationInfo::LINEAR, false},
+  {"SGT", 2, OperationInfo::LINEAR, false},
+  {"SGE", 2, OperationInfo::LINEAR, false},
+  {"SEQ", 2, OperationInfo::LINEAR, false},
+  {"SNE", 2, OperationInfo::LINEAR, false},
   
-  {"ABS", 1, ShOperationInfo::LINEAR, false},
-  {"ACOS", 1, ShOperationInfo::LINEAR, false},
-  {"ACOSH", 1, ShOperationInfo::LINEAR, false},
-  {"ASIN", 1, ShOperationInfo::LINEAR, false},
-  {"ASINH", 1, ShOperationInfo::LINEAR, false},
-  {"ATAN", 1, ShOperationInfo::LINEAR, false},
-  {"ATAN2", 2, ShOperationInfo::LINEAR, false},
-  {"ATANH", 1, ShOperationInfo::LINEAR, false},
+  {"ABS", 1, OperationInfo::LINEAR, false},
+  {"ACOS", 1, OperationInfo::LINEAR, false},
+  {"ACOSH", 1, OperationInfo::LINEAR, false},
+  {"ASIN", 1, OperationInfo::LINEAR, false},
+  {"ASINH", 1, OperationInfo::LINEAR, false},
+  {"ATAN", 1, OperationInfo::LINEAR, false},
+  {"ATAN2", 2, OperationInfo::LINEAR, false},
+  {"ATANH", 1, OperationInfo::LINEAR, false},
 
-  {"CBRT", 1, ShOperationInfo::LINEAR, false},
-  {"CEIL", 1, ShOperationInfo::LINEAR, false},
-  {"COS", 1, ShOperationInfo::LINEAR, false},
-  {"COSH", 1, ShOperationInfo::LINEAR, false},
-  {"CMUL", 1, ShOperationInfo::ALL, false},
-  {"CSUM", 1, ShOperationInfo::ALL, false},
-  {"DOT", 2, ShOperationInfo::ALL, true},
-  {"DX", 1, ShOperationInfo::EXTERNAL, false},
-  {"DY", 1, ShOperationInfo::EXTERNAL, false},
+  {"CBRT", 1, OperationInfo::LINEAR, false},
+  {"CEIL", 1, OperationInfo::LINEAR, false},
+  {"COS", 1, OperationInfo::LINEAR, false},
+  {"COSH", 1, OperationInfo::LINEAR, false},
+  {"CMUL", 1, OperationInfo::ALL, false},
+  {"CSUM", 1, OperationInfo::ALL, false},
+  {"DOT", 2, OperationInfo::ALL, true},
+  {"DX", 1, OperationInfo::EXTERNAL, false},
+  {"DY", 1, OperationInfo::EXTERNAL, false},
 
-  {"EXP", 1, ShOperationInfo::LINEAR, false},
-  {"EXP2", 1, ShOperationInfo::LINEAR, false},
-  {"EXP10", 1, ShOperationInfo::LINEAR, false},
-  {"FLR", 1, ShOperationInfo::LINEAR, false},
-  {"FRAC", 1, ShOperationInfo::LINEAR, false},
+  {"EXP", 1, OperationInfo::LINEAR, false},
+  {"EXP2", 1, OperationInfo::LINEAR, false},
+  {"EXP10", 1, OperationInfo::LINEAR, false},
+  {"FLR", 1, OperationInfo::LINEAR, false},
+  {"FRAC", 1, OperationInfo::LINEAR, false},
 
-  {"HASH", 1, ShOperationInfo::LINEAR, false},
+  {"HASH", 1, OperationInfo::LINEAR, false},
 
-  {"LIT", 1, ShOperationInfo::ALL, false},
-  {"LOG", 1, ShOperationInfo::LINEAR, false},
-  {"LOG2", 1, ShOperationInfo::LINEAR, false},
-  {"LOG10", 1, ShOperationInfo::LINEAR, false},
-  {"LRP", 3, ShOperationInfo::LINEAR, false},
+  {"LIT", 1, OperationInfo::ALL, false},
+  {"LOG", 1, OperationInfo::LINEAR, false},
+  {"LOG2", 1, OperationInfo::LINEAR, false},
+  {"LOG10", 1, OperationInfo::LINEAR, false},
+  {"LRP", 3, OperationInfo::LINEAR, false},
 
-  {"MAD", 3, ShOperationInfo::LINEAR, false},
-  {"MAX", 2, ShOperationInfo::LINEAR, false},
-  {"MIN", 2, ShOperationInfo::LINEAR, true},
-  {"MOD", 2, ShOperationInfo::LINEAR, true},
+  {"MAD", 3, OperationInfo::LINEAR, false},
+  {"MAX", 2, OperationInfo::LINEAR, false},
+  {"MIN", 2, OperationInfo::LINEAR, true},
+  {"MOD", 2, OperationInfo::LINEAR, true},
 
-  {"NOISE", 1, ShOperationInfo::LINEAR, false},
+  {"NOISE", 1, OperationInfo::LINEAR, false},
 
-  {"POW", 2, ShOperationInfo::LINEAR, false},
-  {"RCP", 1, ShOperationInfo::LINEAR, false},
-  {"RND", 1, ShOperationInfo::LINEAR, false},
-  {"RSQ", 1, ShOperationInfo::LINEAR, false},
+  {"POW", 2, OperationInfo::LINEAR, false},
+  {"RCP", 1, OperationInfo::LINEAR, false},
+  {"RND", 1, OperationInfo::LINEAR, false},
+  {"RSQ", 1, OperationInfo::LINEAR, false},
 
-  {"SIN", 1, ShOperationInfo::LINEAR, false},
-  {"SINH", 1, ShOperationInfo::LINEAR, false},
-  {"SGN", 1, ShOperationInfo::LINEAR, false},
-  {"SQRT", 1, ShOperationInfo::LINEAR, false},
-  {"TAN", 1, ShOperationInfo::LINEAR, false},
-  {"TANH", 1, ShOperationInfo::LINEAR, false},
+  {"SIN", 1, OperationInfo::LINEAR, false},
+  {"SINH", 1, OperationInfo::LINEAR, false},
+  {"SGN", 1, OperationInfo::LINEAR, false},
+  {"SQRT", 1, OperationInfo::LINEAR, false},
+  {"TAN", 1, OperationInfo::LINEAR, false},
+  {"TANH", 1, OperationInfo::LINEAR, false},
 
-  {"NORM", 1, ShOperationInfo::ALL, false},
-  {"XPD", 2, ShOperationInfo::ALL, false}, // Not quite true, but probably good enough
+  {"NORM", 1, OperationInfo::ALL, false},
+  {"XPD", 2, OperationInfo::ALL, false}, // Not quite true, but probably good enough
 
-  {"TEX", 2, ShOperationInfo::EXTERNAL, false},
-  {"TEXI", 2, ShOperationInfo::EXTERNAL, false},
-  {"TEXD", 3, ShOperationInfo::EXTERNAL, false},
-  {"TEXLOD", 3, ShOperationInfo::EXTERNAL, false},
-  {"TEXBIAS", 3, ShOperationInfo::EXTERNAL, false},
+  {"TEX", 2, OperationInfo::EXTERNAL, false},
+  {"TEXI", 2, OperationInfo::EXTERNAL, false},
+  {"TEXD", 3, OperationInfo::EXTERNAL, false},
+  {"TEXLOD", 3, OperationInfo::EXTERNAL, false},
+  {"TEXBIAS", 3, OperationInfo::EXTERNAL, false},
 
-  {"COND", 3, ShOperationInfo::LINEAR, false},
+  {"COND", 3, OperationInfo::LINEAR, false},
 
-  {"KIL", 1, ShOperationInfo::IGNORE, false},
+  {"KIL", 1, OperationInfo::IGNORE, false},
 
-  {"OPTBRA", 1, ShOperationInfo::IGNORE, false},
-  {"DECL", 0, ShOperationInfo::IGNORE, false},
+  {"OPTBRA", 1, OperationInfo::IGNORE, false},
+  {"DECL", 0, OperationInfo::IGNORE, false},
 
-  {"STARTSEC", 0, ShOperationInfo::IGNORE, false},
-  {"ENDSEC", 0, ShOperationInfo::IGNORE, false},
+  {"STARTSEC", 0, OperationInfo::IGNORE, false},
+  {"ENDSEC", 0, OperationInfo::IGNORE, false},
 
-  {"FETCH", 1, ShOperationInfo::EXTERNAL, false},
-  {"LOOKUP", 2, ShOperationInfo::EXTERNAL, false},
+  {"FETCH", 1, OperationInfo::EXTERNAL, false},
+  {"LOOKUP", 2, OperationInfo::EXTERNAL, false},
 
-  {"PAL", 2, ShOperationInfo::EXTERNAL, false},
+  {"PAL", 2, OperationInfo::EXTERNAL, false},
 
-  {"COMMENT", 0, ShOperationInfo::IGNORE, false}, // special comment tag
+  {"COMMENT", 0, OperationInfo::IGNORE, false}, // special comment tag
 
-  {"RET", 1, ShOperationInfo::IGNORE, false},
+  {"RET", 1, OperationInfo::IGNORE, false},
 
-  {0, 0, ShOperationInfo::IGNORE, false}
+  {0, 0, OperationInfo::IGNORE, false}
 };
 
 

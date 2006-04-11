@@ -21,105 +21,105 @@
 #define SHUTIL_KERNELSURFACE_HPP 
 
 #include <string>
-#include "sh/ShMatrix.hpp"
-#include "sh/ShTexture.hpp"
-#include "sh/ShProgram.hpp"
+#include "sh/Matrix.hpp"
+#include "sh/Texture.hpp"
+#include "sh/Program.hpp"
 
-/** \file ShKernelSurface.hpp
+/** \file KernelSurface.hpp
  * These are the surface shader kernels.
  * They must take as input an irrad of type T, which is the irradiance from a single light source
  * and should use only the globals "halfVec", "lightVec", "lightPos", "halfVect", or "lightVect". 
  *
- * Output must be a single variable of type T named result (Most likely a ShColor3f or 4f)
+ * Output must be a single variable of type T named result (Most likely a Color3f or 4f)
  */
 
 namespace ShUtil {
 
 using namespace SH;
 
-class ShKernelSurface {
+class KernelSurface {
   private:
     // returns the string prefix concatenated with index
     static std::string makeName(std::string prefix, int index); 
 
   public:
     /** Diffuse fragment program 
-     * IN(0) T kd                 - diffuse coefficient (kd) could be ShColor?f
+     * IN(0) T kd                 - diffuse coefficient (kd) could be Color?f
      * IN(1) T irrad              - irradiance from the light source
      *
-     * IN(1) ShNormal3f normal    - normal (xCS)
-     * IN(2) ShVector3f lightVec  - light vector (xCS)
-     * IN(3) ShPosition4f posh    - positino (HDCS)
+     * IN(1) Normal3f normal    - normal (xCS)
+     * IN(2) Vector3f lightVec  - light vector (xCS)
+     * IN(3) Position4f posh    - positino (HDCS)
      *
      * OUT(0) T result            - output result 
      *
      * xCS is usually either VCS or tangent space 
      */
     template<typename T>
-    static ShProgram diffuse();
+    static Program diffuse();
 
     /** Specular fragment program 
-     * IN(0) T ks                 - specular coefficient (ks) could be ShColor?f
-     * IN(1) ShAttrib1f specExp   - specular exponent 
+     * IN(0) T ks                 - specular coefficient (ks) could be Color?f
+     * IN(1) Attrib1f specExp   - specular exponent 
      * IN(1) T irrad              - irradiance from the light source
      *
-     * IN(2) ShNormal3f normal    - normal (xCS)
-     * IN(3) ShVector3f halfVec   - half vector (xCS)
-     * IN(4) ShVector3f lightVec  - light vector (xCS)
-     * IN(5) ShPosition4f posh    - positino (HDCS)
+     * IN(2) Normal3f normal    - normal (xCS)
+     * IN(3) Vector3f halfVec   - half vector (xCS)
+     * IN(4) Vector3f lightVec  - light vector (xCS)
+     * IN(5) Position4f posh    - positino (HDCS)
      *
      * OUT(0) T result            - output result 
      *
      * xCS is usually either VCS or tangent space 
      */
     template<typename T>
-    static ShProgram specular();
+    static Program specular();
 
     /** Phong fragment program 
-     * IN(0) T kd                 - diffuse coefficient (kd) could be ShColor?f
-     * IN(1) T ks                 - specular coefficient (ks) could be ShColor?f
-     * IN(2) ShAttrib1f specExp   - specular exponent
+     * IN(0) T kd                 - diffuse coefficient (kd) could be Color?f
+     * IN(1) T ks                 - specular coefficient (ks) could be Color?f
+     * IN(2) Attrib1f specExp   - specular exponent
      * IN(1) T irrad              - irradiance from the light source
      *
-     * IN(3) ShNormal3f normal    - normal (xCS)
-     * IN(4) ShVector3f halfVec   - half vector (xCS)
-     * IN(5) ShVector3f lightVec  - light vector (xCS)
-     * IN(6) ShPosition4f posh    - position (HDCS)
+     * IN(3) Normal3f normal    - normal (xCS)
+     * IN(4) Vector3f halfVec   - half vector (xCS)
+     * IN(5) Vector3f lightVec  - light vector (xCS)
+     * IN(6) Position4f posh    - position (HDCS)
      *
      * OUT(0) T result            - output colour 
      *
      * xCS is usually either VCS or tangent space 
      */
     template<typename T>
-    static ShProgram phong();
+    static Program phong();
 
     /** Gooch illustrative shading 
-     * IN(0) T kd                 - diffuse coefficient (kd) could be ShColor?f
+     * IN(0) T kd                 - diffuse coefficient (kd) could be Color?f
      * IN(1) T cool               - cool multiplier (when light | normal == -1) 
      * IN(2) T warm               - warm multiplier (when light | normal == 1)
      *
      * IN(1) T irrad              - irradiance from the light source
-     * IN(3) ShNormal3f normal    - normal (xCS)
-     * IN(5) ShVector3f lightVec  - light vector (xCS)
-     * IN(6) ShPosition4f posh    - position (HDCS)
+     * IN(3) Normal3f normal    - normal (xCS)
+     * IN(5) Vector3f lightVec  - light vector (xCS)
+     * IN(6) Position4f posh    - position (HDCS)
      *
      * OUT(0) T result            - output colour 
      */
     template<typename T>
-    static ShProgram gooch();
+    static Program gooch();
 
     /** null surface
      * IN(0) T irrad
-     * IN(1) ShPosition4f posh
+     * IN(1) Position4f posh
      *
      * OUT(0) T result = irrad
      */
     template<typename T>
-    static ShProgram null();
+    static Program null();
 };
 
 }
 
-#include "ShKernelSurfaceImpl.hpp"
+#include "KernelSurfaceImpl.hpp"
 
 #endif

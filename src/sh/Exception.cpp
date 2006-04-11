@@ -17,61 +17,61 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#include "ShException.hpp"
+#include "Exception.hpp"
 
 namespace SH {
 
-ShException::ShException(const std::string& message)
+Exception::Exception(const std::string& message)
   : m_message(message)
 {
 }
 
-ShException::~ShException() throw()
+Exception::~Exception() throw()
 {
 }
 
-const std::string& ShException::message() const
+const std::string& Exception::message() const
 {
   return m_message;
 }
 
-const char* ShException::what() const throw()
+const char* Exception::what() const throw()
 {
   return m_message.c_str();
 }
 
-ShParseException::ShParseException(const std::string& message)
-  : ShException("Parse Error: " + message)
+ParseException::ParseException(const std::string& message)
+  : Exception("Parse Error: " + message)
 {
 }
 
-ShScopeException::ShScopeException(const std::string& message)
-  : ShException("Scoping Violation: " + message)
+ScopeException::ScopeException(const std::string& message)
+  : Exception("Scoping Violation: " + message)
 {
 }
 
-ShImageException::ShImageException(const std::string& message)
-  : ShException("Image Error: " + message)
+ImageException::ImageException(const std::string& message)
+  : Exception("Image Error: " + message)
 {
 }
 
-ShAlgebraException::ShAlgebraException(const std::string& message)
-  : ShException("Algebra Error: " + message)
+AlgebraException::AlgebraException(const std::string& message)
+  : Exception("Algebra Error: " + message)
 {
 }
 
-ShOptimizerException::ShOptimizerException(const std::string& message)
-  : ShException("Optimizer Error: " + message)
+OptimizerException::OptimizerException(const std::string& message)
+  : Exception("Optimizer Error: " + message)
 {
 }
 
-ShTransformerException::ShTransformerException(const std::string& message)
-  : ShException("Transformer Error: " + message)
+TransformerException::TransformerException(const std::string& message)
+  : Exception("Transformer Error: " + message)
 {
 }
 
-ShBackendException::ShBackendException(const std::string& message)
-  : ShException("Backend Error: " + message)
+BackendException::BackendException(const std::string& message)
+  : Exception("Backend Error: " + message)
 {
 }
 

@@ -17,74 +17,74 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#include "ShTokenizer.hpp"
-#include "ShError.hpp"
+#include "Tokenizer.hpp"
+#include "Error.hpp"
 
 namespace SH {
 
-ShTokenizerException::ShTokenizerException(const std::string& error)
-  : ShException("Tokenizer error: " + error)
+TokenizerException::TokenizerException(const std::string& error)
+  : Exception("Tokenizer error: " + error)
 {
 }
   
-ShTokenizer::ShTokenizer()
+Tokenizer::Tokenizer()
 {
-  m_listStack.push(new ShBlockList());
+  m_listStack.push(new BlockList());
 }
 
-bool ShTokenizer::pushArgQueue()
+bool Tokenizer::pushArgQueue()
 {
-  m_argQueueStack.push(std::queue<ShTokenArgument>());
+  m_argQueueStack.push(std::queue<TokenArgument>());
   return true;
 }
 
-bool ShTokenizer::pushArg()
+bool Tokenizer::pushArg()
 {
-  m_listStack.push(new ShBlockList(true));
+  m_listStack.push(new BlockList(true));
   return true;
 }
 
-bool ShTokenizer::processArg(const ShVariable& result)
+bool Tokenizer::processArg(const Variable& result)
 {
   
   if (!m_listStack.top()->isArgument()) {
-    shError( ShTokenizerException("Attempt to process an argument outside of an argument context.") );
+    error( TokenizerException("Attempt to process an argument outside of an argument context.") );
   }
   
   if (m_argQueueStack.empty()) {
-    shError( ShTokenizerException("Attempt to process an argument without a context.") );
+    error( TokenizerException("Attempt to process an argument without a context.") );
   }
   
-  m_argQueueStack.top().push(ShTokenArgument(result, m_listStack.top()));
+  m_argQueueStack.top().push(TokenArgument(result, m_listStack.top()));
   m_listStack.pop();
   return true;
 }
 
-ShBlockListPtr ShTokenizer::blockList()
+BlockListPtr Tokenizer::blockList()
 {
   if (m_listStack.empty()) {
-    shError( ShTokenizerException("No current tokenized list.") );
+    error( TokenizerException("No current tokenized list.") );
   }
   return m_listStack.top();
 }
 
-ShTokenArgument ShTokenizer::getArgument()
+TokenArgument Tokenizer::getArgument()
 {
   if (m_argQueueStack.empty()) {
-    shError( ShTokenizerException("getArgument(): Argument stack underflow") );
+    error( TokenizerException("getArgument(): Argument stack underflow") );
   }
   if (m_argQueueStack.top().empty()) {
-    shError( ShTokenizerException("getArgument(): Argument is empty") );
+    error( TokenizerException("getArgument(): Argument is empty") );
   }
-  ShTokenArgument r = m_argQueueStack.top().front();
+  TokenArgument r = m_argQueueStack.top().front();
   m_argQueueStack.top().pop();
   return r;
 }
 
-void ShTokenizer::popArgQueue()
+void Tokenizer::popArgQueue()
 {
   if (m_argQueueStack.empty()) {
-    shError( ShTokenizerException("popArgQueue(): Argument stack underflow") );
+    error( TokenizerException("popArgQueue(): Argument stack underflow") );
   }
   m_argQueueStack.pop();
 }

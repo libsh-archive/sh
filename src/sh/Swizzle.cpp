@@ -19,16 +19,16 @@
 //////////////////////////////////////////////////////////////////////////////
 #include <iostream>
 #include <sstream>
-#include "ShSwizzle.hpp"
-#include "ShError.hpp"
+#include "Swizzle.hpp"
+#include "Error.hpp"
 
 namespace SH {
 
-ShSwizzle::ShSwizzle(const ShSwizzle& other, int n)
+Swizzle::Swizzle(const Swizzle& other, int n)
   : m_srcSize(other.m_srcSize),
     m_size(other.m_size * n)
 {
-  SH_DEBUG_ASSERT(n >= 1);
+  DEBUG_ASSERT(n >= 1);
   int i, j;
   if(alloc()) {
     for(j = 0; j < other.m_size; ++j) {
@@ -38,7 +38,7 @@ ShSwizzle::ShSwizzle(const ShSwizzle& other, int n)
       m_index.ptr[i * other.m_size + j] = m_index.ptr[j];
     }
   } else {
-    SH_DEBUG_ASSERT(other.local());
+    DEBUG_ASSERT(other.local());
     for(j = 0; j < other.m_size; ++j) {
       m_index.local[j] = other.m_index.local[j];
     }
@@ -47,13 +47,13 @@ ShSwizzle::ShSwizzle(const ShSwizzle& other, int n)
     } else if(other.m_size == 2) {
       for(j = 2; j < 4; ++j) m_index.local[j] = m_index.local[j-2];
     } else {
-      SH_DEBUG_ASSERT(n == 1);
+      DEBUG_ASSERT(n == 1);
     }
   }
 }
 
-ShSwizzleException::ShSwizzleException(const ShSwizzle& s, int index, int size)
-  : ShException("")
+SwizzleException::SwizzleException(const Swizzle& s, int index, int size)
+  : Exception("")
 {
   std::ostringstream out;
   out << "Swizzle error: " << index << " out of range [0, " << size << ") in " << s;
@@ -61,7 +61,7 @@ ShSwizzleException::ShSwizzleException(const ShSwizzle& s, int index, int size)
   m_message = out.str();
 }
 
-std::ostream& operator<<(std::ostream& out, const ShSwizzle& swizzle)
+std::ostream& operator<<(std::ostream& out, const Swizzle& swizzle)
 {
   if (swizzle.identity()) return out;
   out << "(";

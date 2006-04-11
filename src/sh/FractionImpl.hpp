@@ -21,131 +21,131 @@
 #define SHFRACTIONALIMPL_HPP
 
 #include <cmath>
-#include "ShMath.hpp"
-#include "ShFraction.hpp"
+#include "Math.hpp"
+#include "Fraction.hpp"
 
 namespace SH {
 
-#define _CompType typename ShFraction<T>::CompType 
-#define _LongType typename ShFraction<T>::LongType 
-#define _SignedLongType typename ShFraction<T>::SignedLongType 
+#define _CompType typename Fraction<T>::CompType 
+#define _LongType typename Fraction<T>::LongType 
+#define _SignedLongType typename Fraction<T>::SignedLongType 
 
 // @todo replace uses of std::fabs 
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T>::ShFraction()
+Fraction<T>::Fraction()
 {}
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T>::ShFraction(double value)
+Fraction<T>::Fraction(double value)
   : m_val(clamp_val(value))
 {
 }
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> ShFraction<T>::make_fraction(CompType value)
+Fraction<T> Fraction<T>::make_fraction(CompType value)
 {
-  ShFraction result;
+  Fraction result;
   result.m_val = clamp_val(value);
   return result; 
 }
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> ShFraction<T>::make_fraction_signed(SignedLongType value)
+Fraction<T> Fraction<T>::make_fraction_signed(SignedLongType value)
 {
-  ShFraction result;
+  Fraction result;
   result.m_val = clamp_val_signed(value);
   return result; 
 }
 
 template<typename T/* @todo clamp , bool Clamp */>
 template<typename T2>
-ShFraction<T>::ShFraction(const ShFraction<T2> &other)
+Fraction<T>::Fraction(const Fraction<T2> &other)
   : m_val(clamp_val(other.get_double())) 
 {
 }
 
 /** accessor methods **/
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T>::operator double() const
+Fraction<T>::operator double() const
 {
   return get_double(); 
 }
 
 template<typename T/* @todo clamp , bool Clamp */>
-T& ShFraction<T>::val()
+T& Fraction<T>::val()
 {
   return m_val;
 }
 
 template<typename T/* @todo clamp , bool Clamp */>
-T ShFraction<T>::val() const
+T Fraction<T>::val() const
 {
   return m_val;
 }
 
 /** Arithmetic operators **/
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T>& ShFraction<T>::operator=(double value)
+Fraction<T>& Fraction<T>::operator=(double value)
 {
   m_val = clamp_val(value);
   return *this;
 }
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T>& ShFraction<T>::operator=(const ShFraction& other)
+Fraction<T>& Fraction<T>::operator=(const Fraction& other)
 {
   m_val = other.m_val;
   return *this;
 }
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T>& ShFraction<T>::operator+=(double value)
+Fraction<T>& Fraction<T>::operator+=(double value)
 {
-  return operator+=(ShFraction(value));
+  return operator+=(Fraction(value));
 }
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T>& ShFraction<T>::operator+=(const ShFraction& other)
+Fraction<T>& Fraction<T>::operator+=(const Fraction& other)
 {
   m_val = clamp_val(CompType(m_val) + CompType(other.m_val));
   return *this;
 }
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T>& ShFraction<T>::operator-=(double value)
+Fraction<T>& Fraction<T>::operator-=(double value)
 {
-  return operator-=(ShFraction(value));
+  return operator-=(Fraction(value));
 }
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T>& ShFraction<T>::operator-=(const ShFraction& other)
+Fraction<T>& Fraction<T>::operator-=(const Fraction& other)
 {
   m_val = clamp_val_signed(SignedLongType(m_val) - SignedLongType(other.m_val));
   return *this;
 }
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T>& ShFraction<T>::operator*=(double value)
+Fraction<T>& Fraction<T>::operator*=(double value)
 {
-  return operator*=(ShFraction(value)); 
+  return operator*=(Fraction(value)); 
 }
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T>& ShFraction<T>::operator*=(const ShFraction& other)
+Fraction<T>& Fraction<T>::operator*=(const Fraction& other)
 {
   m_val = clamp_val(CompType(m_val) * CompType(other.m_val));
   return *this;
 }
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T>& ShFraction<T>::operator/=(double value)
+Fraction<T>& Fraction<T>::operator/=(double value)
 {
-  return operator/=(ShFraction(value)); 
+  return operator/=(Fraction(value)); 
 }
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T>& ShFraction<T>::operator/=(const ShFraction& other)
+Fraction<T>& Fraction<T>::operator/=(const Fraction& other)
 {
   LongType numerator = LongType(m_val) << BITS;   
   LongType denom = LongType(other.m_val);
@@ -154,13 +154,13 @@ ShFraction<T>& ShFraction<T>::operator/=(const ShFraction& other)
 }
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T>& ShFraction<T>::operator%=(double value)
+Fraction<T>& Fraction<T>::operator%=(double value)
 {
-  return operator%=(ShFraction(value));
+  return operator%=(Fraction(value));
 }
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T>& ShFraction<T>::operator%=(const ShFraction& other)
+Fraction<T>& Fraction<T>::operator%=(const Fraction& other)
 {
   // @todo range - should need no clamping for this
   m_val = m_val % other.m_val;
@@ -169,21 +169,21 @@ ShFraction<T>& ShFraction<T>::operator%=(const ShFraction& other)
 
 /** Negation **/
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> ShFraction<T>::operator-() const 
+Fraction<T> Fraction<T>::operator-() const 
 {
   if(is_signed /* @todo clamp && Clamp */) return make_fraction(0); 
   return make_fraction(-m_val);
 }
 
 template<typename TT>
-std::ostream& operator<<(std::ostream &out, const ShFraction<TT> &value)
+std::ostream& operator<<(std::ostream &out, const Fraction<TT> &value)
 {
   out << double(value);
   return out;
 }
 
 template<typename TT>
-std::istream& operator>>(std::istream &in, ShFraction<TT> &value)
+std::istream& operator>>(std::istream &in, Fraction<TT> &value)
 {
   double temp;
   in >> temp;
@@ -193,14 +193,14 @@ std::istream& operator>>(std::istream &in, ShFraction<TT> &value)
 
 template<typename T/* @todo clamp , bool Clamp */>
 inline
-double ShFraction<T>::get_double() const
+double Fraction<T>::get_double() const
 {
   return double(m_val) / double(ONE);
 }
 
 template<typename T/* @todo clamp , bool Clamp */>
 inline
-T ShFraction<T>::clamp_val(double value)
+T Fraction<T>::clamp_val(double value)
 {
   double temp = value * ONE;
 
@@ -212,7 +212,7 @@ T ShFraction<T>::clamp_val(double value)
 
 template<typename T/* @todo clamp , bool Clamp */>
 inline
-T ShFraction<T>::clamp_val(CompType value)
+T Fraction<T>::clamp_val(CompType value)
 {
   /* @todo clamp if(Clamp) { */
     value = std::max(std::min(value, CompType(MAX)), CompType(MIN));
@@ -222,7 +222,7 @@ T ShFraction<T>::clamp_val(CompType value)
 
 template<typename T/* @todo clamp , bool Clamp */>
 inline
-T ShFraction<T>::clamp_val_signed(SignedLongType value)
+T Fraction<T>::clamp_val_signed(SignedLongType value)
 {
   /* @todo clamp if(Clamp) { */
     value = std::max(std::min(value, SignedLongType(MAX)), SignedLongType(MIN));
@@ -232,306 +232,306 @@ T ShFraction<T>::clamp_val_signed(SignedLongType value)
 
 /** Arithmetic operators **/
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> operator+(const ShFraction<T> &a, const ShFraction<T> &b) 
+Fraction<T> operator+(const Fraction<T> &a, const Fraction<T> &b) 
 {
-  return ShFraction<T>::make_fraction(_CompType(a.m_val) + _CompType(b.m_val));
+  return Fraction<T>::make_fraction(_CompType(a.m_val) + _CompType(b.m_val));
 }
 
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> operator-(const ShFraction<T> &a, const ShFraction<T> &b) 
+Fraction<T> operator-(const Fraction<T> &a, const Fraction<T> &b) 
 {
-  return ShFraction<T>::make_fraction_signed(
+  return Fraction<T>::make_fraction_signed(
       _SignedLongType(a.m_val) - 
       _SignedLongType(b.m_val));
 }
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> operator*(const ShFraction<T> &a, const ShFraction<T> &b) 
+Fraction<T> operator*(const Fraction<T> &a, const Fraction<T> &b) 
 {
-  return ShFraction<T>::make_fraction(_CompType(a.m_val) * _CompType(b.m_val));
+  return Fraction<T>::make_fraction(_CompType(a.m_val) * _CompType(b.m_val));
 }
 
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> operator/(const ShFraction<T> &a, const ShFraction<T> &b) 
+Fraction<T> operator/(const Fraction<T> &a, const Fraction<T> &b) 
 {
-  _LongType numerator = _LongType(a.m_val) << ShFraction<T>::BITS;   
+  _LongType numerator = _LongType(a.m_val) << Fraction<T>::BITS;   
   _LongType denom = _LongType(b.m_val);
-  return ShFraction<T>::make_fraction(numerator / denom);
+  return Fraction<T>::make_fraction(numerator / denom);
 }
 
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> operator%(const ShFraction<T> &a, const ShFraction<T> &b) 
+Fraction<T> operator%(const Fraction<T> &a, const Fraction<T> &b) 
 {
   T temp = a.m_val % b.m_val;
   if(temp < 0) temp += b.m_val; 
-  return ShFraction<T>(temp);
+  return Fraction<T>(temp);
 }
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> cbrt(const ShFraction<T> &a) 
+Fraction<T> cbrt(const Fraction<T> &a) 
 {
-  return ShFraction<T>(std::pow(double(a), 1.0 / 3.0)); 
+  return Fraction<T>(std::pow(double(a), 1.0 / 3.0)); 
 }
 
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> exp(const ShFraction<T> &a) 
+Fraction<T> exp(const Fraction<T> &a) 
 {
-  return ShFraction<T>(std::exp(double(a))); 
+  return Fraction<T>(std::exp(double(a))); 
 }
 
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> exp2(const ShFraction<T> &a) 
+Fraction<T> exp2(const Fraction<T> &a) 
 {
-  return ShFraction<T>(std::pow(2.0, double(a))); 
+  return Fraction<T>(std::pow(2.0, double(a))); 
 }
 
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> exp10(const ShFraction<T> &a) 
+Fraction<T> exp10(const Fraction<T> &a) 
 {
-  return ShFraction<T>(std::pow(10.0, double(a))); 
+  return Fraction<T>(std::pow(10.0, double(a))); 
 }
 
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> log(const ShFraction<T> &a) 
+Fraction<T> log(const Fraction<T> &a) 
 {
-  return ShFraction<T>(std::log(double(a))); 
+  return Fraction<T>(std::log(double(a))); 
 }
 
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> log2(const ShFraction<T> &a) 
+Fraction<T> log2(const Fraction<T> &a) 
 {
-  return ShFraction<T>(log2f(double(a))); 
+  return Fraction<T>(log2f(double(a))); 
 }
 
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> log10(const ShFraction<T> &a) 
+Fraction<T> log10(const Fraction<T> &a) 
 {
-  return ShFraction<T>(log10f(double(a))); 
+  return Fraction<T>(log10f(double(a))); 
 }
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> frac(const ShFraction<T> &a)
+Fraction<T> frac(const Fraction<T> &a)
 {
   T result = a.m_val;
   if(result < 0) {
-    result += ShFraction<T>::ONE;
+    result += Fraction<T>::ONE;
   }
-  return ShFraction<T>(result);
+  return Fraction<T>(result);
 }
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> fmod(const ShFraction<T> &a, const ShFraction<T> &b) 
+Fraction<T> fmod(const Fraction<T> &a, const Fraction<T> &b) 
 {
   return a % b;
 }
 
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> pow(const ShFraction<T> &a, const ShFraction<T> &b) 
+Fraction<T> pow(const Fraction<T> &a, const Fraction<T> &b) 
 {
   // @todo check if this is optimal
   // @todo do integer special cases? - see NuS.cc
-  return ShFraction<T>(std::pow(double(a), double(b))); 
+  return Fraction<T>(std::pow(double(a), double(b))); 
 }
 
 
 // not a good function for fractional types...
 // guaranteed to overflow...DOH
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> rcp(const ShFraction<T> &a) 
+Fraction<T> rcp(const Fraction<T> &a) 
 {
-  if(a.m_val > 0) return ShFraction<T>(ShFraction<T>::MAX);
-  return ShFraction<T>(ShFraction<T>::MIN);
+  if(a.m_val > 0) return Fraction<T>(Fraction<T>::MAX);
+  return Fraction<T>(Fraction<T>::MIN);
 }
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> rsq(const ShFraction<T> &a) 
+Fraction<T> rsq(const Fraction<T> &a) 
 {
   return rcp(a); // same bad behaviour 
 }
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> sgn(const ShFraction<T> &a) 
+Fraction<T> sgn(const Fraction<T> &a) 
 {
-  return ShFraction<T>(a.m_val > 0 ? 1 : a.m_val == 0 ? 0 : -1); 
+  return Fraction<T>(a.m_val > 0 ? 1 : a.m_val == 0 ? 0 : -1); 
 }
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> sqrt(const ShFraction<T> &a) 
+Fraction<T> sqrt(const Fraction<T> &a) 
 {
-  return ShFraction<T>(std::sqrt(double(a)));
+  return Fraction<T>(std::sqrt(double(a)));
 }
 
 
 /** Trig Operators */
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> acos(const ShFraction<T> &a) 
+Fraction<T> acos(const Fraction<T> &a) 
 {
-  return ShFraction<T>(std::acos(double(a)));
+  return Fraction<T>(std::acos(double(a)));
 }
 
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> asin(const ShFraction<T> &a) 
+Fraction<T> asin(const Fraction<T> &a) 
 {
-  return ShFraction<T>(std::asin(double(a)));
+  return Fraction<T>(std::asin(double(a)));
 }
 
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> atan(const ShFraction<T> &a) 
+Fraction<T> atan(const Fraction<T> &a) 
 {
-  return ShFraction<T>(std::atan(double(a)));
+  return Fraction<T>(std::atan(double(a)));
 }
 
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> atan2(const ShFraction<T> &a, const ShFraction<T> &b) 
+Fraction<T> atan2(const Fraction<T> &a, const Fraction<T> &b) 
 {
-  return ShFraction<T>(std::atan2(double(a), double(b)));
+  return Fraction<T>(std::atan2(double(a), double(b)));
 }
 
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> cos(const ShFraction<T> &a) 
+Fraction<T> cos(const Fraction<T> &a) 
 {
-  return ShFraction<T>(std::cos(double(a)));
+  return Fraction<T>(std::cos(double(a)));
 }
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> sin(const ShFraction<T> &a) 
+Fraction<T> sin(const Fraction<T> &a) 
 {
-  return ShFraction<T>(std::sin(double(a)));
+  return Fraction<T>(std::sin(double(a)));
 }
 
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> tan(const ShFraction<T> &a) 
+Fraction<T> tan(const Fraction<T> &a) 
 {
-  return ShFraction<T>(std::tan(double(a)));
+  return Fraction<T>(std::tan(double(a)));
 }
 
 
 /** Comparison Operators **/
 template<typename T/* @todo clamp , bool Clamp */>
-bool operator<(const ShFraction<T> &a, const ShFraction<T> &b) 
+bool operator<(const Fraction<T> &a, const Fraction<T> &b) 
 {
   return (a.m_val < b.m_val);
 }
 
 template<typename T/* @todo clamp , bool Clamp */>
-bool operator<=(const ShFraction<T> &a, const ShFraction<T> &b) 
+bool operator<=(const Fraction<T> &a, const Fraction<T> &b) 
 {
   return (a.m_val <= b.m_val);
 }
 
 template<typename T/* @todo clamp , bool Clamp */>
-bool operator>(const ShFraction<T> &a, const ShFraction<T> &b) 
+bool operator>(const Fraction<T> &a, const Fraction<T> &b) 
 {
   return (a.m_val > b.m_val);
 }
 
 template<typename T/* @todo clamp , bool Clamp */>
-bool operator>=(const ShFraction<T> &a, const ShFraction<T> &b) 
+bool operator>=(const Fraction<T> &a, const Fraction<T> &b) 
 {
   return (a.m_val >= b.m_val);
 }
 
 template<typename T/* @todo clamp , bool Clamp */>
-bool operator==(const ShFraction<T> &a, const ShFraction<T> &b) 
+bool operator==(const Fraction<T> &a, const Fraction<T> &b) 
 {
   return (a.m_val == b.m_val);
 }
 
 template<typename T/* @todo clamp , bool Clamp */>
-bool operator!=(const ShFraction<T> &a, const ShFraction<T> &b) 
+bool operator!=(const Fraction<T> &a, const Fraction<T> &b) 
 {
   return (a.m_val != b.m_val);
 }
 
 /** Clamping operators **/
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> min(const ShFraction<T> &a, const ShFraction<T> &b) 
+Fraction<T> min(const Fraction<T> &a, const Fraction<T> &b) 
 {
-  return ShFraction<T>(std::min(a.m_val, b.m_val));
+  return Fraction<T>(std::min(a.m_val, b.m_val));
 }
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> max(const ShFraction<T> &a, const ShFraction<T> &b) 
+Fraction<T> max(const Fraction<T> &a, const Fraction<T> &b) 
 {
-  return ShFraction<T>(std::max(a.m_val, b.m_val));
+  return Fraction<T>(std::max(a.m_val, b.m_val));
 }
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> floor(const ShFraction<T> &a) 
+Fraction<T> floor(const Fraction<T> &a) 
 {
 
   T result = 0; 
-  if(a.m_val == ShFraction<T>::ONE) {
-    result = ShFraction<T>::ONE;
-  } else if(ShFraction<T>::is_signed && a.m_val < 0) {
-    a.m_val = -ShFraction<T>::ONE;
+  if(a.m_val == Fraction<T>::ONE) {
+    result = Fraction<T>::ONE;
+  } else if(Fraction<T>::is_signed && a.m_val < 0) {
+    a.m_val = -Fraction<T>::ONE;
   }
-  return ShFraction<T>(result); 
+  return Fraction<T>(result); 
 }
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> ceil(const ShFraction<T> &a) 
+Fraction<T> ceil(const Fraction<T> &a) 
 {
-  T ONE = ShFraction<T>::ONE;
+  T ONE = Fraction<T>::ONE;
   T result = 0; 
   if(a.m_val > 0) {
     result = ONE;
-  } else if(ShFraction<T>::is_signed && 
+  } else if(Fraction<T>::is_signed && 
       a.m_val == -ONE) {
     result = -ONE;
   }
-  return ShFraction<T>(result);
+  return Fraction<T>(result);
 }
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> rnd(const ShFraction<T> &a) 
+Fraction<T> rnd(const Fraction<T> &a) 
 {
-  T ONE = ShFraction<T>::ONE;
+  T ONE = Fraction<T>::ONE;
   T HALF = ONE >> 1; // slightly less than half
   T result;
   if(a.m_val > HALF) {
     result = ONE;
-  } else if(!ShFraction<T>::is_signed || result > -HALF) {
+  } else if(!Fraction<T>::is_signed || result > -HALF) {
     result = 0;
   } else {
     result = -ONE;
   }
-  return ShFraction<T>(result); 
+  return Fraction<T>(result); 
 }
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> abs(const ShFraction<T> &a) 
+Fraction<T> abs(const Fraction<T> &a) 
 {
-  return ShFraction<T>(a.m_val < 0 ? -a.m_val: a.m_val);
+  return Fraction<T>(a.m_val < 0 ? -a.m_val: a.m_val);
 }
 
 /** Misc operators **/
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> cond(const ShFraction<T> &a, const ShFraction<T> &b, 
-    const ShFraction<T> &c)
+Fraction<T> cond(const Fraction<T> &a, const Fraction<T> &b, 
+    const Fraction<T> &c)
 {
-  return ShFraction<T>(a.m_val > 0 ? b.m_val: c.m_val); 
+  return Fraction<T>(a.m_val > 0 ? b.m_val: c.m_val); 
 }
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> lerp(const ShFraction<T> &a, const ShFraction<T> &b, const ShFraction<T> &c) 
+Fraction<T> lerp(const Fraction<T> &a, const Fraction<T> &b, const Fraction<T> &c) 
 {
-  T ONE = ShFraction<T>(ShFraction<T>::ONE);
+  T ONE = Fraction<T>(Fraction<T>::ONE);
   return a * b + (ONE - a) * c;
 }
 

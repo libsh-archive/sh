@@ -17,12 +17,12 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#include "ShLib.hpp" // ShLibTrig needs to be included from within ShLib
+#include "Lib.hpp" // LibTrig needs to be included from within Lib
 
 #ifndef SHLIBTRIG_HPP
 #define SHLIBTRIG_HPP
 
-#include "ShGeneric.hpp"
+#include "Generic.hpp"
 
 #ifndef _WIN32
 namespace SH {
@@ -39,7 +39,7 @@ namespace SH {
  * Input values outside the range [-1,1] will give undefined results.
  */
 template<int N, typename T>
-ShGeneric<N, T> acos(const ShGeneric<N, T>& var);
+Generic<N, T> acos(const Generic<N, T>& var);
 
 /** Arcsine. 
  * Operates componentwise on tuples.
@@ -47,21 +47,21 @@ ShGeneric<N, T> acos(const ShGeneric<N, T>& var);
  * Input values outside the range [-1,1] will give undefined results.
  */
 template<int N, typename T>
-ShGeneric<N, T> asin(const ShGeneric<N, T>& var);
+Generic<N, T> asin(const Generic<N, T>& var);
 
 /** Arctangent. 
  * Operates componentwise on tuples.
  * Gives a result in [-pi/2, pi/2].
  */
 template<int N, typename T>
-ShGeneric<N, T> atan(const ShGeneric<N, T>& var);
+Generic<N, T> atan(const Generic<N, T>& var);
 
 /** Arctangent of two variables. 
  * Operates componentwise on tuples of y/x.
  * Gives a result in [-pi/2, pi/2].
  */
 template<int N, typename T>
-ShGeneric<N, T> atan2(const ShGeneric<N, T>& y, const ShGeneric<N, T>& x);
+Generic<N, T> atan2(const Generic<N, T>& y, const Generic<N, T>& x);
 
 /** Cosine.
  * Operates componentwise on tuples.
@@ -69,7 +69,7 @@ ShGeneric<N, T> atan2(const ShGeneric<N, T>& y, const ShGeneric<N, T>& x);
  * in the range [-1,1].
  */
 template<int N, typename T>
-ShGeneric<N, T> cos(const ShGeneric<N, T>& var);
+Generic<N, T> cos(const Generic<N, T>& var);
 
 /** Sine.
  * Operates componentwise on tuples.
@@ -77,61 +77,61 @@ ShGeneric<N, T> cos(const ShGeneric<N, T>& var);
  * in the range [-1,1].
  */
 template<int N, typename T>
-ShGeneric<N, T> sin(const ShGeneric<N, T>& var);
+Generic<N, T> sin(const Generic<N, T>& var);
 
 /** Tangent.
  * Operates componentwise on tuples.
  * Returns the tangent of x.   Equivalent to sin(x)/cos(x).
  */
 template<int N, typename T>
-ShGeneric<N, T> tan(const ShGeneric<N, T>& var);
+Generic<N, T> tan(const Generic<N, T>& var);
 
 /** Hyperbolic cosine.
  * Operates componentwise on tuples.
  * Returns the hypebolic cosine of x.
  */
 template<int N, typename T>
-ShGeneric<N, T> cosh(const ShGeneric<N, T>& var);
+Generic<N, T> cosh(const Generic<N, T>& var);
 
 /** Hyperbolic sine.
  * Operates componentwise on tuples.
  * Returns the hyperbolic sine of x.
  */
 template<int N, typename T>
-ShGeneric<N, T> sinh(const ShGeneric<N, T>& var);
+Generic<N, T> sinh(const Generic<N, T>& var);
 
 /** Hyperbolic tangent.
  * Operates componentwise on tuples.
  * Returns the hyperbolic tangent of x.   Equivalent to sinh(x)/cosh(x).
  */
 template<int N, typename T>
-ShGeneric<N, T> tanh(const ShGeneric<N, T>& var);
+Generic<N, T> tanh(const Generic<N, T>& var);
 
 /** Hyperbolic arccosine.
  * Operates componentwise on tuples.
  * Returns the hypebolic arccosine of x.
  */
 template<int N, typename T>
-ShGeneric<N, T> acosh(const ShGeneric<N, T>& var);
+Generic<N, T> acosh(const Generic<N, T>& var);
 
 /** Hyperbolic arcsine.
  * Operates componentwise on tuples.
  * Returns the hyperbolic arcsine of x.
  */
 template<int N, typename T>
-ShGeneric<N, T> asinh(const ShGeneric<N, T>& var);
+Generic<N, T> asinh(const Generic<N, T>& var);
 
 /** Hyperbolic arctangent.
  * Operates componentwise on tuples.
  * Returns the hyperbolic arctangent of x.
  */
 template<int N, typename T>
-ShGeneric<N, T> atanh(const ShGeneric<N, T>& var);
+Generic<N, T> atanh(const Generic<N, T>& var);
 /*@}*/
 
 }
 #endif
 
-#include "ShLibTrigImpl.hpp"
+#include "LibTrigImpl.hpp"
 
 #endif

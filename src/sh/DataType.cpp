@@ -19,7 +19,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include <climits>
-#include "ShDataType.hpp"
+#include "DataType.hpp"
 
 namespace SH {
 const char* dataTypeName[] = {

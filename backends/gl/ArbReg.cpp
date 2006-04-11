@@ -48,38 +48,38 @@ static struct {
   char* name;
   bool indexed;
 } arbRegBindingInfo[] = {
-  {SH_ARB_REG_PARAM, "program.local", true},
-  {SH_ARB_REG_PARAM, "program.env", true},
-  {SH_ARB_REG_PARAM, "<nil>", true},
-  {SH_ARB_REG_OUTPUT, "result.color", false}, // TODO: Special case?
+  {ARB_REG_PARAM, "program.local", true},
+  {ARB_REG_PARAM, "program.env", true},
+  {ARB_REG_PARAM, "<nil>", true},
+  {ARB_REG_OUTPUT, "result.color", false}, // TODO: Special case?
   
-  {SH_ARB_REG_ATTRIB, "vertex.position", false},
-  {SH_ARB_REG_ATTRIB, "vertex.weight", true},
-  {SH_ARB_REG_ATTRIB, "vertex.normal", false},
-  {SH_ARB_REG_ATTRIB, "vertex.color", false}, // TODO: Special case?
-  {SH_ARB_REG_ATTRIB, "vertex.fogcoord", false},
-  {SH_ARB_REG_ATTRIB, "vertex.texcoord", true},
-  {SH_ARB_REG_ATTRIB, "vertex.matrixindex", true},
-  {SH_ARB_REG_ATTRIB, "vertex.attrib", true},
-  {SH_ARB_REG_OUTPUT, "result.position", false},
-  {SH_ARB_REG_OUTPUT, "result.fogcoord", false},
-  {SH_ARB_REG_OUTPUT, "result.pointsize", false},
-  {SH_ARB_REG_OUTPUT, "result.texcoord", true},
+  {ARB_REG_ATTRIB, "vertex.position", false},
+  {ARB_REG_ATTRIB, "vertex.weight", true},
+  {ARB_REG_ATTRIB, "vertex.normal", false},
+  {ARB_REG_ATTRIB, "vertex.color", false}, // TODO: Special case?
+  {ARB_REG_ATTRIB, "vertex.fogcoord", false},
+  {ARB_REG_ATTRIB, "vertex.texcoord", true},
+  {ARB_REG_ATTRIB, "vertex.matrixindex", true},
+  {ARB_REG_ATTRIB, "vertex.attrib", true},
+  {ARB_REG_OUTPUT, "result.position", false},
+  {ARB_REG_OUTPUT, "result.fogcoord", false},
+  {ARB_REG_OUTPUT, "result.pointsize", false},
+  {ARB_REG_OUTPUT, "result.texcoord", true},
 
-  {SH_ARB_REG_ATTRIB, "fragment.color", false}, // TODO: Special case?
-  {SH_ARB_REG_ATTRIB, "fragment.texcoord", true},
-  {SH_ARB_REG_ATTRIB, "fragment.fogcoord", false},
-  {SH_ARB_REG_ATTRIB, "fragment.position", false},
-  {SH_ARB_REG_OUTPUT, "result.depth", false},
-  {SH_ARB_REG_OUTPUT, "result.color", true}, // Needs ATI_draw_buffers extension
+  {ARB_REG_ATTRIB, "fragment.color", false}, // TODO: Special case?
+  {ARB_REG_ATTRIB, "fragment.texcoord", true},
+  {ARB_REG_ATTRIB, "fragment.fogcoord", false},
+  {ARB_REG_ATTRIB, "fragment.position", false},
+  {ARB_REG_OUTPUT, "result.depth", false},
+  {ARB_REG_OUTPUT, "result.color", true}, // Needs ATI_draw_buffers extension
 
-  {SH_ARB_REG_ATTRIB, "<nil>", false},
+  {ARB_REG_ATTRIB, "<nil>", false},
 };
 
 ArbReg::ArbReg()
-  : type(SH_ARB_REG_TEMP), index(-1), preset(false), name("")
+  : type(ARB_REG_TEMP), index(-1), preset(false), name("")
 {
-    binding.type = SH_ARB_REG_NONE;
+    binding.type = ARB_REG_NONE;
     binding.index = -1;
     binding.count = 1;
 }
@@ -87,7 +87,7 @@ ArbReg::ArbReg()
 ArbReg::ArbReg(ArbRegType type, int index, std::string name)
   : type(type), index(index), preset(false), name(name)
 {
-    binding.type = SH_ARB_REG_NONE;
+    binding.type = ARB_REG_NONE;
     binding.index = -1;
     binding.count = 1;
 }
@@ -96,7 +96,7 @@ ArbReg::ArbReg(ArbRegType type, int index, std::string name)
 std::ostream& ArbReg::printDecl(std::ostream& out) const
 {
   out << arbRegTypeInfo[type].name << " " << *this;
-  if (type == SH_ARB_REG_CONST) {
+  if (type == ARB_REG_CONST) {
     out << " = " << "{";
     for (int i = 0; i < 4; i++) {
       if (i) out << ", ";
@@ -107,8 +107,8 @@ std::ostream& ArbReg::printDecl(std::ostream& out) const
       out.precision(prec);
     }
     out << "}";
-  } else if (binding.type != SH_ARB_REG_NONE) {
-  if (binding.type == SH_ARB_REG_STATE)
+  } else if (binding.type != ARB_REG_NONE) {
+  if (binding.type == ARB_REG_STATE)
     {
     out << " = " << binding.name;
     }
@@ -131,7 +131,7 @@ std::ostream& ArbReg::printDecl(std::ostream& out) const
     }
   }
   out << ";"; 
-  if(!name.empty() && type != SH_ARB_REG_CONST) out << " # " << name;
+  if(!name.empty() && type != ARB_REG_CONST) out << " # " << name;
   return out;
 }
 

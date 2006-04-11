@@ -3,10 +3,10 @@ import common, semantic
 common.header()
 
 common.guard("SHCOLOR_HPP")
-common.inprint('#include "ShAttrib.hpp"')
+common.inprint('#include "Attrib.hpp"')
 common.namespace()
 
-decl = semantic.Class("Color", "color", "SH_COLOR",
+decl = semantic.Class("Color", "color", "COLOR",
                       """An n-color.
 """)
 

@@ -30,7 +30,7 @@ public:
 
   TextureStrategy* create(void);
   
-  void bindTexture(const SH::ShTextureNodePtr& texture,
+  void bindTexture(const SH::TextureNodePtr& texture,
                    GLenum target, bool write);
 };
 

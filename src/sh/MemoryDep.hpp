@@ -24,10 +24,10 @@ namespace SH {
 
 /** A dependency between a memory object and a specific type
  */
-class ShMemoryDep {
+class MemoryDep {
 public:
-  ShMemoryDep() {}
-  virtual ~ShMemoryDep() {}
+  MemoryDep() {}
+  virtual ~MemoryDep() {}
 
   virtual void memory_update() = 0; 
 };

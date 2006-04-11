@@ -23,13 +23,13 @@
 #include <map>
 #include <list>
 #include <iosfwd>
-#include "ShDllExport.hpp"
-#include "ShInfo.hpp"
-#include "ShRefCount.hpp"
-#include "ShCtrlGraph.hpp"
-#include "ShStructural.hpp"
+#include "DllExport.hpp"
+#include "Info.hpp"
+#include "RefCount.hpp"
+#include "CtrlGraph.hpp"
+#include "Structural.hpp"
 
-/** @file ShSectionNode.hpp
+/** @file SectionNode.hpp
  * ities for generating information from nested SECTION blocks in a
  * structural analysis of a control flow graph.
  */
@@ -39,29 +39,29 @@
 
 namespace SH {
 
-/* Really just a bastard child of ShStructuralNode.
- * Maintains ShSectionNode information only in a much cleaner form
- * (Might just want to merge this into ShStructuralNode later...)
+/* Really just a bastard child of StructuralNode.
+ * Maintains SectionNode information only in a much cleaner form
+ * (Might just want to merge this into StructuralNode later...)
  */
-class ShSectionNode: public ShRefCountable {
+class SectionNode: public RefCountable {
   public:
     /** Constructs an empty section */
-    ShSectionNode();
+    SectionNode();
 
-    typedef std::set<ShPointer<ShSectionNode> > SectionSet;
+    typedef std::set<Pointer<SectionNode> > SectionSet;
     typedef SectionSet::iterator iterator;
     typedef SectionSet::const_iterator const_iterator;
 
     SectionSet children; ///< Sections nested within this section in the hierarchy 
-    ShSectionNode* parent; ///< parent in tree, except for root where this = 0.
+    SectionNode* parent; ///< parent in tree, except for root where this = 0.
 
     iterator begin() { return children.begin(); }
     iterator end() { return children.end(); }
     const_iterator begin() const { return children.begin(); }
     const_iterator end() const { return children.end(); }
-    void addChild(ShPointer<ShSectionNode> child); 
+    void addChild(Pointer<SectionNode> child); 
 
-    typedef std::list<ShCtrlGraphNodePtr> CfgNodeList; 
+    typedef std::list<CtrlGraphNodePtr> CfgNodeList; 
     typedef CfgNodeList::iterator cfg_iterator;
     typedef CfgNodeList::const_iterator const_cfg_iterator;
 
@@ -77,14 +77,14 @@ class ShSectionNode: public ShRefCountable {
     cfg_iterator cfgEnd() { return cfgNodes.end(); }
     const_cfg_iterator cfgBegin() const { return cfgNodes.begin(); }
     const_cfg_iterator cfgEnd() const { return cfgNodes.end(); }
-    void addCfg(const ShCtrlGraphNodePtr& cfgNode) { cfgNodes.push_back(cfgNode); }
+    void addCfg(const CtrlGraphNodePtr& cfgNode) { cfgNodes.push_back(cfgNode); }
 
     /* Returns whether this is the root */
     bool isRoot() const { return !parent; }
 
     /** Retrieves the STARTSEC and ENDSEC statements for this section */ 
-    ShStatement* getStart();
-    ShStatement* getEnd();
+    Statement* getStart();
+    Statement* getEnd();
 
     /** Retrieves the section name from the STARTSEC */
     std::string name();
@@ -92,13 +92,13 @@ class ShSectionNode: public ShRefCountable {
     /* Some useful queries about nodes in the tree */ 
     int depth();
 };
-typedef ShPointer<ShSectionNode> ShSectionNodePtr;
+typedef Pointer<SectionNode> SectionNodePtr;
 
-class ShSectionTree {
+class SectionTree {
   public:
-    ShSectionNodePtr root;
+    SectionNodePtr root;
 
-    ShSectionTree(ShStructural &structural);
+    SectionTree(Structural &structural);
 
     /* DFS through the section tree
      * This is just a copy of the Cfg code...should really refactor */
@@ -106,20 +106,20 @@ class ShSectionTree {
     void dfs(F& functor);
      
     /* Retrieves the section containing cfgNode */
-    ShSectionNodePtr operator[](const ShCtrlGraphNodePtr& cfgNode);
+    SectionNodePtr operator[](const CtrlGraphNodePtr& cfgNode);
 
     /* Returns whether a section node in this tree contains a particular section
      * node. */ 
-    bool contains(const ShSectionNodePtr& section, const ShCtrlGraphNodePtr& cfgNode);
+    bool contains(const SectionNodePtr& section, const CtrlGraphNodePtr& cfgNode);
 
     /* Graphviz dump */
     std::ostream& dump(std::ostream& out); 
 
     /* Graphviz dump with a special functor with two functions:
-     *    void operator()(std::ostream&, ShCtrlGraphNodePtr) that outputs a HTML-style label 
+     *    void operator()(std::ostream&, CtrlGraphNodePtr) that outputs a HTML-style label 
      *    for a cfg node
      *
-     *    void operator()(std::ostream&, ShSectionNodePtr) that outputs any section specific
+     *    void operator()(std::ostream&, SectionNodePtr) that outputs any section specific
      *    attributes (as part of the stmts in a a section's subgraph)
      */
     template<class F>
@@ -127,15 +127,15 @@ class ShSectionTree {
 
   private:
     // adds structural subtree rooted at structNode to the section 
-    static void makeSection(const ShStructuralNodePtr& structNode, ShSectionNodePtr section);
+    static void makeSection(const StructuralNodePtr& structNode, SectionNodePtr section);
 
-    typedef std::map<ShCtrlGraphNodePtr, ShSectionNodePtr> CfgSectionMap;
+    typedef std::map<CtrlGraphNodePtr, SectionNodePtr> CfgSectionMap;
     CfgSectionMap cfgSection; 
-    void gatherCfgSection(const ShSectionNodePtr& section); 
+    void gatherCfgSection(const SectionNodePtr& section); 
 
     /* DFS through the section tree */
     template<class F>
-    static void realDfs(const ShSectionNodePtr& node, F& functor);
+    static void realDfs(const SectionNodePtr& node, F& functor);
 
     /* Dump a node and subtree using the given functor (functor described above in dump()) 
      *
@@ -146,11 +146,11 @@ class ShSectionTree {
      * @param node The root of the section subtree to process
      * @param F functor as described above in dump*/
     template<class F>
-    void realDump(std::ostream& out, std::ostream& cfgout, const ShSectionNodePtr& node, F& functor);
+    void realDump(std::ostream& out, std::ostream& cfgout, const SectionNodePtr& node, F& functor);
 };
 
 }
 
-#include "ShSectionImpl.hpp"
+#include "SectionImpl.hpp"
 
 #endif

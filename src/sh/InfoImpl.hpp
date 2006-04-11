@@ -20,12 +20,12 @@
 #ifndef SHINFOIMPL_HPP
 #define SHINFOIMPL_HPP
 
-#include "ShInfo.hpp"
+#include "Info.hpp"
 
 namespace SH {
 
 template<typename T>
-T* ShInfoHolder::get_info()
+T* InfoHolder::get_info()
 {
   for (InfoList::iterator I = info.begin(); I != info.end(); ++I) {
     T* item = dynamic_cast<T*>(*I);
@@ -37,7 +37,7 @@ T* ShInfoHolder::get_info()
 }
 
 template<typename T>
-const T* ShInfoHolder::get_info() const
+const T* InfoHolder::get_info() const
 {
   for (InfoList::const_iterator I = info.begin(); I != info.end(); ++I) {
     const T* item = dynamic_cast<const T*>(*I);
@@ -49,7 +49,7 @@ const T* ShInfoHolder::get_info() const
 }
 
 template<typename T>
-void ShInfoHolder::destroy_info()
+void InfoHolder::destroy_info()
 {
   for (InfoList::iterator I = info.begin(); I != info.end();) {
     T* item = dynamic_cast<T*>(*I);

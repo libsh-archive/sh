@@ -22,26 +22,26 @@
 
 #include <string>
 #include <vector>
-#include "ShHashMap.hpp"
-#include "ShVariableType.hpp"
-#include "ShDataType.hpp"
-#include "ShRefCount.hpp"
-#include "ShFraction.hpp"
-#include "ShHalf.hpp"
+#include "HashMap.hpp"
+#include "VariableType.hpp"
+#include "DataType.hpp"
+#include "RefCount.hpp"
+#include "Fraction.hpp"
+#include "Half.hpp"
 
 namespace SH {
 
 /// forward declarations 
-struct ShVariantFactory;
+struct VariantFactory;
 
 
 /** A holder of information about a data type and how to allocate it 
- * @see ShDataType.hpp
+ * @see DataType.hpp
  * */ 
 struct 
-SH_DLLEXPORT
-ShTypeInfo {
-  virtual ~ShTypeInfo() {}
+DLLEXPORT
+TypeInfo {
+  virtual ~TypeInfo() {}
 
   /** Returns a the name of the value type */
   virtual const char* name() const = 0;
@@ -49,8 +49,8 @@ ShTypeInfo {
   /** Returns size of type */ 
   virtual int datasize() const = 0;
 
-  /** Returns the factory that generates ShVariant objects of this type */
-  virtual const ShVariantFactory* variantFactory() const = 0; 
+  /** Returns the factory that generates Variant objects of this type */
+  virtual const VariantFactory* variantFactory() const = 0; 
 
   /** Initializes the variant factories, automatic promotions, and
    * other variant casters.
@@ -58,51 +58,51 @@ ShTypeInfo {
   static void init();
 
   /** Returns the type info with the requested value and data types. */ 
-  static const ShTypeInfo* get(ShValueType valueType, ShDataType dataType);
+  static const TypeInfo* get(ValueType valueType, DataType dataType);
 
-  typedef ShPairHashMap<ShValueType, ShDataType, const ShTypeInfo*> TypeInfoMap;
+  typedef PairHashMap<ValueType, DataType, const TypeInfo*> TypeInfoMap;
   private:
-    /** Holds ShDataTypeInfo instances for all available valuetype/datatypes */
+    /** Holds DataTypeInfo instances for all available valuetype/datatypes */
     static TypeInfoMap* m_valueTypes;
 
-    /** Adds automatic promotion and other casts into the ShCastManager */ 
+    /** Adds automatic promotion and other casts into the CastManager */ 
     static void addCasts();
 
-    /** Adds ops to the ShEval class */ 
+    /** Adds ops to the Eval class */ 
     static void addOps();
 };
 
-// generic level, singleton ShTypeInfo class holding information for
+// generic level, singleton TypeInfo class holding information for
 // a particular type
-template<typename T, ShDataType DT>
-struct ShDataTypeInfo: public ShTypeInfo {
+template<typename T, DataType DT>
+struct DataTypeInfo: public TypeInfo {
   public:
-    typedef typename ShDataTypeCppType<T, DT>::type type;
+    typedef typename DataTypeCppType<T, DT>::type type;
     static const type Zero;
     static const type One;
 
     const char* name() const; 
     int datasize() const;
-    const ShVariantFactory* variantFactory() const;
+    const VariantFactory* variantFactory() const;
 
-    static const ShDataTypeInfo* instance();
+    static const DataTypeInfo* instance();
 
   protected:
-    static ShDataTypeInfo *m_instance;
-    ShDataTypeInfo() {}
+    static DataTypeInfo *m_instance;
+    DataTypeInfo() {}
 };
 
 
-SH_DLLEXPORT
-extern const ShTypeInfo* shTypeInfo(ShValueType valueType, ShDataType dataType = SH_HOST);
+DLLEXPORT
+extern const TypeInfo* typeInfo(ValueType valueType, DataType dataType = HOST);
 
-SH_DLLEXPORT
-extern const ShVariantFactory* shVariantFactory(ShValueType valueType, ShDataType dataType = SH_HOST);
+DLLEXPORT
+extern const VariantFactory* variantFactory(ValueType valueType, DataType dataType = HOST);
 
-SH_DLLEXPORT
-extern const char* shValueTypeName(ShValueType valueType);
+DLLEXPORT
+extern const char* valueTypeName(ValueType valueType);
 }
 
-#include "ShTypeInfoImpl.hpp"
+#include "TypeInfoImpl.hpp"
 
 #endif

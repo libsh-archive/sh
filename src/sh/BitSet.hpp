@@ -22,29 +22,29 @@
 
 #include <cstddef>
 #include <iosfwd>
-#include "ShDllExport.hpp"
+#include "DllExport.hpp"
 
 namespace SH {
 
 /* A reference to a single bit in a set.
- * @see ShBitSet
+ * @see BitSet
  */
 class
-SH_DLLEXPORT ShBitRef {
+DLLEXPORT BitRef {
 public:
   operator bool() const;
-  ShBitRef& operator=(bool b);
+  BitRef& operator=(bool b);
 
 private:
-  friend class ShBitSet;
+  friend class BitSet;
   
-  ShBitRef(unsigned int* byte, unsigned int mask);
+  BitRef(unsigned int* byte, unsigned int mask);
 
   unsigned int* m_byte;
   unsigned int m_mask;
 
-  ShBitRef(const ShBitRef& other);
-  ShBitRef& operator=(const ShBitRef& other);
+  BitRef(const BitRef& other);
+  BitRef& operator=(const BitRef& other);
 };
 
 /** A bitset.
@@ -53,31 +53,31 @@ private:
  * may need.
  */
 class
-SH_DLLEXPORT ShBitSet {
+DLLEXPORT BitSet {
 public:
   /** Construct a bitset with size bits.
    * By default all bits are set to 0.
    * @arg size number of bits in the bitset.
    */
-  ShBitSet();
-  explicit ShBitSet(std::size_t size);
-  ShBitSet(const ShBitSet& other);
+  BitSet();
+  explicit BitSet(std::size_t size);
+  BitSet(const BitSet& other);
   
-  ~ShBitSet();
+  ~BitSet();
 
-  ShBitSet& operator=(const ShBitSet& other);
-  ShBitSet& operator&=(const ShBitSet& other);
-  ShBitSet& operator|=(const ShBitSet& other);
-  ShBitSet& operator^=(const ShBitSet& other);
+  BitSet& operator=(const BitSet& other);
+  BitSet& operator&=(const BitSet& other);
+  BitSet& operator|=(const BitSet& other);
+  BitSet& operator^=(const BitSet& other);
 
-  ShBitSet operator&(const ShBitSet& other) const;
-  ShBitSet operator|(const ShBitSet& other) const;
-  ShBitSet operator^(const ShBitSet& other) const;
+  BitSet operator&(const BitSet& other) const;
+  BitSet operator|(const BitSet& other) const;
+  BitSet operator^(const BitSet& other) const;
   
-  ShBitSet operator~() const;
+  BitSet operator~() const;
 
-  bool operator==(const ShBitSet& other) const;
-  bool operator!=(const ShBitSet& other) const;
+  bool operator==(const BitSet& other) const;
+  bool operator!=(const BitSet& other) const;
 
   // Return true iff all entries are 1
   bool full() const;
@@ -87,15 +87,15 @@ public:
   std::size_t size() const;
 
   bool operator[](std::size_t i) const;
-  ShBitRef operator[](std::size_t i);
+  BitRef operator[](std::size_t i);
 
 private:
   std::size_t m_size;
   unsigned int* m_data;
 };
 
-SH_DLLEXPORT
-std::ostream& operator<<(std::ostream& out, const ShBitSet& bitset);
+DLLEXPORT
+std::ostream& operator<<(std::ostream& out, const BitSet& bitset);
 
 }
 

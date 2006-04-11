@@ -18,9 +18,9 @@
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 #include "Utils.hpp"
-#include "ShTextureNode.hpp"
-#include "ShArray.hpp"
-#include "ShOptimizations.hpp"
+#include "TextureNode.hpp"
+#include "Array.hpp"
+#include "Optimizations.hpp"
 #include "sh.hpp"
 
 namespace shgl {
@@ -28,41 +28,41 @@ namespace shgl {
 using namespace SH;
 using namespace std;
 
-void ChannelGatherer::operator()(const ShCtrlGraphNode* node)
+void ChannelGatherer::operator()(const CtrlGraphNode* node)
 {
   if (!node) return;
 
-  ShBasicBlockPtr block = node->block;
+  BasicBlockPtr block = node->block;
   if (!block) return;
 
-  for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
-    const ShStatement& stmt = *I;
-    if (stmt.op != SH_OP_FETCH) continue;
+  for (BasicBlock::StmtList::iterator I = block->begin(); I != block->end(); ++I) {
+    const Statement& stmt = *I;
+    if (stmt.op != OP_FETCH) continue;
 
     // TODO: ought to complain here
-    if (stmt.src[0].node()->kind() != SH_STREAM) continue;
+    if (stmt.src[0].node()->kind() != STREAM) continue;
     
-    ShChannelNodePtr channel = shref_dynamic_cast<ShChannelNode>(stmt.src[0].node());
+    ChannelNodePtr channel = shref_dynamic_cast<ChannelNode>(stmt.src[0].node());
 
-    ShTextureNodePtr tex;
-    ShTextureTraits traits = ShArrayTraits();
+    TextureNodePtr tex;
+    TextureTraits traits = ArrayTraits();
 
-    tex = new ShTextureNode(dims, channel->size(), channel->valueType(),
+    tex = new TextureNode(dims, channel->size(), channel->valueType(),
                             traits, 1, 1, 1, 0);
     tex->memory(channel->memory(), 0);
     
-    ShVariableNodePtr os1(new ShVariableNode(SH_TEMP, 4, SH_FLOAT));
-    ShVariableNodePtr os2(new ShVariableNode(SH_TEMP, 4, SH_FLOAT));
+    VariableNodePtr os1(new VariableNode(TEMP, 4, FLOAT));
+    VariableNodePtr os2(new VariableNode(TEMP, 4, FLOAT));
 
     channel_map.insert(std::make_pair(channel, ChannelData(tex, os1, os2)));
   }
 }
 
 TexFetcher::TexFetcher(ChannelMap& channel_map,
-                       const ShVariableNodePtr& tc_node,
+                       const VariableNodePtr& tc_node,
                        bool indexed, bool os_calculation,
-                       const ShVariableNodePtr& tex_size_node,
-                       const ShProgramNodePtr& program)
+                       const VariableNodePtr& tex_size_node,
+                       const ProgramNodePtr& program)
     : channel_map(channel_map),
       tc_node(tc_node),
       indexed(indexed),
@@ -72,47 +72,47 @@ TexFetcher::TexFetcher(ChannelMap& channel_map,
 {
 }
 
-void TexFetcher::operator()(ShCtrlGraphNode* node)
+void TexFetcher::operator()(CtrlGraphNode* node)
 {
   if (!node->block) return;
-  for (ShBasicBlock::ShStmtList::iterator I = node->block->begin();
+  for (BasicBlock::StmtList::iterator I = node->block->begin();
        I != node->block->end(); ++I) {
-    ShStatement& stmt = *I;
-    if (stmt.op != SH_OP_FETCH && stmt.op != SH_OP_LOOKUP) continue;
+    Statement& stmt = *I;
+    if (stmt.op != OP_FETCH && stmt.op != OP_LOOKUP) continue;
       
     if (!stmt.src[0].node()) {
-      SH_DEBUG_WARN("FETCH/LOOKUP from null stream");
+      DEBUG_WARN("FETCH/LOOKUP from null stream");
       continue;
     }
-    if (stmt.src[0].node()->kind() != SH_STREAM) {
-      SH_DEBUG_WARN("FETCH/LOOKUP from non-stream");
+    if (stmt.src[0].node()->kind() != STREAM) {
+      DEBUG_WARN("FETCH/LOOKUP from non-stream");
       continue;
     }
       
-    ShChannelNodePtr stream_node = shref_dynamic_cast<ShChannelNode>(stmt.src[0].node());
+    ChannelNodePtr stream_node = shref_dynamic_cast<ChannelNode>(stmt.src[0].node());
     ChannelMap::const_iterator J = channel_map.find(stream_node);
     if (J == channel_map.end()) {
-      SH_DEBUG_WARN("Stream node " << stream_node.object() << ", " << stream_node->name() << " not found in input map");
+      DEBUG_WARN("Stream node " << stream_node.object() << ", " << stream_node->name() << " not found in input map");
       continue;
     }
 
     if (!J->second.tex_var) {
-      SH_DEBUG_WARN("No texture allocated for stream node");
+      DEBUG_WARN("No texture allocated for stream node");
       continue;
     }
 
-    ShVariable tex_var(J->second.tex_var);
-    ShVariable os1_var(J->second.os1_var);
-    ShVariable os2_var(J->second.os2_var);
+    Variable tex_var(J->second.tex_var);
+    Variable os1_var(J->second.os1_var);
+    Variable os2_var(J->second.os2_var);
 
-    if (stmt.op == SH_OP_FETCH) {
-      ShVariable coords_var(tc_node);
+    if (stmt.op == OP_FETCH) {
+      Variable coords_var(tc_node);
       if (os_calculation) {
-        ShContext::current()->enter(program);
-        ShVariable result(new ShVariableNode(SH_TEMP, 4, SH_FLOAT));
-        ShContext::current()->exit();
+        Context::current()->enter(program);
+        Variable result(new VariableNode(TEMP, 4, FLOAT));
+        Context::current()->exit();
 
-        ShBasicBlock::ShStmtList new_stmts;
+        BasicBlock::StmtList new_stmts;
 
         //
         // The calculation we are doing here is:
@@ -123,19 +123,19 @@ void TexFetcher::operator()(ShCtrlGraphNode* node)
         //
         // z = z*s + o + b
         // w = 1
-        new_stmts.push_back(ShStatement(result(2,3), SH_OP_MAD, coords_var(2,3), os1_var(0,2), os1_var(1,3)));
+        new_stmts.push_back(Statement(result(2,3), OP_MAD, coords_var(2,3), os1_var(0,2), os1_var(1,3)));
         // x = frac z
-        new_stmts.push_back(ShStatement(result(0), SH_OP_FRAC, result(2)));
+        new_stmts.push_back(Statement(result(0), OP_FRAC, result(2)));
         // y = x*-2*b + y*0 + z/wi + w*b
-        new_stmts.push_back(ShStatement(result(1), result, SH_OP_DOT, os2_var));
+        new_stmts.push_back(Statement(result(1), result, OP_DOT, os2_var));
 
         if (indexed) {
-          ShVariable tex_size_var(tex_size_node);
-          new_stmts.push_back(ShStatement(result(0,1), result(0,1), SH_OP_MUL, tex_size_var(2,2)));
-          new_stmts.push_back(ShStatement(stmt.dest, tex_var, SH_OP_TEXI, result(0,1)));
+          Variable tex_size_var(tex_size_node);
+          new_stmts.push_back(Statement(result(0,1), result(0,1), OP_MUL, tex_size_var(2,2)));
+          new_stmts.push_back(Statement(stmt.dest, tex_var, OP_TEXI, result(0,1)));
         }
         else {
-          new_stmts.push_back(ShStatement(stmt.dest, tex_var, SH_OP_TEX, result(0,1)));
+          new_stmts.push_back(Statement(stmt.dest, tex_var, OP_TEX, result(0,1)));
         }
 
         I = node->block->erase(I);
@@ -144,22 +144,22 @@ void TexFetcher::operator()(ShCtrlGraphNode* node)
       }
       else {
         if (indexed) {
-          stmt = ShStatement(stmt.dest, tex_var, SH_OP_TEXI, coords_var(0,1));
+          stmt = Statement(stmt.dest, tex_var, OP_TEXI, coords_var(0,1));
         }
         else {
-          stmt = ShStatement(stmt.dest, tex_var, SH_OP_TEX, coords_var(0,1));
+          stmt = Statement(stmt.dest, tex_var, OP_TEX, coords_var(0,1));
         }
       }
     } else {
       // Make sure our actualy index is a temporary in the program.
-      ShContext::current()->enter(program);
-      ShVariable coordsVar(new ShVariableNode(SH_TEMP, 2, SH_FLOAT));
-      ShContext::current()->exit();
+      Context::current()->enter(program);
+      Variable coordsVar(new VariableNode(TEMP, 2, FLOAT));
+      Context::current()->exit();
         
-      ShBasicBlock::ShStmtList new_stmts;
-      new_stmts.push_back(ShStatement(coordsVar(0), stmt.src[1], SH_OP_MOD, J->second.tex_var->texSizeVar()(0)));
-      new_stmts.push_back(ShStatement(coordsVar(1), stmt.src[1], SH_OP_DIV, J->second.tex_var->texSizeVar()(0)));
-      new_stmts.push_back(ShStatement(stmt.dest, tex_var, SH_OP_TEXI, coordsVar));
+      BasicBlock::StmtList new_stmts;
+      new_stmts.push_back(Statement(coordsVar(0), stmt.src[1], OP_MOD, J->second.tex_var->texSizeVar()(0)));
+      new_stmts.push_back(Statement(coordsVar(1), stmt.src[1], OP_DIV, J->second.tex_var->texSizeVar()(0)));
+      new_stmts.push_back(Statement(stmt.dest, tex_var, OP_TEXI, coordsVar));
       I = node->block->erase(I);
       node->block->splice(I, new_stmts);
       I--;
@@ -168,7 +168,7 @@ void TexFetcher::operator()(ShCtrlGraphNode* node)
 }
 
 // Extract the backend name from the target if there is one (including the colon)
-string get_target_backend(const ShProgramNodeCPtr& program)
+string get_target_backend(const ProgramNodeCPtr& program)
 {
   const string& target = program->target();
   string::size_type colon_pos = target.find(":");
@@ -180,8 +180,8 @@ string get_target_backend(const ShProgramNodeCPtr& program)
   }
 }
 
-StreamCache::StreamCache(ShProgramNode* stream_program,
-                         ShProgramNode* vertex_program,
+StreamCache::StreamCache(ProgramNode* stream_program,
+                         ProgramNode* vertex_program,
                          int tex_size, int max_outputs,
                          FloatExtension float_extension)
   : m_stream_program(stream_program),
@@ -190,17 +190,17 @@ StreamCache::StreamCache(ShProgramNode* stream_program,
     m_max_outputs(max_outputs),
     m_float_extension(float_extension)
 {
-  ShTextureDims dims(SH_TEXTURE_2D);
+  TextureDims dims(TEXTURE_2D);
   
   switch (m_float_extension) {
-  case SH_ARB_NV_FLOAT_BUFFER:
-    dims = SH_TEXTURE_RECT;
+  case ARB_NV_FLOAT_BUFFER:
+    dims = TEXTURE_RECT;
     break;
-  case SH_ARB_ATI_PIXEL_FORMAT_FLOAT:
-    dims = SH_TEXTURE_2D;
+  case ARB_ATI_PIXEL_FORMAT_FLOAT:
+    dims = TEXTURE_2D;
     break;
   default:
-    SH_DEBUG_ASSERT(false);
+    DEBUG_ASSERT(false);
     break;
   }
 
@@ -212,11 +212,11 @@ StreamCache::StreamCache(ShProgramNode* stream_program,
                   get_target_backend(stream_program) + "fragment",
                   i == SINGLE_OUTPUT ? 1 : max_outputs);
 
-    for (std::list<ShProgramNodePtr>::iterator I = m_programs[i].begin();
+    for (std::list<ProgramNodePtr>::iterator I = m_programs[i].begin();
          I != m_programs[i].end(); ++I) {
-      ShProgram with_tc = ShProgram(*I) & lose<ShTexCoord4f>("streamcoord");
+      Program with_tc = Program(*I) & lose<TexCoord4f>("streamcoord");
       TexFetcher fetcher(m_channel_map, with_tc.node()->inputs.back(),
-                         dims == SH_TEXTURE_RECT, 
+                         dims == TEXTURE_RECT, 
                          i != NO_OFFSET_STRIDE,
                          m_output_stride.node(),
                          with_tc.node());
@@ -226,15 +226,15 @@ StreamCache::StreamCache(ShProgramNode* stream_program,
     
       if (i != NO_OFFSET_STRIDE) {
         string target = get_target_backend(stream_program) + "fragment";
-        ShProgram preamble = SH_BEGIN_PROGRAM(target) {
-          ShInputTexCoord4f SH_DECL(streamcoord);
-          ShOutputTexCoord4f SH_DECL(index);
+        Program preamble = SH_BEGIN_PROGRAM(target) {
+          InputTexCoord4f DECL(streamcoord);
+          OutputTexCoord4f DECL(index);
           // index = (x - bias, y - bias, -bias, 1-bias)
           index = streamcoord - m_output_offset(3,3,3,3);
           // z = (x + y*width + z*dest_offset/bias)/dest_stride
           index(2) = index(0,1,2) | m_output_offset(0,1,2);
 
-          ShAttrib1f SH_DECL(stride);
+          Attrib1f DECL(stride);
           // stride = z*width
           stride = index(2) * m_output_stride(0);
           discard(frac(stride) - m_output_stride(1));
@@ -245,19 +245,19 @@ StreamCache::StreamCache(ShProgramNode* stream_program,
       *I = with_tc.node();
     }
 
-    for (std::list<ShProgramNodePtr>::iterator I = m_programs[i].begin(); 
+    for (std::list<ProgramNodePtr>::iterator I = m_programs[i].begin(); 
          I != m_programs[i].end(); ++I) {
-      m_program_sets[i].push_back(new ShProgramSet(ShProgram(vertex_program),
-                                                   ShProgram(*I)));
+      m_program_sets[i].push_back(new ProgramSet(Program(vertex_program),
+                                                   Program(*I)));
     }
   }
 
   for (ChannelMap::iterator I = m_channel_map.begin(); I != m_channel_map.end(); ++I) {
-    ShChannelNode* channel = I->first.object();
-    ShTextureNode* texture = I->second.tex_var.object();
+    ChannelNode* channel = I->first.object();
+    TextureNode* texture = I->second.tex_var.object();
 
-    SH_DEBUG_ASSERT(channel);
-    SH_DEBUG_ASSERT(texture);
+    DEBUG_ASSERT(channel);
+    DEBUG_ASSERT(texture);
 
     texture->memory(channel->memory(), 0);
     texture->setTexSize(tex_size, tex_size);
@@ -265,29 +265,29 @@ StreamCache::StreamCache(ShProgramNode* stream_program,
   }
 }
 
-ShInfo* StreamCache::clone() const
+Info* StreamCache::clone() const
 {
-  SH_DEBUG_ASSERT(false);
+  DEBUG_ASSERT(false);
   return 0;
 //  return new FBOStreamCache(m_stream_program, m_vertex_program, m_max_outputs);
 }
 
 void StreamCache::update_destination(int dest_offset, int dest_stride)
 {
-  if (m_float_extension == SH_ARB_NV_FLOAT_BUFFER) {
+  if (m_float_extension == ARB_NV_FLOAT_BUFFER) {
     float bias = 0.5;
     float z = (float)dest_offset/m_tex_size/dest_stride/bias;
-    m_output_offset = ShAttrib4f(1.0/m_tex_size/dest_stride, 
+    m_output_offset = Attrib4f(1.0/m_tex_size/dest_stride, 
                                  1.0/dest_stride, z, bias);
-    m_output_stride = ShAttrib3f((float)m_tex_size, 
+    m_output_stride = Attrib3f((float)m_tex_size, 
                                  0.5/dest_stride, m_tex_size);
   }
   else {
     float bias = 1.0/(2*m_tex_size);
     float z = (float)dest_offset/m_tex_size/dest_stride/bias;
-    m_output_offset = ShAttrib4f(1.0/dest_stride, 
+    m_output_offset = Attrib4f(1.0/dest_stride, 
                                  (float)m_tex_size/dest_stride, z, bias);
-    m_output_stride = ShAttrib3f((float)m_tex_size,
+    m_output_stride = Attrib3f((float)m_tex_size,
                                  0.5/dest_stride, m_tex_size);
   }
 }
@@ -295,17 +295,17 @@ void StreamCache::update_destination(int dest_offset, int dest_stride)
 void StreamCache::update_channels()
 {
   for (ChannelMap::iterator I = m_channel_map.begin(); I != m_channel_map.end(); ++I) {
-    ShChannelNode* channel = I->first.object();
-    ShTextureNode* texture = I->second.tex_var.object();
+    ChannelNode* channel = I->first.object();
+    TextureNode* texture = I->second.tex_var.object();
 
-    SH_DEBUG_ASSERT(channel);
-    SH_DEBUG_ASSERT(texture);
+    DEBUG_ASSERT(channel);
+    DEBUG_ASSERT(texture);
     
     // TODO: potentially increase the texture size
     texture->memory(channel->memory(), 0);
 
-    ShAttrib4f os1(I->second.os1_var.object(), ShSwizzle(), false);
-    ShAttrib4f os2(I->second.os2_var.object(), ShSwizzle(), false);
+    Attrib4f os1(I->second.os1_var.object(), Swizzle(), false);
+    Attrib4f os2(I->second.os2_var.object(), Swizzle(), false);
 
     //
     // See TexFetcher::operator() for explanation of the two
@@ -337,41 +337,41 @@ void StreamCache::freeze_inputs(bool state)
 
 StreamCache::set_iterator StreamCache::sets_begin(SetType type)
 {
-  SH_DEBUG_ASSERT(type >= NO_OFFSET_STRIDE && type <= SINGLE_OUTPUT);
+  DEBUG_ASSERT(type >= NO_OFFSET_STRIDE && type <= SINGLE_OUTPUT);
   return m_program_sets[type].begin();
 }
 
 StreamCache::set_iterator StreamCache::sets_end(SetType type)
 {
-  SH_DEBUG_ASSERT(type >= NO_OFFSET_STRIDE && type <= SINGLE_OUTPUT);
+  DEBUG_ASSERT(type >= NO_OFFSET_STRIDE && type <= SINGLE_OUTPUT);
   return m_program_sets[type].end();
 }
 
 StreamCache::set_const_iterator StreamCache::sets_begin(SetType type) const
 {
-  SH_DEBUG_ASSERT(type >= NO_OFFSET_STRIDE && type <= SINGLE_OUTPUT);
+  DEBUG_ASSERT(type >= NO_OFFSET_STRIDE && type <= SINGLE_OUTPUT);
   return m_program_sets[type].begin();
 }
 
 StreamCache::set_const_iterator StreamCache::sets_end(SetType type) const
 {
-  SH_DEBUG_ASSERT(type >= NO_OFFSET_STRIDE && type <= SINGLE_OUTPUT);
+  DEBUG_ASSERT(type >= NO_OFFSET_STRIDE && type <= SINGLE_OUTPUT);
   return m_program_sets[type].end();
 }
 
-void split_program(ShProgramNode* program,
-                   std::list<ShProgramNodePtr>& programs,
+void split_program(ProgramNode* program,
+                   std::list<ProgramNodePtr>& programs,
                    const std::string& target, int chunk_size)
 {
-  SH_DEBUG_ASSERT(chunk_size > 0);
+  DEBUG_ASSERT(chunk_size > 0);
   int var = 0;
-  for (ShProgramNode::VarList::const_iterator I = program->begin_outputs();
+  for (ProgramNode::VarList::const_iterator I = program->begin_outputs();
        I != program->end_outputs(); ) {
     std::vector<int> chunk;
     for (int i = 0; i < chunk_size && I != program->end_outputs(); ++I,++i,++var){
       chunk.push_back(var);
     }
-    ShProgram p = shSwizzle(chunk) << ShProgram(program);
+    Program p = swizzle(chunk) << Program(program);
     p.node()->target() = target;
     programs.push_back(p.node());
   }

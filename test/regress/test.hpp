@@ -17,8 +17,8 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SH_REGRESS_TEST_HPP
-#define SH_REGRESS_TEST_HPP
+#ifndef REGRESS_TEST_HPP
+#define REGRESS_TEST_HPP
 
 #include <iostream>
 #include <iomanip>
@@ -32,7 +32,7 @@
 #define COLOR_NORMAL "[0m"
 
 // turns on output of all results, even if they pass 
-//#define SH_REGRESS_SHOWALL 
+//#define REGRESS_OWALL 
 
 class Test {
 public:
@@ -51,23 +51,23 @@ public:
     print_values(varname.c_str(), s.str());
   }
 
-  template<int N, SH::ShBindingType Binding, typename T, SH::ShSemanticType Semantic, bool swizzled>
-  void mem_from_host(typename SH::ShAttrib<N, Binding, T, Semantic, swizzled>::mem_type mem[], const SH::ShAttrib<N, Binding, T, Semantic, swizzled>& host)
+  template<int N, SH::BindingType Binding, typename T, SH::SemanticType Semantic, bool swizzled>
+  void mem_from_host(typename SH::Attrib<N, Binding, T, Semantic, swizzled>::mem_type mem[], const SH::Attrib<N, Binding, T, Semantic, swizzled>& host)
   {
     using namespace SH;
-    ShVariantPtr memVariant = new ShDataVariant<typename ShAttrib<N, Binding, T, Semantic, swizzled>::storage_type, SH_MEM>(host.size(), mem, false);
+    VariantPtr memVariant = new DataVariant<typename Attrib<N, Binding, T, Semantic, swizzled>::storage_type, MEM>(host.size(), mem, false);
     memVariant->set(host.getVariant());
   }
 
-  template<int Rows, int Cols, SH::ShBindingType Binding, typename T>
-  void mem_from_host(typename SH::ShMatrix<Rows, Cols, Binding, T>::mem_type mem[], const SH::ShMatrix<Rows, Cols, Binding, T>& host)
+  template<int Rows, int Cols, SH::BindingType Binding, typename T>
+  void mem_from_host(typename SH::Matrix<Rows, Cols, Binding, T>::mem_type mem[], const SH::Matrix<Rows, Cols, Binding, T>& host)
   {
     // TODO: add support for matrices
   }
 
   /// Apply the input parameter to the program
   template<class T>
-  SH::ShProgram bind_input(SH::ShProgram& program, const T& in, std::string& str)
+  SH::Program bind_input(SH::Program& program, const T& in, std::string& str)
   {
     using namespace std;
     using namespace SH;
@@ -76,8 +76,8 @@ public:
     IT* _in = new IT[in.size()];
     mem_from_host(_in, in);
     
-    ShHostMemoryPtr mem_in = new ShHostMemory(in.size()*sizeof(IT), _in, T::value_type);
-    ShChannel<typename T::TempType> chan_in(mem_in, 1);
+    HostMemoryPtr mem_in = new HostMemory(in.size()*sizeof(IT), _in, T::value_type);
+    Channel<typename T::TempType> chan_in(mem_in, 1);
     
     stringstream s;
     s << setiosflags(ios::right);
@@ -108,7 +108,7 @@ public:
         return 1;
       }
     }
-#ifdef SH_REGRESS_SHOWALL
+#ifdef REGRESS_OWALL
     print_pass(name);
     for (unsigned j=0; j < inputs.size(); j++) {
       char label[4] = "  A";
@@ -123,7 +123,7 @@ public:
 
   /// Run stream test on current backend (1 input parameter)
   template <class INPUT1, class OUTPUT>
-  int run(SH::ShProgram& program, const INPUT1& in1, const OUTPUT& res, const double epsilon)
+  int run(SH::Program& program, const INPUT1& in1, const OUTPUT& res, const double epsilon)
   {
     if (on_host()) return 0; // skip this test
 
@@ -137,11 +137,11 @@ public:
     OT* _res = new OT[res.size()];
     mem_from_host(_res, res);
 
-    SH::ShHostMemoryPtr mem_out = new SH::ShHostMemory(res.size()*sizeof(OT), _out, OUTPUT::value_type);
-    SH::ShChannel<typename OUTPUT::TempType> chan_out(mem_out, 1);
+    SH::HostMemoryPtr mem_out = new SH::HostMemory(res.size()*sizeof(OT), _out, OUTPUT::value_type);
+    SH::Channel<typename OUTPUT::TempType> chan_out(mem_out, 1);
 
     std::vector<std::string> inputs(1);
-    SH::ShProgram program1 = bind_input(program, in1, inputs[0]);
+    SH::Program program1 = bind_input(program, in1, inputs[0]);
     chan_out = program1;
     mem_out->hostStorage()->sync();
 
@@ -150,7 +150,7 @@ public:
 
   /// Run stream test on current backend (2 input parameters)
   template <class INPUT1, class INPUT2, class OUTPUT>
-  int run(SH::ShProgram& program, const INPUT1& in1, const INPUT2& in2,
+  int run(SH::Program& program, const INPUT1& in1, const INPUT2& in2,
 	  const OUTPUT& res, const double epsilon)
   {
     if (on_host()) return 0; // skip this test
@@ -165,12 +165,12 @@ public:
     OT* _res = new OT[res.size()];
     mem_from_host(_res, res);
 
-    SH::ShHostMemoryPtr mem_out = new SH::ShHostMemory(res.size()*sizeof(OT), _out, OUTPUT::value_type);
-    SH::ShChannel<typename OUTPUT::TempType> chan_out(mem_out, 1);
+    SH::HostMemoryPtr mem_out = new SH::HostMemory(res.size()*sizeof(OT), _out, OUTPUT::value_type);
+    SH::Channel<typename OUTPUT::TempType> chan_out(mem_out, 1);
 
     std::vector<std::string> inputs(2);
-    SH::ShProgram program1 = bind_input(program, in1, inputs[0]);
-    SH::ShProgram program2 = bind_input(program1, in2, inputs[1]);
+    SH::Program program1 = bind_input(program, in1, inputs[0]);
+    SH::Program program2 = bind_input(program1, in2, inputs[1]);
     chan_out = program2;
     mem_out->hostStorage()->sync();
 
@@ -179,7 +179,7 @@ public:
 
   /// Run stream test on current backend (3 input parameters)
   template <class INPUT1, class INPUT2, class INPUT3, class OUTPUT>
-  int run(SH::ShProgram& program, const INPUT1& in1, const INPUT2& in2,
+  int run(SH::Program& program, const INPUT1& in1, const INPUT2& in2,
            const INPUT3& in3, const OUTPUT res, const double epsilon)
   {
     if (on_host()) return 0; // skip this test
@@ -194,13 +194,13 @@ public:
     OT* _res = new OT[res.size()];
     mem_from_host(_res, res);
   
-    SH::ShHostMemoryPtr mem_out = new SH::ShHostMemory(res.size()*sizeof(OT), _out, OUTPUT::value_type);
-    SH::ShChannel<typename OUTPUT::TempType> chan_out(mem_out, 1);
+    SH::HostMemoryPtr mem_out = new SH::HostMemory(res.size()*sizeof(OT), _out, OUTPUT::value_type);
+    SH::Channel<typename OUTPUT::TempType> chan_out(mem_out, 1);
 
     std::vector<std::string> inputs(3);
-    SH::ShProgram program1 = bind_input(program, in1, inputs[0]);
-    SH::ShProgram program2 = bind_input(program1, in2, inputs[1]);
-    SH::ShProgram program3 = bind_input(program2, in3, inputs[2]);
+    SH::Program program1 = bind_input(program, in1, inputs[0]);
+    SH::Program program2 = bind_input(program1, in2, inputs[1]);
+    SH::Program program3 = bind_input(program2, in3, inputs[2]);
     chan_out = program3;
     mem_out->hostStorage()->sync();
 
@@ -209,7 +209,7 @@ public:
 
   /// Run stream test on current backend (4 input parameters)
   template <class INPUT1, class INPUT2, class INPUT3, class INPUT4, class OUTPUT>
-  int run(SH::ShProgram& program, const INPUT1& in1, const INPUT2& in2,
+  int run(SH::Program& program, const INPUT1& in1, const INPUT2& in2,
            const INPUT3& in3, const INPUT4& in4, const OUTPUT res, const double epsilon)
   {
     if (on_host()) return 0; // skip this test
@@ -224,14 +224,14 @@ public:
     OT* _res = new OT[res.size()];
     mem_from_host(_res, res);
   
-    SH::ShHostMemoryPtr mem_out = new SH::ShHostMemory(res.size()*sizeof(OT), _out, OUTPUT::value_type);
-    SH::ShChannel<typename OUTPUT::TempType> chan_out(mem_out, 1);
+    SH::HostMemoryPtr mem_out = new SH::HostMemory(res.size()*sizeof(OT), _out, OUTPUT::value_type);
+    SH::Channel<typename OUTPUT::TempType> chan_out(mem_out, 1);
 
     std::vector<std::string> inputs(4);
-    SH::ShProgram program1 = bind_input(program, in1, inputs[0]);
-    SH::ShProgram program2 = bind_input(program1, in2, inputs[1]);
-    SH::ShProgram program3 = bind_input(program2, in3, inputs[2]);
-    SH::ShProgram program4 = bind_input(program3, in4, inputs[3]);
+    SH::Program program1 = bind_input(program, in1, inputs[0]);
+    SH::Program program2 = bind_input(program1, in2, inputs[1]);
+    SH::Program program3 = bind_input(program2, in3, inputs[2]);
+    SH::Program program4 = bind_input(program3, in4, inputs[3]);
     chan_out = program4;
     mem_out->hostStorage()->sync();
 

@@ -21,135 +21,135 @@
 #define SHEVALIMPL_HPP
 
 #include <numeric>
-#include "ShEval.hpp"
-#include "ShVariant.hpp"
-#include "ShDebug.hpp"
-#include "ShError.hpp"
+#include "Eval.hpp"
+#include "Variant.hpp"
+#include "Debug.hpp"
+#include "Error.hpp"
 
 namespace SH {
 
-template<ShOperation OP, typename T>
-void ShRegularOp<OP, T>::operator()( 
-    ShVariant* dest, const ShVariant* a, const ShVariant* b, const ShVariant* c) const
+template<Operation OP, typename T>
+void RegularOp<OP, T>::operator()( 
+    Variant* dest, const Variant* a, const Variant* b, const Variant* c) const
 {
-  ShDataVariant<T, SH_HOST>* destVec;
-  const ShDataVariant<T, SH_HOST>  *aVec, *bVec, *cVec;
+  DataVariant<T, HOST>* destVec;
+  const DataVariant<T, HOST>  *aVec, *bVec, *cVec;
 
-  SH_DEBUG_ASSERT(dest && a);
-  destVec = variant_cast<T, SH_HOST>(dest);
-  aVec = variant_cast<T, SH_HOST>(a);
+  DEBUG_ASSERT(dest && a);
+  destVec = variant_cast<T, HOST>(dest);
+  aVec = variant_cast<T, HOST>(a);
 
-  if(b) bVec = variant_cast<T, SH_HOST>(b);
+  if(b) bVec = variant_cast<T, HOST>(b);
   else bVec = 0;
 
-  if(c) cVec = variant_cast<T, SH_HOST>(c);
+  if(c) cVec = variant_cast<T, HOST>(c);
   else cVec = 0;
 
-  ShRegularOpChooser<OP, T>::Op::doop(destVec, aVec, bVec, cVec);
+  RegularOpChooser<OP, T>::Op::doop(destVec, aVec, bVec, cVec);
 }
 
 template<typename T>
-void _shInitFloatOps() {
-  ShEval* eval = ShEval::instance();
-  const ShValueType V = ShStorageTypeInfo<T>::value_type;
+void _initFloatOps() {
+  Eval* eval = Eval::instance();
+  const ValueType V = StorageTypeInfo<T>::value_type;
 
-  eval->addOp(SH_OP_ABS, new ShRegularOp<SH_OP_ABS, T>(), V, V);
-  eval->addOp(SH_OP_ACOS, new ShRegularOp<SH_OP_ACOS, T>(), V, V);
-  eval->addOp(SH_OP_ACOSH, new ShRegularOp<SH_OP_ACOSH, T>(), V, V);
-  eval->addOp(SH_OP_ASIN, new ShRegularOp<SH_OP_ASIN, T>(), V, V);
-  eval->addOp(SH_OP_ASINH, new ShRegularOp<SH_OP_ASINH, T>(), V, V);
-  eval->addOp(SH_OP_ASN, new ShRegularOp<SH_OP_ASN, T>(), V, V);
-  eval->addOp(SH_OP_ATAN, new ShRegularOp<SH_OP_ATAN, T>(), V, V);
-  eval->addOp(SH_OP_ATANH, new ShRegularOp<SH_OP_ATANH, T>(), V, V);
-  eval->addOp(SH_OP_CBRT, new ShRegularOp<SH_OP_CBRT, T>(), V, V);
-  eval->addOp(SH_OP_CEIL, new ShRegularOp<SH_OP_CEIL, T>(), V, V);
-  eval->addOp(SH_OP_COS, new ShRegularOp<SH_OP_COS, T>(), V, V);
-  eval->addOp(SH_OP_COSH, new ShRegularOp<SH_OP_COSH, T>(), V, V);
-  eval->addOp(SH_OP_CSUM, new ShRegularOp<SH_OP_CSUM, T>(), V, V);
-  eval->addOp(SH_OP_CMUL, new ShRegularOp<SH_OP_CMUL, T>(), V, V);
-  eval->addOp(SH_OP_EXP, new ShRegularOp<SH_OP_EXP, T>(), V, V);
-  eval->addOp(SH_OP_EXP2, new ShRegularOp<SH_OP_EXP2, T>(), V, V);
-  eval->addOp(SH_OP_EXP10, new ShRegularOp<SH_OP_EXP10, T>(), V, V);
-  eval->addOp(SH_OP_FLR, new ShRegularOp<SH_OP_FLR, T>(), V, V);
-  eval->addOp(SH_OP_FRAC, new ShRegularOp<SH_OP_FRAC, T>(), V, V);
-  eval->addOp(SH_OP_HASH, new ShRegularOp<SH_OP_HASH, T>(), V, V);
-  eval->addOp(SH_OP_LOG, new ShRegularOp<SH_OP_LOG, T>(), V, V);
-  eval->addOp(SH_OP_LOG2, new ShRegularOp<SH_OP_LOG2, T>(), V, V);
-  eval->addOp(SH_OP_LOG10, new ShRegularOp<SH_OP_LOG10, T>(), V, V);
-  //eval->addOp(SH_OP_NEG, new ShRegularOp<SH_OP_NEG, T>());
-  eval->addOp(SH_OP_NOISE, new ShRegularOp<SH_OP_NOISE, T>(), V, V);
-  eval->addOp(SH_OP_NORM, new ShRegularOp<SH_OP_NORM, T>(), V, V);
-  eval->addOp(SH_OP_RCP, new ShRegularOp<SH_OP_RCP, T>(), V, V);
-  eval->addOp(SH_OP_RND, new ShRegularOp<SH_OP_RND, T>(), V, V);
-  eval->addOp(SH_OP_RSQ, new ShRegularOp<SH_OP_RSQ, T>(), V, V);
-  eval->addOp(SH_OP_SIN, new ShRegularOp<SH_OP_SIN, T>(), V, V);
-  eval->addOp(SH_OP_SINH, new ShRegularOp<SH_OP_SINH, T>(), V, V);
-  eval->addOp(SH_OP_SGN, new ShRegularOp<SH_OP_SGN, T>(), V, V);
-  eval->addOp(SH_OP_SQRT, new ShRegularOp<SH_OP_SQRT, T>(), V, V);
-  eval->addOp(SH_OP_TAN, new ShRegularOp<SH_OP_TAN, T>(), V, V);
-  eval->addOp(SH_OP_TANH, new ShRegularOp<SH_OP_TANH, T>(), V, V);
+  eval->addOp(OP_ABS, new RegularOp<OP_ABS, T>(), V, V);
+  eval->addOp(OP_ACOS, new RegularOp<OP_ACOS, T>(), V, V);
+  eval->addOp(OP_ACOSH, new RegularOp<OP_ACOSH, T>(), V, V);
+  eval->addOp(OP_ASIN, new RegularOp<OP_ASIN, T>(), V, V);
+  eval->addOp(OP_ASINH, new RegularOp<OP_ASINH, T>(), V, V);
+  eval->addOp(OP_ASN, new RegularOp<OP_ASN, T>(), V, V);
+  eval->addOp(OP_ATAN, new RegularOp<OP_ATAN, T>(), V, V);
+  eval->addOp(OP_ATANH, new RegularOp<OP_ATANH, T>(), V, V);
+  eval->addOp(OP_CBRT, new RegularOp<OP_CBRT, T>(), V, V);
+  eval->addOp(OP_CEIL, new RegularOp<OP_CEIL, T>(), V, V);
+  eval->addOp(OP_COS, new RegularOp<OP_COS, T>(), V, V);
+  eval->addOp(OP_COSH, new RegularOp<OP_COSH, T>(), V, V);
+  eval->addOp(OP_CSUM, new RegularOp<OP_CSUM, T>(), V, V);
+  eval->addOp(OP_CMUL, new RegularOp<OP_CMUL, T>(), V, V);
+  eval->addOp(OP_EXP, new RegularOp<OP_EXP, T>(), V, V);
+  eval->addOp(OP_EXP2, new RegularOp<OP_EXP2, T>(), V, V);
+  eval->addOp(OP_EXP10, new RegularOp<OP_EXP10, T>(), V, V);
+  eval->addOp(OP_FLR, new RegularOp<OP_FLR, T>(), V, V);
+  eval->addOp(OP_FRAC, new RegularOp<OP_FRAC, T>(), V, V);
+  eval->addOp(OP_HASH, new RegularOp<OP_HASH, T>(), V, V);
+  eval->addOp(OP_LOG, new RegularOp<OP_LOG, T>(), V, V);
+  eval->addOp(OP_LOG2, new RegularOp<OP_LOG2, T>(), V, V);
+  eval->addOp(OP_LOG10, new RegularOp<OP_LOG10, T>(), V, V);
+  //eval->addOp(OP_NEG, new RegularOp<OP_NEG, T>());
+  eval->addOp(OP_NOISE, new RegularOp<OP_NOISE, T>(), V, V);
+  eval->addOp(OP_NORM, new RegularOp<OP_NORM, T>(), V, V);
+  eval->addOp(OP_RCP, new RegularOp<OP_RCP, T>(), V, V);
+  eval->addOp(OP_RND, new RegularOp<OP_RND, T>(), V, V);
+  eval->addOp(OP_RSQ, new RegularOp<OP_RSQ, T>(), V, V);
+  eval->addOp(OP_SIN, new RegularOp<OP_SIN, T>(), V, V);
+  eval->addOp(OP_SINH, new RegularOp<OP_SINH, T>(), V, V);
+  eval->addOp(OP_SGN, new RegularOp<OP_SGN, T>(), V, V);
+  eval->addOp(OP_SQRT, new RegularOp<OP_SQRT, T>(), V, V);
+  eval->addOp(OP_TAN, new RegularOp<OP_TAN, T>(), V, V);
+  eval->addOp(OP_TANH, new RegularOp<OP_TANH, T>(), V, V);
 
-  eval->addOp(SH_OP_ADD, new ShRegularOp<SH_OP_ADD, T>(), V, V, V);
-  eval->addOp(SH_OP_ATAN2, new ShRegularOp<SH_OP_ATAN2, T>(), V, V, V);
-  eval->addOp(SH_OP_DIV, new ShRegularOp<SH_OP_DIV, T>(), V, V, V);
-  eval->addOp(SH_OP_DOT, new ShRegularOp<SH_OP_DOT, T>(), V, V, V);
-  eval->addOp(SH_OP_MAX, new ShRegularOp<SH_OP_MAX, T>(), V, V, V);
-  eval->addOp(SH_OP_MIN, new ShRegularOp<SH_OP_MIN, T>(), V, V, V);
-  eval->addOp(SH_OP_MOD, new ShRegularOp<SH_OP_MOD, T>(), V, V, V);
-  eval->addOp(SH_OP_MUL, new ShRegularOp<SH_OP_MUL, T>(), V, V, V);
-  eval->addOp(SH_OP_POW, new ShRegularOp<SH_OP_POW, T>(), V, V, V);
-  eval->addOp(SH_OP_SEQ, new ShRegularOp<SH_OP_SEQ, T>(), V, V, V);
-  eval->addOp(SH_OP_SGE, new ShRegularOp<SH_OP_SGE, T>(), V, V, V);
-  eval->addOp(SH_OP_SGT, new ShRegularOp<SH_OP_SGT, T>(), V, V, V);
-  eval->addOp(SH_OP_SLE, new ShRegularOp<SH_OP_SLE, T>(), V, V, V);
-  eval->addOp(SH_OP_SLT, new ShRegularOp<SH_OP_SLT, T>(), V, V, V);
-  eval->addOp(SH_OP_SNE, new ShRegularOp<SH_OP_SNE, T>(), V, V, V);
-  eval->addOp(SH_OP_XPD, new ShRegularOp<SH_OP_XPD, T>(), V, V, V);
+  eval->addOp(OP_ADD, new RegularOp<OP_ADD, T>(), V, V, V);
+  eval->addOp(OP_ATAN2, new RegularOp<OP_ATAN2, T>(), V, V, V);
+  eval->addOp(OP_DIV, new RegularOp<OP_DIV, T>(), V, V, V);
+  eval->addOp(OP_DOT, new RegularOp<OP_DOT, T>(), V, V, V);
+  eval->addOp(OP_MAX, new RegularOp<OP_MAX, T>(), V, V, V);
+  eval->addOp(OP_MIN, new RegularOp<OP_MIN, T>(), V, V, V);
+  eval->addOp(OP_MOD, new RegularOp<OP_MOD, T>(), V, V, V);
+  eval->addOp(OP_MUL, new RegularOp<OP_MUL, T>(), V, V, V);
+  eval->addOp(OP_POW, new RegularOp<OP_POW, T>(), V, V, V);
+  eval->addOp(OP_SEQ, new RegularOp<OP_SEQ, T>(), V, V, V);
+  eval->addOp(OP_SGE, new RegularOp<OP_SGE, T>(), V, V, V);
+  eval->addOp(OP_SGT, new RegularOp<OP_SGT, T>(), V, V, V);
+  eval->addOp(OP_SLE, new RegularOp<OP_SLE, T>(), V, V, V);
+  eval->addOp(OP_SLT, new RegularOp<OP_SLT, T>(), V, V, V);
+  eval->addOp(OP_SNE, new RegularOp<OP_SNE, T>(), V, V, V);
+  eval->addOp(OP_XPD, new RegularOp<OP_XPD, T>(), V, V, V);
 
-  eval->addOp(SH_OP_LIT, new ShRegularOp<SH_OP_LIT, T>(), V, V);
-  eval->addOp(SH_OP_LRP, new ShRegularOp<SH_OP_LRP, T>(), V, V, V, V);
-  eval->addOp(SH_OP_MAD, new ShRegularOp<SH_OP_MAD, T>(), V, V, V, V);
-  eval->addOp(SH_OP_COND, new ShRegularOp<SH_OP_COND, T>(), V, V, V, V);
+  eval->addOp(OP_LIT, new RegularOp<OP_LIT, T>(), V, V);
+  eval->addOp(OP_LRP, new RegularOp<OP_LRP, T>(), V, V, V, V);
+  eval->addOp(OP_MAD, new RegularOp<OP_MAD, T>(), V, V, V, V);
+  eval->addOp(OP_COND, new RegularOp<OP_COND, T>(), V, V, V, V);
 }
 
 template<typename T>
-void _shInitIntOps() {
-  ShEval* eval = ShEval::instance();
-  const ShValueType V = ShStorageTypeInfo<T>::value_type;
+void _initIntOps() {
+  Eval* eval = Eval::instance();
+  const ValueType V = StorageTypeInfo<T>::value_type;
 
   // guaranteed int result ops (ignore overflow)
-  eval->addOp(SH_OP_ABS, new ShRegularOp<SH_OP_ABS, T>(), V, V);
-  eval->addOp(SH_OP_ASN, new ShRegularOp<SH_OP_ASN, T>(), V, V);
-  //eval->addOp(SH_OP_NEG, new ShRegularOp<SH_OP_NEG, T>());
-  eval->addOp(SH_OP_CSUM, new ShRegularOp<SH_OP_CSUM, T>(), V, V);
-  eval->addOp(SH_OP_CMUL, new ShRegularOp<SH_OP_CMUL, T>(), V, V);
-  eval->addOp(SH_OP_SGN, new ShRegularOp<SH_OP_SGN, T>(), V, V);
+  eval->addOp(OP_ABS, new RegularOp<OP_ABS, T>(), V, V);
+  eval->addOp(OP_ASN, new RegularOp<OP_ASN, T>(), V, V);
+  //eval->addOp(OP_NEG, new RegularOp<OP_NEG, T>());
+  eval->addOp(OP_CSUM, new RegularOp<OP_CSUM, T>(), V, V);
+  eval->addOp(OP_CMUL, new RegularOp<OP_CMUL, T>(), V, V);
+  eval->addOp(OP_SGN, new RegularOp<OP_SGN, T>(), V, V);
 
-  eval->addOp(SH_OP_ADD, new ShRegularOp<SH_OP_ADD, T>(), V, V, V);
-  eval->addOp(SH_OP_DIV, new ShRegularOp<SH_OP_DIV, T>(), V, V, V);
-  eval->addOp(SH_OP_DOT, new ShRegularOp<SH_OP_DOT, T>(), V, V, V);
-  eval->addOp(SH_OP_MAX, new ShRegularOp<SH_OP_MAX, T>(), V, V, V);
-  eval->addOp(SH_OP_MIN, new ShRegularOp<SH_OP_MIN, T>(), V, V, V);
-  eval->addOp(SH_OP_MOD, new ShRegularOp<SH_OP_MOD, T>(), V, V, V);
-  eval->addOp(SH_OP_MUL, new ShRegularOp<SH_OP_MUL, T>(), V, V, V);
-  eval->addOp(SH_OP_POW, new ShRegularOp<SH_OP_POW, T>(), V, V, V);
-  eval->addOp(SH_OP_SEQ, new ShRegularOp<SH_OP_SEQ, T>(), V, V, V);
-  eval->addOp(SH_OP_SGE, new ShRegularOp<SH_OP_SGE, T>(), V, V, V);
-  eval->addOp(SH_OP_SGT, new ShRegularOp<SH_OP_SGT, T>(), V, V, V);
-  eval->addOp(SH_OP_SLE, new ShRegularOp<SH_OP_SLE, T>(), V, V, V);
-  eval->addOp(SH_OP_SLT, new ShRegularOp<SH_OP_SLT, T>(), V, V, V);
-  eval->addOp(SH_OP_SNE, new ShRegularOp<SH_OP_SNE, T>(), V, V, V);
-  eval->addOp(SH_OP_XPD, new ShRegularOp<SH_OP_XPD, T>(), V, V, V);
+  eval->addOp(OP_ADD, new RegularOp<OP_ADD, T>(), V, V, V);
+  eval->addOp(OP_DIV, new RegularOp<OP_DIV, T>(), V, V, V);
+  eval->addOp(OP_DOT, new RegularOp<OP_DOT, T>(), V, V, V);
+  eval->addOp(OP_MAX, new RegularOp<OP_MAX, T>(), V, V, V);
+  eval->addOp(OP_MIN, new RegularOp<OP_MIN, T>(), V, V, V);
+  eval->addOp(OP_MOD, new RegularOp<OP_MOD, T>(), V, V, V);
+  eval->addOp(OP_MUL, new RegularOp<OP_MUL, T>(), V, V, V);
+  eval->addOp(OP_POW, new RegularOp<OP_POW, T>(), V, V, V);
+  eval->addOp(OP_SEQ, new RegularOp<OP_SEQ, T>(), V, V, V);
+  eval->addOp(OP_SGE, new RegularOp<OP_SGE, T>(), V, V, V);
+  eval->addOp(OP_SGT, new RegularOp<OP_SGT, T>(), V, V, V);
+  eval->addOp(OP_SLE, new RegularOp<OP_SLE, T>(), V, V, V);
+  eval->addOp(OP_SLT, new RegularOp<OP_SLT, T>(), V, V, V);
+  eval->addOp(OP_SNE, new RegularOp<OP_SNE, T>(), V, V, V);
+  eval->addOp(OP_XPD, new RegularOp<OP_XPD, T>(), V, V, V);
 
-  eval->addOp(SH_OP_LRP, new ShRegularOp<SH_OP_LRP, T>(), V, V, V, V);
-  eval->addOp(SH_OP_MAD, new ShRegularOp<SH_OP_MAD, T>(), V, V, V, V);
-  eval->addOp(SH_OP_COND, new ShRegularOp<SH_OP_COND, T>(), V, V, V, V);
+  eval->addOp(OP_LRP, new RegularOp<OP_LRP, T>(), V, V, V, V);
+  eval->addOp(OP_MAD, new RegularOp<OP_MAD, T>(), V, V, V, V);
+  eval->addOp(OP_COND, new RegularOp<OP_COND, T>(), V, V, V, V);
 
   // unary ASN equivalents for ints 
-  eval->addOp(SH_OP_CEIL, new ShRegularOp<SH_OP_ASN, T>(), V, V);
-  eval->addOp(SH_OP_FLR, new ShRegularOp<SH_OP_ASN, T>(), V, V);
-  eval->addOp(SH_OP_FRAC, new ShRegularOp<SH_OP_ASN, T>(), V, V);
-  eval->addOp(SH_OP_RND, new ShRegularOp<SH_OP_ASN, T>(), V, V);
+  eval->addOp(OP_CEIL, new RegularOp<OP_ASN, T>(), V, V);
+  eval->addOp(OP_FLR, new RegularOp<OP_ASN, T>(), V, V);
+  eval->addOp(OP_FRAC, new RegularOp<OP_ASN, T>(), V, V);
+  eval->addOp(OP_RND, new RegularOp<OP_ASN, T>(), V, V);
 
   // all other ops must use float (since they can potentially give float
   // results)

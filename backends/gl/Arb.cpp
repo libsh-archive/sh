@@ -34,8 +34,8 @@ ArbCodeStrategy* ArbCodeStrategy::create(void)
   return new ArbCodeStrategy;
 }
 
-ShBackendCodePtr ArbCodeStrategy::generate(const std::string& target,
-                                           const ShProgramNodeCPtr& shader,
+BackendCodePtr ArbCodeStrategy::generate(const std::string& target,
+                                           const ProgramNodeCPtr& shader,
                                            TextureStrategy* texture)
 {
   std::string::size_type loc = target.rfind(':');
@@ -53,7 +53,7 @@ unsigned int arbTarget(const std::string& unit)
 }
 
 ArbException::ArbException(const std::string& message)
-  : ShBackendException(std::string("ARB error: ") + message)
+  : BackendException(std::string("ARB error: ") + message)
 {
 }
 

@@ -18,38 +18,38 @@
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 
-#include "ShDebug.hpp"
-#include "ShInfo.hpp"
+#include "Debug.hpp"
+#include "Info.hpp"
 
 namespace SH {
 
-ShInfo::~ShInfo()
+Info::~Info()
 {
 }
 
-ShInfo::ShInfo() 
+Info::Info() 
 {
 }
 
-ShInfoComment::ShInfoComment(const std::string& comment) 
+InfoComment::InfoComment(const std::string& comment) 
   : comment(comment)
 {}
 
-ShInfo* ShInfoComment::clone() const
+Info* InfoComment::clone() const
 {
-  return new ShInfoComment(*this);
+  return new InfoComment(*this);
 }
 
 
-ShInfoHolder::ShInfoHolder()
+InfoHolder::InfoHolder()
 {}
 
-ShInfoHolder::~ShInfoHolder()
+InfoHolder::~InfoHolder()
 {
   erase_all();
 }
 
-ShInfoHolder::ShInfoHolder(const ShInfoHolder &other)
+InfoHolder::InfoHolder(const InfoHolder &other)
 {
   for(InfoList::const_iterator I = other.info.begin(); I != other.info.end(); ++I) {
     info.push_back((*I)->clone());
@@ -57,7 +57,7 @@ ShInfoHolder::ShInfoHolder(const ShInfoHolder &other)
 }
 
 // Makes this list equal to a clone of other's list
-ShInfoHolder& ShInfoHolder::operator=(const ShInfoHolder &other)
+InfoHolder& InfoHolder::operator=(const InfoHolder &other)
 {
   if(this == &other) return *this;
   erase_all();
@@ -67,17 +67,17 @@ ShInfoHolder& ShInfoHolder::operator=(const ShInfoHolder &other)
   return *this;
 }
 
-void ShInfoHolder::add_info(ShInfo* new_info)
+void InfoHolder::add_info(Info* new_info)
 {
   info.push_back(new_info);
 }
 
-void ShInfoHolder::remove_info(ShInfo* old_info)
+void InfoHolder::remove_info(Info* old_info)
 {
   info.remove(old_info);
 }
 
-void ShInfoHolder::erase_all()
+void InfoHolder::erase_all()
 {
   for(InfoList::const_iterator I = info.begin(); I != info.end(); ++I) {
     delete *I;

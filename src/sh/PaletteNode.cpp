@@ -17,33 +17,33 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#include "ShPaletteNode.hpp"
+#include "PaletteNode.hpp"
 
 namespace SH {
 
-ShPaletteNode::ShPaletteNode(int elements, ShSemanticType semantic, ShValueType valueType, std::size_t length)
-  : ShVariableNode(SH_PALETTE, elements, valueType, semantic),
+PaletteNode::PaletteNode(int elements, SemanticType semantic, ValueType valueType, std::size_t length)
+  : VariableNode(PALETTE, elements, valueType, semantic),
     m_length(length),
-    m_nodes(new ShVariableNodePtr[length])
+    m_nodes(new VariableNodePtr[length])
 {
 }
 
-void ShPaletteNode::set_node(std::size_t i, const ShVariableNodePtr& node)
+void PaletteNode::set_node(std::size_t i, const VariableNodePtr& node)
 {
   m_nodes[i] = node;
 }
 
-std::size_t ShPaletteNode::palette_length() const
+std::size_t PaletteNode::palette_length() const
 {
   return m_length;
 }
 
-ShVariableNodeCPtr ShPaletteNode::get_node(std::size_t index) const
+VariableNodeCPtr PaletteNode::get_node(std::size_t index) const
 {
   return m_nodes[index];
 }
 
-ShVariableNodePtr ShPaletteNode::get_node(std::size_t index)
+VariableNodePtr PaletteNode::get_node(std::size_t index)
 {
   return m_nodes[index];
 }

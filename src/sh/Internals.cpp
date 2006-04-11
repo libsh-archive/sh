@@ -17,29 +17,29 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#include "ShInternals.hpp"
-#include "ShDebug.hpp"
+#include "Internals.hpp"
+#include "Debug.hpp"
 
 namespace SH { 
 
-ShVariableReplacer::ShVariableReplacer(ShVarMap& v)
+VariableReplacer::VariableReplacer(VarMap& v)
   : varMap(v) 
 {
 }
 
-void ShVariableReplacer::operator()(const ShCtrlGraphNodePtr& node) 
+void VariableReplacer::operator()(const CtrlGraphNodePtr& node) 
 {
   // replace variables that are conditions in branches
-  ShCtrlGraphNode::SuccessorList::iterator I;
+  CtrlGraphNode::SuccessorList::iterator I;
   for(I = node->successors.begin(); I != node->successors.end(); ++I) {
     repVar(I->cond);
   }
 
   // replace variables in the block
   if (!node) return;
-  ShBasicBlockPtr block = node->block;
+  BasicBlockPtr block = node->block;
   if (!block) return;
-  for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
+  for (BasicBlock::StmtList::iterator I = block->begin(); I != block->end(); ++I) {
     repVar(I->dest);
     for (int i = 0; i < 3; i++) {
       repVar(I->src[i]);
@@ -48,18 +48,18 @@ void ShVariableReplacer::operator()(const ShCtrlGraphNodePtr& node)
 
 }
 
-void ShVariableReplacer::operator()(const ShStructuralNodePtr& node) 
+void VariableReplacer::operator()(const StructuralNodePtr& node) 
 {
   if(node->cfg_node) operator()(node->cfg_node);
-  for (ShStructuralNode::StructNodeList::iterator I = node->structnodes.begin(); 
+  for (StructuralNode::StructNodeList::iterator I = node->structnodes.begin(); 
       I != node->structnodes.end(); ++I) {
     operator()(*I);
   }
 }
 
-void ShVariableReplacer::operator()(ShProgramNode::VarList &varList) 
+void VariableReplacer::operator()(ProgramNode::VarList &varList) 
 {
-  ShProgramNode::VarList::iterator I;
+  ProgramNode::VarList::iterator I;
   for(I = varList.begin(); I != varList.end();) {
     if(varMap.count(*I) > 0) {
       varList.insert(I, varMap[*I]);
@@ -68,21 +68,21 @@ void ShVariableReplacer::operator()(ShProgramNode::VarList &varList)
   }
 }
 
-void ShVariableReplacer::repVar(ShVariable& var) 
+void VariableReplacer::repVar(Variable& var) 
 {
   if(var.null()) return;
-  ShVarMap::iterator I = varMap.find(var.node());
+  VarMap::iterator I = varMap.find(var.node());
   if (I == varMap.end()) return;
-  var = ShVariable(I->second, var.swizzle(), var.neg());
+  var = Variable(I->second, var.swizzle(), var.neg());
 }
 
 
 
-void ShVarTransformMap::add_variable_transform(const ShVariableNodePtr& origVar, const ShVariableNodePtr& newVar)
+void VarTransformMap::add_variable_transform(const VariableNodePtr& origVar, const VariableNodePtr& newVar)
 {
   // We need only go one level of depth since we store the mappings to the ORIGINAL,
   // instead of traversing the chain each time.
-  ShVarMap::iterator i = m_NewToOldMap.find(origVar);
+  VarMap::iterator i = m_NewToOldMap.find(origVar);
   m_NewToOldMap[newVar] = (i == m_NewToOldMap.end() ? origVar : i->second);
 }
 

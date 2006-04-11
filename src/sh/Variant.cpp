@@ -19,14 +19,14 @@
 //////////////////////////////////////////////////////////////////////////////
 #include <iostream>
 #include <sstream>
-#include "ShVariant.hpp"
+#include "Variant.hpp"
 
 namespace SH {
 
-ShVariant::ShVariant()
+Variant::Variant()
 {}
 
-ShVariant::~ShVariant() 
+Variant::~Variant() 
 {}
 
 }

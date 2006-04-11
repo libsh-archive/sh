@@ -23,19 +23,19 @@
 #include <map>
 #include <set>
 #include <algorithm>
-#include "ShDebug.hpp"
-#include "ShDllExport.hpp"
-#include "ShVariableNode.hpp"
-#include "ShBackend.hpp"
+#include "Debug.hpp"
+#include "DllExport.hpp"
+#include "VariableNode.hpp"
+#include "Backend.hpp"
 
 namespace SH {
 
-struct ShLifeTime {
-  ShLifeTime()
+struct LifeTime {
+  LifeTime()
   {
   }
   
-  ShLifeTime(void *var, int first)
+  LifeTime(void *var, int first)
     : var(var), first(first), last(first)
   {
   }
@@ -49,7 +49,7 @@ struct ShLifeTime {
     if (last < index) last = index;
   }
   
-  bool operator<(const ShLifeTime& other) const
+  bool operator<(const LifeTime& other) const
   {
     return first < other.first;
   }
@@ -82,11 +82,11 @@ struct LifeToken {
 /** A simple, basic-block based linear register allocator.
  */
 template<typename T>
-class ShLinearAllocatorBase {
+class LinearAllocatorBase {
 public:
-  typedef ShPointer<T> TPtr;
+  typedef Pointer<T> TPtr;
 
-  ShLinearAllocatorBase(const ShBackendCodePtr& backendCode)
+  LinearAllocatorBase(const BackendCodePtr& backendCode)
     : m_backendCode(backendCode)
   {
   }
@@ -98,7 +98,7 @@ public:
     LifetimeMap::iterator I = m_lifetimes.find(var.object());
 
     if (I == m_lifetimes.end()) {
-      m_lifetimes[var.object()] = ShLifeTime(var.object(), index);
+      m_lifetimes[var.object()] = LifeTime(var.object(), index);
     } else {
       I->second.mark(index);
     }
@@ -107,9 +107,9 @@ public:
   // Dump the life times to stderr
   void debugDump()
   {
-#ifdef SH_DEBUG
+#ifdef DEBUG
     for (LifetimeMap::const_iterator I = m_lifetimes.begin(); I != m_lifetimes.end(); ++I) {
-      SH_DEBUG_PRINT(I->first << " = {" << I->second.first << ", " << I->second.last << "}");
+      DEBUG_PRINT(I->first << " = {" << I->second.first << ", " << I->second.last << "}");
     }
 #endif
   }
@@ -128,7 +128,7 @@ public:
       if (!I->end) {
         if (!m_backendCode->allocateRegister(TPtr(reinterpret_cast<T *>(I->var)))) {
           // TODO: Error
-          SH_DEBUG_WARN("Error allocating a register for " << I->var);
+          DEBUG_WARN("Error allocating a register for " << I->var);
         }
       } else {
         m_backendCode->freeRegister(TPtr(reinterpret_cast<T *>(I->var)));
@@ -137,12 +137,12 @@ public:
   }
 
 private:
-  ShBackendCodePtr m_backendCode;
-  typedef std::map<void *, ShLifeTime> LifetimeMap;
+  BackendCodePtr m_backendCode;
+  typedef std::map<void *, LifeTime> LifetimeMap;
   LifetimeMap m_lifetimes;
 };
 
-typedef ShLinearAllocatorBase<ShVariableNode> ShLinearAllocator;
+typedef LinearAllocatorBase<VariableNode> LinearAllocator;
 
 }
 

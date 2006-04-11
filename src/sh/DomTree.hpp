@@ -25,18 +25,18 @@
 #include <map>
 #include <vector>
 #include <algorithm>
-#include "ShDllExport.hpp"
-#include "ShCtrlGraph.hpp"
-#include "ShRefCount.hpp"
+#include "DllExport.hpp"
+#include "CtrlGraph.hpp"
+#include "RefCount.hpp"
 
 namespace SH {
 
   /** A dominator tree in a flowgraph.
    */
   class
-  SH_DLLEXPORT ShDomTree {
+  DLLEXPORT DomTree {
   public:
-    ShDomTree(ShCtrlGraphPtr ctrlGraph);
+    DomTree(CtrlGraphPtr ctrlGraph);
 
     /// Postorder (bottom-up) traversal.
     template<typename T> void postorder(T& f);
@@ -46,57 +46,57 @@ namespace SH {
   
     void debugDump();
 
-    int numbering(ShCtrlGraphNodePtr node) const {
+    int numbering(CtrlGraphNodePtr node) const {
       return (int)(std::find( m_vertex.begin(), m_vertex.end(), node) - m_vertex.begin());
     }
   
   private:
-    void dfs(ShCtrlGraphNodePtr v);
-    ShCtrlGraphNodePtr eval(ShCtrlGraphNodePtr v);
-    void compress(ShCtrlGraphNodePtr v);
-    void link(ShCtrlGraphNodePtr v, ShCtrlGraphNodePtr w);
+    void dfs(CtrlGraphNodePtr v);
+    CtrlGraphNodePtr eval(CtrlGraphNodePtr v);
+    void compress(CtrlGraphNodePtr v);
+    void link(CtrlGraphNodePtr v, CtrlGraphNodePtr w);
   
-    ShCtrlGraphPtr m_graph;
+    CtrlGraphPtr m_graph;
 
     // See [TODO Ref Langauer & Tarjan pg 127] for more information on these
 
-    typedef std::map<ShCtrlGraphNodePtr, ShCtrlGraphNodePtr> ParentMap;
+    typedef std::map<CtrlGraphNodePtr, CtrlGraphNodePtr> ParentMap;
     ParentMap m_parent;
-    typedef std::set<ShCtrlGraphNodePtr> PredSet;
-    typedef std::map<ShCtrlGraphNodePtr, PredSet> PredMap;
+    typedef std::set<CtrlGraphNodePtr> PredSet;
+    typedef std::map<CtrlGraphNodePtr, PredSet> PredMap;
     PredMap m_pred;
-    typedef std::map<ShCtrlGraphNodePtr, int> SemiMap;
+    typedef std::map<CtrlGraphNodePtr, int> SemiMap;
     SemiMap m_semi;
-    std::vector<ShCtrlGraphNodePtr> m_vertex;
-    typedef std::set<ShCtrlGraphNodePtr> BucketSet;
-    typedef std::map<ShCtrlGraphNodePtr, BucketSet> BucketMap;
+    std::vector<CtrlGraphNodePtr> m_vertex;
+    typedef std::set<CtrlGraphNodePtr> BucketSet;
+    typedef std::map<CtrlGraphNodePtr, BucketSet> BucketMap;
     BucketMap m_bucket;
-    typedef std::map<ShCtrlGraphNodePtr, ShCtrlGraphNodePtr> DomMap;
+    typedef std::map<CtrlGraphNodePtr, CtrlGraphNodePtr> DomMap;
     DomMap m_dom;
 
-    typedef std::map<ShCtrlGraphNodePtr, ShCtrlGraphNodePtr> AncestorMap;
+    typedef std::map<CtrlGraphNodePtr, CtrlGraphNodePtr> AncestorMap;
     AncestorMap m_ancestor;
-    typedef std::map<ShCtrlGraphNodePtr, ShCtrlGraphNodePtr> LabelMap;
+    typedef std::map<CtrlGraphNodePtr, CtrlGraphNodePtr> LabelMap;
     LabelMap m_label;
 
-    typedef std::set<ShCtrlGraphNodePtr> ChildrenSet;
-    typedef std::map<ShCtrlGraphNodePtr, ChildrenSet> ChildrenMap;
+    typedef std::set<CtrlGraphNodePtr> ChildrenSet;
+    typedef std::map<CtrlGraphNodePtr, ChildrenSet> ChildrenMap;
     ChildrenMap m_children;
   
     int m_n;
 
-    template<typename T> void postorderNode(T& f, ShCtrlGraphNodePtr root, int level = 0);
-    template<typename T> void preorderNode(T& f, ShCtrlGraphNodePtr root, int level = 0);
+    template<typename T> void postorderNode(T& f, CtrlGraphNodePtr root, int level = 0);
+    template<typename T> void preorderNode(T& f, CtrlGraphNodePtr root, int level = 0);
   };
 
   template<typename T>
-  void ShDomTree::postorder(T& f)
+  void DomTree::postorder(T& f)
   {
     postorderNode(f, m_graph->entry());
   }
 
   template<typename T>
-  void ShDomTree::postorderNode(T& f, ShCtrlGraphNodePtr root, int level)
+  void DomTree::postorderNode(T& f, CtrlGraphNodePtr root, int level)
   {
     ChildrenSet& children = m_children[root];
     for (ChildrenSet::iterator I = children.begin(); I != children.end(); ++I) {
@@ -106,13 +106,13 @@ namespace SH {
   }
 
   template<typename T>
-  void ShDomTree::preorder(T& f)
+  void DomTree::preorder(T& f)
   {
     preorderNode(f, m_graph->entry());
   }
 
   template<typename T>
-  void ShDomTree::preorderNode(T& f, ShCtrlGraphNodePtr root, int level)
+  void DomTree::preorderNode(T& f, CtrlGraphNodePtr root, int level)
   {
     f(root, level);
     ChildrenSet& children = m_children[root];

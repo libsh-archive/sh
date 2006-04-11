@@ -17,12 +17,12 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#include "ShUtility.hpp"
+#include "Utility.hpp"
 #include <iostream>
 
 namespace SH {
 
-std::ostream& shPrintIndent(std::ostream& out, int indent)
+std::ostream& printIndent(std::ostream& out, int indent)
 {
   for (int i = 0; i < indent; i++) out << ' ';
   return out;

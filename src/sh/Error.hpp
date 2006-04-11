@@ -20,20 +20,20 @@
 #ifndef SHERROR_HPP
 #define SHERROR_HPP 
 
-#include "ShDllExport.hpp"
-#include "ShException.hpp"
+#include "DllExport.hpp"
+#include "Exception.hpp"
 
-/** @file shError.hh
+/** @file error.hh
  *  Error handling functions 
  */
 
 namespace SH {
 
-/** Throws the given exception when ShContext::current()->throw_errors() is on. 
+/** Throws the given exception when Context::current()->throw_errors() is on. 
  * Otherwise prints error message.
  */
-SH_DLLEXPORT
-void shError(const ShException& exception); 
+DLLEXPORT
+void error(const Exception& exception); 
 
 }
 #endif

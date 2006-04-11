@@ -48,43 +48,43 @@
 #include <string>
 #include <vector>
 #include <ostream>
-#include "ShDllExport.hpp"
-#include "ShPool.hpp"
-#include "ShSwizzle.hpp"
-#include "ShVariableType.hpp"
-#include "ShDataType.hpp"
-#include "ShRefCount.hpp"
+#include "DllExport.hpp"
+#include "Pool.hpp"
+#include "Swizzle.hpp"
+#include "VariableType.hpp"
+#include "DataType.hpp"
+#include "RefCount.hpp"
 
 namespace SH {
 
 
-/** An ShVariant is a wrapper around a fixed-size array of data
+/** An Variant is a wrapper around a fixed-size array of data
  * of a data type.  It is used internally for
- * holding tuple data for ShVariableNodes, and occasionally as temporaries
+ * holding tuple data for VariableNodes, and occasionally as temporaries
  * for larger data arrays.
  *
- * There are ShDataVariant<V> implementations that hold a T array. 
+ * There are DataVariant<V> implementations that hold a T array. 
  *
- * @see ShDataVariant
+ * @see DataVariant
  */
 class 
-SH_DLLEXPORT 
-ShVariant: public ShRefCountable {
+DLLEXPORT 
+Variant: public RefCountable {
   public:
-    ShVariant();
-    virtual ~ShVariant();
+    Variant();
+    virtual ~Variant();
 
 
     //// Gives the associated type identifier string mapped to a unique integer index 
     /// (Note this is here only for convenience and the value is cached
-    /// somewhere better like in the ShVariableNode)
-    virtual ShValueType valueType() const = 0; 
+    /// somewhere better like in the VariableNode)
+    virtual ValueType valueType() const = 0; 
 
     /// Gives the data type held by this variant 
-    virtual ShDataType dataType() const = 0; 
+    virtual DataType dataType() const = 0; 
 
     /// Returns whether the value/data type in this variant match the given ones.
-    virtual bool typeMatches(ShValueType valueType, ShDataType dataType) const = 0;
+    virtual bool typeMatches(ValueType valueType, DataType dataType) const = 0;
 
     //// Gives the associated type name 
     virtual const char* typeName() const = 0; 
@@ -95,7 +95,7 @@ ShVariant: public ShRefCountable {
     /// Gives the number of bytes per element stored in this data array 
     virtual int datasize() const = 0;
 
-    /// Returns true if the array held in the ShVariant was allocated
+    /// Returns true if the array held in the Variant was allocated
     /// by this.
     virtual bool managed() const = 0;
 
@@ -107,45 +107,45 @@ ShVariant: public ShRefCountable {
     /** Sets the values of this from other.  
      * size() must equal other.size() 
      * @{ */
-    virtual void set(const ShPointer<const ShVariant>& other) = 0;
-    virtual void set(const ShVariant* other) = 0;
+    virtual void set(const Pointer<const Variant>& other) = 0;
+    virtual void set(const Variant* other) = 0;
     // @}
 
     /** Sets the value of the indexed element in this from the first element of other 
      * @{ */
-    virtual void set(const ShPointer<const ShVariant>& other, int index) = 0;
-    virtual void set(const ShVariant* other, int index) = 0;
+    virtual void set(const Pointer<const Variant>& other, int index) = 0;
+    virtual void set(const Variant* other, int index) = 0;
     // @}
 
     /** Sets the value of this from other using the given negation and writemask
      * on this.  other.size() must equal writemask.size()
      * @{ */
-    virtual void set(const ShPointer<const ShVariant>& other, bool neg, const ShSwizzle &writemask) = 0;
-    virtual void set(const ShVariant* other, bool neg, const ShSwizzle &writemask) = 0;
+    virtual void set(const Pointer<const Variant>& other, bool neg, const Swizzle &writemask) = 0;
+    virtual void set(const Variant* other, bool neg, const Swizzle &writemask) = 0;
     // @}
 
-    /// Creates a copy of this ShVariant.
-    virtual ShPointer<ShVariant> get() const = 0;
+    /// Creates a copy of this Variant.
+    virtual Pointer<Variant> get() const = 0;
 
-    /// Creates single element ShVariant with the indexed element from this.  
-    virtual ShPointer<ShVariant> get(int index) const = 0;
+    /// Creates single element Variant with the indexed element from this.  
+    virtual Pointer<Variant> get(int index) const = 0;
 
     /// Creates a copy of the Variant with the given swizzle and negation
     /// for a given number of elements (defaults to 1)
     /// swizzle.m_srcSize must equal size()
-    virtual ShPointer<ShVariant> get(bool neg, const ShSwizzle &swizzle, int count=1) const = 0; 
+    virtual Pointer<Variant> get(bool neg, const Swizzle &swizzle, int count=1) const = 0; 
 
     /// Returns true iff other is the same size, type, and has the same values
-    // This uses shDataTypeEquals
+    // This uses dataTypeEquals
     //
-    // @see ShDataType.hpp
+    // @see DataType.hpp
     //@{
-    virtual bool equals(const ShPointer<const ShVariant>& other) const = 0;
-    virtual bool equals(const ShVariant* other) const = 0;
+    virtual bool equals(const Pointer<const Variant>& other) const = 0;
+    virtual bool equals(const Variant* other) const = 0;
     //@}
 
     /// Returns whether every tuple element is positive 
-    // @see ShDataType.hpp
+    // @see DataType.hpp
     virtual bool isTrue() const = 0;
 
     /// Returns a pointer to the beginning of the array 
@@ -158,7 +158,7 @@ ShVariant: public ShRefCountable {
     /// Encodes the data value as a string
     virtual std::string encode() const = 0;
     virtual std::string encode(int index, int repeats=1) const = 0;
-    virtual std::string encode(bool neg, const ShSwizzle &swizzle) const = 0;
+    virtual std::string encode(bool neg, const Swizzle &swizzle) const = 0;
 
     /// C++ array declaration compatible encoding.
     /// Generates a string that can be used as an array initializer 
@@ -167,56 +167,56 @@ ShVariant: public ShRefCountable {
     virtual std::string encodeArray() const = 0;
 };
 
-typedef ShPointer<ShVariant> ShVariantPtr;
-typedef ShPointer<const ShVariant> ShVariantCPtr;
+typedef Pointer<Variant> VariantPtr;
+typedef Pointer<const Variant> VariantCPtr;
 
-/* A fixed-size array of a specific data type that can act as an ShVariant 
+/* A fixed-size array of a specific data type that can act as an Variant 
  *
- * This is different from ShMemory objects which hold arbitrary typed
+ * This is different from Memory objects which hold arbitrary typed
  * data in byte arrays (that eventually may include some 
  * unordered collection of several types)
  *
- * @see ShMemory 
+ * @see Memory 
  **/ 
-template<typename T, ShDataType DT=SH_HOST>
-class ShDataVariant: public ShVariant {
+template<typename T, DataType DT=HOST>
+class DataVariant: public Variant {
   public:
-    static const ShValueType value_type = ShStorageTypeInfo<T>::value_type;
-    static const ShDataType data_type = DT;
-    typedef ShDataVariant<T, DT>* PtrType;
-    typedef const ShDataVariant<T, DT>* CPtrType;
-    typedef typename ShDataTypeCppType<T, DT>::type DataType;
-    typedef DataType* iterator;
-    typedef const DataType* const_iterator;
+    static const ValueType value_type = StorageTypeInfo<T>::value_type;
+    static const DataType data_type = DT;
+    typedef DataVariant<T, DT>* PtrType;
+    typedef const DataVariant<T, DT>* CPtrType;
+    typedef typename DataTypeCppType<T, DT>::type CppDataType;
+    typedef CppDataType* iterator;
+    typedef const CppDataType* const_iterator;
 
     /// Constructs a data array and sets the value to a default value
     /// (typically zero)
-    ShDataVariant(int N); 
+    DataVariant(int N); 
 
     /// Constructs a data array and sets the value to a given value 
-    ShDataVariant(int N, const DataType &value); 
+    DataVariant(int N, const CppDataType &value); 
 
     /// Constructs a data array that reads its size and values from
-    /// a string encoding (must be from the encode() method of a ShDataVariant
+    /// a string encoding (must be from the encode() method of a DataVariant
     /// of the same type)
-    ShDataVariant(std::string encodedValue);
+    DataVariant(std::string encodedValue);
 
     /// Constructs a data array from an existing array of type T
     /// of the given size.  This uses the given array internally
     /// iff managed = false, otherwise it allocates a new array 
     /// and makes a copy.
-    ShDataVariant(int N, void *data, bool managed = true);
+    DataVariant(int N, void *data, bool managed = true);
 
     /// Constructs a data array using values from another array
     /// swizzled and negated as requested. 
-    ShDataVariant(const ShDataVariant<T, DT> &other);
-    ShDataVariant(const ShDataVariant<T, DT> &other, bool neg, const ShSwizzle &swizzle, int count=1); 
+    DataVariant(const DataVariant<T, DT> &other);
+    DataVariant(const DataVariant<T, DT> &other, bool neg, const Swizzle &swizzle, int count=1); 
 
-    virtual ~ShDataVariant();
+    virtual ~DataVariant();
 
-    ShValueType valueType() const; 
-    ShDataType dataType() const; 
-    bool typeMatches(ShValueType valueType, ShDataType dataType) const; 
+    ValueType valueType() const; 
+    DataType dataType() const; 
+    bool typeMatches(ValueType valueType, DataType dataType) const; 
 
     //// Gives the associated type name 
     const char* typeName() const; 
@@ -230,27 +230,27 @@ class ShDataVariant: public ShVariant {
 
     void negate();
 
-    void set(const ShVariantCPtr& other);
-    void set(const ShVariant* other);
-    void set(const ShVariantCPtr& other, int index);
-    void set(const ShVariant* other, int index);
-    void set(const ShVariantCPtr& other, bool neg, const ShSwizzle &writemask);
-    void set(const ShVariant* other, bool neg, const ShSwizzle &writemask);
+    void set(const VariantCPtr& other);
+    void set(const Variant* other);
+    void set(const VariantCPtr& other, int index);
+    void set(const Variant* other, int index);
+    void set(const VariantCPtr& other, bool neg, const Swizzle &writemask);
+    void set(const Variant* other, bool neg, const Swizzle &writemask);
 
-    ShVariantPtr get() const; 
-    ShVariantPtr get(int index) const; 
-    ShVariantPtr get(bool neg, const ShSwizzle &swizzle, int count=1) const; 
+    VariantPtr get() const; 
+    VariantPtr get(int index) const; 
+    VariantPtr get(bool neg, const Swizzle &swizzle, int count=1) const; 
 
-    bool equals(const ShVariantCPtr& other) const; 
-    bool equals(const ShVariant* other) const; 
+    bool equals(const VariantCPtr& other) const; 
+    bool equals(const Variant* other) const; 
 
     bool isTrue() const;
 
     void* array(); 
     const void* array() const; 
 
-    DataType& operator[](int index);
-    const DataType& operator[](int index) const;
+    CppDataType& operator[](int index);
+    const CppDataType& operator[](int index) const;
 
     iterator begin();
     iterator end();
@@ -263,7 +263,7 @@ class ShDataVariant: public ShVariant {
     //// and the istream >> T function cannot read $'s
     std::string encode() const;
     std::string encode(int index, int repeats=1) const; 
-    std::string encode(bool neg, const ShSwizzle &swizzle) const; 
+    std::string encode(bool neg, const Swizzle &swizzle) const; 
 
     /// TODO switch to fixed byte-length encodings so we don't
     /// need these whacky special characters 
@@ -273,23 +273,23 @@ class ShDataVariant: public ShVariant {
     
     std::string encodeArray() const;
 
-#ifdef SH_USE_MEMORY_POOL
+#ifdef USE_MEMORY_POOL
     // Memory pool stuff.
     void* operator new(std::size_t size);
     void operator delete(void* d, std::size_t size);
 #endif
     
   protected:
-    DataType *m_begin; ///< Start of the data array
-    DataType *m_end; ///< One after the end of the array
+    CppDataType *m_begin; ///< Start of the data array
+    CppDataType *m_end; ///< One after the end of the array
 
     bool m_managed; ///< true iff we are responsible for array alloc/delete 
 
     /// allocates an array of size N and sets m_begin, m_end
     void alloc(int N);
 
-#ifdef SH_USE_MEMORY_POOL
-    static ShPool* m_pool;
+#ifdef USE_MEMORY_POOL
+    static Pool* m_pool;
 #endif
 };
 
@@ -299,28 +299,28 @@ class ShDataVariant: public ShVariant {
 //
 // Refcounted and non-refcounted versions
 //@{
-template<typename T, ShDataType DT>
-ShPointer<ShDataVariant<T, DT> > variant_cast(const ShVariantPtr& c);
+template<typename T, DataType DT>
+Pointer<DataVariant<T, DT> > variant_cast(const VariantPtr& c);
 
-template<typename T, ShDataType DT>
-ShPointer<const ShDataVariant<T, DT> > variant_cast(const ShVariantCPtr& c);
+template<typename T, DataType DT>
+Pointer<const DataVariant<T, DT> > variant_cast(const VariantCPtr& c);
 
-template<typename T, ShDataType DT>
-ShDataVariant<T, DT>* variant_cast(ShVariant* c);
+template<typename T, DataType DT>
+DataVariant<T, DT>* variant_cast(Variant* c);
 
-template<typename T, ShDataType DT>
-const ShDataVariant<T, DT>* variant_cast(const ShVariant* c);
+template<typename T, DataType DT>
+const DataVariant<T, DT>* variant_cast(const Variant* c);
 // @}
 
 // Make a copy of c cast to the requested type 
 //@{
-template<typename T, ShDataType DT>
-ShPointer<ShDataVariant<T, DT> > variant_convert(const ShVariantCPtr& c);
+template<typename T, DataType DT>
+Pointer<DataVariant<T, DT> > variant_convert(const VariantCPtr& c);
 // @}
 
 
 }
 
-#include "ShVariantImpl.hpp"
+#include "VariantImpl.hpp"
 
 #endif

@@ -21,8 +21,8 @@
 #define SHCFGBLOCK_HPP
 
 #include <list>
-#include "ShBlock.hpp"
-#include "ShCtrlGraph.hpp"
+#include "Block.hpp"
+#include "CtrlGraph.hpp"
 
 namespace SH {
 
@@ -32,29 +32,29 @@ namespace SH {
  * false to use the original graph.  
  */
 class 
-SH_DLLEXPORT
-ShCfgBlock : public ShBlock {
+DLLEXPORT
+CfgBlock : public Block {
 public:
-  ShCfgBlock(const ShProgram &program, bool copy=true);
-  ShCfgBlock(const ShCtrlGraphPtr& cfg, bool copy=true);
-  ShCfgBlock(const ShCtrlGraphNodePtr& node, bool copy=true); 
+  CfgBlock(const Program &program, bool copy=true);
+  CfgBlock(const CtrlGraphPtr& cfg, bool copy=true);
+  CfgBlock(const CtrlGraphNodePtr& node, bool copy=true); 
 
-  ~ShCfgBlock();
+  ~CfgBlock();
 
-  ShCtrlGraphNodePtr entry() const;
-  ShCtrlGraphNodePtr exit() const;
+  CtrlGraphNodePtr entry() const;
+  CtrlGraphNodePtr exit() const;
 
   void print(std::ostream& out, int indent) const;
   void graphvizDump(std::ostream& out) const;
 
   
 private:
-  void init(const ShCtrlGraphPtr& cfg, bool copy);
-  ShCtrlGraphNodePtr m_entry, m_exit;
+  void init(const CtrlGraphPtr& cfg, bool copy);
+  CtrlGraphNodePtr m_entry, m_exit;
 };
 
-typedef ShPointer<ShCfgBlock> ShCfgBlockPtr;
-typedef ShPointer<const ShCfgBlock> ShCfgBlockCPtr;
+typedef Pointer<CfgBlock> CfgBlockPtr;
+typedef Pointer<const CfgBlock> CfgBlockCPtr;
 
 }
 

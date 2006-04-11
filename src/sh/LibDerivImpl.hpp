@@ -20,44 +20,44 @@
 #ifndef SHLIBDERIVIMPL_HPP
 #define SHLIBDERIVIMPL_HPP
 
-#include "ShLibDeriv.hpp"
+#include "LibDeriv.hpp"
 
 namespace SH {
 
 template<int N, typename T>
-ShGeneric<N, T> dx(const ShGeneric<N, T>& var)
+Generic<N, T> dx(const Generic<N, T>& var)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  Attrib<N, TEMP, T> t;
   shDX(t, var);
   return t;
 }
 
 template<int N, typename T>
-ShGeneric<N, T> dy(const ShGeneric<N, T>& var)
+Generic<N, T> dy(const Generic<N, T>& var)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  Attrib<N, TEMP, T> t;
   shDY(t, var);
   return t;
 }
 
 template<int N, typename T>
 inline
-ShGeneric<N, T> fwidth(const ShGeneric<N, T>& var)
+Generic<N, T> fwidth(const Generic<N, T>& var)
 {
   return max(abs(dx(var)), abs(dy(var)));
 }
 
 template<typename T>
 inline
-ShGeneric<2, T> gradient(const ShGeneric<1, T>& var)
+Generic<2, T> gradient(const Generic<1, T>& var)
 {
-  return ShAttrib2f(dx(var), dy(var));
+  return Attrib2f(dx(var), dy(var));
 }
 
 template<int N, typename T>
-ShMatrix<2, N, SH_TEMP, T> jacobian(const ShGeneric<N, T>& var)
+Matrix<2, N, TEMP, T> jacobian(const Generic<N, T>& var)
 {
-  ShMatrix<2, N, SH_TEMP, T> ret;
+  Matrix<2, N, TEMP, T> ret;
   ret[0] = dx(var);
   ret[1] = dy(var);
   return ret;

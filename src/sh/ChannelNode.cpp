@@ -17,42 +17,42 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#include "ShChannelNode.hpp"
-#include "ShAttrib.hpp"
+#include "ChannelNode.hpp"
+#include "Attrib.hpp"
 
 namespace SH {
 
-ShChannelNode::ShChannelNode(ShSemanticType specType, int elements, ShValueType valueType)
-  : ShVariableNode(SH_STREAM, elements, valueType),
+ChannelNode::ChannelNode(SemanticType specType, int elements, ValueType valueType)
+  : VariableNode(STREAM, elements, valueType),
     m_memory(0), m_count(0), m_stride(1), m_offset(0)
 {
   specialType(specType);
 }
 
-ShChannelNode::ShChannelNode(ShSemanticType specType, int elements, ShValueType valueType,
-                             const ShMemoryPtr& memory, int count)
-  : ShVariableNode(SH_STREAM, elements, valueType),
+ChannelNode::ChannelNode(SemanticType specType, int elements, ValueType valueType,
+                             const MemoryPtr& memory, int count)
+  : VariableNode(STREAM, elements, valueType),
     m_memory(memory), m_count(count), m_stride(1), m_offset(0)
 {
   specialType(specType);
 }
 
-ShChannelNode::~ShChannelNode()
+ChannelNode::~ChannelNode()
 {
 }
 
-void ShChannelNode::memory(const ShMemoryPtr& memory, int count)
+void ChannelNode::memory(const MemoryPtr& memory, int count)
 {
   m_memory = memory;
   m_count = count;
 }
 
-ShPointer<const ShMemory> ShChannelNode::memory() const
+Pointer<const Memory> ChannelNode::memory() const
 {
   return m_memory;
 }
 
-ShMemoryPtr ShChannelNode::memory() 
+MemoryPtr ChannelNode::memory() 
 {
   return m_memory;
 }

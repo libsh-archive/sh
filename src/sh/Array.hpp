@@ -22,88 +22,88 @@
 
 namespace SH {
 
-template<typename T> class ShBaseTexture1D;
-template<typename T> class ShBaseTexture2D;
-template<typename T> class ShBaseTexture3D;
-template<typename T> class ShBaseTextureRect;
-template<typename T> class ShBaseTextureCube;
+template<typename T> class BaseTexture1D;
+template<typename T> class BaseTexture2D;
+template<typename T> class BaseTexture3D;
+template<typename T> class BaseTextureRect;
+template<typename T> class BaseTextureCube;
   
-/** Default traits for ShArray.
+/** Default traits for Array.
  * An array is a texture that does not support filtering or interpolation.
  */
 struct
-ShArrayTraits : public ShTextureTraits {
-  ShArrayTraits()
-    : ShTextureTraits(0, SH_FILTER_NONE, SH_WRAP_CLAMP_TO_EDGE)
+ArrayTraits : public TextureTraits {
+  ArrayTraits()
+    : TextureTraits(0, FILTER_NONE, WRAP_CLAMP_TO_EDGE)
   {}
 };
 
-template<typename T> class ShArrayRect;
+template<typename T> class ArrayRect;
 /** One-dimensional array.
  */
 template<typename T>
-class ShArray1D
-  : public ShBaseTexture1D<T> {
+class Array1D
+  : public BaseTexture1D<T> {
 public:
-  ShArray1D()
-    : ShBaseTexture1D<T>(ShArrayTraits())
+  Array1D()
+    : BaseTexture1D<T>(ArrayTraits())
   {}
-  ShArray1D(int width)
-    : ShBaseTexture1D<T>(width, ShArrayTraits())
+  Array1D(int width)
+    : BaseTexture1D<T>(width, ArrayTraits())
   {}
-  typedef ShArrayRect<T> rectangular_type;
-  typedef ShBaseTexture1D<T> base_type;
+  typedef ArrayRect<T> rectangular_type;
+  typedef BaseTexture1D<T> base_type;
   typedef T return_type;
 };
 
 /** Two-dimensional square power-of-two array.
  */
 template<typename T>
-class ShArray2D
-  : public ShBaseTexture2D<T> {
+class Array2D
+  : public BaseTexture2D<T> {
 public:
-  ShArray2D()
-    : ShBaseTexture2D<T>(ShArrayTraits())
+  Array2D()
+    : BaseTexture2D<T>(ArrayTraits())
   {}
-  ShArray2D(int width, int height)
-    : ShBaseTexture2D<T>(width, height, ShArrayTraits())
+  Array2D(int width, int height)
+    : BaseTexture2D<T>(width, height, ArrayTraits())
   {}
-  typedef ShArrayRect<T> rectangular_type;
-  typedef ShBaseTexture2D<T> base_type;
+  typedef ArrayRect<T> rectangular_type;
+  typedef BaseTexture2D<T> base_type;
   typedef T return_type;
 };
 
 /** Two-dimensional non-square array.
  */
 template<typename T>
-class ShArrayRect
-  : public ShBaseTextureRect<T> {
+class ArrayRect
+  : public BaseTextureRect<T> {
 public:
-  ShArrayRect()
-    : ShBaseTextureRect<T>(ShArrayTraits())
+  ArrayRect()
+    : BaseTextureRect<T>(ArrayTraits())
   {}
-  ShArrayRect(int width, int height)
-    : ShBaseTextureRect<T>(width, height, ShArrayTraits())
+  ArrayRect(int width, int height)
+    : BaseTextureRect<T>(width, height, ArrayTraits())
   {}
-  typedef ShArrayRect<T> rectangular_type;
-  typedef ShBaseTextureRect<T> base_type;
+  typedef ArrayRect<T> rectangular_type;
+  typedef BaseTextureRect<T> base_type;
   typedef T return_type;
 };
 
 /** Three-dimensional array.
  */
 template<typename T>
-class ShArray3D
-  : public ShBaseTexture3D<T> {
+class Array3D
+  : public BaseTexture3D<T> {
 public:
-  ShArray3D()
-    : ShBaseTexture3D<T>(ShArrayTraits())
+  Array3D()
+    : BaseTexture3D<T>(ArrayTraits())
   {}
-  ShArray3D(int width, int height, int depth)
-    : ShBaseTexture3D<T>(width, height, depth, ShArrayTraits())
+  Array3D(int width, int height, int depth)
+    : BaseTexture3D<T>(width, height, depth, ArrayTraits())
   {}
-  typedef ShArrayRect<T> rectangular_type;
-  typedef ShBaseTexture3D<T> base_type;
+  typedef ArrayRect<T> rectangular_type;
+  typedef BaseTexture3D<T> base_type;
   typedef T return_type;
 };
 
@@ -112,17 +112,17 @@ public:
  * faces.   The texel indexed depends only on the direction of the vector.
  */
 template<typename T>
-class ShArrayCube
-  : public ShBaseTextureCube<T> {
+class ArrayCube
+  : public BaseTextureCube<T> {
 public:
-  ShArrayCube()
-    : ShBaseTextureCube<T>(ShArrayTraits())
+  ArrayCube()
+    : BaseTextureCube<T>(ArrayTraits())
   {}
-  ShArrayCube(int width, int height)
-    : ShBaseTextureCube<T>(width, height, ShArrayTraits())
+  ArrayCube(int width, int height)
+    : BaseTextureCube<T>(width, height, ArrayTraits())
   {}
-  typedef ShArrayRect<T> rectangular_type;
-  typedef ShBaseTextureCube<T> base_type;
+  typedef ArrayRect<T> rectangular_type;
+  typedef BaseTextureCube<T> base_type;
   typedef T return_type;
 };
 

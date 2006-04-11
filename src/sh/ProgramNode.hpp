@@ -24,39 +24,39 @@
 #include <map>
 #include <utility>
 #include <string>
-#include "ShDllExport.hpp"
-#include "ShRefCount.hpp"
-#include "ShTokenizer.hpp"
-#include "ShVariableNode.hpp"
-#include "ShCtrlGraph.hpp"
-#include "ShTextureNode.hpp"
-#include "ShPaletteNode.hpp"
-#include "ShChannelNode.hpp"
-#include "ShMeta.hpp"
+#include "DllExport.hpp"
+#include "RefCount.hpp"
+#include "Tokenizer.hpp"
+#include "VariableNode.hpp"
+#include "CtrlGraph.hpp"
+#include "TextureNode.hpp"
+#include "PaletteNode.hpp"
+#include "ChannelNode.hpp"
+#include "Meta.hpp"
 
 namespace SH {
 
-class ShBackendCode;
-class ShBackend;
+class BackendCode;
+class Backend;
 
 /** A particular Sh program.
  */
 class
-SH_DLLEXPORT ShProgramNode : public virtual ShRefCountable, public virtual ShMeta, public virtual ShInfoHolder {
+DLLEXPORT ProgramNode : public virtual RefCountable, public virtual Meta, public virtual InfoHolder {
 public:
-  ShProgramNode(const std::string& target);
+  ProgramNode(const std::string& target);
 
-  ~ShProgramNode();
+  ~ProgramNode();
   
   /** Forcefully compile this program for a particular backend, even
    * if it has been compiled previously. Use code() to obtain the
    * actual code.  This operation will fail if this program does not
    * have a particular target. */
-  void compile(const ShPointer<ShBackend>& backend);
+  void compile(const Pointer<Backend>& backend);
   /** Forcefully compile this program for a particular backend, even
    * if it has been compiled previously. Use code() to obtain the
    * actual code. */
-  void compile(const std::string& target, const ShPointer<ShBackend>& backend);
+  void compile(const std::string& target, const Pointer<Backend>& backend);
 
   /** Check whether the program has been compiled for the default
    * backend.  This operation will fail if this program does not have
@@ -67,7 +67,7 @@ public:
   bool is_compiled(const std::string& target) const;
   /** Check whether the program has been compiled for the given
    * backend and the given target. */
-  bool is_compiled(const std::string& target, const ShPointer<ShBackend>& backend) const;
+  bool is_compiled(const std::string& target, const Pointer<Backend>& backend) const;
 
   /// Describe the inputs and outputs of this program.
   std::string describe_interface() const;
@@ -86,26 +86,26 @@ public:
   
   /** Obtain the code for currently active backend.  This operation
    * will fail if this program does not have a particular target. */
-  ShPointer<ShBackendCode> code(); 
+  Pointer<BackendCode> code(); 
   /** Obtain the code for a particular backend. Generates it if
    * necessary.  This operation will fail if this program does not
    * have a particular target. */
-  ShPointer<ShBackendCode> code(const ShPointer<ShBackend>& backend);
+  Pointer<BackendCode> code(const Pointer<Backend>& backend);
   /** Obtain the code for a particular backend. Generates it if
    * necessary.*/
-  ShPointer<ShBackendCode> code(const std::string& target, const ShPointer<ShBackend>& backend);
+  Pointer<BackendCode> code(const std::string& target, const Pointer<Backend>& backend);
 
   /// Notify this program that a uniform variable has changed.
-  void updateUniform(const ShVariableNodePtr& uniform);
+  void updateUniform(const VariableNodePtr& uniform);
 
   /** The tokenizer for this program's body. Used only during
    * construction of the program (before parsing) */
-  ShTokenizer tokenizer;
+  Tokenizer tokenizer;
 
   /** The control graph (the parsed form of the token
-   * list). Constructed during the parsing step, when shEndProgram()
+   * list). Constructed during the parsing step, when endProgram()
    * is called. */
-  ShPointer<ShCtrlGraph> ctrlGraph;
+  Pointer<CtrlGraph> ctrlGraph;
 
   /// Called right before optimization to collect temporary declarations 
   void collectDecls();
@@ -114,7 +114,7 @@ public:
   void collectVariables();
 
   /// Returns whether a temporary variable is declared in this program
-  bool hasDecl(const ShVariableNodePtr& node) const;
+  bool hasDecl(const VariableNodePtr& node) const;
 
   /** Add a declaration.  This is for use when a program is
    * transformed and new temporaries are added.
@@ -125,15 +125,15 @@ public:
    * @todo range check that adding to the cfg node doesn't screw anything up...
    * (i.e. if somewhere we don't copy cfg when manipulating program...) */
   //@{
-  void addDecl(const ShVariableNodePtr& node, const ShCtrlGraphNodePtr&);
-  void addDecl(const ShVariableNodePtr& node);
+  void addDecl(const VariableNodePtr& node, const CtrlGraphNodePtr&);
+  void addDecl(const VariableNodePtr& node);
   //@}
 
-  typedef std::set<ShVariableNodePtr> VarSet;
-  typedef std::list<ShVariableNodePtr> VarList;
-  typedef std::list<ShTextureNodePtr> TexList;
-  typedef std::list<ShChannelNodePtr> ChannelList;
-  typedef std::list<ShPaletteNodePtr> PaletteList;
+  typedef std::set<VariableNodePtr> VarSet;
+  typedef std::list<VariableNodePtr> VarList;
+  typedef std::list<TextureNodePtr> TexList;
+  typedef std::list<ChannelNodePtr> ChannelList;
+  typedef std::list<PaletteNodePtr> PaletteList;
 
   VarList::const_iterator begin_inputs() const         { return inputs.begin(); }
   VarList::const_iterator end_inputs() const           { return inputs.end(); }
@@ -177,7 +177,7 @@ public:
   std::string& target() { return m_target; }
 
   /// Make a copy of this program.
-  ShPointer<ShProgramNode> clone() const;
+  Pointer<ProgramNode> clone() const;
 
   /// Print a description of a list of variables
   static std::ostream& print(std::ostream& out, const VarList& list);
@@ -185,35 +185,35 @@ public:
   /// True if this program has been completed with SH_END.
   bool finished() const { return m_finished; }
 
-  /// @internal Set finished to true. Only shEndShader() needs to call this.
+  /// @internal Set finished to true. Only endShader() needs to call this.
   void finish();
 
   /** @internal Indicate that we have been assigned to a uniform
    * during construction. This is so we can call back that uniform
    * when the program is finished constructing. */
-  void assign(const ShVariableNodePtr& var) const { m_assigned_var = var; }
+  void assign(const VariableNodePtr& var) const { m_assigned_var = var; }
   
 private:
   std::string m_backend_name; ///< Can be empty if the program is not yet compiled for a backend.
   std::string m_target; ///< Can be empty, if there is no target associated with this program.
 
-  void collect_node_decls(const ShPointer<ShCtrlGraphNode>& node);
-  void collect_node_vars(const ShPointer<ShCtrlGraphNode>& node);
-  void collect_var(const ShVariableNodePtr& node);
-  void collect_dependent_uniform(const ShVariableNodePtr& var);
+  void collect_node_decls(const Pointer<CtrlGraphNode>& node);
+  void collect_node_vars(const Pointer<CtrlGraphNode>& node);
+  void collect_var(const VariableNodePtr& node);
+  void collect_dependent_uniform(const VariableNodePtr& var);
 
-  typedef std::map< std::pair< std::string, ShPointer<ShBackend> >,
-                    ShPointer<ShBackendCode> > CodeMap;
+  typedef std::map< std::pair< std::string, Pointer<Backend> >,
+                    Pointer<BackendCode> > CodeMap;
   CodeMap m_code; ///< Compiled code is cached here.
 
   bool m_finished; ///< True if this program has been constructed
                    /// completely.
 
-  mutable ShVariableNodePtr m_assigned_var;
+  mutable VariableNodePtr m_assigned_var;
 };
 
-typedef ShPointer<ShProgramNode> ShProgramNodePtr;
-typedef ShPointer<const ShProgramNode> ShProgramNodeCPtr;
+typedef Pointer<ProgramNode> ProgramNodePtr;
+typedef Pointer<const ProgramNode> ProgramNodeCPtr;
 
 }
 

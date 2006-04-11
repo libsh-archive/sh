@@ -45,8 +45,8 @@ int gprintf(int x, int y, char* fmt, ...);
 // Animation data
 float angle = 0;
 
-ShProgram vsh;
-ShProgram fsh;
+Program vsh;
+Program fsh;
 
 void display()
 {
@@ -61,8 +61,8 @@ void display()
   
   // turn off vertex and fragment programs, this
   // effectively turns off Sh
-  shUnbind(vsh);
-  shUnbind(fsh);
+  unbind(vsh);
+  unbind(fsh);
 
   // push modelview matrix and load the rotation
   // for the point light
@@ -86,8 +86,8 @@ void display()
   
   // turn vertex and fragment programs back on 
   // bind programs
-  shBind(vsh);
-  shBind(fsh);
+  bind(vsh);
+  bind(fsh);
 
   // setup the modelview matrix with the rotation
   // for the dodecahedron and draw it
@@ -96,7 +96,7 @@ void display()
   glutSolidDodecahedron();
   glPopMatrix();
 
-  shUnbind();
+  unbind();
   
   gprintf(10, 10, "Space - Toggle animation");
   gprintf(10, 24, "    c - Change color");
@@ -161,14 +161,14 @@ void init_gl(void)
 void init_sh()
 {
   // set OpenGL backend
-  shSetBackend("glsl");
+  setBackend("glsl");
 
   // Sh data
-  ShMatrix4x4f mv;
-  ShMatrix4x4f mvp;
-  ShPoint3f lightp;
-  ShColor3f diffuse;
-  ShColor3f ambient;
+  Matrix4x4f mv;
+  Matrix4x4f mvp;
+  Point3f lightp;
+  Color3f diffuse;
+  Color3f ambient;
 
   // setup OpenGL bindings
   mv.meta("opengl:state", "state.matrix.modelview");
@@ -184,12 +184,12 @@ void init_sh()
   
   // construct vertex program
   vsh = SH_BEGIN_VERTEX_PROGRAM {
-    ShInputPosition4f ipos;
-    ShInputNormal3f inrm;
+    InputPosition4f ipos;
+    InputNormal3f inrm;
 
-    ShOutputPosition4f opos;
-    ShOutputNormal3f onrm;
-    ShOutputVector3f olightv;
+    OutputPosition4f opos;
+    OutputNormal3f onrm;
+    OutputVector3f olightv;
 
     // transform position and normal and
     // generate the light vector
@@ -200,11 +200,11 @@ void init_sh()
 
   // construct fragment program
   fsh = SH_BEGIN_FRAGMENT_PROGRAM {
-    ShInputPosition4f ipos;
-    ShInputNormal3f inrm;
-    ShInputVector3f ilightv;
+    InputPosition4f ipos;
+    InputNormal3f inrm;
+    InputVector3f ilightv;
 
-    ShOutputColor3f oclr;
+    OutputColor3f oclr;
 
     inrm = normalize(inrm);
     ilightv = normalize(ilightv);
@@ -244,7 +244,7 @@ int main(int argc, char** argv)
   
     glutMainLoop();
 
-  } catch (const ShException& e) {
+  } catch (const Exception& e) {
     std::cerr << "Sh error: " << e.message() << std::endl;
     return 1;
   } catch (const std::exception& e) {

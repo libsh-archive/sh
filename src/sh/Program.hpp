@@ -20,44 +20,44 @@
 #ifndef SHPROGRAM_HPP
 #define SHPROGRAM_HPP
 
-#include "ShDllExport.hpp"
-#include "ShProgramNode.hpp"
-#include "ShBackend.hpp"
+#include "DllExport.hpp"
+#include "ProgramNode.hpp"
+#include "Backend.hpp"
 
 namespace SH {
 
-class ShStream;
-template<typename T> class ShChannel;
-class ShRecord;
+class Stream;
+template<typename T> class Channel;
+class Record;
 
-/** Thin wrapper around ShProgramNode.
+/** Thin wrapper around ProgramNode.
  */
 class
-SH_DLLEXPORT ShProgram : public ShMetaForwarder {
+DLLEXPORT Program : public MetaForwarder {
 public:
-  ShProgram();
-  ShProgram(const ShProgram& other);
-  ShProgram(const std::string& target);
-  ShProgram(const ShProgramNodePtr& node);
+  Program();
+  Program(const Program& other);
+  Program(const std::string& target);
+  Program(const ProgramNodePtr& node);
 
-  ShProgram& operator=(const ShProgram& other);
+  Program& operator=(const Program& other);
   
-  /// Obtain the node which this ShProgram wraps
-  ShProgramNodeCPtr node() const { return m_node; }
+  /// Obtain the node which this Program wraps
+  ProgramNodeCPtr node() const { return m_node; }
 
-  /// Obtain the node which this ShProgram wraps
-  ShProgramNodePtr node() { return m_node; }
+  /// Obtain the node which this Program wraps
+  ProgramNodePtr node() { return m_node; }
   
   /** Forcefully compile this program for a particular backend, even
    * if it has been compiled previously. Use code() to obtain the
    * actual code.  This operation will fail if this program does not
    * have a particular target. */
-  void compile(const ShPointer<ShBackend>& backend) { m_node->compile(backend); }
+  void compile(const Pointer<Backend>& backend) { m_node->compile(backend); }
 
   /** Forcefully compile this program for a particular backend, even
    * if it has been compiled previously. Use code() to obtain the
    * actual code. */
-  void compile(const std::string& target, const ShPointer<ShBackend>& backend)
+  void compile(const std::string& target, const Pointer<Backend>& backend)
   {
     m_node->compile(target, backend);
   }
@@ -98,23 +98,23 @@ public:
   /** Obtain the code for currently active backend. 
    * This operation will fail if this program does not have a
    * particular target. */
-  ShPointer<ShBackendCode> code() { return m_node->code(); }
+  Pointer<BackendCode> code() { return m_node->code(); }
   
   /** Obtain the code for a particular backend. Generates it if necessary.
    * This operation will fail if this program does not have a
    * particular target. */
-  ShPointer<ShBackendCode> code(const ShPointer<ShBackend>& backend) {
+  Pointer<BackendCode> code(const Pointer<Backend>& backend) {
     return m_node->code(backend);
   }
 
   /// Obtain the code for a particular backend. Generates it if necessary.
-  ShPointer<ShBackendCode> code(const std::string& target, const ShPointer<ShBackend>& backend)
+  Pointer<BackendCode> code(const std::string& target, const Pointer<Backend>& backend)
   {
     return m_node->code(target, backend);
   }
 
   /// Notify this program that a uniform variable has changed.
-  void updateUniform(const ShVariableNodePtr& uniform)
+  void updateUniform(const VariableNodePtr& uniform)
   {
     m_node->updateUniform(uniform);
   }
@@ -129,83 +129,83 @@ public:
   /// It may be useful to change a program's target sometimes.
   std::string& target() { return m_node->target(); }
 
-  ShProgramNode::VarList::const_iterator begin_inputs() const         { return m_node->begin_inputs(); }
-  ShProgramNode::VarList::const_iterator end_inputs() const           { return m_node->end_inputs(); }
-  ShProgramNode::VarList::const_iterator begin_outputs() const        { return m_node->begin_outputs(); }
-  ShProgramNode::VarList::const_iterator end_outputs() const          { return m_node->end_outputs(); }
-  ShProgramNode::VarList::const_iterator begin_temps() const          { return m_node->begin_temps(); }
-  ShProgramNode::VarList::const_iterator end_temps() const            { return m_node->end_temps(); }
-  ShProgramNode::VarList::const_iterator begin_constants() const      { return m_node->begin_constants(); }
-  ShProgramNode::VarList::const_iterator end_constants() const        { return m_node->end_constants(); }
-  ShProgramNode::VarList::const_iterator begin_parameters() const     { return m_node->begin_parameters(); }
-  ShProgramNode::VarList::const_iterator end_parameters() const       { return m_node->end_parameters(); }
-  ShProgramNode::VarList::const_iterator begin_all_parameters() const { return m_node->begin_all_parameters(); }
-  ShProgramNode::VarList::const_iterator end_all_parameters() const   { return m_node->end_all_parameters(); }
-  ShProgramNode::TexList::const_iterator begin_textures() const       { return m_node->begin_textures(); }
-  ShProgramNode::TexList::const_iterator end_textures() const         { return m_node->end_textures(); }
-  ShProgramNode::ChannelList::const_iterator begin_channels() const   { return m_node->begin_channels(); }
-  ShProgramNode::ChannelList::const_iterator end_channels() const     { return m_node->end_channels(); }
-  ShProgramNode::PaletteList::const_iterator begin_palettes() const   { return m_node->begin_palettes(); }
-  ShProgramNode::PaletteList::const_iterator end_palettes() const     { return m_node->end_palettes(); }
+  ProgramNode::VarList::const_iterator begin_inputs() const         { return m_node->begin_inputs(); }
+  ProgramNode::VarList::const_iterator end_inputs() const           { return m_node->end_inputs(); }
+  ProgramNode::VarList::const_iterator begin_outputs() const        { return m_node->begin_outputs(); }
+  ProgramNode::VarList::const_iterator end_outputs() const          { return m_node->end_outputs(); }
+  ProgramNode::VarList::const_iterator begin_temps() const          { return m_node->begin_temps(); }
+  ProgramNode::VarList::const_iterator end_temps() const            { return m_node->end_temps(); }
+  ProgramNode::VarList::const_iterator begin_constants() const      { return m_node->begin_constants(); }
+  ProgramNode::VarList::const_iterator end_constants() const        { return m_node->end_constants(); }
+  ProgramNode::VarList::const_iterator begin_parameters() const     { return m_node->begin_parameters(); }
+  ProgramNode::VarList::const_iterator end_parameters() const       { return m_node->end_parameters(); }
+  ProgramNode::VarList::const_iterator begin_all_parameters() const { return m_node->begin_all_parameters(); }
+  ProgramNode::VarList::const_iterator end_all_parameters() const   { return m_node->end_all_parameters(); }
+  ProgramNode::TexList::const_iterator begin_textures() const       { return m_node->begin_textures(); }
+  ProgramNode::TexList::const_iterator end_textures() const         { return m_node->end_textures(); }
+  ProgramNode::ChannelList::const_iterator begin_channels() const   { return m_node->begin_channels(); }
+  ProgramNode::ChannelList::const_iterator end_channels() const     { return m_node->end_channels(); }
+  ProgramNode::PaletteList::const_iterator begin_palettes() const   { return m_node->begin_palettes(); }
+  ProgramNode::PaletteList::const_iterator end_palettes() const     { return m_node->end_palettes(); }
 
   // Call operators for channels and streams.
   // Equivalent to operator<< invocations.
   // Note that the template functions are implemented in
-  // ShChannelImpl.hpp
+  // ChannelImpl.hpp
   template<typename T0>
-  ShProgram operator()(const ShChannel<T0>& t0) const;
-  ShProgram operator()(const ShStream& s0) const;
+  Program operator()(const Channel<T0>& t0) const;
+  Program operator()(const Stream& s0) const;
   template<typename T0, typename T1>
-  ShProgram operator()(const ShChannel<T0>& t0,
-                        const ShChannel<T1>& t1) const;
-  ShProgram operator()(const ShStream& s0,
-                        const ShStream& s1) const;
+  Program operator()(const Channel<T0>& t0,
+                        const Channel<T1>& t1) const;
+  Program operator()(const Stream& s0,
+                        const Stream& s1) const;
   template<typename T0, typename T1, typename T2>
-  ShProgram operator()(const ShChannel<T0>& t0,
-                        const ShChannel<T1>& t1,
-                        const ShChannel<T2>& t2) const;
-  ShProgram operator()(const ShStream& s0,
-                        const ShStream& s1,
-                        const ShStream& s2) const;
+  Program operator()(const Channel<T0>& t0,
+                        const Channel<T1>& t1,
+                        const Channel<T2>& t2) const;
+  Program operator()(const Stream& s0,
+                        const Stream& s1,
+                        const Stream& s2) const;
   template<typename T0, typename T1, typename T2, typename T3>
-  ShProgram operator()(const ShChannel<T0>& t0,
-                        const ShChannel<T1>& t1,
-                        const ShChannel<T2>& t2,
-                        const ShChannel<T3>& t3) const;
-  ShProgram operator()(const ShStream& s0,
-                        const ShStream& s1,
-                        const ShStream& s2,
-                        const ShStream& s3) const;
+  Program operator()(const Channel<T0>& t0,
+                        const Channel<T1>& t1,
+                        const Channel<T2>& t2,
+                        const Channel<T3>& t3) const;
+  Program operator()(const Stream& s0,
+                        const Stream& s1,
+                        const Stream& s2,
+                        const Stream& s3) const;
   template<typename T0, typename T1, typename T2, typename T3,
            typename T4>
-  ShProgram operator()(const ShChannel<T0>& t0,
-                        const ShChannel<T1>& t1,
-                        const ShChannel<T2>& t2,
-                        const ShChannel<T3>& t3,
-                        const ShChannel<T4>& t4) const;
-  ShProgram operator()(const ShStream& s0,
-                        const ShStream& s1,
-                        const ShStream& s2,
-                        const ShStream& s3,
-                        const ShStream& s4) const;
+  Program operator()(const Channel<T0>& t0,
+                        const Channel<T1>& t1,
+                        const Channel<T2>& t2,
+                        const Channel<T3>& t3,
+                        const Channel<T4>& t4) const;
+  Program operator()(const Stream& s0,
+                        const Stream& s1,
+                        const Stream& s2,
+                        const Stream& s3,
+                        const Stream& s4) const;
   
   // Call operators for records
   // May want to merge these with above in the long term. 
-  ShProgram operator()(const ShRecord &rec) const;
-  ShProgram operator()(const ShVariable &v0) const;
-  ShProgram operator()(const ShVariable &v0, 
-                       const ShVariable &v1) const;
-  ShProgram operator()(const ShVariable &v0, 
-                       const ShVariable &v1, 
-                       const ShVariable &v2) const;
-  ShProgram operator()(const ShVariable &v0, 
-                       const ShVariable &v1, 
-                       const ShVariable &v2, 
-                       const ShVariable &v3) const;
+  Program operator()(const Record &rec) const;
+  Program operator()(const Variable &v0) const;
+  Program operator()(const Variable &v0, 
+                       const Variable &v1) const;
+  Program operator()(const Variable &v0, 
+                       const Variable &v1, 
+                       const Variable &v2) const;
+  Program operator()(const Variable &v0, 
+                       const Variable &v1, 
+                       const Variable &v2, 
+                       const Variable &v3) const;
   
 private:
 
-  ShProgramNodePtr m_node;
+  ProgramNodePtr m_node;
 };
 
 }

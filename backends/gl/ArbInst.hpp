@@ -20,7 +20,7 @@
 #ifndef ARBINST_HPP
 #define ARBINST_HPP
 
-#include "ShVariable.hpp"
+#include "Variable.hpp"
 
 namespace shgl {
 
@@ -30,104 +30,104 @@ enum ArbOp {
   // VERTEX AND FRAGMENT
   
   // Vector
-  SH_ARB_ABS,
-  SH_ARB_FLR,
-  SH_ARB_FRC,
-  SH_ARB_LIT,
-  SH_ARB_MOV,
+  ARB_ABS,
+  ARB_FLR,
+  ARB_FRC,
+  ARB_LIT,
+  ARB_MOV,
 
   // Scalar
-  SH_ARB_EX2,
-  SH_ARB_LG2,
-  SH_ARB_RCP,
-  SH_ARB_RSQ,
+  ARB_EX2,
+  ARB_LG2,
+  ARB_RCP,
+  ARB_RSQ,
 
   // Binary scalar
-  SH_ARB_POW,
+  ARB_POW,
 
   // Binary vector
-  SH_ARB_ADD,
-  SH_ARB_DP3,
-  SH_ARB_DP4,
-  SH_ARB_DPH,
-  SH_ARB_DST,
-  SH_ARB_MAX,
-  SH_ARB_MIN,
-  SH_ARB_MUL,
-  SH_ARB_SGE,
-  SH_ARB_SLT,
-  SH_ARB_SUB,
-  SH_ARB_XPD,
+  ARB_ADD,
+  ARB_DP3,
+  ARB_DP4,
+  ARB_DPH,
+  ARB_DST,
+  ARB_MAX,
+  ARB_MIN,
+  ARB_MUL,
+  ARB_SGE,
+  ARB_SLT,
+  ARB_SUB,
+  ARB_XPD,
 
   // Trinary
-  SH_ARB_MAD,
+  ARB_MAD,
 
   // Swizzling
-  SH_ARB_SWZ,
+  ARB_SWZ,
 
   // VERTEX ONLY
   // Scalar
-  SH_ARB_EXP,
-  SH_ARB_LOG,
+  ARB_EXP,
+  ARB_LOG,
   
   // Weird,
-  SH_ARB_ARL,
-  SH_ARB_ARRAYMOV, // Kind of hacky but works.
+  ARB_ARL,
+  ARB_ARRAYMOV, // Kind of hacky but works.
   
   // FRAGMENT ONLY
   // Scalar
-  SH_ARB_COS,
-  SH_ARB_SIN,
-  SH_ARB_SCS,
+  ARB_COS,
+  ARB_SIN,
+  ARB_SCS,
 
   // Trinary
-  SH_ARB_CMP,
-  SH_ARB_LRP,
+  ARB_CMP,
+  ARB_LRP,
 
   // Sampling
-  SH_ARB_TEX,
-  SH_ARB_TXP,
-  SH_ARB_TXB,
+  ARB_TEX,
+  ARB_TXP,
+  ARB_TXB,
 
   // KIL
-  SH_ARB_KIL,
+  ARB_KIL,
 
   // NV_vertex_program2/NV_fragment_program
-  SH_ARB_SEQ,
-  SH_ARB_SGT,
-  SH_ARB_SLE,
-  SH_ARB_SNE,
-  SH_ARB_SFL,
-  SH_ARB_STR,
+  ARB_SEQ,
+  ARB_SGT,
+  ARB_SLE,
+  ARB_SNE,
+  ARB_SFL,
+  ARB_STR,
 
   // NV_fragment_program
-  SH_ARB_DDX,
-  SH_ARB_DDY,
-  SH_ARB_RFL,
-  SH_ARB_TXD,
+  ARB_DDX,
+  ARB_DDY,
+  ARB_RFL,
+  ARB_TXD,
 
   // NV_vertex_program2
-  SH_ARB_SSG,
-  SH_ARB_BRA,
-  SH_ARB_LABEL, // Special label "instruction"
+  ARB_SSG,
+  ARB_BRA,
+  ARB_LABEL, // Special label "instruction"
   
   // NV_fragment_program2
-  SH_ARB_DIV,
-  SH_ARB_DP2,
-  SH_ARB_NRM,
-  SH_ARB_IF,
-  SH_ARB_ELSE,
-  SH_ARB_ENDIF,
-  SH_ARB_REP,
-  SH_ARB_ENDREP,
-  SH_ARB_BRK,
-  SH_ARB_RET,
+  ARB_DIV,
+  ARB_DP2,
+  ARB_NRM,
+  ARB_IF,
+  ARB_ELSE,
+  ARB_ENDIF,
+  ARB_REP,
+  ARB_ENDREP,
+  ARB_BRK,
+  ARB_RET,
   
   // Special "operations" for emit
-  SH_ARB_FUN,
+  ARB_FUN,
 
   // Just comments
-  SH_ARB_COMMENT,
+  ARB_COMMENT,
 };
 
 /** Information about the operations from ArbOp.
@@ -162,36 +162,36 @@ struct ArbInst {
   {
   }
 
-  ArbInst(ArbOp op, int label, const SH::ShVariable& condition)
+  ArbInst(ArbOp op, int label, const SH::Variable& condition)
     : op(op), label(label), invert(false),
       update_cc(false), ccode(NOCC)
   {
     src[0] = condition;
   }
   
-  ArbInst(ArbOp op, const SH::ShVariable& dest)
+  ArbInst(ArbOp op, const SH::Variable& dest)
     : op(op), dest(dest), invert(false),
       update_cc(false), ccode(NOCC)
   {
   }
 
-  ArbInst(ArbOp op, const SH::ShVariable& dest, const SH::ShVariable& src0)
+  ArbInst(ArbOp op, const SH::Variable& dest, const SH::Variable& src0)
     : op(op), dest(dest), invert(false),
       update_cc(false), ccode(NOCC)
   {
     src[0] = src0;
   }
 
-  ArbInst(ArbOp op, const SH::ShVariable& dest, const SH::ShVariable& src0,
-          const SH::ShVariable& src1)
+  ArbInst(ArbOp op, const SH::Variable& dest, const SH::Variable& src0,
+          const SH::Variable& src1)
     : op(op), dest(dest), invert(false),
       update_cc(false), ccode(NOCC)
   {
     src[0] = src0;
     src[1] = src1;
   }
-  ArbInst(ArbOp op, const SH::ShVariable& dest, const SH::ShVariable& src0,
-          const SH::ShVariable& src1, const SH::ShVariable& src2)
+  ArbInst(ArbOp op, const SH::Variable& dest, const SH::Variable& src0,
+          const SH::Variable& src1, const SH::Variable& src2)
     : op(op), dest(dest), invert(false),
       update_cc(false), ccode(NOCC)
   {
@@ -199,9 +199,9 @@ struct ArbInst {
     src[1] = src1;
     src[2] = src2;
   }
-  ArbInst(ArbOp op, const SH::ShVariable& dest, const SH::ShVariable& src0,
-          const SH::ShVariable& src1, const SH::ShVariable& src2,
-          const SH::ShVariable& src3)
+  ArbInst(ArbOp op, const SH::Variable& dest, const SH::Variable& src0,
+          const SH::Variable& src1, const SH::Variable& src2,
+          const SH::Variable& src3)
     : op(op), dest(dest), invert(false),
       update_cc(false), ccode(NOCC)
   {
@@ -212,9 +212,9 @@ struct ArbInst {
   }
   
   ArbOp op;
-  SH::ShVariable dest;
+  SH::Variable dest;
 
-  SH::ShVariable src[max_num_sources];
+  SH::Variable src[max_num_sources];
 
   int label; // For branching instructions and labels
   bool invert; // Invert the sense of a break condition.
@@ -234,7 +234,7 @@ struct ArbInst {
     FL
   } ccode; ///< Do a conditional instruction
 
-  SH::ShSwizzle ccswiz;
+  SH::Swizzle ccswiz;
   
   // Only used for COMMENTs
   std::string comment;

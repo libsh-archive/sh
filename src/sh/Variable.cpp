@@ -19,43 +19,43 @@
 //////////////////////////////////////////////////////////////////////////////
 #include <iostream>
 
-#include "ShVariable.hpp"
-#include "ShDebug.hpp"
-#include "ShRecord.hpp"
-#include "ShProgram.hpp"
+#include "Variable.hpp"
+#include "Debug.hpp"
+#include "Record.hpp"
+#include "Program.hpp"
 
 namespace SH {
 
-ShVariable::ShVariable()
-  : ShMetaForwarder(0),
+Variable::Variable()
+  : MetaForwarder(0),
     m_node(0), m_swizzle(0), m_neg(false)
 {
 }
 
-ShVariable::ShVariable(const ShVariableNodePtr& node)
-  : ShMetaForwarder(node.object()),
+Variable::Variable(const VariableNodePtr& node)
+  : MetaForwarder(node.object()),
     m_node(node), m_swizzle(node ? node->size() : 0), m_neg(false)
 {
 }
 
-ShVariable::ShVariable(const ShVariableNodePtr& node,
-                       const ShSwizzle& swizzle,
+Variable::Variable(const VariableNodePtr& node,
+                       const Swizzle& swizzle,
                        bool neg)
-  : ShMetaForwarder(node.object()),
+  : MetaForwarder(node.object()),
     m_node(node), m_swizzle(swizzle), m_neg(neg)
 {
 }
 
-ShVariable& ShVariable::operator=(const ShProgram &prg) {
+Variable& Variable::operator=(const Program &prg) {
   // @todo range
-  ShRecord rec(*this); 
+  Record rec(*this); 
   rec = prg;
   return *this;
 }
 
-void ShVariable::attach(const ShProgram& prgc)
+void Variable::attach(const Program& prgc)
 {
-  ShProgram prg(prgc);
+  Program prg(prgc);
   if (prg.node()->finished()) {
     m_node->attach(prg.node());
   } else {
@@ -63,163 +63,163 @@ void ShVariable::attach(const ShProgram& prgc)
   }
 }
 
-bool ShVariable::null() const
+bool Variable::null() const
 {
   return !m_node;
 }
 
-bool ShVariable::uniform() const
+bool Variable::uniform() const
 {
   return m_node->uniform();
 }
 
-bool ShVariable::hasValues() const
+bool Variable::hasValues() const
 {
   return m_node->hasValues();
 }
 
-int ShVariable::size() const
+int Variable::size() const
 {
   return m_swizzle.size();
 }
 
-ShValueType ShVariable::valueType() const 
+ValueType Variable::valueType() const 
 {
-  if(!m_node) return SH_VALUETYPE_END;
+  if(!m_node) return VALUETYPE_END;
   return m_node->valueType();
 }
 
-void ShVariable::rangeVariant(const ShVariant* low, const ShVariant* high)
+void Variable::rangeVariant(const Variant* low, const Variant* high)
 {
   m_node->rangeVariant(low, high, m_neg, m_swizzle);
 }
 
-ShVariantPtr ShVariable::lowBoundVariant() const
+VariantPtr Variable::lowBoundVariant() const
 {
   return m_node->lowBoundVariant()->get(m_neg, m_swizzle);
 }
 
-ShVariantPtr ShVariable::highBoundVariant() const
+VariantPtr Variable::highBoundVariant() const
 {
   return m_node->highBoundVariant()->get(m_neg, m_swizzle);
 }
 
-const ShSwizzle& ShVariable::swizzle() const
+const Swizzle& Variable::swizzle() const
 {
   return m_swizzle;
 }
 
-const ShVariableNodePtr& ShVariable::node() const
+const VariableNodePtr& Variable::node() const
 {
   return m_node;
 }
 
-bool ShVariable::neg() const
+bool Variable::neg() const
 {
   return m_neg;
 }
 
-bool& ShVariable::neg()
+bool& Variable::neg()
 {
   return m_neg;
 }
 
-ShVariantPtr ShVariable::getVariant() const
+VariantPtr Variable::getVariant() const
 {
   return m_node->getVariant()->get(m_neg, m_swizzle);
 }
 
-ShVariantPtr ShVariable::getVariant(int index) const
+VariantPtr Variable::getVariant(int index) const
 {
-  return m_node->getVariant()->get(m_neg, m_swizzle * ShSwizzle(size(), index)); 
+  return m_node->getVariant()->get(m_neg, m_swizzle * Swizzle(size(), index)); 
 }
 
 
-bool ShVariable::loadVariant(ShVariant *&result) const
+bool Variable::loadVariant(Variant *&result) const
 {
   if((!m_neg) && m_swizzle.identity()) {
-    result = const_cast<ShVariant*>(m_node->getVariant());
+    result = const_cast<Variant*>(m_node->getVariant());
     return false;
   }
   // @todo type figure out a nicer, but just as efficient way than this hackery without
-  // exposing unwanted functionality in ShVariant or ShVariableNode. 
-  ShVariantPtr temp = getVariant();
+  // exposing unwanted functionality in Variant or VariableNode. 
+  VariantPtr temp = getVariant();
   temp->acquireRef();
   result = temp.object();
   return true;
 }
 
-void ShVariable::updateVariant() 
+void Variable::updateVariant() 
 {
   m_node->update_all();
 }
 
-void ShVariable::setVariant(const ShVariant* other, bool neg, const ShSwizzle &writemask)
+void Variable::setVariant(const Variant* other, bool neg, const Swizzle &writemask)
 {
   m_node->setVariant(other, neg ^ m_neg, m_swizzle * writemask);
 }
 
-void ShVariable::setVariant(const ShVariantCPtr& other, bool neg, const ShSwizzle &writemask)
+void Variable::setVariant(const VariantCPtr& other, bool neg, const Swizzle &writemask)
 {
   setVariant(other.object(), neg, writemask); 
 }
 
-void ShVariable::setVariant(const ShVariant* other, int index)
+void Variable::setVariant(const Variant* other, int index)
 {
-  m_node->setVariant(other, m_neg, m_swizzle * ShSwizzle(size(), index));
+  m_node->setVariant(other, m_neg, m_swizzle * Swizzle(size(), index));
 }
 
-void ShVariable::setVariant(const ShVariantCPtr& other, int index)
+void Variable::setVariant(const VariantCPtr& other, int index)
 {
   setVariant(other.object(), index); 
 }
 
-void ShVariable::setVariant(const ShVariant* other)
+void Variable::setVariant(const Variant* other)
 {
   m_node->setVariant(other, m_neg, m_swizzle);
 }
 
-void ShVariable::setVariant(const ShVariantCPtr& other)
+void Variable::setVariant(const VariantCPtr& other)
 {
   setVariant(other.object());
 }
 
-ShVariable ShVariable::operator()() const
+Variable Variable::operator()() const
 {
-  return ShVariable(m_node, m_swizzle, m_neg);
+  return Variable(m_node, m_swizzle, m_neg);
 }
 
-ShVariable ShVariable::operator()(int i1) const
+Variable Variable::operator()(int i1) const
 {
-  return ShVariable(m_node, m_swizzle * ShSwizzle(size(), i1), m_neg);
+  return Variable(m_node, m_swizzle * Swizzle(size(), i1), m_neg);
 }
 
-ShVariable ShVariable::operator()(int i1, int i2) const
+Variable Variable::operator()(int i1, int i2) const
 {
-  return ShVariable(m_node, m_swizzle * ShSwizzle(size(), i1, i2), m_neg);
+  return Variable(m_node, m_swizzle * Swizzle(size(), i1, i2), m_neg);
 }
 
-ShVariable ShVariable::operator()(int i1, int i2, int i3) const
+Variable Variable::operator()(int i1, int i2, int i3) const
 {
-  return ShVariable(m_node, m_swizzle * ShSwizzle(size(), i1, i2, i3), m_neg);
+  return Variable(m_node, m_swizzle * Swizzle(size(), i1, i2, i3), m_neg);
 }
 
-ShVariable ShVariable::operator()(int i1, int i2, int i3, int i4) const
+Variable Variable::operator()(int i1, int i2, int i3, int i4) const
 {
-  return ShVariable(m_node, m_swizzle * ShSwizzle(size(), i1, i2, i3, i4), m_neg);
+  return Variable(m_node, m_swizzle * Swizzle(size(), i1, i2, i3, i4), m_neg);
 }
 
-ShVariable ShVariable::operator()(int n, int indices[]) const
+Variable Variable::operator()(int n, int indices[]) const
 {
-  return ShVariable(m_node, m_swizzle * ShSwizzle(size(), n, indices), m_neg);
+  return Variable(m_node, m_swizzle * Swizzle(size(), n, indices), m_neg);
 }
 
-ShVariable ShVariable::operator()(const ShSwizzle &swizzle) const
+Variable Variable::operator()(const Swizzle &swizzle) const
 {
-  return ShVariable(m_node, m_swizzle * swizzle, m_neg);
+  return Variable(m_node, m_swizzle * swizzle, m_neg);
 }
 
-std::ostream& operator<<(std::ostream& out, const ShVariable& v)
+std::ostream& operator<<(std::ostream& out, const Variable& v)
 {
   if (!v.m_node){
     out << "[null]";
@@ -241,17 +241,17 @@ std::ostream& operator<<(std::ostream& out, const ShVariable& v)
 }
 
 
-ShVariable ShVariable::operator-() const
+Variable Variable::operator-() const
 {
-  return ShVariable(m_node, m_swizzle, !m_neg);
+  return Variable(m_node, m_swizzle, !m_neg);
 }
 
-bool ShVariable::operator==(const ShVariable& other) const
+bool Variable::operator==(const Variable& other) const
 {
   return m_node == other.m_node && m_swizzle == other.m_swizzle && m_neg == other.m_neg;
 }
 
-void ShVariable::clone(const ShVariable& other)
+void Variable::clone(const Variable& other)
 {
   m_node = other.m_node;
   m_swizzle = other.m_swizzle;

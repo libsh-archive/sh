@@ -20,13 +20,13 @@
 #ifndef SHDATATYPE_HPP
 #define SHDATATYPE_HPP
 
-#include "ShUtility.hpp"
-#include "ShVariableType.hpp"
-#include "ShHalf.hpp"
-#include "ShFraction.hpp"
-#include "ShStorageType.hpp"
+#include "Utility.hpp"
+#include "VariableType.hpp"
+#include "Half.hpp"
+#include "Fraction.hpp"
+#include "StorageType.hpp"
 
-/** @file ShDataType.hpp
+/** @file DataType.hpp
  * Defines the host computation and memory storage c++ types associated with
  * each Sh value type.
  *
@@ -35,13 +35,13 @@
 namespace SH {
 /**  Used to denote the kinds of C++ data types associated with a Value type. 
  */
-enum ShDataType {
-  SH_HOST,  //< computation data type on the host
-  SH_MEM,  //< data type stored in memory on the host
-  SH_DATATYPE_END
+enum DataType {
+  HOST,  //< computation data type on the host
+  MEM,  //< data type stored in memory on the host
+  DATATYPE_END
 };
 
-SH_DLLEXPORT
+DLLEXPORT
 extern const char* dataTypeName[];
 
 /** Sets the actual host computation and memory data types for a given Value type.
@@ -53,20 +53,20 @@ extern const char* dataTypeName[];
  *                (NV_half_float is similar, except it has NaN and INF)
  * 
  * @{ */
-template<typename T, ShDataType DT> struct ShDataTypeCppType; 
+template<typename T, DataType DT> struct DataTypeCppType; 
 
-template<typename T> struct ShDataTypeCppType<T, SH_HOST> { typedef T type; }; 
-template<typename T> struct ShDataTypeCppType<T, SH_MEM> { typedef T type; }; 
+template<typename T> struct DataTypeCppType<T, HOST> { typedef T type; }; 
+template<typename T> struct DataTypeCppType<T, MEM> { typedef T type; }; 
 
 // define special cases here
-#define SH_VALUETYPE_DATATYPE(T, hostType, memType)\
-  template<> struct ShDataTypeCppType<T, SH_HOST> { typedef hostType type; }; \
-  template<> struct ShDataTypeCppType<T, SH_MEM> { typedef memType type; }; 
+#define VALUETYPE_DATATYPE(T, hostType, memType)\
+  template<> struct DataTypeCppType<T, HOST> { typedef hostType type; }; \
+  template<> struct DataTypeCppType<T, MEM> { typedef memType type; }; 
 
-SH_VALUETYPE_DATATYPE(ShHalf, float, ShHalf); 
+VALUETYPE_DATATYPE(Half, float, Half); 
 
-template<typename T> struct ShHostType { typedef typename ShDataTypeCppType<T, SH_HOST>::type type; };
-template<typename T> struct ShMemType { typedef typename ShDataTypeCppType<T, SH_MEM>::type type; };
+template<typename T> struct HostType { typedef typename DataTypeCppType<T, HOST>::type type; };
+template<typename T> struct MemType { typedef typename DataTypeCppType<T, MEM>::type type; };
 // @}
 
 /**  Sets the constant values for a given data type.
@@ -74,50 +74,50 @@ template<typename T> struct ShMemType { typedef typename ShDataTypeCppType<T, SH
  * And with all current types, Zero is a false value and One is a true value
  * (although usually not the only ones).
  * @{ */
-template<typename T, ShDataType DT> 
-struct ShDataTypeConstant {
-    typedef typename ShDataTypeCppType<T, DT>::type type;
+template<typename T, DataType DT> 
+struct DataTypeConstant {
+    typedef typename DataTypeCppType<T, DT>::type type;
     static const type Zero; /* additive identity and also a true value */ \
     static const type One; /* multiplicative identity also a false value */ \
 };
 
-template<typename T, ShDataType DT>
-const typename ShDataTypeCppType<T, DT>::type ShDataTypeConstant<T, DT>::Zero = 
-  (typename ShDataTypeCppType<T, DT>::type)(0.0); 
+template<typename T, DataType DT>
+const typename DataTypeCppType<T, DT>::type DataTypeConstant<T, DT>::Zero = 
+  (typename DataTypeCppType<T, DT>::type)(0.0); 
 
-template<typename T, ShDataType DT>
-const typename ShDataTypeCppType<T, DT>::type ShDataTypeConstant<T, DT>::One = 
-  (typename ShDataTypeCppType<T, DT>::type)(1.0); 
+template<typename T, DataType DT>
+const typename DataTypeCppType<T, DT>::type DataTypeConstant<T, DT>::One = 
+  (typename DataTypeCppType<T, DT>::type)(1.0); 
 // @}
 
 /** Returns the boolean cond in the requested data type */
-template<typename T, ShDataType DT>
+template<typename T, DataType DT>
 inline
-typename ShDataTypeCppType<T, DT>::type shDataTypeCond(bool cond);
+typename DataTypeCppType<T, DT>::type dataTypeCond(bool cond);
 
 /** Returns a whether the two values are exactly the same.
  * This is is useful for the range types.
  * @{ */
 template<typename T>
 inline
-bool shDataTypeEqual(const T &a, const T &b);
+bool dataTypeEqual(const T &a, const T &b);
 // @}
 
 /** Returns whether the value is always greater than zero (i.e. true) 
  */
 template<typename T>
 inline
-bool shDataTypeIsPositive(const T &a);
+bool dataTypeIsPositive(const T &a);
 
 
 /** Casts one data type to another data type 
  */
-template<typename T1, ShDataType DT1, typename T2, ShDataType DT2>
-void shDataTypeCast(typename ShDataTypeCppType<T1, DT1>::type &dest,
-                    const typename ShDataTypeCppType<T2, DT2>::type &src);
+template<typename T1, DataType DT1, typename T2, DataType DT2>
+void dataTypeCast(typename DataTypeCppType<T1, DT1>::type &dest,
+                    const typename DataTypeCppType<T2, DT2>::type &src);
 
 }
 
-#include "ShDataTypeImpl.hpp"
+#include "DataTypeImpl.hpp"
 
 #endif

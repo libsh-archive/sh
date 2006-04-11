@@ -18,8 +18,8 @@
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 #include "GlBackend.hpp"
-#include "ShDebug.hpp"
-#include "ShError.hpp"
+#include "Debug.hpp"
+#include "Error.hpp"
 #include "GlTextureStorage.hpp"
 
 #include <sstream>
@@ -113,7 +113,7 @@ namespace shgl {
 using namespace SH;
 
 #ifdef _WIN32
-LRESULT CALLBACK shGlWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK glWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
   // An empty WindowProc, we need one to create a window. For now
   // just pass everything through DefWindowProc.
@@ -124,7 +124,7 @@ LRESULT CALLBACK shGlWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 }
 #endif /* _WIN32 */
 
-void shGlCheckError(const char* desc, const char* file, int line)
+void glCheckError(const char* desc, const char* file, int line)
 {
   GLenum errnum = glGetError();
   char* error = 0;
@@ -156,8 +156,8 @@ void shGlCheckError(const char* desc, const char* file, int line)
     error = "Unknown error!";
     break;
   }
-  SH_DEBUG_PRINT("GL ERROR on " << file << ": " <<line<<": "<< error);
-  SH_DEBUG_PRINT("GL ERROR call: " << desc);
+  DEBUG_PRINT("GL ERROR on " << file << ": " <<line<<": "<< error);
+  DEBUG_PRINT("GL ERROR call: " << desc);
 }
 
 #ifdef _WIN32
@@ -166,14 +166,14 @@ if ((x = reinterpret_cast<PFN ## T ## PROC>(wglGetProcAddress(#x))) == NULL) \
 { \
   std::stringstream msg; \
   msg << "wglGetProcAddress failed (" << GetLastError() << ")"; \
-  shError(ShException(msg.str())); \
+  error(Exception(msg.str())); \
 }
 #endif /* _WIN32 */
 
-SH::ShBackendSetPtr CodeStrategy::generate_set(const SH::ShProgramSet& s)
+SH::BackendSetPtr CodeStrategy::generate_set(const SH::ProgramSet& s)
 {
-  SH_DEBUG_ERROR("shgl::CodeStrategy::generate_set() called!");
-  SH_DEBUG_ASSERT(false);
+  DEBUG_ERROR("shgl::CodeStrategy::generate_set() called!");
+  DEBUG_ASSERT(false);
   return 0;
 }
 
@@ -184,8 +184,8 @@ bool CodeStrategy::use_default_set() const
 
 void CodeStrategy::unbind_all_programs()
 {
-  SH_DEBUG_ERROR("shgl::CodeStrategy::unbind_all_programs() called!");
-  SH_DEBUG_ASSERT(false);
+  DEBUG_ERROR("shgl::CodeStrategy::unbind_all_programs() called!");
+  DEBUG_ASSERT(false);
 }
 
 bool CodeStrategy::use_default_unbind_all() const
@@ -195,7 +195,7 @@ bool CodeStrategy::use_default_unbind_all() const
 
 GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrategy* stream, 
                      const std::string& name, const std::string& version) :
-  ShBackend(name, version),
+  Backend(name, version),
   m_code(code),
   m_texture(texture),
   m_stream(stream)
@@ -219,7 +219,7 @@ GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrateg
   // WNDCLASSEX, PIXELFORMATDESCRIPTOR, etc). Should this window perhaps
   // be kept around for the lifetime of the GlBackend? It would simplify
   // the pbuffer code. What are the implications of having a hidden window
-  // lying around, what about the event loop and shGlWindowProc. How does
+  // lying around, what about the event loop and glWindowProc. How does
   // this interact with a UI toolkit. If someone loads the backend before
   // initializing glut does this stuff conflict with the WGL stuff done 
   // by GLUT. The documentation explicit states that "extension function
@@ -233,7 +233,7 @@ GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrateg
     ZeroMemory(&wc, sizeof (WNDCLASSEX));
     wc.cbSize = sizeof(WNDCLASSEX);
     wc.style = 0;
-    wc.lpfnWndProc = shGlWindowProc;
+    wc.lpfnWndProc = glWindowProc;
     wc.cbClsExtra = 0;
     wc.cbWndExtra = 0;
     wc.hInstance = NULL;
@@ -241,7 +241,7 @@ GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrateg
     wc.hCursor = NULL;
     wc.hbrBackground = NULL;
     wc.lpszMenuName = NULL;
-    wc.lpszClassName = "shGlWindow";
+    wc.lpszClassName = "glWindow";
     wc.hIconSm = NULL;
 
     if (!RegisterClassEx(&wc)) {
@@ -249,18 +249,18 @@ GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrateg
       if (error != ERROR_CLASS_ALREADY_EXISTS) {
         std::stringstream msg;
         msg << "RegisterClassEx failed (" << error << ")";
-        shError(ShException(msg.str()));
+        error(Exception(msg.str()));
       }
     }
 
-    hWnd = CreateWindowEx(0, "shGlWindow", "shGlWindow", WS_POPUP,
+    hWnd = CreateWindowEx(0, "glWindow", "glWindow", WS_POPUP,
                           CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
                           NULL, NULL, NULL, NULL);
 
     if (hWnd == NULL) {
       std::stringstream msg;
       msg << "CreateWindowEx failed (" << GetLastError() << ")";
-      shError(ShException(msg.str()));
+      error(Exception(msg.str()));
     }
 
     hdc = GetDC(hWnd);
@@ -269,7 +269,7 @@ GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrateg
 
       std::stringstream msg;
       msg << "GetDC failed (" << GetLastError() << ")";
-      shError(ShException(msg.str()));
+      error(Exception(msg.str()));
     }
 
     PIXELFORMATDESCRIPTOR pfd;
@@ -284,13 +284,13 @@ GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrateg
     if (pf == 0) {
       std::stringstream msg;
       msg << "ChoosePixelFormat failed (" << GetLastError() << ")";
-      shError(ShException(msg.str()));
+      error(Exception(msg.str()));
     }
 
     if (!SetPixelFormat(hdc, pf, &pfd)) {
       std::stringstream msg;
       msg << "SetPixelFormat failed (" << GetLastError() << ")";
-      shError(ShException(msg.str()));
+      error(Exception(msg.str()));
     }
 
     hglrc = wglCreateContext(hdc);
@@ -300,7 +300,7 @@ GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrateg
 
       std::stringstream msg;
       msg << "wglCreateContext failed (" << GetLastError() << ")";
-      shError(ShException(msg.str()));
+      error(Exception(msg.str()));
     }
 
     if (!wglMakeCurrent(hdc, hglrc)) {
@@ -310,7 +310,7 @@ GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrateg
 
       std::stringstream msg;
       msg << "wglMakeCurrent failed (" << GetLastError() << ")";
-      shError(ShException(msg.str()));
+      error(Exception(msg.str()));
     }
   } else {
     hdc = NULL;
@@ -410,11 +410,11 @@ GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrateg
   GlTextureGlTextureTransfer::instance = new GlTextureGlTextureTransfer();
 }
 
-SH::ShBackendCodePtr GlBackend::generate_code(const std::string& target,
-                                              const SH::ShProgramNodeCPtr& shader)
+SH::BackendCodePtr GlBackend::generate_code(const std::string& target,
+                                              const SH::ProgramNodeCPtr& shader)
 {
   if (target.find("stream") != target.npos) {
-    SH_DEBUG_WARN("Stream programs cannot be compiled on OpenGL backends."
+    DEBUG_WARN("Stream programs cannot be compiled on OpenGL backends."
                   " Execute programs directly without compiling them.");
     return 0;
   }
@@ -422,10 +422,10 @@ SH::ShBackendCodePtr GlBackend::generate_code(const std::string& target,
   return m_code->generate(target, shader, m_texture);
 }
 
-SH::ShBackendSetPtr GlBackend::generate_set(const ShProgramSet& s)
+SH::BackendSetPtr GlBackend::generate_set(const ProgramSet& s)
 {
   if (m_code->use_default_set()) {
-    return SH::ShBackend::generate_set(s);
+    return SH::Backend::generate_set(s);
   } else {
     return m_code->generate_set(s);
   }
@@ -434,13 +434,13 @@ SH::ShBackendSetPtr GlBackend::generate_set(const ShProgramSet& s)
 void GlBackend::unbind_all_programs()
 {
   if (m_code->use_default_unbind_all()) {
-    SH::ShBackend::unbind_all_programs();
+    SH::Backend::unbind_all_programs();
   } else {
     m_code->unbind_all_programs();
   }
 }
 
-void GlBackend::execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest)
+void GlBackend::execute(const SH::ProgramNodeCPtr& program, SH::Stream& dest)
 {
   m_stream->execute(program, dest, m_texture);
 }

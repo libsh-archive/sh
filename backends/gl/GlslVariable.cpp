@@ -110,8 +110,8 @@ const GlslVariable::ArbToGlslEntry arb_to_glsl_table[] = {
 
 GlslVariable::GlslVariable()
   : m_attribute(-1), m_builtin(false), m_texture(false), m_palette(false), 
-    m_uniform(false), m_name(""), m_size(0), m_dims(SH_TEXTURE_1D), m_length(0), 
-    m_kind(SH_TEMP), m_type(SH_FLOAT), m_semantic_type(SH_ATTRIB), m_values("")
+    m_uniform(false), m_name(""), m_size(0), m_dims(TEXTURE_1D), m_length(0), 
+    m_kind(TEMP), m_type(FLOAT), m_semantic_type(ATTRIB), m_values("")
 {
 }
 
@@ -123,9 +123,9 @@ GlslVariable::GlslVariable(const GlslVariable& v)
 {
 }
 
-GlslVariable::GlslVariable(const ShVariableNodePtr& v)
+GlslVariable::GlslVariable(const VariableNodePtr& v)
   : m_attribute(-1), m_builtin(!v->meta("opengl:state").empty()), 
-    m_texture(SH_TEXTURE == v->kind()), m_palette(SH_PALETTE == v->kind()),
+    m_texture(TEXTURE == v->kind()), m_palette(PALETTE == v->kind()),
     m_uniform(m_texture || m_palette || v->uniform()),
     m_name(v->meta("opengl:state")), m_size(v->size()), m_kind(v->kind()), 
     m_type(v->valueType()), m_semantic_type(v->specialType())
@@ -138,16 +138,16 @@ GlslVariable::GlslVariable(const ShVariableNodePtr& v)
     replace(m_values.begin(), m_values.end(), ';', ',');
 
     // Scalar constants are not assigned a variable
-    if ((1 == m_size) && (SH_CONST == m_kind)) {
+    if ((1 == m_size) && (CONST == m_kind)) {
       m_name = type_string() + "(" + m_values + ")";
       m_builtin = true;
     }
   }
   if (m_texture) {
-    ShTextureNodePtr texture = shref_dynamic_cast<ShTextureNode>(v);
+    TextureNodePtr texture = shref_dynamic_cast<TextureNode>(v);
     m_dims = texture->dims();
   } else if (m_palette) {
-    ShPaletteNodePtr palette = shref_dynamic_cast<ShPaletteNode>(v);
+    PaletteNodePtr palette = shref_dynamic_cast<PaletteNode>(v);
     m_length = palette->palette_length();
   }
 }
@@ -159,7 +159,7 @@ string GlslVariable::declaration() const
   stringstream s;
   string type = type_string();
 
-  if (m_kind == SH_CONST) {
+  if (m_kind == CONST) {
     s << "const ";
   }
 
@@ -187,36 +187,36 @@ void GlslVariable::name(int i, enum GlslProgramType unit)
     } else {
       varname << "uni";
     }
-    varname << "_" << (unit == SH_GLSL_FP ? "fp" : "vp");
+    varname << "_" << (unit == GLSL_FP ? "fp" : "vp");
   } 
   else {
     switch (m_kind) {
-    case SH_INPUT:
+    case INPUT:
       varname << "var_i";
       break;
-    case SH_OUTPUT:
+    case OUTPUT:
       varname << "var_o";
       break;
-    case SH_INOUT:
+    case INOUT:
       varname << "var_io";
       break;
-    case SH_TEMP:
+    case TEMP:
       varname << "var_t";
       break;
-    case SH_CONST:
+    case CONST:
       varname << "var_c";
       break;
-    case SH_TEXTURE:
+    case TEXTURE:
       varname << "var_tex";
       break;
-    case SH_STREAM:
+    case STREAM:
       varname << "var_s";
       break;
-    case SH_PALETTE:
+    case PALETTE:
       varname << "var_p";
       break;
-    case SH_BINDINGTYPE_END:
-      SH_DEBUG_ASSERT(0); // Error
+    case BINDINGTYPE_END:
+      DEBUG_ASSERT(0); // Error
       break;
     }
   }
@@ -228,7 +228,7 @@ void GlslVariable::name(int i, enum GlslProgramType unit)
 
 void GlslVariable::attribute(int index)
 {
-  SH_DEBUG_ASSERT(SH_FLOAT == m_type); // only float inputs are allowed
+  DEBUG_ASSERT(FLOAT == m_type); // only float inputs are allowed
   stringstream name;
   name << "attrib" << index;
   m_name = name.str();
@@ -254,19 +254,19 @@ string GlslVariable::type_string() const
     stringstream s;
     s << "sampler";
     switch (m_dims) {
-    case SH_TEXTURE_1D:
+    case TEXTURE_1D:
       s << "1D";
       break;
-    case SH_TEXTURE_2D:
+    case TEXTURE_2D:
       s << "2D";
       break;
-    case SH_TEXTURE_3D:
+    case TEXTURE_3D:
       s << "3D";
       break;
-    case SH_TEXTURE_CUBE:
+    case TEXTURE_CUBE:
       s << "Cube";
       break;
-    case SH_TEXTURE_RECT:
+    case TEXTURE_RECT:
       s << "2DRect";
       break;
     }
@@ -308,7 +308,7 @@ std::string GlslVariable::parse_state_array
       }
       return array_value;
     } else {
-      throw SH::ShException("Unterminated array index in opengl:state metadata");
+      throw SH::Exception("Unterminated array index in opengl:state metadata");
     }
   } else {
     return std::string();
@@ -409,7 +409,7 @@ std::string GlslVariable::translate_state_arb_to_glsl
       // Translate the right hand portion using our new sub-table
       right_translated = translate_state_arb_to_glsl(right, entry->subtable);      
     } else {
-      SH_DEBUG_WARN("No matching GLSL state found for ARB state '" << left << "'");
+      DEBUG_WARN("No matching GLSL state found for ARB state '" << left << "'");
       // Translate the right hand portion using our current table
       right_translated = translate_state_arb_to_glsl(right, table);
     }

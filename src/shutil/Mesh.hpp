@@ -28,15 +28,15 @@
 
 namespace ShUtil {
 
-/** \file ShMesh.hpp
+/** \file Mesh.hpp
  * A basic mesh structure based on half-edges.
  *
  * To use this class, define CopyConstructible 
  * vertex, face, and edge classes to hold your vertex/face/edge specific data
- * that are subclasses of ShMeshVertex, ShMeshFace, and ShMeshEdge
+ * that are subclasses of MeshVertex, MeshFace, and MeshEdge
  * respectively.
  *
- * The half-edge ShMesh class always keeps the following invariants: 
+ * The half-edge Mesh class always keeps the following invariants: 
  * * Edge pointers: 
  *   For any edge e,
  *   a) if e.next, then e.next->prev = e
@@ -52,7 +52,7 @@ namespace ShUtil {
  *   For any face f, f.edge.face = f, and
  *   f.edge->next->next...  = f.edge after following enough next pointers.
  *
- * All the public ShMesh class functions maintain these invariants.
+ * All the public Mesh class functions maintain these invariants.
  *
  * Null Pointers:
  * For any edge e, e.start and e.end are always != 0.
@@ -61,39 +61,39 @@ namespace ShUtil {
  */
 
 template<typename VertexType, typename FaceType, typename EdgeType>
-struct ShMeshType {
+struct MeshType {
   typedef VertexType Vertex;
   typedef FaceType Face;
   typedef EdgeType Edge;
 };
 
 template<typename M>
-struct ShMeshVertex {
+struct MeshVertex {
   typedef typename M::Edge Edge;
   Edge *edge; //< Edge that starts at this vertex 
 
   /** \brief Constructor that sets edge to 0 */ 
-  ShMeshVertex();
+  MeshVertex();
 
   /** \brief Constructor that sets edge to 0 */ 
-  ShMeshVertex(const ShMeshVertex<M> &other);
+  MeshVertex(const MeshVertex<M> &other);
 };
 
 template<typename M>
-struct ShMeshFace {
+struct MeshFace {
   typedef typename M::Edge Edge;
   Edge *edge; //< Edge in this face 
 
   /** \brief Constructor that sets edge to 0 */ 
-  ShMeshFace();
+  MeshFace();
 
   /** \brief Constructor that sets edge to 0 */ 
-  ShMeshFace(const ShMeshFace<M> &other);
+  MeshFace(const MeshFace<M> &other);
 };
 
 // A half-edge going from start to end that is part of face.
 template<typename M>
-struct ShMeshEdge {
+struct MeshEdge {
   typedef typename M::Vertex Vertex;
   typedef typename M::Face Face;
   typedef typename M::Edge Edge;
@@ -105,10 +105,10 @@ struct ShMeshEdge {
   Edge *prev; //< Previous edge in the face
 
   /** \brief Constructs a edge with all pointers = 0 */ 
-  ShMeshEdge();
+  MeshEdge();
 
   /** \brief Constructor that sets all pointers = 0 */ 
-  ShMeshEdge(const ShMeshEdge<M> &other);
+  MeshEdge(const MeshEdge<M> &other);
 
   /** \brief Constructs a edge with pointers to the given objects 
    * (any may be 0 except start and end) */
@@ -126,9 +126,9 @@ struct ShMeshEdge {
 };
 
 
-/** ShMesh class stores a mesh using a half-edge data structure */
+/** Mesh class stores a mesh using a half-edge data structure */
 template<typename M>
-class ShMesh {
+class Mesh {
   public:
     typedef M MeshType; 
     typedef typename M::Vertex Vertex; 
@@ -141,17 +141,17 @@ class ShMesh {
     typedef std::list<Vertex*> VertexList;
 
     /** \brief Empty mesh constructor */
-    ShMesh();
+    Mesh();
 
     /** \brief Copy constructor 
      * Makes copies of vertices, edges, and faces and builds a mesh isomorphic other */
-    ShMesh(const ShMesh<M>& other);
+    Mesh(const Mesh<M>& other);
 
-    /** \brief ShMesh destructor */
-    ~ShMesh();
+    /** \brief Mesh destructor */
+    ~Mesh();
 
     /** \brief Assignment Operator  */
-    ShMesh<M>& operator=(const ShMesh<M>& other); 
+    Mesh<M>& operator=(const Mesh<M>& other); 
 
     /** \brief removes all verts, edges, and faces in this mesh & deletes them*/
     void clear();
@@ -228,6 +228,6 @@ class ShMesh {
 
 }
 
-#include "ShMeshImpl.hpp"
+#include "MeshImpl.hpp"
 
 #endif

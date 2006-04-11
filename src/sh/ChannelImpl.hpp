@@ -20,228 +20,228 @@
 #ifndef SHSTREAMIMPL_HPP
 #define SHSTREAMIMPL_HPP
 
-#include "ShStream.hpp"
-#include "ShDebug.hpp"
-#include "ShVariable.hpp"
-#include "ShContext.hpp"
-#include "ShProgram.hpp"
-#include "ShSyntax.hpp"
-#include "ShStatement.hpp"
-#include "ShAlgebra.hpp"
-#include "ShError.hpp"
-#include "ShException.hpp"
+#include "Stream.hpp"
+#include "Debug.hpp"
+#include "Variable.hpp"
+#include "Context.hpp"
+#include "Program.hpp"
+#include "Syntax.hpp"
+#include "Statement.hpp"
+#include "Algebra.hpp"
+#include "Error.hpp"
+#include "Exception.hpp"
 
 namespace SH {
 
 template<typename T>
-ShChannel<T>::ShChannel()
-  : ShMetaForwarder(0),
-    m_node(new ShChannelNode(T::semantic_type, T::typesize, T::value_type))
+Channel<T>::Channel()
+  : MetaForwarder(0),
+    m_node(new ChannelNode(T::semantic_type, T::typesize, T::value_type))
 {
   real_meta(m_node.object());
 }
 
 template<typename T>
-ShChannel<T>::ShChannel(int count)
-  : ShMetaForwarder(0),
-    m_node(new ShChannelNode(T::semantic_type, T::typesize, T::value_type))
+Channel<T>::Channel(int count)
+  : MetaForwarder(0),
+    m_node(new ChannelNode(T::semantic_type, T::typesize, T::value_type))
 {
   real_meta(m_node.object());
-  ShHostMemoryPtr mem = new ShHostMemory(count * T::typesize * sizeof(typename T::mem_type), T::value_type);
+  HostMemoryPtr mem = new HostMemory(count * T::typesize * sizeof(typename T::mem_type), T::value_type);
   m_node->memory(mem, count);
 }
 
 template<typename T>
-ShChannel<T>::ShChannel(const ShMemoryPtr& memory, int count)
-  : ShMetaForwarder(0),
-    m_node(new ShChannelNode(T::semantic_type, T::typesize, T::value_type, memory, count))
+Channel<T>::Channel(const MemoryPtr& memory, int count)
+  : MetaForwarder(0),
+    m_node(new ChannelNode(T::semantic_type, T::typesize, T::value_type, memory, count))
 {
   real_meta(m_node.object());
 }
 
 template<typename T>
-void ShChannel<T>::memory(const ShMemoryPtr& memory, int count)
+void Channel<T>::memory(const MemoryPtr& memory, int count)
 {
   m_node->memory(memory, count);
 }
 
 template<typename T>
-int ShChannel<T>::count() const
+int Channel<T>::count() const
 {
   return m_node->count();
 }
 
 template<typename T>
-void ShChannel<T>::count(int count)
+void Channel<T>::count(int count)
 {
   m_node->count(count);
 }
 
 template<typename T>
-void ShChannel<T>::stride(int stride)
+void Channel<T>::stride(int stride)
 {
   m_node->stride(stride);
 }
 
 template<typename T>
-void ShChannel<T>::offset(int offset)
+void Channel<T>::offset(int offset)
 {
   m_node->offset(offset);
 }
 
 template<typename T>
-int ShChannel<T>::stride()
+int Channel<T>::stride()
 {
   return m_node->stride();
 }
 
 template<typename T>
-int ShChannel<T>::offset()
+int Channel<T>::offset()
 {
   return m_node->offset();
 }
 
 template<typename T>
-ShMemoryPtr ShChannel<T>::memory()
+MemoryPtr Channel<T>::memory()
 {
   return m_node->memory();
 }
 
 template<typename T>
-ShPointer<const ShMemory> ShChannel<T>::memory() const
+Pointer<const Memory> Channel<T>::memory() const
 {
   return m_node->memory();
 }
 
 template<typename T>
-ShChannelNodePtr ShChannel<T>::node()
+ChannelNodePtr Channel<T>::node()
 {
   return m_node;
 }
 
 template<typename T>
-const ShChannelNodePtr ShChannel<T>::node() const
+const ChannelNodePtr Channel<T>::node() const
 {
   return m_node;
 }
 
 template<typename T>
-typename T::mem_type* ShChannel<T>::read_data()
+typename T::mem_type* Channel<T>::read_data()
 {
-  ShStoragePtr storage = memory()->findStorage("host");
-  if (!storage) shError(ShException("No host storage found"));
-  ShHostStoragePtr host_storage = shref_dynamic_cast<ShHostStorage>(storage);
-  SH_DEBUG_ASSERT(host_storage);
+  StoragePtr storage = memory()->findStorage("host");
+  if (!storage) error(Exception("No host storage found"));
+  HostStoragePtr host_storage = shref_dynamic_cast<HostStorage>(storage);
+  DEBUG_ASSERT(host_storage);
   host_storage->sync();
   return static_cast<typename T::mem_type*>(host_storage->data());
 }
 
 template<typename T>
-typename T::mem_type* ShChannel<T>::write_data()
+typename T::mem_type* Channel<T>::write_data()
 {
-  ShStoragePtr storage = memory()->findStorage("host");
-  if (!storage) shError(ShException("No host storage found"));
-  ShHostStoragePtr host_storage = shref_dynamic_cast<ShHostStorage>(storage);
-  SH_DEBUG_ASSERT(host_storage);
+  StoragePtr storage = memory()->findStorage("host");
+  if (!storage) error(Exception("No host storage found"));
+  HostStoragePtr host_storage = shref_dynamic_cast<HostStorage>(storage);
+  DEBUG_ASSERT(host_storage);
   host_storage->dirty();
   return static_cast<typename T::mem_type*>(host_storage->data());
 }
 
 template<typename T>
-T ShChannel<T>::operator()() const
+T Channel<T>::operator()() const
 {
-  // TODO: shError() maybe instead.
-  if (!ShContext::current()->parsing()) shError(ShScopeException("Stream fetch outside program"));
+  // TODO: error() maybe instead.
+  if (!Context::current()->parsing()) error(ScopeException("Stream fetch outside program"));
   
   T t;
-  ShVariable streamVar(m_node);
-  ShStatement stmt(t, SH_OP_FETCH, streamVar);
+  Variable streamVar(m_node);
+  Statement stmt(t, OP_FETCH, streamVar);
 
-  ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
+  Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
   
   return t;
 }
 
 template<typename T>
 template<typename T2>
-T ShChannel<T>::operator[](const ShGeneric<1, T2>& index) const
+T Channel<T>::operator[](const Generic<1, T2>& index) const
 {
-  // TODO: shError() maybe instead.
-  if (!ShContext::current()->parsing()) shError(ShScopeException("Indexed stream fetch outside program"));
+  // TODO: error() maybe instead.
+  if (!Context::current()->parsing()) error(ScopeException("Indexed stream fetch outside program"));
   
   T t;
-  ShVariable streamVar(m_node);
-  ShStatement stmt(t, streamVar, SH_OP_LOOKUP, index);
+  Variable streamVar(m_node);
+  Statement stmt(t, streamVar, OP_LOOKUP, index);
 
-  ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
+  Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
   
   return t;
 }
 
 template<typename T>
-ShProgram connect(const ShChannel<T>& stream,
-                  const ShProgram& program)
+Program connect(const Channel<T>& stream,
+                  const Program& program)
 {
-  ShProgram nibble = SH_BEGIN_PROGRAM() {
+  Program nibble = SH_BEGIN_PROGRAM() {
     typename T::OutputType out = stream();
   } SH_END_PROGRAM;
   return connect(nibble, program);
 }
 
 template<typename T>
-ShProgram operator<<(const ShProgram& program,
-                     const ShChannel<T>& stream)
+Program operator<<(const Program& program,
+                     const Channel<T>& stream)
 {
   return connect(stream, program);
 }
 
 template<typename T>
-ShChannel<T>& ShChannel<T>::operator=(const ShProgram& program)
+Channel<T>& Channel<T>::operator=(const Program& program)
 {
-  ShStream stream(*this);
+  Stream stream(*this);
   stream = program;
   return *this;
 }
 
 // Put these here for dependency reasons, even though they are member
-// functions of ShProgram
+// functions of Program
 template<typename T0>
-ShProgram ShProgram::operator()(const ShChannel<T0>& t0) const
+Program Program::operator()(const Channel<T0>& t0) const
 {
   return (*this) << t0;
 }
 
 template<typename T0, typename T1>
-ShProgram ShProgram::operator()(const ShChannel<T0>& t0,
-                                 const ShChannel<T1>& t1) const
+Program Program::operator()(const Channel<T0>& t0,
+                                 const Channel<T1>& t1) const
 {
   return (*this) << t0 << t1;
 }
 
 template<typename T0, typename T1, typename T2>
-ShProgram ShProgram::operator()(const ShChannel<T0>& t0,
-                                 const ShChannel<T1>& t1,
-                                 const ShChannel<T2>& t2) const
+Program Program::operator()(const Channel<T0>& t0,
+                                 const Channel<T1>& t1,
+                                 const Channel<T2>& t2) const
 {
   return (*this) << t0 << t1 << t2;
 }
 
 template<typename T0, typename T1, typename T2, typename T3>
-ShProgram ShProgram::operator()(const ShChannel<T0>& t0,
-                                 const ShChannel<T1>& t1,
-                                 const ShChannel<T2>& t2,
-                                 const ShChannel<T3>& t3) const
+Program Program::operator()(const Channel<T0>& t0,
+                                 const Channel<T1>& t1,
+                                 const Channel<T2>& t2,
+                                 const Channel<T3>& t3) const
 {
   return (*this) << t0 << t1 << t2 << t3;
 }
 
 template<typename T0, typename T1, typename T2, typename T3,
          typename T4>
-ShProgram ShProgram::operator()(const ShChannel<T0>& t0,
-                                 const ShChannel<T1>& t1,
-                                 const ShChannel<T2>& t2,
-                                 const ShChannel<T3>& t3,
-                                 const ShChannel<T4>& t4) const
+Program Program::operator()(const Channel<T0>& t0,
+                                 const Channel<T1>& t1,
+                                 const Channel<T2>& t2,
+                                 const Channel<T3>& t3,
+                                 const Channel<T4>& t4) const
 {
   return (*this) << t0 << t1 << t2 << t3 << t4;
 }

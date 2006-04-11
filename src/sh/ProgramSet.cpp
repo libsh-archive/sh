@@ -17,32 +17,32 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#include "ShProgramSet.hpp"
-#include "ShBackend.hpp"
+#include "ProgramSet.hpp"
+#include "Backend.hpp"
 
 namespace SH {
 
-ShProgramSet::ShProgramSet()
+ProgramSet::ProgramSet()
 {
 }
 
-ShProgramSet::ShProgramSet(const ShProgram& a)
+ProgramSet::ProgramSet(const Program& a)
 {
-  m_nodes.push_back(shref_const_cast<ShProgramNode>(a.node()));
+  m_nodes.push_back(shref_const_cast<ProgramNode>(a.node()));
 }
 
-ShProgramSet::ShProgramSet(const ShProgram& a, const ShProgram& b)
+ProgramSet::ProgramSet(const Program& a, const Program& b)
 {
-  m_nodes.push_back(shref_const_cast<ShProgramNode>(a.node()));
-  m_nodes.push_back(shref_const_cast<ShProgramNode>(b.node()));
+  m_nodes.push_back(shref_const_cast<ProgramNode>(a.node()));
+  m_nodes.push_back(shref_const_cast<ProgramNode>(b.node()));
 }
 
-ShPointer<ShBackendSet> ShProgramSet::backend_set(const ShPointer<ShBackend>& backend) const
+Pointer<BackendSet> ProgramSet::backend_set(const Pointer<Backend>& backend) const
 {
   if (!backend) return 0;
 
   if (m_backend_sets.find(backend) == m_backend_sets.end()) {
-    ShBackendSetPtr bs = backend->generate_set(*this);
+    BackendSetPtr bs = backend->generate_set(*this);
     if (!bs) return 0;
     m_backend_sets[backend] = bs;
   }

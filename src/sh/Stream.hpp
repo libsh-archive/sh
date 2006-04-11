@@ -21,29 +21,29 @@
 #define SHSTREAM_HPP
 
 #include <list>
-#include "ShDllExport.hpp"
-#include "ShChannel.hpp"
-#include "ShChannelNode.hpp"
+#include "DllExport.hpp"
+#include "Channel.hpp"
+#include "ChannelNode.hpp"
 
 namespace SH {
 
 /** Dynamic list of channels.
  * The stream keep track (by reference) of an ordered lists of 
  * data channels, to be used as inputs and outputs of stream operations.
- * @see ShChannel
+ * @see Channel
  */
 class
-SH_DLLEXPORT ShStream {
+DLLEXPORT Stream {
 public:
-  typedef std::list<ShChannelNodePtr> NodeList;
+  typedef std::list<ChannelNodePtr> NodeList;
   typedef NodeList::iterator iterator;
   typedef NodeList::const_iterator const_iterator;
 
-  ShStream();
-  ShStream(const ShChannelNodePtr& node);
+  Stream();
+  Stream(const ChannelNodePtr& node);
   
   template<typename T>
-  ShStream(const ShChannel<T>& channel);
+  Stream(const Channel<T>& channel);
 
   const_iterator begin() const;
   const_iterator end() const;
@@ -52,14 +52,14 @@ public:
   int size() const;
 
   template<typename T>
-  void append(const ShChannel<T>& channel);
+  void append(const Channel<T>& channel);
   template<typename T>
-  void prepend(const ShChannel<T>& channel);
+  void prepend(const Channel<T>& channel);
 
-  void append(const ShChannelNodePtr& node);
-  void prepend(const ShChannelNodePtr& node);
+  void append(const ChannelNodePtr& node);
+  void prepend(const ChannelNodePtr& node);
   // Execute fully bound stream program and place results in stream.
-  ShStream& operator=(const ShProgram& program);
+  Stream& operator=(const Program& program);
   
 private:
   NodeList m_nodes;
@@ -69,60 +69,60 @@ private:
  * This concatenates the list of channels in the component streams.
  */
 template<typename T1, typename T2>
-ShStream combine(const ShChannel<T1>& left, const ShChannel<T2>& right);
+Stream combine(const Channel<T1>& left, const Channel<T2>& right);
 
 /** Combine a stream and a channel.
  * This concatenates the given channel to the end of the list of
  * channels in the stream.
  */
 template<typename T2>
-ShStream combine(const ShStream& left, const ShChannel<T2>& right);
+Stream combine(const Stream& left, const Channel<T2>& right);
 
 /** Combine a channel and a stream.
  * This concatenates the given channel to the start of the list of
  * channels in the stream.
  */
 template<typename T1>
-ShStream combine(const ShChannel<T1>& left, const ShStream& right);
+Stream combine(const Channel<T1>& left, const Stream& right);
 
-SH_DLLEXPORT
-ShStream combine(const ShStream& left, const ShStream& right);
+DLLEXPORT
+Stream combine(const Stream& left, const Stream& right);
 
 /** An operator alias for combine between channels.
  */
 template<typename T1, typename T2>
-ShStream operator&(const ShChannel<T1>& left, const ShChannel<T2>& right);
+Stream operator&(const Channel<T1>& left, const Channel<T2>& right);
 
 /** An operator alias for combine between a stream and a channel.
  */
 template<typename T2>
-ShStream operator&(const ShStream& left, const ShChannel<T2>& right);
+Stream operator&(const Stream& left, const Channel<T2>& right);
 
 /** An operator alias for combine between a channel and a stream.
  */
 template<typename T1>
-ShStream operator&(const ShChannel<T1>& left, const ShStream& right);
+Stream operator&(const Channel<T1>& left, const Stream& right);
 
 /** An operator alias for combine between two streams.
  */
-SH_DLLEXPORT
-ShStream operator&(const ShStream& left, const ShStream& right);
+DLLEXPORT
+Stream operator&(const Stream& left, const Stream& right);
 
 /** Apply a program to a stream. 
  * This function connects streams onto the output of programs
  * TODO: is this right?  why is the stream argument first?
  */
-SH_DLLEXPORT
-ShProgram connect(const ShStream& stream, const ShProgram& program);
+DLLEXPORT
+Program connect(const Stream& stream, const Program& program);
 
 /** An operator alias for connect(p,s).
  */
-SH_DLLEXPORT
-ShProgram operator<<(const ShProgram& program, const ShStream& stream);
+DLLEXPORT
+Program operator<<(const Program& program, const Stream& stream);
 
 
 }
 
-#include "ShStreamImpl.hpp"
+#include "StreamImpl.hpp"
 
 #endif

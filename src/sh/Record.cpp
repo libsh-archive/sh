@@ -18,125 +18,125 @@
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 #include <sstream>
-#include "ShDebug.hpp"
-#include "ShError.hpp"
-#include "ShContext.hpp"
-#include "ShCfgBlock.hpp"
-#include "ShProgram.hpp"
-#include "ShInstructions.hpp"
-#include "ShSyntax.hpp"
-#include "ShAlgebra.hpp"
-#include "ShMemory.hpp"
-#include "ShChannelNode.hpp"
-#include "ShStream.hpp"
-#include "ShRecord.hpp"
+#include "Debug.hpp"
+#include "Error.hpp"
+#include "Context.hpp"
+#include "CfgBlock.hpp"
+#include "Program.hpp"
+#include "Instructions.hpp"
+#include "Syntax.hpp"
+#include "Algebra.hpp"
+#include "Memory.hpp"
+#include "ChannelNode.hpp"
+#include "Stream.hpp"
+#include "Record.hpp"
 
 namespace SH {
 
-ShRecord::ShRecord()
+Record::Record()
 {
 }
 
-ShRecord::ShRecord(const ShVariable& var) 
+Record::Record(const Variable& var) 
 {
   m_vars.push_back(var);
 }
 
-ShRecord::VarList::const_iterator ShRecord::begin() const 
+Record::VarList::const_iterator Record::begin() const 
 {
   return m_vars.begin();
 }
 
-ShRecord::VarList::const_iterator ShRecord::end() const 
+Record::VarList::const_iterator Record::end() const 
 {
   return m_vars.end();
 }
 
 
-ShRecord::VarList::iterator ShRecord::begin() 
+Record::VarList::iterator Record::begin() 
 {
   return m_vars.begin();
 }
 
-ShRecord::VarList::iterator ShRecord::end() 
+Record::VarList::iterator Record::end() 
 {
   return m_vars.end();
 }
 
-size_t ShRecord::size() const 
+size_t Record::size() const 
 {
   return m_vars.size();
 }
 
-void ShRecord::append(const ShVariable& var) 
+void Record::append(const Variable& var) 
 {
   m_vars.push_back(var);
 }
 
-void ShRecord::prepend(const ShVariable& var) 
+void Record::prepend(const Variable& var) 
 {
   m_vars.push_front(var);
 }
 
-void ShRecord::append(const ShRecord& rec) 
+void Record::append(const Record& rec) 
 {
   m_vars.insert(m_vars.end(), rec.begin(), rec.end());
 }
 
-void ShRecord::prepend(const ShRecord& rec) 
+void Record::prepend(const Record& rec) 
 {
   m_vars.insert(m_vars.begin(), rec.begin(), rec.end());
 }
 
-ShRecord combine(const ShVariable& left, const ShVariable& right)
+Record combine(const Variable& left, const Variable& right)
 {
-  ShRecord result(left);
+  Record result(left);
   result.append(right);
   return result;
 }
 
-ShRecord combine(const ShRecord& left, const ShVariable& right)
+Record combine(const Record& left, const Variable& right)
 {
-  ShRecord result = left;
+  Record result = left;
   result.append(right);
   return result;
 }
 
-ShRecord combine(const ShVariable& left, const ShRecord& right)
+Record combine(const Variable& left, const Record& right)
 {
-  ShRecord result = right;
+  Record result = right;
   result.prepend(left);
   return result;
 }
 
-ShRecord combine(const ShRecord& left, const ShRecord& right)
+Record combine(const Record& left, const Record& right)
 {
-  ShRecord result = left;
+  Record result = left;
   result.append(right);
   return result;
 }
 
-ShRecord operator&(const ShVariable& left, const ShVariable& right)
+Record operator&(const Variable& left, const Variable& right)
 {
   return combine(left, right);
 }
 
-ShRecord operator&(const ShRecord& left, const ShVariable& right)
+Record operator&(const Record& left, const Variable& right)
 {
   return combine(left, right);
 }
 
-ShRecord operator&(const ShVariable& left, const ShRecord& right)
+Record operator&(const Variable& left, const Record& right)
 {
   return combine(left, right);
 }
 
-ShRecord operator&(const ShRecord& left, const ShRecord& right)
+Record operator&(const Record& left, const Record& right)
 {
   return combine(left, right);
 }
 
-ShRecord& ShRecord::operator=(const ShRecord &other)
+Record& Record::operator=(const Record &other)
 {
   VarList::iterator I = begin();
   VarList::const_iterator O = other.begin();
@@ -147,69 +147,69 @@ ShRecord& ShRecord::operator=(const ShRecord &other)
   return *this;
 }
 
-ShRecord& ShRecord::operator=(const ShProgram& program)
+Record& Record::operator=(const Program& program)
 {
-  //SH_DEBUG_PRINT("Assigning program to record");
+  //DEBUG_PRINT("Assigning program to record");
   if(!program.node()->inputs.empty()) {
     std::ostringstream out;
-    out << "Insufficient arguments for calling an ShProgram." << std::endl; 
+    out << "Insufficient arguments for calling an Program." << std::endl; 
     out << "Expected arguments for:" << std::endl;
-    ShProgramNode::print(out, program.node()->inputs);
+    ProgramNode::print(out, program.node()->inputs);
 
-    shError(ShException(out.str()));
+    error(Exception(out.str()));
   }
 
-  if(ShContext::current()->parsing()) { 
-    ShProgram outputMappedProgram = (*this) << program;
-    ShContext::current()->parsing()->tokenizer.blockList()->addBlock(
-        new ShCfgBlock(outputMappedProgram, false));
+  if(Context::current()->parsing()) { 
+    Program outputMappedProgram = (*this) << program;
+    Context::current()->parsing()->tokenizer.blockList()->addBlock(
+        new CfgBlock(outputMappedProgram, false));
   } else { //immediate mode
     // @todo range immediate mode program calls should execute the 
-    // ShEval interpreter.
-    SH_DEBUG_PRINT("Should call an interpreter here");
+    // Eval interpreter.
+    DEBUG_PRINT("Should call an interpreter here");
   }
   return *this;
 }
 
-ShProgram connect(const ShRecord& rec, const ShProgram& program)
+Program connect(const Record& rec, const Program& program)
 {
-  ShProgram nibble = SH_BEGIN_PROGRAM() {
-    for(ShRecord::VarList::const_iterator I = rec.begin(); I != rec.end(); ++I) {
-      ShVariable out(I->node()->clone(SH_OUTPUT, I->size(), SH_VALUETYPE_END, SH_SEMANTICTYPE_END, 
+  Program nibble = SH_BEGIN_PROGRAM() {
+    for(Record::VarList::const_iterator I = rec.begin(); I != rec.end(); ++I) {
+      Variable out(I->node()->clone(OUTPUT, I->size(), VALUETYPE_END, SEMANTICTYPE_END, 
         true, false));
-      //SH_DEBUG_PRINT("connect ShRecord output size = " << I->size()); 
-      ShContext::current()->parsing()->tokenizer.blockList()->addStatement(
-        ShStatement(out, SH_OP_ASN, *I));  
+      //DEBUG_PRINT("connect Record output size = " << I->size()); 
+      Context::current()->parsing()->tokenizer.blockList()->addStatement(
+        Statement(out, OP_ASN, *I));  
     }
   } SH_END;
   return connect(nibble, program);
 }
 
-ShProgram operator<<(const ShProgram& program, const ShRecord& rec)
+Program operator<<(const Program& program, const Record& rec)
 {
   return connect(rec, program);
 }
 
-ShProgram connect(const ShProgram& program, const ShRecord& rec)
+Program connect(const Program& program, const Record& rec)
 {
-  int oldOpt = ShContext::current()->optimization();
-  ShContext::current()->optimization(0);
+  int oldOpt = Context::current()->optimization();
+  Context::current()->optimization(0);
 
-  ShProgram nibble = SH_BEGIN_PROGRAM() {
-    for(ShRecord::VarList::const_iterator I = rec.begin(); I != rec.end(); ++I) {
-      ShVariable in(I->node()->clone(SH_INPUT, I->size(), SH_VALUETYPE_END, SH_SEMANTICTYPE_END, 
+  Program nibble = SH_BEGIN_PROGRAM() {
+    for(Record::VarList::const_iterator I = rec.begin(); I != rec.end(); ++I) {
+      Variable in(I->node()->clone(INPUT, I->size(), VALUETYPE_END, SEMANTICTYPE_END, 
             true, false));
-      //SH_DEBUG_PRINT("connect ShRecord input size = " << I->size()); 
-      ShContext::current()->parsing()->tokenizer.blockList()->addStatement(
-         ShStatement(*I, SH_OP_ASN, in));  
+      //DEBUG_PRINT("connect Record input size = " << I->size()); 
+      Context::current()->parsing()->tokenizer.blockList()->addStatement(
+         Statement(*I, OP_ASN, in));  
     }
   } SH_END;
-  ShProgram result = connect(program, nibble);
-  ShContext::current()->optimization(oldOpt);
+  Program result = connect(program, nibble);
+  Context::current()->optimization(oldOpt);
   return result;
 }
 
-ShProgram operator<<(const ShRecord& rec, const ShProgram &program)
+Program operator<<(const Record& rec, const Program &program)
 {
   return connect(program, rec);
 }

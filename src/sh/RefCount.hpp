@@ -21,75 +21,75 @@
 #define SHREFCOUNT_HPP
 
 #include <utility>
-#include "ShDllExport.hpp"
+#include "DllExport.hpp"
 
-// #define SH_REFCOUNT_DEBUGGING
+// #define REFCOUNT_DEBUGGING
 
-#ifdef SH_REFCOUNT_DEBUGGING
+#ifdef REFCOUNT_DEBUGGING
 #include <iostream>
 #include <iomanip>
-#include "ShDebug.hpp"
+#include "Debug.hpp"
 
-#define SH_RCDEBUG_GREEN std::cerr << "[32m"
-#define SH_RCDEBUG_RED std::cerr << "[31m"
-#define SH_RCDEBUG_BLUE std::cerr << "[34m"
-#define SH_RCDEBUG_NORMAL std::cerr << "[0m"
+#define RCDEBUG_GREEN std::cerr << "[32m"
+#define RCDEBUG_RED std::cerr << "[31m"
+#define RCDEBUG_BLUE std::cerr << "[34m"
+#define RCDEBUG_NORMAL std::cerr << "[0m"
 
 #endif
 
 namespace SH {
 
 /** A class which can be reference-counted.
- * These are classes you can wrap in an ShRefCount. Inherit from this
+ * These are classes you can wrap in an RefCount. Inherit from this
  * if you want to reference-count your class.
  */
 class 
-SH_DLLEXPORT
-ShRefCountable 
+DLLEXPORT
+RefCountable 
 {
 public:
-  ShRefCountable()
+  RefCountable()
     : m_refCount(0)
   {
   }
 
-  ShRefCountable(const ShRefCountable&)
+  RefCountable(const RefCountable&)
     : m_refCount(0)
     // any new RefCountable should have a zero refcount, even if it's
     // made as a copy
   {
   }
 
-  ShRefCountable& operator=(const ShRefCountable&)
+  RefCountable& operator=(const RefCountable&)
   {
     // we don't actually change refCount here
     // this is indeed the intended behaviour
     return *this;
   }
 
-#ifdef SH_REFCOUNT_DEBUGGING
+#ifdef REFCOUNT_DEBUGGING
   // Just to make this polymorphic, so typeid() works as expected
-  virtual ~ShRefCountable() {}   
+  virtual ~RefCountable() {}   
 #endif
   
   int acquireRef() const
   {
-#ifdef SH_REFCOUNT_DEBUGGING
-    SH_RCDEBUG_GREEN;
+#ifdef REFCOUNT_DEBUGGING
+    RCDEBUG_GREEN;
     std::cerr << "   [+] " << std::setw(10) << this << " <" << typeid(*this).name() << ">"
               << ": " << m_refCount << "->" << (m_refCount + 1) << std::endl;
-    SH_RCDEBUG_NORMAL;
+    RCDEBUG_NORMAL;
 #endif
     return ++m_refCount;
   }
   
   int releaseRef() const
   {
-#ifdef SH_REFCOUNT_DEBUGGING
-    SH_RCDEBUG_RED;
+#ifdef REFCOUNT_DEBUGGING
+    RCDEBUG_RED;
     std::cerr << "   [-] " << std::setw(10) << this << " <" << typeid(*this).name() << ">"
               << ": " << m_refCount << "->" << (m_refCount - 1) << std::endl;
-    SH_RCDEBUG_NORMAL;
+    RCDEBUG_NORMAL;
 #endif
     return --m_refCount;
   }
@@ -106,41 +106,41 @@ private:
 /** A reference-counting smart pointer. 
  */
 template<typename T>
-class ShPointer 
+class Pointer 
 {
 public:
-  ShPointer();
-  ShPointer(T* object);
-  ShPointer(const ShPointer& other);
+  Pointer();
+  Pointer(T* object);
+  Pointer(const Pointer& other);
   template<typename S>
-  ShPointer(const ShPointer<S>& other);
+  Pointer(const Pointer<S>& other);
   
-  ~ShPointer();
+  ~Pointer();
 
-  ShPointer& operator=(T* other);
-  ShPointer& operator=(const ShPointer& other);
+  Pointer& operator=(T* other);
+  Pointer& operator=(const Pointer& other);
   template<typename S>
-  ShPointer& operator=(const ShPointer<S>& other);
+  Pointer& operator=(const Pointer<S>& other);
 
   /// Two references are equal if they point to the same object.
-  bool operator==(const ShPointer& other) const;
+  bool operator==(const Pointer& other) const;
 
   /// Two references are equal if they point to the same object.
-  bool operator!=(const ShPointer& other) const;
+  bool operator!=(const Pointer& other) const;
 
   /// Actually compares the pointers.
-  bool operator<(const ShPointer& other) const;
+  bool operator<(const Pointer& other) const;
 
   T& operator*() const;
   T* operator->() const;
 
   // Idea taken from the Boost shared_ptr implementation.
-  typedef T * (ShPointer<T>::*unspecified_bool_type)() const;
+  typedef T * (Pointer<T>::*unspecified_bool_type)() const;
     
   /// Return true iff this is not a reference to a null pointer
   operator unspecified_bool_type() const
   {
-    return m_object == 0 ? 0 : &ShPointer<T>::object;
+    return m_object == 0 ? 0 : &Pointer<T>::object;
   }  
 
   /// Obtain the total amount of references to the referenced object.
@@ -149,7 +149,7 @@ public:
   /// Obtain a pointer to the object we reference count
   T* object() const;
 
-  void swap(ShPointer& other);
+  void swap(Pointer& other);
 
 private:
   void releaseRef();
@@ -158,16 +158,16 @@ private:
 };
 
 template<typename T, typename S>
-ShPointer<T> shref_static_cast(const ShPointer<S>& other);
+Pointer<T> shref_static_cast(const Pointer<S>& other);
 
 template<typename T, typename S>
-ShPointer<T> shref_dynamic_cast(const ShPointer<S>& other);
+Pointer<T> shref_dynamic_cast(const Pointer<S>& other);
 
 template<typename T, typename S>
-ShPointer<T> shref_const_cast(const ShPointer<S>& other);
+Pointer<T> shref_const_cast(const Pointer<S>& other);
 
 } // namespace SH
 
-#include "ShRefCountImpl.hpp"
+#include "RefCountImpl.hpp"
 
 #endif

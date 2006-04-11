@@ -18,15 +18,15 @@
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 
-#include "ShDomTree.hpp"
+#include "DomTree.hpp"
 #include <iostream>
-#include "ShDebug.hpp"
-#include "ShUtility.hpp"
+#include "Debug.hpp"
+#include "Utility.hpp"
 
 
 namespace SH {
 
-  ShDomTree::ShDomTree(ShCtrlGraphPtr graph)
+  DomTree::DomTree(CtrlGraphPtr graph)
     : m_graph(graph),
       m_n(0)
   {
@@ -36,12 +36,12 @@ namespace SH {
     
     // Steps 2 and 3
     for (int i = m_n; i >= 2; i--) {
-      ShCtrlGraphNodePtr w = m_vertex[i];
+      CtrlGraphNodePtr w = m_vertex[i];
       // Step 2
       PredSet& pred = m_pred[w];
       for (PredSet::iterator I = pred.begin(); I != pred.end(); ++I) {
-	ShCtrlGraphNodePtr v = *I;
-	ShCtrlGraphNodePtr u = eval(v);
+	CtrlGraphNodePtr v = *I;
+	CtrlGraphNodePtr u = eval(v);
 	if (m_semi[u] < m_semi[v]) m_semi[w] = m_semi[u];
       }
       m_bucket[m_vertex[m_semi[w]]].insert(w);
@@ -51,45 +51,45 @@ namespace SH {
       BucketSet& bucket = m_bucket[m_parent[w]];
       while (!bucket.empty()) {
 	BucketSet::iterator I = bucket.begin();
-	ShCtrlGraphNodePtr v = *I;
+	CtrlGraphNodePtr v = *I;
 	bucket.erase(I);
-	ShCtrlGraphNodePtr u = eval(v);
+	CtrlGraphNodePtr u = eval(v);
 	m_dom[v] = (m_semi[u] < m_semi[v] ? u : m_parent[w]);
       }
     }
     
     // Step 4
     for (int i = 2; i <= m_n; i++) {
-      ShCtrlGraphNodePtr w = m_vertex[i];
+      CtrlGraphNodePtr w = m_vertex[i];
       if (m_dom[w] != m_vertex[m_semi[w]]) m_dom[w] = m_dom[m_dom[w]];
     }
     m_dom[m_graph->entry()] = 0;
   }
   
   struct DebugDumper {
-    DebugDumper(const ShDomTree& tree)
+    DebugDumper(const DomTree& tree)
       : tree(tree)
     {
     }
-    void operator()(ShCtrlGraphNodePtr node, int level) {
+    void operator()(CtrlGraphNodePtr node, int level) {
       //    node->print(std::cerr, 0);
-      shPrintIndent(std::cerr, level);
-      SH_DEBUG_PRINT("Node with numbering " << tree.numbering(node));
+      printIndent(std::cerr, level);
+      DEBUG_PRINT("Node with numbering " << tree.numbering(node));
     }
-    const ShDomTree& tree;
+    const DomTree& tree;
   };
 
-  void ShDomTree::debugDump()
+  void DomTree::debugDump()
   {
-#ifdef SH_DEBUG
-    SH_DEBUG_PRINT("Debug Dump");
+#ifdef DEBUG
+    DEBUG_PRINT("Debug Dump");
     DebugDumper d(*this);
     preorder(d);
-    SH_DEBUG_PRINT("Debug Dump End");
+    DEBUG_PRINT("Debug Dump End");
 #endif
   }
 
-  void ShDomTree::dfs(ShCtrlGraphNodePtr v)
+  void DomTree::dfs(CtrlGraphNodePtr v)
   {
     if (!v) return;
     m_n++;
@@ -98,16 +98,16 @@ namespace SH {
     m_ancestor[v] = 0;
     m_label[v] = v;
   
-    for (std::vector<ShCtrlGraphBranch>::const_iterator I = v->successors.begin();
+    for (std::vector<CtrlGraphBranch>::const_iterator I = v->successors.begin();
 	 I != v->successors.end(); ++I) {
-      ShCtrlGraphNodePtr w = I->node;
+      CtrlGraphNodePtr w = I->node;
       if (m_semi[w] == 0) {
 	m_parent[w] = v;
 	dfs(w);
       }
       m_pred[w].insert(v);
     }
-    ShCtrlGraphNodePtr w = v->follower;
+    CtrlGraphNodePtr w = v->follower;
     if (w) {
       if (m_semi[w] == 0) {
 	m_parent[w] = v;
@@ -117,7 +117,7 @@ namespace SH {
     }
   }
 
-  ShCtrlGraphNodePtr ShDomTree::eval(ShCtrlGraphNodePtr v)
+  CtrlGraphNodePtr DomTree::eval(CtrlGraphNodePtr v)
   {
     if (!m_ancestor[v]) {
       return v;
@@ -127,7 +127,7 @@ namespace SH {
     }
   }
 
-  void ShDomTree::compress(ShCtrlGraphNodePtr v)
+  void DomTree::compress(CtrlGraphNodePtr v)
   {
     // This procedure assumes ancestor[v] != 0
     if (m_ancestor[m_ancestor[v]]) {
@@ -139,7 +139,7 @@ namespace SH {
     }
   }
 
-  void ShDomTree::link(ShCtrlGraphNodePtr v, ShCtrlGraphNodePtr w)
+  void DomTree::link(CtrlGraphNodePtr v, CtrlGraphNodePtr w)
   {
     m_ancestor[w] = v;
     m_children[v].insert(w);

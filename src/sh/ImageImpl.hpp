@@ -20,21 +20,21 @@
 #ifndef SHIMAGEIMPL_HPP
 #define SHIMAGEIMPL_HPP
 
-#include "ShImage.hpp"
-#include "ShDebug.hpp"
+#include "Image.hpp"
+#include "Debug.hpp"
 
 namespace SH {
 
 template<typename T>
-ShTypedImage<T>::ShTypedImage(int width, int height, int elements)
+TypedImage<T>::TypedImage(int width, int height, int elements)
 {
   set_size(width, height, elements);
 }
 
 template<typename T>
-ShTypedImage<T>::ShTypedImage(const ShTypedImage<T>& other)
+TypedImage<T>::TypedImage(const TypedImage<T>& other)
   : m_width(other.m_width), m_height(other.m_height), m_elements(other.m_elements),
-    m_memory(other.m_memory ? new ShHostMemory(sizeof(T) * m_width * m_height * m_elements, ShStorageTypeInfo<T>::value_type) : 0)
+    m_memory(other.m_memory ? new HostMemory(sizeof(T) * m_width * m_height * m_elements, StorageTypeInfo<T>::value_type) : 0)
 {
   if (m_memory) {
     std::memcpy(m_memory->hostStorage()->data(),
@@ -44,12 +44,12 @@ ShTypedImage<T>::ShTypedImage(const ShTypedImage<T>& other)
 }
 
 template<typename T>
-ShTypedImage<T>& ShTypedImage<T>::operator=(const ShTypedImage<T>& other)
+TypedImage<T>& TypedImage<T>::operator=(const TypedImage<T>& other)
 {
   m_width = other.m_width;
   m_height = other.m_height;
   m_elements = other.m_elements;
-  m_memory = (other.m_memory ? new ShHostMemory(sizeof(T) * m_width * m_height * m_elements, ShStorageTypeInfo<T>::value_type) : 0);
+  m_memory = (other.m_memory ? new HostMemory(sizeof(T) * m_width * m_height * m_elements, StorageTypeInfo<T>::value_type) : 0);
   std::memcpy(m_memory->hostStorage()->data(),
               other.m_memory->hostStorage()->data(),
               m_width * m_height * m_elements * sizeof(T));
@@ -58,11 +58,11 @@ ShTypedImage<T>& ShTypedImage<T>::operator=(const ShTypedImage<T>& other)
 }
 
 template<typename T>
-ShTypedImage<T> ShTypedImage<T>::getNormalImage()
+TypedImage<T> TypedImage<T>::getNormalImage()
 {
   int w = width();
   int h = height();
-  ShTypedImage<T> output_image(w,h,3);
+  TypedImage<T> output_image(w,h,3);
   for (int j = 0; j < h; j++) {
     int jp1 = j + 1;
     if (jp1 >= h) jp1 = 0;
@@ -91,85 +91,85 @@ ShTypedImage<T> ShTypedImage<T>::getNormalImage()
 }
 
 template<typename T>
-const T* ShTypedImage<T>::data() const
+const T* TypedImage<T>::data() const
 {
   if (!m_memory) return 0;
   return reinterpret_cast<const T*>(m_memory->hostStorage()->data());
 }
 
 template<typename T>
-T* ShTypedImage<T>::data()
+T* TypedImage<T>::data()
 {
   if (!m_memory) return 0;
   return reinterpret_cast<T*>(m_memory->hostStorage()->data());
 }
 
 template<typename T>
-T ShTypedImage<T>::operator()(int x, int y, int i) const
+T TypedImage<T>::operator()(int x, int y, int i) const
 {
-  SH_DEBUG_ASSERT(m_memory);
+  DEBUG_ASSERT(m_memory);
   return data()[m_elements * (m_width * y + x) + i];
 }
 
 template<typename T>
-T& ShTypedImage<T>::operator()(int x, int y, int i)
+T& TypedImage<T>::operator()(int x, int y, int i)
 {
   return data()[m_elements * (m_width * y + x) + i];
 }
 
 template<typename T>
-ShTypedImage<T>::ShTypedImage()
+TypedImage<T>::TypedImage()
   : m_width(0), m_height(0), m_elements(0), m_memory(0)
 {
 }
 
 template<typename T>
-ShTypedImage<T>::~ShTypedImage()
+TypedImage<T>::~TypedImage()
 {
 }
 
 template<typename T>
-int ShTypedImage<T>::width() const
+int TypedImage<T>::width() const
 {
   return m_width;
 }
 
 template<typename T>
-int ShTypedImage<T>::height() const
+int TypedImage<T>::height() const
 {
   return m_height;
 }
 
 template<typename T>
-void ShTypedImage<T>::set_size(int width, int height, int elements)
+void TypedImage<T>::set_size(int width, int height, int elements)
 {
   m_width = width;
   m_height = height;
   m_elements = elements;
-  m_memory = new ShHostMemory(sizeof(T) * m_width * m_height * m_elements, ShStorageTypeInfo<T>::value_type);
+  m_memory = new HostMemory(sizeof(T) * m_width * m_height * m_elements, StorageTypeInfo<T>::value_type);
 }
 
 template<typename T>
-int ShTypedImage<T>::elements() const
+int TypedImage<T>::elements() const
 {
   return m_elements;
 }
 
 template<typename T>
-void ShTypedImage<T>::dirty() 
+void TypedImage<T>::dirty() 
 {
   if (!m_memory) return;
   m_memory->hostStorage()->dirty();
 }
 
 template<typename T>
-ShMemoryPtr ShTypedImage<T>::memory()
+MemoryPtr TypedImage<T>::memory()
 {
   return m_memory;
 }
 
 template<typename T>
-ShPointer<const ShMemory> ShTypedImage<T>::memory() const
+Pointer<const Memory> TypedImage<T>::memory() const
 {
   return m_memory;
 }

@@ -20,92 +20,92 @@
 #ifndef SHTEXTURE_HPP
 #define SHTEXTURE_HPP
 
-#include "ShBaseTexture.hpp"
+#include "BaseTexture.hpp"
 
 namespace SH {
 
 /** Trait class to represent texture filtering modes.
  */
 struct 
-ShFilteredTextureTraits : public ShTextureTraits {
-  ShFilteredTextureTraits()
-    : ShTextureTraits(1, SH_FILTER_MIPMAP_LINEAR, SH_WRAP_CLAMP_TO_EDGE)
+FilteredTextureTraits : public TextureTraits {
+  FilteredTextureTraits()
+    : TextureTraits(1, FILTER_MIPMAP_LINEAR, WRAP_CLAMP_TO_EDGE)
   {}
 };
 
-template<typename T> class ShTextureRect;
+template<typename T> class TextureRect;
 
 /** One-dimensional power-of-two texture type.
  */
 template<typename T>
-class ShTexture1D
-  : public ShBaseTexture1D<T> {
+class Texture1D
+  : public BaseTexture1D<T> {
 public:
-  ShTexture1D()
-    : ShBaseTexture1D<T>(ShFilteredTextureTraits())
+  Texture1D()
+    : BaseTexture1D<T>(FilteredTextureTraits())
   {}
-  ShTexture1D(int width)
-    : ShBaseTexture1D<T>(width, ShFilteredTextureTraits())
+  Texture1D(int width)
+    : BaseTexture1D<T>(width, FilteredTextureTraits())
   {}
-  typedef ShTextureRect<T> rectangular_type;
-  typedef ShBaseTexture1D<T> base_type;
+  typedef TextureRect<T> rectangular_type;
+  typedef BaseTexture1D<T> base_type;
   typedef T return_type;
 };
 
 /** Two-dimensional square power-of-two texture type.
  */
 template<typename T>
-class ShTexture2D
-  : public ShBaseTexture2D<T> {
+class Texture2D
+  : public BaseTexture2D<T> {
 public:
-  ShTexture2D()
-    : ShBaseTexture2D<T>(ShFilteredTextureTraits())
+  Texture2D()
+    : BaseTexture2D<T>(FilteredTextureTraits())
   {}
-  ShTexture2D(int width, int height)
-    : ShBaseTexture2D<T>(width, height, ShFilteredTextureTraits())
+  Texture2D(int width, int height)
+    : BaseTexture2D<T>(width, height, FilteredTextureTraits())
   {}
-  //    ShTexture2D(int width, int height, ShTextureTraits& traits)
-  //     : ShBaseTexture2D<T>(width, height, traits)
+  //    Texture2D(int width, int height, TextureTraits& traits)
+  //     : BaseTexture2D<T>(width, height, traits)
   //   {}
-  typedef ShTextureRect<T> rectangular_type;
-  typedef ShBaseTexture2D<T> base_type;
+  typedef TextureRect<T> rectangular_type;
+  typedef BaseTexture2D<T> base_type;
   typedef T return_type;
 };
 
 /** Two-dimensional rectangular texture type.
  */
 template<typename T>
-class ShTextureRect
-  : public ShBaseTextureRect<T> {
+class TextureRect
+  : public BaseTextureRect<T> {
 public:
-  ShTextureRect()
-    : ShBaseTextureRect<T>(ShFilteredTextureTraits())
+  TextureRect()
+    : BaseTextureRect<T>(FilteredTextureTraits())
   {}
-  ShTextureRect(int width, int height)
-    : ShBaseTextureRect<T>(width, height, ShFilteredTextureTraits())
+  TextureRect(int width, int height)
+    : BaseTextureRect<T>(width, height, FilteredTextureTraits())
   {}
-  //    ShTextureRect(int width, int height, ShTextureTraits& traits)
-  //     : ShBaseTextureRect<T>(width, height, traits)
+  //    TextureRect(int width, int height, TextureTraits& traits)
+  //     : BaseTextureRect<T>(width, height, traits)
   //   {}
-  typedef ShTextureRect<T> rectangular_type;
-  typedef ShBaseTextureRect<T> base_type;
+  typedef TextureRect<T> rectangular_type;
+  typedef BaseTextureRect<T> base_type;
   typedef T return_type;
 };
 
 /** Three-dimensional texture type.
  */
 template<typename T>
-class ShTexture3D
-  : public ShBaseTexture3D<T> {
+class Texture3D
+  : public BaseTexture3D<T> {
 public:
-  ShTexture3D()
-    : ShBaseTexture3D<T>(ShFilteredTextureTraits())
+  Texture3D()
+    : BaseTexture3D<T>(FilteredTextureTraits())
   {}
-  ShTexture3D(int width, int height, int depth)
-    : ShBaseTexture3D<T>(width, height, depth, ShFilteredTextureTraits())
+  Texture3D(int width, int height, int depth)
+    : BaseTexture3D<T>(width, height, depth, FilteredTextureTraits())
   {}
-  typedef ShTextureRect<T> rectangular_type;
-  typedef ShBaseTexture3D<T> base_type;
+  typedef TextureRect<T> rectangular_type;
+  typedef BaseTexture3D<T> base_type;
   typedef T return_type;
 };
 
@@ -115,17 +115,17 @@ public:
  * indexed will depend only on the direction of the vector.
  */
 template<typename T>
-class ShTextureCube
-  : public ShBaseTextureCube<T> {
+class TextureCube
+  : public BaseTextureCube<T> {
 public:
-  ShTextureCube()
-    : ShBaseTextureCube<T>(ShFilteredTextureTraits())
+  TextureCube()
+    : BaseTextureCube<T>(FilteredTextureTraits())
   {}
-  ShTextureCube(int width, int height)
-    : ShBaseTextureCube<T>(width, height, ShFilteredTextureTraits())
+  TextureCube(int width, int height)
+    : BaseTextureCube<T>(width, height, FilteredTextureTraits())
   {}
-  typedef ShTextureRect<T> rectangular_type;
-  typedef ShBaseTextureCube<T> base_type;
+  typedef TextureRect<T> rectangular_type;
+  typedef BaseTextureCube<T> base_type;
   typedef T return_type;
 };
 

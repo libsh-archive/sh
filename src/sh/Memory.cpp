@@ -17,19 +17,19 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#include "ShMemory.hpp"
-#include "ShDebug.hpp"
-#include "ShVariant.hpp"
+#include "Memory.hpp"
+#include "Debug.hpp"
+#include "Variant.hpp"
 #include <cstring>
 #include <algorithm>
 
 namespace SH {
 
 //////////////////////
-// --- ShMemory --- //
+// --- Memory --- //
 //////////////////////
 
-ShMemory::~ShMemory()
+Memory::~Memory()
 {
   for (StorageList::iterator I = m_storages.begin(); I != m_storages.end(); ++I) {
     (*I)->orphan(); // We don't need these storages to tell us that they are
@@ -37,7 +37,7 @@ ShMemory::~ShMemory()
   }
 }
 
-int ShMemory::timestamp() const
+int Memory::timestamp() const
 {
   if (m_frozen)
     return m_frozenTimestamp;
@@ -45,7 +45,7 @@ int ShMemory::timestamp() const
     return m_timestamp;
 }
 
-ShPointer<ShStorage> ShMemory::findStorage(const std::string& id)
+Pointer<Storage> Memory::findStorage(const std::string& id)
 {
   for (StorageList::iterator I = m_storages.begin(); I != m_storages.end(); ++I) {
     if ((*I)->id() == id) {
@@ -55,7 +55,7 @@ ShPointer<ShStorage> ShMemory::findStorage(const std::string& id)
   return 0;
 }
 
-ShPointer<const ShStorage> ShMemory::findStorage(const std::string& id) const
+Pointer<const Storage> Memory::findStorage(const std::string& id) const
 {
   for (StorageList::const_iterator I = m_storages.begin(); I != m_storages.end(); ++I) {
     if ((*I)->id() == id) {
@@ -65,22 +65,22 @@ ShPointer<const ShStorage> ShMemory::findStorage(const std::string& id) const
   return 0;
 }
 
-ShMemory::ShMemory()
+Memory::Memory()
   : m_timestamp(0), m_frozen(false), m_frozenTimestamp(0)
 {
 }
 
-int ShMemory::increment_timestamp()
+int Memory::increment_timestamp()
 {
   return ++m_timestamp;
 }
 
-void ShMemory::addStorage(const ShPointer<ShStorage>& storage)
+void Memory::addStorage(const Pointer<Storage>& storage)
 {
   m_storages.push_back(storage);
 }
 
-void ShMemory::removeStorage(const ShPointer<ShStorage>& storage)
+void Memory::removeStorage(const Pointer<Storage>& storage)
 {
   StorageList::iterator I = std::find(m_storages.begin(), m_storages.end(), storage);
   if (I == m_storages.end()) {
@@ -92,87 +92,87 @@ void ShMemory::removeStorage(const ShPointer<ShStorage>& storage)
   // TODO: fix this, refcount lossage.
 }
 
-void ShMemory::add_dep(ShMemoryDep* dep)
+void Memory::add_dep(MemoryDep* dep)
 {
   dependencies.push_back(dep);
 }
 
-void ShMemory::flush()
+void Memory::flush()
 {
-  ShHostStoragePtr storage = shref_dynamic_cast<ShHostStorage>(findStorage("host"));
+  HostStoragePtr storage = shref_dynamic_cast<HostStorage>(findStorage("host"));
   storage->dirtyall();
-  for(std::list<ShMemoryDep*>::iterator i = dependencies.begin(); i != dependencies.end(); i++)
+  for(std::list<MemoryDep*>::iterator i = dependencies.begin(); i != dependencies.end(); i++)
     (*i)->memory_update();
 }
 
-void ShMemory::freeze(bool state)
+void Memory::freeze(bool state)
 {
   m_frozen = state;
   m_frozenTimestamp = m_timestamp;
 }
 
 ////////////////////////
-// --- ShTransfer --- //
+// --- Transfer --- //
 ////////////////////////
-ShTransfer::ShTransfer(const std::string& from, const std::string& to)
+Transfer::Transfer(const std::string& from, const std::string& to)
 {
-  ShStorage::addTransfer(from, to, this);
+  Storage::addTransfer(from, to, this);
 }
 
 
 ///////////////////////
-// --- ShStorage --- //
+// --- Storage --- //
 ///////////////////////
-ShStorage::ShStorage()
+Storage::Storage()
   : m_timestamp(-1)
 {
 }
 
-ShStorage::~ShStorage()
+Storage::~Storage()
 {
   if (m_memory) {
     m_memory->removeStorage(this);
   }
 }
 
-int ShStorage::timestamp() const
+int Storage::timestamp() const
 {
   return m_timestamp;
 }
 
-void ShStorage::setTimestamp(int timestamp)
+void Storage::setTimestamp(int timestamp)
 {
-  SH_DEBUG_ASSERT(timestamp >= m_timestamp); // TODO: Assert this assertion :)
+  DEBUG_ASSERT(timestamp >= m_timestamp); // TODO: Assert this assertion :)
   m_timestamp = timestamp;
 }
 
-const ShMemory* ShStorage::memory() const
+const Memory* Storage::memory() const
 {
   return m_memory;
 }
 
-ShMemory* ShStorage::memory()
+Memory* Storage::memory()
 {
   return m_memory;
 }
 
-void ShStorage::orphan()
+void Storage::orphan()
 {
   m_memory = 0;
 }
 
-void ShStorage::sync() const
+void Storage::sync() const
 {
-  SH_DEBUG_ASSERT(m_memory);
+  DEBUG_ASSERT(m_memory);
   
   if (m_memory->timestamp() == timestamp()) return; // We are already in sync
 
   // Out of sync. Find the cheapest other storage to sync from
-  const ShStorage* source = 0;
+  const Storage* source = 0;
   int transfer_cost = -1;
-  ShMemory::StorageList::const_iterator I;
+  Memory::StorageList::const_iterator I;
   for (I = m_memory->m_storages.begin(); I != m_memory->m_storages.end(); ++I) {
-    const ShStorage* other = I->object();
+    const Storage* other = I->object();
     if (other == this) continue;
     if (other->timestamp() < m_memory->timestamp()) continue;
     int local_cost = cost(other, this);
@@ -184,19 +184,19 @@ void ShStorage::sync() const
   }
   
   // For now:
-  SH_DEBUG_ASSERT(source);
+  DEBUG_ASSERT(source);
   // TODO: In the future, traverse the graph of transfers to find a
   // cheap, working one.
 
   // Do the actual transfer
   // Need to cast away the constness since we actually want to write TO this,
   // although all we're doing is "updating" it to the latest version.
-  if (!transfer(source, const_cast<ShStorage*>(this))) {
-    SH_DEBUG_WARN("Transfer from " << source << " to " << this << " failed!");
+  if (!transfer(source, const_cast<Storage*>(this))) {
+    DEBUG_WARN("Transfer from " << source << " to " << this << " failed!");
   }
 }
 
-void ShStorage::dirty()
+void Storage::dirty()
 {
   // TODO: Maybe in the future check that the sync worked
   sync();
@@ -204,12 +204,12 @@ void ShStorage::dirty()
   dirtyall();
 }
 
-void ShStorage::dirtyall()
+void Storage::dirtyall()
 {
   m_timestamp = m_memory->increment_timestamp();
 }
 
-int ShStorage::cost(const ShStorage* from, const ShStorage* to)
+int Storage::cost(const Storage* from, const Storage* to)
 {
   if (!from) return -1;
   if (!to) return -1;
@@ -221,7 +221,7 @@ int ShStorage::cost(const ShStorage* from, const ShStorage* to)
   return I->second->cost(from, to);
 }
 
-bool ShStorage::transfer(const ShStorage* from, ShStorage* to)
+bool Storage::transfer(const Storage* from, Storage* to)
 {
   if (!from) return false;
   if (!to) return false;
@@ -241,36 +241,36 @@ bool ShStorage::transfer(const ShStorage* from, ShStorage* to)
   }
 }
 
-void ShStorage::addTransfer(const std::string& from,
+void Storage::addTransfer(const std::string& from,
                             const std::string& to,
-                            ShTransfer* transfer)
+                            Transfer* transfer)
 {
   if (!m_transfers) m_transfers = new TransferMap();
   (*m_transfers)[std::make_pair(from, to)] = transfer;
 }
 
-ShStorage::ShStorage(ShMemory* memory, ShValueType value_type)
+Storage::Storage(Memory* memory, ValueType value_type)
   : m_value_type(value_type), 
-    m_value_size(shTypeInfo(value_type, SH_MEM)->datasize()),
+    m_value_size(typeInfo(value_type, MEM)->datasize()),
     m_memory(memory), m_timestamp(-1)
 {
   m_memory->addStorage(this);
 }
 
-void ShStorage::value_type(ShValueType value_type)
+void Storage::value_type(ValueType value_type)
 { 
   m_value_type = value_type;
-  m_value_size = shTypeInfo(value_type, SH_MEM)->datasize();
+  m_value_size = typeInfo(value_type, MEM)->datasize();
 }
 
-ShStorage::TransferMap* ShStorage::m_transfers = 0;
+Storage::TransferMap* Storage::m_transfers = 0;
 
 ///////////////////////////
-// --- ShHostStorage --- //
+// --- HostStorage --- //
 ///////////////////////////
 
-ShHostStorage::ShHostStorage(ShMemory* memory, std::size_t length, ShValueType value_type, std::size_t align)
-  : ShStorage(memory, value_type),
+HostStorage::HostStorage(Memory* memory, std::size_t length, ValueType value_type, std::size_t align)
+  : Storage(memory, value_type),
     m_length(length),
     m_data_unaligned(new char[length + align - 1]),
     m_managed(true)
@@ -278,8 +278,8 @@ ShHostStorage::ShHostStorage(ShMemory* memory, std::size_t length, ShValueType v
   m_data = reinterpret_cast<void *>(((reinterpret_cast<ptrdiff_t>(m_data_unaligned) + align - 1) / align) * align);
 }
 
-ShHostStorage::ShHostStorage(ShMemory* memory, std::size_t length, void* data, ShValueType value_type)
-  : ShStorage(memory, value_type),
+HostStorage::HostStorage(Memory* memory, std::size_t length, void* data, ValueType value_type)
+  : Storage(memory, value_type),
     m_length(length),
     m_data(data),
     m_data_unaligned(data),
@@ -287,78 +287,78 @@ ShHostStorage::ShHostStorage(ShMemory* memory, std::size_t length, void* data, S
 {
 }
 
-ShHostStorage::~ShHostStorage()
+HostStorage::~HostStorage()
 {
   if (m_managed) {
     delete [] reinterpret_cast<char*>(m_data_unaligned);
   }
 }
 
-std::string ShHostStorage::id() const
+std::string HostStorage::id() const
 {
   return "host";
 }
 
 
-std::size_t ShHostStorage::length() const
+std::size_t HostStorage::length() const
 {
   return m_length;
 }
 
-const void* ShHostStorage::data() const
+const void* HostStorage::data() const
 {
   return m_data;
 }
 
-void* ShHostStorage::data()
+void* HostStorage::data()
 {
   return m_data;
 }
 
 //////////////////////////
-// --- ShHostMemory --- //
+// --- HostMemory --- //
 //////////////////////////
 
-ShHostMemory::ShHostMemory(std::size_t length, ShValueType value_type, std::size_t align)
+HostMemory::HostMemory(std::size_t length, ValueType value_type, std::size_t align)
   : m_hostStorage(0)
 {
   // avoids base-from-member initialization problem
-  m_hostStorage = new ShHostStorage(this, length, value_type, align);
+  m_hostStorage = new HostStorage(this, length, value_type, align);
 
   // Make the host storage represent the newest version of the memory
   m_hostStorage->dirtyall();
 }
 
-ShHostMemory::ShHostMemory(std::size_t length, void* data, ShValueType value_type)
+HostMemory::HostMemory(std::size_t length, void* data, ValueType value_type)
   : m_hostStorage(0)
 {
   // avoids base-from-member initialization problem
-  m_hostStorage = new ShHostStorage(this, length, data, value_type);
+  m_hostStorage = new HostStorage(this, length, data, value_type);
 
   // Make the host storage represent the newest version of the memory
   m_hostStorage->dirtyall();
 }
 
-ShHostMemory::~ShHostMemory()
+HostMemory::~HostMemory()
 {
 }
 
-ShHostStoragePtr ShHostMemory::hostStorage()
-{
-  return m_hostStorage;
-}
-
-ShPointer<const ShHostStorage> ShHostMemory::hostStorage() const
+HostStoragePtr HostMemory::hostStorage()
 {
   return m_hostStorage;
 }
 
-class ShHostHostTransfer : public ShTransfer {
+Pointer<const HostStorage> HostMemory::hostStorage() const
+{
+  return m_hostStorage;
+}
+
+class HostHostTransfer : public Transfer {
 public:
-  bool transfer(const ShStorage* from, ShStorage* to)
+  bool transfer(const Storage* from, Storage* to)
   {
-    const ShHostStorage* host_from = dynamic_cast<const ShHostStorage*>(from);
-    ShHostStorage* host_to = dynamic_cast<ShHostStorage*>(to);
+    const HostStorage* host_from = dynamic_cast<const HostStorage*>(from);
+    HostStorage* host_to = dynamic_cast<HostStorage*>(to);
 
     // Check that casts succeeded
     if (!host_from) return false;
@@ -374,9 +374,9 @@ public:
     } else {
       // Do the type conversion
       const std::size_t nb_values = host_from->length() / host_from->value_size();
-      ShVariantPtr from_variant = shVariantFactory(host_from->value_type(), SH_MEM)->
+      VariantPtr from_variant = variantFactory(host_from->value_type(), MEM)->
 	generate(nb_values, const_cast<void*>(host_from->data()), false);
-      ShVariantPtr to_variant = shVariantFactory(host_to->value_type(), SH_MEM)->
+      VariantPtr to_variant = variantFactory(host_to->value_type(), MEM)->
 	generate(nb_values, host_to->data(), false);
       to_variant->set(from_variant);
     }
@@ -384,20 +384,20 @@ public:
     return true;
   }
 
-  int cost(const ShStorage* from, const ShStorage* to)
+  int cost(const Storage* from, const Storage* to)
   {
     return 10; // Maybe this should be 0, but you never know...
   }
 
 private:
-  ShHostHostTransfer()
-    : ShTransfer("host", "host")
+  HostHostTransfer()
+    : Transfer("host", "host")
   {
   }
   
-  static ShHostHostTransfer* instance;
+  static HostHostTransfer* instance;
 };
 
-ShHostHostTransfer* ShHostHostTransfer::instance = new ShHostHostTransfer();
+HostHostTransfer* HostHostTransfer::instance = new HostHostTransfer();
 
 }

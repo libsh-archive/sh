@@ -17,23 +17,23 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SH_SWIZZLEIMPL_HPP
-#define SH_SWIZZLEIMPL_HPP
+#ifndef SHSWIZZLEIMPL_HPP
+#define SHSWIZZLEIMPL_HPP
 #include <iostream>
-#include "ShSwizzle.hpp"
-#include "ShError.hpp"
-#include "ShDebug.hpp"
+#include "Swizzle.hpp"
+#include "Error.hpp"
+#include "Debug.hpp"
 
 namespace SH {
 
-inline ShSwizzle::ShSwizzle()
+inline Swizzle::Swizzle()
   : m_srcSize(0),
     m_size(0)
 {
   alloc();
 }
 
-inline ShSwizzle::ShSwizzle(int srcSize)
+inline Swizzle::Swizzle(int srcSize)
   : m_srcSize(srcSize),
     m_size(srcSize)
 {
@@ -42,7 +42,7 @@ inline ShSwizzle::ShSwizzle(int srcSize)
   } 
 }
 
-inline ShSwizzle::ShSwizzle(int srcSize, int i0)
+inline Swizzle::Swizzle(int srcSize, int i0)
   : m_srcSize(srcSize),
     m_size(1)
 {
@@ -54,7 +54,7 @@ inline ShSwizzle::ShSwizzle(int srcSize, int i0)
   }
 }
 
-inline ShSwizzle::ShSwizzle(int srcSize, int i0, int i1)
+inline Swizzle::Swizzle(int srcSize, int i0, int i1)
   : m_srcSize(srcSize),
     m_size(2)
 {
@@ -69,7 +69,7 @@ inline ShSwizzle::ShSwizzle(int srcSize, int i0, int i1)
   }
 }
 
-inline ShSwizzle::ShSwizzle(int srcSize, int i0, int i1, int i2)
+inline Swizzle::Swizzle(int srcSize, int i0, int i1, int i2)
   : m_srcSize(srcSize),
     m_size(3)
 {
@@ -87,7 +87,7 @@ inline ShSwizzle::ShSwizzle(int srcSize, int i0, int i1, int i2)
   }
 }
 
-inline ShSwizzle::ShSwizzle(int srcSize, int i0, int i1, int i2, int i3)
+inline Swizzle::Swizzle(int srcSize, int i0, int i1, int i2, int i3)
   : m_srcSize(srcSize),
     m_size(4)
 {
@@ -108,7 +108,7 @@ inline ShSwizzle::ShSwizzle(int srcSize, int i0, int i1, int i2, int i3)
   }
 }
 
-inline ShSwizzle::ShSwizzle(int srcSize, int size, int* indices)
+inline Swizzle::Swizzle(int srcSize, int size, int* indices)
   : m_srcSize(srcSize),
     m_size(size)
 {
@@ -122,19 +122,19 @@ inline ShSwizzle::ShSwizzle(int srcSize, int size, int* indices)
 }
 
 
-inline ShSwizzle::ShSwizzle(const ShSwizzle& other)
+inline Swizzle::Swizzle(const Swizzle& other)
   : m_srcSize(other.m_srcSize),
     m_size(other.m_size)
 {
   copy(other, !alloc());
 }
 
-inline ShSwizzle::~ShSwizzle()
+inline Swizzle::~Swizzle()
 {
   dealloc();
 }
 
-inline ShSwizzle& ShSwizzle::operator=(const ShSwizzle& other)
+inline Swizzle& Swizzle::operator=(const Swizzle& other)
 {
   if(this == &other) return *this;
 
@@ -148,15 +148,15 @@ inline ShSwizzle& ShSwizzle::operator=(const ShSwizzle& other)
   return *this;
 }
 
-inline ShSwizzle& ShSwizzle::operator*=(const ShSwizzle& other)  
+inline Swizzle& Swizzle::operator*=(const Swizzle& other)  
 {
   (*this) = (*this) * other;
   return (*this);
 }
 
-inline ShSwizzle ShSwizzle::operator*(const ShSwizzle& other) const
+inline Swizzle Swizzle::operator*(const Swizzle& other) const
 {
-  ShSwizzle result;
+  Swizzle result;
   result.m_size = other.m_size;
   result.m_srcSize = m_srcSize;
   bool resultLocal = true; 
@@ -168,7 +168,7 @@ inline ShSwizzle ShSwizzle::operator*(const ShSwizzle& other) const
   const bool isLocal = local();
   for (int i = 0; i < other.m_size; i++) {
     int oi = other[i];
-    if (oi >= m_size) shError( ShSwizzleException(*this, oi, size()) );
+    if (oi >= m_size) error( SwizzleException(*this, oi, size()) );
     int index = isLocal ? m_index.local[oi] : m_index.ptr[oi];
     if(resultLocal) result.m_index.local[i] = index;
     else result.m_index.ptr[i] = index;
@@ -176,14 +176,14 @@ inline ShSwizzle ShSwizzle::operator*(const ShSwizzle& other) const
   return result;
 }
 
-inline int ShSwizzle::operator[](int index) const
+inline int Swizzle::operator[](int index) const
 {
-  if (index >= m_size || index < 0) shError( ShSwizzleException(*this, index, m_size) );
+  if (index >= m_size || index < 0) error( SwizzleException(*this, index, m_size) );
   if(local()) return m_index.local[index];
   return m_index.ptr[index];
 }
 
-inline void ShSwizzle::copy(const ShSwizzle &other, bool islocal) 
+inline void Swizzle::copy(const Swizzle &other, bool islocal) 
 {
   if(islocal) {
     m_index.intval = other.m_index.intval;
@@ -192,14 +192,14 @@ inline void ShSwizzle::copy(const ShSwizzle &other, bool islocal)
   }
 }
 
-inline void ShSwizzle::checkSrcSize(int index) 
+inline void Swizzle::checkSrcSize(int index) 
 {
   if (index < 0 || index >= m_srcSize) {
-    shError( ShSwizzleException(*this, index, m_srcSize) );
+    error( SwizzleException(*this, index, m_srcSize) );
   }
 }
 
-inline bool ShSwizzle::alloc()
+inline bool Swizzle::alloc()
 {
   if(local()) {
     m_index.intval = idswiz(); 
@@ -209,17 +209,17 @@ inline bool ShSwizzle::alloc()
   return true;
 }
 
-inline void ShSwizzle::dealloc()
+inline void Swizzle::dealloc()
 {
   if(!local()) delete [] m_index.ptr;
 }
 
-inline bool ShSwizzle::local() const
+inline bool Swizzle::local() const
 {
   return (m_srcSize < 256 && m_size <= 4); 
 }
 
-inline int ShSwizzle::idswiz() const
+inline int Swizzle::idswiz() const
 {
 // @todo type detect endianess correctly
 // power pc's are not the only big endian machines...
@@ -230,7 +230,7 @@ inline int ShSwizzle::idswiz() const
 #endif
 }
 
-inline bool ShSwizzle::identity() const
+inline bool Swizzle::identity() const
 {
   if (m_size != m_srcSize) return false;
   if (local()) {
@@ -243,7 +243,7 @@ inline bool ShSwizzle::identity() const
   return true; 
 }
 
-inline bool ShSwizzle::operator==(const ShSwizzle& other) const
+inline bool Swizzle::operator==(const Swizzle& other) const
 {
   if (m_srcSize != other.m_srcSize) return false;
   if (m_size != other.m_size) return false;
@@ -251,7 +251,7 @@ inline bool ShSwizzle::operator==(const ShSwizzle& other) const
   return memcmp(m_index.ptr, other.m_index.ptr, sizeof(int)*m_size) == 0;
 }
 
-inline bool ShSwizzle::operator<(const ShSwizzle& other) const
+inline bool Swizzle::operator<(const Swizzle& other) const
 {
   if (m_srcSize < other.m_srcSize) return true;
   if (m_srcSize > other.m_srcSize) return false;

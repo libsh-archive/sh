@@ -20,130 +20,130 @@
 #ifndef SHOPERATION_HPP
 #define SHOPERATION_HPP
 
-#include "ShDllExport.hpp"
+#include "DllExport.hpp"
 
 namespace SH {
 
 /** Kinds of operations.
  * If you change this, be sure to change the opInfo array in
- * ShOperation.cpp
+ * Operation.cpp
  * @see opInfo
  */
-enum ShOperation {
-  SH_OP_ASN, ///< Assignment
+enum Operation {
+  OP_ASN, ///< Assignment
 
   // Simple arithmetic
-  SH_OP_NEG, ///< Unary negation
-  SH_OP_ADD, ///< Binary addition
-  SH_OP_MUL, ///< Binary multiplication. Can be scalar on left or
+  OP_NEG, ///< Unary negation
+  OP_ADD, ///< Binary addition
+  OP_MUL, ///< Binary multiplication. Can be scalar on left or
              ///  right side.
-  SH_OP_DIV, ///< Binary division. Can be scalar on right side.
+  OP_DIV, ///< Binary division. Can be scalar on right side.
 
   // Comparisons
   // All of the following set dst to either 1 or 0.
-  SH_OP_SLT, ///< Set less than
-  SH_OP_SLE, ///< Set less than or equal
-  SH_OP_SGT, ///< Set greater than
-  SH_OP_SGE, ///< Set greater than or equal
-  SH_OP_SEQ, ///< Set equal
-  SH_OP_SNE, ///< Set not equal
+  OP_SLT, ///< Set less than
+  OP_SLE, ///< Set less than or equal
+  OP_SGT, ///< Set greater than
+  OP_SGE, ///< Set greater than or equal
+  OP_SEQ, ///< Set equal
+  OP_SNE, ///< Set not equal
 
   // The bulk
-  SH_OP_ABS, ///< Unary absolute value
-  SH_OP_ACOS, ///< Unary arccosine (result between -pi/2 and pi/2)
-  SH_OP_ACOSH, ///< Unary hyperbolic arccosine (result between -pi/2 and pi/2)
-  SH_OP_ASIN, ///< Unary arcsine (result between 0 and pi)
-  SH_OP_ASINH, ///< Unary hyperbolic arcsine (result between 0 and pi)
-  SH_OP_ATAN, ///< Unary arctan (result between -pi/2 and pi/2)
-  SH_OP_ATAN2, ///< Binary arctan of src[1]/src[0] (result between -pi and pi)
-  SH_OP_ATANH, ///< Unary hyperbolic arctan (result between -pi/2 and pi/2)
+  OP_ABS, ///< Unary absolute value
+  OP_ACOS, ///< Unary arccosine (result between -pi/2 and pi/2)
+  OP_ACOSH, ///< Unary hyperbolic arccosine (result between -pi/2 and pi/2)
+  OP_ASIN, ///< Unary arcsine (result between 0 and pi)
+  OP_ASINH, ///< Unary hyperbolic arcsine (result between 0 and pi)
+  OP_ATAN, ///< Unary arctan (result between -pi/2 and pi/2)
+  OP_ATAN2, ///< Binary arctan of src[1]/src[0] (result between -pi and pi)
+  OP_ATANH, ///< Unary hyperbolic arctan (result between -pi/2 and pi/2)
 
-  SH_OP_CBRT, ///< Unary componentwise cube root
-  SH_OP_CEIL, ///< Unary smallest integer not less than src[0]
-  SH_OP_COS, ///< Unary cosine function
-  SH_OP_COSH, ///< Unary hyperbolic cosine function
-  SH_OP_CMUL, ///< Unary product of components
-  SH_OP_CSUM, ///< Unary sum of components
-  SH_OP_DOT, ///< Binary dot product
-  SH_OP_DX, ///< Unary derivative in x
-  SH_OP_DY, ///< Unary derivative in y
+  OP_CBRT, ///< Unary componentwise cube root
+  OP_CEIL, ///< Unary smallest integer not less than src[0]
+  OP_COS, ///< Unary cosine function
+  OP_COSH, ///< Unary hyperbolic cosine function
+  OP_CMUL, ///< Unary product of components
+  OP_CSUM, ///< Unary sum of components
+  OP_DOT, ///< Binary dot product
+  OP_DX, ///< Unary derivative in x
+  OP_DY, ///< Unary derivative in y
 
-  SH_OP_EXP, ///< Unary natural exponent
-  SH_OP_EXP2, ///< Unary base-2 exponent
-  SH_OP_EXP10, ///< Unary base-10 exponent
-  SH_OP_FLR, ///< Unary smallest integer not greater than src[0]
-  SH_OP_FRAC, ///< Unary fractional part
+  OP_EXP, ///< Unary natural exponent
+  OP_EXP2, ///< Unary base-2 exponent
+  OP_EXP10, ///< Unary base-10 exponent
+  OP_FLR, ///< Unary smallest integer not greater than src[0]
+  OP_FRAC, ///< Unary fractional part
 
-  SH_OP_HASH, ///< Procedural hash function
+  OP_HASH, ///< Procedural hash function
 
-  SH_OP_LIT, ///< Compute lighting coefficients
-  SH_OP_LOG, ///< Unary natural log
-  SH_OP_LOG2, ///< Unary base-2 log
-  SH_OP_LOG10, ///< Unary base-10 log
-  SH_OP_LRP, ///< Trinary linear interpolation src[0] * src[1]  +  (1-src[0]) * src[2]
+  OP_LIT, ///< Compute lighting coefficients
+  OP_LOG, ///< Unary natural log
+  OP_LOG2, ///< Unary base-2 log
+  OP_LOG10, ///< Unary base-10 log
+  OP_LRP, ///< Trinary linear interpolation src[0] * src[1]  +  (1-src[0]) * src[2]
 
-  SH_OP_MAD, ///< Multiply and add src[0] * src[1] + src[2]
-  SH_OP_MAX, ///< Binary componentwise maximum
-  SH_OP_MIN, ///< Binary componentwise minimum
-  SH_OP_MOD, ///< Binary float modulus, result has same sign as src[0] 
+  OP_MAD, ///< Multiply and add src[0] * src[1] + src[2]
+  OP_MAX, ///< Binary componentwise maximum
+  OP_MIN, ///< Binary componentwise minimum
+  OP_MOD, ///< Binary float modulus, result has same sign as src[0] 
 
-  SH_OP_NOISE, ///< Noise function
+  OP_NOISE, ///< Noise function
 
-  SH_OP_POW, ///< Binary power
-  SH_OP_RCP, ///< Unary reciprocal
-  SH_OP_RND, ///< Unary round to neareset integer
-  SH_OP_RSQ, ///< Unary reciprocal square root
+  OP_POW, ///< Binary power
+  OP_RCP, ///< Unary reciprocal
+  OP_RND, ///< Unary round to neareset integer
+  OP_RSQ, ///< Unary reciprocal square root
 
-  SH_OP_SIN, ///< Unary sine function
-  SH_OP_SINH, ///< Unary hyperbolic sine function
-  SH_OP_SGN, ///< Unary componentwise sign
-  SH_OP_SQRT, ///< Unary square root
-  SH_OP_TAN, ///< Unary tangent
-  SH_OP_TANH, ///< Unary hyperbolic tangent
+  OP_SIN, ///< Unary sine function
+  OP_SINH, ///< Unary hyperbolic sine function
+  OP_SGN, ///< Unary componentwise sign
+  OP_SQRT, ///< Unary square root
+  OP_TAN, ///< Unary tangent
+  OP_TANH, ///< Unary hyperbolic tangent
 
   // "Vector" operations
-  SH_OP_NORM, ///< Normalize vector
-  SH_OP_XPD, ///< Cross product
+  OP_NORM, ///< Normalize vector
+  OP_XPD, ///< Cross product
 
   // Textures
-  SH_OP_TEX, ///< Texture lookup (0..1)
-  SH_OP_TEXI, ///< Texture lookup, indexed mode (0..width - 1)
-  SH_OP_TEXD, ///< Texture lookup with derivatives [0..1]
-  SH_OP_TEXLOD, ///< Texture lookup with LOD [0..1]
-  SH_OP_TEXBIAS, ///< Texture lookup with LOD Bias [0..1]
+  OP_TEX, ///< Texture lookup (0..1)
+  OP_TEXI, ///< Texture lookup, indexed mode (0..width - 1)
+  OP_TEXD, ///< Texture lookup with derivatives [0..1]
+  OP_TEXLOD, ///< Texture lookup with LOD [0..1]
+  OP_TEXBIAS, ///< Texture lookup with LOD Bias [0..1]
 
   // Conditionals
-  SH_OP_COND, ///< Conditional assignment: dst[i] = (src[0][i] > 0.0 ? src[1][i] : src[2][i])
+  OP_COND, ///< Conditional assignment: dst[i] = (src[0][i] > 0.0 ? src[1][i] : src[2][i])
 
   // Fragment kill
-  SH_OP_KIL, ///< Conditionally kill fragment (if for any i, src[0][i] > 0)
+  OP_KIL, ///< Conditionally kill fragment (if for any i, src[0][i] > 0)
 
   // Special
-  SH_OP_OPTBRA, ///< Used in the optimizer to indicate a conditional
+  OP_OPTBRA, ///< Used in the optimizer to indicate a conditional
                 ///  branch dependency. This should never show up in
                 ///  code passed to the backend.
-  SH_OP_DECL,   ///< Used during ShProgram definition to indicate temp declaration points.
+  OP_DECL,   ///< Used during Program definition to indicate temp declaration points.
                 ///  These are transferred during parsing into a map in each cfg
                 ///  node, and do not appear in actual cfg block statement lists.
 
-  SH_OP_STARTSEC, ///< Indicates the starting point of a hierarchical section
-  SH_OP_ENDSEC,  ///< Indicates the ending point of a hierarchical section
+  OP_STARTSEC, ///< Indicates the starting point of a hierarchical section
+  OP_ENDSEC,  ///< Indicates the ending point of a hierarchical section
 
   // Streams
-  SH_OP_FETCH, ///< Unary (takes a stream). Fetch an element from a stream. Similar to TEX
-  SH_OP_LOOKUP, ///< Binary (first argument is a stream). Fetch an
+  OP_FETCH, ///< Unary (takes a stream). Fetch an element from a stream. Similar to TEX
+  OP_LOOKUP, ///< Binary (first argument is a stream). Fetch an
                 /// element from a stream with a given index. Similar to TEX
 
   // Palettes
-  SH_OP_PAL, ///< Binary. First argument is a palette. Palette array lookup.
+  OP_PAL, ///< Binary. First argument is a palette. Palette array lookup.
 
-  SH_OP_COMMENT, ///< For internal use.  Stores a comment at this point in the IR.
-                 ///< Statements of this kind MUST have a ShInfoComment attached
+  OP_COMMENT, ///< For internal use.  Stores a comment at this point in the IR.
+                 ///< Statements of this kind MUST have a InfoComment attached
 
   // Control flow
-  SH_OP_RET,
+  OP_RET,
 
-  SH_OPERATION_END ///< End of List marker.  Not an actual op
+  OPERATION_END ///< End of List marker.  Not an actual op
 };
 
 #ifdef IGNORE
@@ -152,8 +152,8 @@ enum ShOperation {
 
 /** Information related to a specific operation */
 struct
-SH_DLLEXPORT
-ShOperationInfo {
+DLLEXPORT
+OperationInfo {
   const char* name; ///< The operation's name, e.g. "ASN"
   int arity; ///< The arity of the operation. 1, 2 or 3.
 
@@ -169,8 +169,8 @@ ShOperationInfo {
 };
 
 
-SH_DLLEXPORT
-extern const ShOperationInfo opInfo[];
+DLLEXPORT
+extern const OperationInfo opInfo[];
 
 } // namespace SH
 

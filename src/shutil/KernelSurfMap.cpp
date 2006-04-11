@@ -17,30 +17,30 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#include "sh/ShSyntax.hpp"
-#include "sh/ShNormal.hpp"
-#include "sh/ShLib.hpp"
-#include "ShKernelSurfMap.hpp"
-#include "ShFunc.hpp"
+#include "sh/Syntax.hpp"
+#include "sh/Normal.hpp"
+#include "sh/Lib.hpp"
+#include "KernelSurfMap.hpp"
+#include "Func.hpp"
 
 namespace ShUtil {
 
-ShProgram ShKernelSurfMap::bump() {
-  ShProgram kernel = SH_BEGIN_PROGRAM() {
-    ShInputAttrib2f SH_DECL(gradient);
-    ShInOutNormal3f SH_DECL(normalt);
+Program KernelSurfMap::bump() {
+  Program kernel = SH_BEGIN_PROGRAM() {
+    InputAttrib2f DECL(gradient);
+    InOutNormal3f DECL(normalt);
 
     normalt(1,2) += gradient;
   } SH_END;
   return kernel;
 }
 
-ShProgram ShKernelSurfMap::vcsBump() {
-  ShProgram kernel = SH_BEGIN_PROGRAM() {
-    ShInputAttrib2f SH_DECL(gradient);
-    ShInOutNormal3f SH_DECL(normal);
-    ShInputVector3f SH_DECL(tangent);
-    ShInputVector3f SH_DECL(tangent2);
+Program KernelSurfMap::vcsBump() {
+  Program kernel = SH_BEGIN_PROGRAM() {
+    InputAttrib2f DECL(gradient);
+    InOutNormal3f DECL(normal);
+    InputVector3f DECL(tangent);
+    InputVector3f DECL(tangent2);
 
     normal = mad(gradient(0), tangent, normal);
     normal = mad(gradient(1), tangent2, normal);

@@ -20,8 +20,8 @@
 #ifndef GLXPBUFFERCONTEXT_HPP
 #define GLXPBUFFERCONTEXT_HPP
 
-#include "ShStream.hpp"
-#include "ShProgram.hpp"
+#include "Stream.hpp"
+#include "Program.hpp"
 #include "PBufferContext.hpp"
 
 namespace shgl {
@@ -61,8 +61,8 @@ private:
   GLXContext m_context;
 };
 
-typedef SH::ShPointer<GLXPBufferContext> GLXPBufferContextPtr;
-typedef SH::ShPointer<const GLXPBufferContext> GLXPBufferContextCPtr;
+typedef SH::Pointer<GLXPBufferContext> GLXPBufferContextPtr;
+typedef SH::Pointer<const GLXPBufferContext> GLXPBufferContextCPtr;
 
 class GLXPBufferFactory : public PBufferFactory {
 public:

@@ -20,142 +20,142 @@
 #ifndef SHINSTRUCTIONS_HPP
 #define SHINSTRUCTIONS_HPP
 
-#include "ShDllExport.hpp"
-#include "ShVariable.hpp"
+#include "DllExport.hpp"
+#include "Variable.hpp"
 
 namespace SH {
 
 /** @defgroup instructions Intermediate-representation instructions
  * You probably don't ever need to call any of these.
  * They are mostly used internally.
- * Instead, use the library functions provided by ShLib.hpp.
+ * Instead, use the library functions provided by Lib.hpp.
  * @{
  */
 
-SH_DLLEXPORT
-void shASN(ShVariable& dest, const ShVariable& src);
-//void shNEG(ShVariable& dest, const ShVariable& src);
-SH_DLLEXPORT
-void shADD(ShVariable& dest, const ShVariable& a, const ShVariable& b);
-SH_DLLEXPORT
-void shMUL(ShVariable& dest, const ShVariable& a, const ShVariable& b);
-SH_DLLEXPORT
-void shDIV(ShVariable& dest, const ShVariable& a, const ShVariable& b);
+DLLEXPORT
+void shASN(Variable& dest, const Variable& src);
+//void shNEG(Variable& dest, const Variable& src);
+DLLEXPORT
+void shADD(Variable& dest, const Variable& a, const Variable& b);
+DLLEXPORT
+void shMUL(Variable& dest, const Variable& a, const Variable& b);
+DLLEXPORT
+void shDIV(Variable& dest, const Variable& a, const Variable& b);
 
-SH_DLLEXPORT
-void shSLT(ShVariable& dest, const ShVariable& a, const ShVariable& b);
-SH_DLLEXPORT
-void shSLE(ShVariable& dest, const ShVariable& a, const ShVariable& b);
-SH_DLLEXPORT
-void shSGT(ShVariable& dest, const ShVariable& a, const ShVariable& b);
-SH_DLLEXPORT
-void shSGE(ShVariable& dest, const ShVariable& a, const ShVariable& b);
-SH_DLLEXPORT
-void shSEQ(ShVariable& dest, const ShVariable& a, const ShVariable& b);
-SH_DLLEXPORT
-void shSNE(ShVariable& dest, const ShVariable& a, const ShVariable& b);
+DLLEXPORT
+void shSLT(Variable& dest, const Variable& a, const Variable& b);
+DLLEXPORT
+void shSLE(Variable& dest, const Variable& a, const Variable& b);
+DLLEXPORT
+void shSGT(Variable& dest, const Variable& a, const Variable& b);
+DLLEXPORT
+void shSGE(Variable& dest, const Variable& a, const Variable& b);
+DLLEXPORT
+void shSEQ(Variable& dest, const Variable& a, const Variable& b);
+DLLEXPORT
+void shSNE(Variable& dest, const Variable& a, const Variable& b);
 
-SH_DLLEXPORT
-void shABS(ShVariable& dest, const ShVariable& a);
-SH_DLLEXPORT
-void shACOS(ShVariable& dest, const ShVariable& a);
-SH_DLLEXPORT
-void shACOSH(ShVariable& dest, const ShVariable& a);
-SH_DLLEXPORT
-void shASIN(ShVariable& dest, const ShVariable& a);
-SH_DLLEXPORT
-void shASINH(ShVariable& dest, const ShVariable& a);
-SH_DLLEXPORT
-void shATAN(ShVariable& dest, const ShVariable& a);
-SH_DLLEXPORT
-void shATAN2(ShVariable& dest, const ShVariable& a, const ShVariable& b);
-SH_DLLEXPORT
-void shATANH(ShVariable& dest, const ShVariable& a);
-SH_DLLEXPORT
-void shCBRT(ShVariable& dest, const ShVariable& a);
-SH_DLLEXPORT
-void shCEIL(ShVariable& dest, const ShVariable& a);
-SH_DLLEXPORT
-void shCOS(ShVariable& dest, const ShVariable& a);
-SH_DLLEXPORT
-void shCOSH(ShVariable& dest, const ShVariable& a);
-SH_DLLEXPORT
-void shCMUL(ShVariable& dest, const ShVariable& a);
-SH_DLLEXPORT
-void shCSUM(ShVariable& dest, const ShVariable& a);
-SH_DLLEXPORT
-void shDOT(ShVariable& dest, const ShVariable& a, const ShVariable& b);
-SH_DLLEXPORT
-void shDX(ShVariable& dest, const ShVariable& a);
-SH_DLLEXPORT
-void shDY(ShVariable& dest, const ShVariable& a);
-SH_DLLEXPORT
-void shEXP(ShVariable& dest, const ShVariable& a);
-SH_DLLEXPORT
-void shEXP2(ShVariable& dest, const ShVariable& a);
-SH_DLLEXPORT
-void shEXP10(ShVariable& dest, const ShVariable& a);
-SH_DLLEXPORT
-void shFLR(ShVariable& dest, const ShVariable& a);
-SH_DLLEXPORT
-void shFRAC(ShVariable& dest, const ShVariable& a);
-SH_DLLEXPORT
-void shLIT(ShVariable& dest, const ShVariable& a);
-SH_DLLEXPORT
-void shLOG(ShVariable& dest, const ShVariable& a);
-SH_DLLEXPORT
-void shLOG2(ShVariable& dest, const ShVariable& a);
-SH_DLLEXPORT
-void shLOG10(ShVariable& dest, const ShVariable& a);
-SH_DLLEXPORT
-void shLRP(ShVariable& dest, const ShVariable& alpha,
-           const ShVariable& a, const ShVariable& b);
-SH_DLLEXPORT
-void shHASH(ShVariable& dest, const ShVariable& a);
-SH_DLLEXPORT
-void shMAD(ShVariable& dest, const ShVariable& a,
-           const ShVariable& b, const ShVariable& c);
-SH_DLLEXPORT
-void shMAX(ShVariable& dest, const ShVariable& a, const ShVariable& b);
-SH_DLLEXPORT
-void shMIN(ShVariable& dest, const ShVariable& a, const ShVariable& b);
-SH_DLLEXPORT
-void shMOD(ShVariable& dest, const ShVariable& a, const ShVariable& b);
-SH_DLLEXPORT
-void shNOISE(ShVariable& dest, const ShVariable& a);
-SH_DLLEXPORT
-void shPOW(ShVariable& dest, const ShVariable& a, const ShVariable& b);
-SH_DLLEXPORT
-void shRCP(ShVariable& dest, const ShVariable& a);
-SH_DLLEXPORT
-void shRND(ShVariable& dest, const ShVariable& a);
-SH_DLLEXPORT
-void shRSQ(ShVariable& dest, const ShVariable& a);
-SH_DLLEXPORT
-void shSGN(ShVariable& dest, const ShVariable& a);
-SH_DLLEXPORT
-void shSIN(ShVariable& dest, const ShVariable& a);
-SH_DLLEXPORT
-void shSINH(ShVariable& dest, const ShVariable& a);
-SH_DLLEXPORT
-void shSQRT(ShVariable& dest, const ShVariable& a);
-SH_DLLEXPORT
-void shTAN(ShVariable& dest, const ShVariable& a);
-SH_DLLEXPORT
-void shTANH(ShVariable& dest, const ShVariable& a);
+DLLEXPORT
+void shABS(Variable& dest, const Variable& a);
+DLLEXPORT
+void shACOS(Variable& dest, const Variable& a);
+DLLEXPORT
+void shACOSH(Variable& dest, const Variable& a);
+DLLEXPORT
+void shASIN(Variable& dest, const Variable& a);
+DLLEXPORT
+void shASINH(Variable& dest, const Variable& a);
+DLLEXPORT
+void shATAN(Variable& dest, const Variable& a);
+DLLEXPORT
+void shATAN2(Variable& dest, const Variable& a, const Variable& b);
+DLLEXPORT
+void shATANH(Variable& dest, const Variable& a);
+DLLEXPORT
+void shCBRT(Variable& dest, const Variable& a);
+DLLEXPORT
+void shCEIL(Variable& dest, const Variable& a);
+DLLEXPORT
+void shCOS(Variable& dest, const Variable& a);
+DLLEXPORT
+void shCOSH(Variable& dest, const Variable& a);
+DLLEXPORT
+void shCMUL(Variable& dest, const Variable& a);
+DLLEXPORT
+void shCSUM(Variable& dest, const Variable& a);
+DLLEXPORT
+void shDOT(Variable& dest, const Variable& a, const Variable& b);
+DLLEXPORT
+void shDX(Variable& dest, const Variable& a);
+DLLEXPORT
+void shDY(Variable& dest, const Variable& a);
+DLLEXPORT
+void shEXP(Variable& dest, const Variable& a);
+DLLEXPORT
+void shEXP2(Variable& dest, const Variable& a);
+DLLEXPORT
+void shEXP10(Variable& dest, const Variable& a);
+DLLEXPORT
+void shFLR(Variable& dest, const Variable& a);
+DLLEXPORT
+void shFRAC(Variable& dest, const Variable& a);
+DLLEXPORT
+void shLIT(Variable& dest, const Variable& a);
+DLLEXPORT
+void shLOG(Variable& dest, const Variable& a);
+DLLEXPORT
+void shLOG2(Variable& dest, const Variable& a);
+DLLEXPORT
+void shLOG10(Variable& dest, const Variable& a);
+DLLEXPORT
+void shLRP(Variable& dest, const Variable& alpha,
+           const Variable& a, const Variable& b);
+DLLEXPORT
+void shHASH(Variable& dest, const Variable& a);
+DLLEXPORT
+void shMAD(Variable& dest, const Variable& a,
+           const Variable& b, const Variable& c);
+DLLEXPORT
+void shMAX(Variable& dest, const Variable& a, const Variable& b);
+DLLEXPORT
+void shMIN(Variable& dest, const Variable& a, const Variable& b);
+DLLEXPORT
+void shMOD(Variable& dest, const Variable& a, const Variable& b);
+DLLEXPORT
+void shNOISE(Variable& dest, const Variable& a);
+DLLEXPORT
+void shPOW(Variable& dest, const Variable& a, const Variable& b);
+DLLEXPORT
+void shRCP(Variable& dest, const Variable& a);
+DLLEXPORT
+void shRND(Variable& dest, const Variable& a);
+DLLEXPORT
+void shRSQ(Variable& dest, const Variable& a);
+DLLEXPORT
+void shSGN(Variable& dest, const Variable& a);
+DLLEXPORT
+void shSIN(Variable& dest, const Variable& a);
+DLLEXPORT
+void shSINH(Variable& dest, const Variable& a);
+DLLEXPORT
+void shSQRT(Variable& dest, const Variable& a);
+DLLEXPORT
+void shTAN(Variable& dest, const Variable& a);
+DLLEXPORT
+void shTANH(Variable& dest, const Variable& a);
 
-SH_DLLEXPORT
-void shNORM(ShVariable& dest, const ShVariable& a);
-SH_DLLEXPORT
-void shXPD(ShVariable& dest, const ShVariable& a, const ShVariable& b);
+DLLEXPORT
+void shNORM(Variable& dest, const Variable& a);
+DLLEXPORT
+void shXPD(Variable& dest, const Variable& a, const Variable& b);
 
-SH_DLLEXPORT
-void shCOND(ShVariable& dest, const ShVariable& cond,
-            const ShVariable& a, const ShVariable& b);
-SH_DLLEXPORT
-void shKIL(const ShVariable& cond);
-SH_DLLEXPORT
-void shRET(const ShVariable& cond);
+DLLEXPORT
+void shCOND(Variable& dest, const Variable& cond,
+            const Variable& a, const Variable& b);
+DLLEXPORT
+void shKIL(const Variable& cond);
+DLLEXPORT
+void shRET(const Variable& cond);
 
 /*@}*/
 

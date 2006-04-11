@@ -22,16 +22,16 @@
 
 #include <cstddef>
 
-#include "ShPaletteNode.hpp"
-#include "ShGeneric.hpp"
+#include "PaletteNode.hpp"
+#include "Generic.hpp"
 
 namespace SH {
 
 template<typename T>
-class ShPalette {
+class Palette {
 public:
-  ShPalette(std::size_t size);
-  ~ShPalette();
+  Palette(std::size_t size);
+  ~Palette();
   
   // C++-time lookup
   const T& operator[](std::size_t index) const;
@@ -39,15 +39,15 @@ public:
 
   // Sh program runtime lookup
   template<typename T2>
-  T operator[](const ShGeneric<1, T2>& index) const;
+  T operator[](const Generic<1, T2>& index) const;
   
 private:
-  ShPaletteNodePtr m_node;
+  PaletteNodePtr m_node;
   T* m_data;
 };
 
 }
 
-#include "ShPaletteImpl.hpp"
+#include "PaletteImpl.hpp"
 
 #endif

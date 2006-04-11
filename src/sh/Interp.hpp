@@ -25,32 +25,32 @@ namespace SH {
 /** Set Interpolation level in Texture type.
  * Use this template to indicate that a texture should be interpolated
  * to a particular level L.
- * For example, ShInterp<0, T> implies a nearest-neighbour lookup,
- * whereas ShInterp<1, T> implies linear interpolation.
+ * For example, Interp<0, T> implies a nearest-neighbour lookup,
+ * whereas Interp<1, T> implies linear interpolation.
  */
 template<int L, typename T>
-class ShInterp : public T {
+class Interp : public T {
 public:
   static int level() {
     if (L >= 2) return 3; else return L;
   }
   
-  ShInterp()
+  Interp()
     : T()
   {
     this->m_node->traits().interpolation(level());
   }
-  ShInterp(int width)
+  Interp(int width)
     : T(width)
   {
     this->m_node->traits().interpolation(level());
   }
-  ShInterp(int width, int height)
+  Interp(int width, int height)
     : T(width, height)
   {
     this->m_node->traits().interpolation(level());
   }
-  ShInterp(int width, int height, int depth)
+  Interp(int width, int height, int depth)
     : T(width, height, depth)
   {
     this->m_node->traits().interpolation(level());

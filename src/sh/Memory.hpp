@@ -24,10 +24,10 @@
 #include <map>
 #include <utility>
 #include <string>
-#include "ShDllExport.hpp"
-#include "ShRefCount.hpp"
-#include "ShMemoryDep.hpp"
-#include "ShStorageType.hpp"
+#include "DllExport.hpp"
+#include "RefCount.hpp"
+#include "MemoryDep.hpp"
+#include "StorageType.hpp"
 
 namespace SH {
 
@@ -35,7 +35,7 @@ namespace SH {
  * @{
  */
 
-class ShStorage;
+class Storage;
 
 /** A memory object.
  * A memory object represents a chunk of data.   Note, however, that
@@ -43,33 +43,33 @@ class ShStorage;
  * both the CPU and the GPU.   This class keeps track of the "current"
  * version and makes transfers as necessary.
  * @todo Maybe keep a length field (in bytes)?
- * @see ShStorage
+ * @see Storage
  */
 class
-SH_DLLEXPORT ShMemory : public ShRefCountable {
+DLLEXPORT Memory : public RefCountable {
 public:
-  virtual ~ShMemory();
+  virtual ~Memory();
 
   /// Return the timestamp of the most up-to-date storage of this memory
   int timestamp() const;
 
   /// Find a storage of a given id.
-  ShPointer<ShStorage> findStorage(const std::string& id);
+  Pointer<Storage> findStorage(const std::string& id);
 
-  ShPointer<const ShStorage> findStorage(const std::string& id) const;
+  Pointer<const Storage> findStorage(const std::string& id) const;
 
   /// Find a storage of a given id selected by an external functor.
-  /// @arg functor A functor of ShStoragePtr -> bool.
+  /// @arg functor A functor of StoragePtr -> bool.
   template<typename Functor>
-  ShPointer<ShStorage> findStorage(const std::string& id, const Functor& f);
+  Pointer<Storage> findStorage(const std::string& id, const Functor& f);
   template<typename Functor>
-  ShPointer<ShStorage> findStorage(const std::string& id, Functor& f);
+  Pointer<Storage> findStorage(const std::string& id, Functor& f);
 
   /// Discard this storage from this memory
-  void removeStorage(const ShPointer<ShStorage>& storage);
+  void removeStorage(const Pointer<Storage>& storage);
 
   /// link the memory to a specific dependency
-  void add_dep(ShMemoryDep* dep);
+  void add_dep(MemoryDep* dep);
 
   /// modify the memory data by using the links to the dependencies
   void flush();
@@ -78,14 +78,14 @@ public:
   void freeze(bool state);
 
 protected:
-  ShMemory();
+  Memory();
 
 private:
   int increment_timestamp();
 
-  void addStorage(const ShPointer<ShStorage>& storage);
+  void addStorage(const Pointer<Storage>& storage);
 
-  typedef std::list< ShPointer<ShStorage> > StorageList;
+  typedef std::list< Pointer<Storage> > StorageList;
   StorageList m_storages;
   int m_timestamp;
 
@@ -95,52 +95,52 @@ private:
   int m_frozenTimestamp;
 
   /// the list of all dependencies, for update calls
-  std::list<ShMemoryDep*> dependencies;
+  std::list<MemoryDep*> dependencies;
 
-  friend class ShStorage;
+  friend class Storage;
 
   /// NOT IMPLEMENTED
-  ShMemory& operator=(const ShMemory& other);
+  Memory& operator=(const Memory& other);
   /// NOT IMPLEMENTED
-  ShMemory(const ShMemory& other);
+  Memory(const Memory& other);
 };
 
-typedef ShPointer<ShMemory> ShMemoryPtr;
-typedef ShPointer<const ShMemory> ShMemoryCPtr;
+typedef Pointer<Memory> MemoryPtr;
+typedef Pointer<const Memory> MemoryCPtr;
 
 /** A Storage Transfer function.
  * A transfer specifies the cost and manner of transferring data from
  * one storage to another.
  * Static instances of these should be created for any possible
  * storage transfers.
- * Use the ShStorage::addTransfer() function to add a transfer to the
+ * Use the Storage::addTransfer() function to add a transfer to the
  * list.
  *
- * @see ShMemory
- * @see ShStorage
+ * @see Memory
+ * @see Storage
  */
 class
-SH_DLLEXPORT ShTransfer {
+DLLEXPORT Transfer {
 public:
-  virtual ~ShTransfer() {}
+  virtual ~Transfer() {}
 
   /// Returns true if the transfer succeeded.
-  virtual bool transfer(const ShStorage* from, ShStorage* to) = 0;
+  virtual bool transfer(const Storage* from, Storage* to) = 0;
 
   /// Returns -1 if transfer impossible, otherwise the cost of
   /// transfer.
   /// @todo Perhaps this needs more information, e.g. size of the storages.
-  virtual int cost(const ShStorage* from, const ShStorage* to) = 0;
+  virtual int cost(const Storage* from, const Storage* to) = 0;
 
 protected:
-  ShTransfer(const std::string& from, const std::string& to);
+  Transfer(const std::string& from, const std::string& to);
 
 private:
   
   /// NOT IMPLEMENTED
-  ShTransfer(const ShTransfer& other);
+  Transfer(const Transfer& other);
   /// NOT IMPLEMENTED
-  ShTransfer& operator=(const ShTransfer& other);
+  Transfer& operator=(const Transfer& other);
 };
 
 /** A Storage object
@@ -148,22 +148,22 @@ private:
  * contents. This might be on the CPU, the GPU, a filesystem or even
  * across the network.
  *
- * @see ShMemory
- * @see ShTransfer
+ * @see Memory
+ * @see Transfer
  */
 class
-SH_DLLEXPORT ShStorage : public ShRefCountable {
+DLLEXPORT Storage : public RefCountable {
 public:
-  ShStorage();
-  virtual ~ShStorage();
+  Storage();
+  virtual ~Storage();
 
   /// Return the version of the data currently stored by this storage
   int timestamp() const;
   
   /// Return the memory this storage represents
-  const ShMemory* memory() const;
+  const Memory* memory() const;
   /// Return the memory this storage represents
-  ShMemory* memory();
+  Memory* memory();
 
   /// Make sure this storage is in sync with the latest version of the
   /// memory.
@@ -184,69 +184,69 @@ public:
   
   /// Return the cost of transferring from one storage to another.
   /// Returns -1 if there is no possible transfer.
-  static int cost(const ShStorage* from, const ShStorage* to);
+  static int cost(const Storage* from, const Storage* to);
 
   /// Transfer data from one storage to another.
   /// Returns true if the transfer succeeded.
-  static bool transfer(const ShStorage* from, ShStorage* to);
+  static bool transfer(const Storage* from, Storage* to);
 
   /// Use this to register new transfer functions when they are instantiated.
   static void addTransfer(const std::string& from,
                           const std::string& to,
-                          ShTransfer* transfer);
+                          Transfer* transfer);
 
-  /// Called by ShMemory when it destructs. Necessary for refcounting purposes.
+  /// Called by Memory when it destructs. Necessary for refcounting purposes.
   void orphan();
   
   /// Return the type that is stored inside this object
-  ShValueType value_type() const { return m_value_type; }
+  ValueType value_type() const { return m_value_type; }
 
   /// Change the internal type (does NOT convert the values)
-  void value_type(ShValueType value_type);
+  void value_type(ValueType value_type);
 
   /// Return the size in bytes of one value in the storage array
   int value_size() const { return m_value_size; }
 
 protected:
-  ShStorage(ShMemory* memory, ShValueType value_type);
+  Storage(Memory* memory, ValueType value_type);
   
-  ShValueType m_value_type; // type index expected of data on host
+  ValueType m_value_type; // type index expected of data on host
   int m_value_size; // size of one element
 
 private:
-  ShMemory* m_memory;
+  Memory* m_memory;
   int m_timestamp;
 
   /// Force-set the version of the data currently stored by this storage
   void setTimestamp(int timestamp);
   
-  typedef std::map<std::pair<std::string, std::string>, ShTransfer*> TransferMap;
+  typedef std::map<std::pair<std::string, std::string>, Transfer*> TransferMap;
   static TransferMap* m_transfers;
 
   /// NOT IMPLEMENTED
-  ShStorage(const ShStorage& other);
+  Storage(const Storage& other);
   /// NOT IMPLEMENTED
-  ShStorage& operator=(const ShStorage& other);
+  Storage& operator=(const Storage& other);
 };
 
-typedef ShPointer<ShStorage> ShStoragePtr;
-typedef ShPointer<const ShStorage> ShStorageCPtr;
+typedef Pointer<Storage> StoragePtr;
+typedef Pointer<const Storage> StorageCPtr;
 
-/** An ShStorage representing data stored on the CPU host memory.
- * You probably want to use ShHostMemory to construct this.
- * @see ShMemory
- * @see ShStorage
- * @see ShHostMemory
+/** An Storage representing data stored on the CPU host memory.
+ * You probably want to use HostMemory to construct this.
+ * @see Memory
+ * @see Storage
+ * @see HostMemory
  */
 class
-SH_DLLEXPORT ShHostStorage : public ShStorage {
+DLLEXPORT HostStorage : public Storage {
 public:
-  ShHostStorage(ShMemory* memory, std::size_t length, ShValueType storage_type, std::size_t align = 1); ///< Internally managed storage
-  ShHostStorage(ShMemory* memory, std::size_t length, void* data, ShValueType storage_type); ///< Externally managed storage
+  HostStorage(Memory* memory, std::size_t length, ValueType storage_type, std::size_t align = 1); ///< Internally managed storage
+  HostStorage(Memory* memory, std::size_t length, void* data, ValueType storage_type); ///< Externally managed storage
 
   /// Destruct this storage.
   /// If the memory was allocated internally, it will be freed automatically.
-  ~ShHostStorage();
+  ~HostStorage();
 
   std::string id() const;
 
@@ -266,40 +266,40 @@ private:
   bool m_managed; ///< Did we create the data? If so, this is true
 
   // NOT IMPLEMENTED
-  ShHostStorage& operator=(const ShHostStorage& other);
-  ShHostStorage(const ShHostStorage& other);
+  HostStorage& operator=(const HostStorage& other);
+  HostStorage(const HostStorage& other);
 };
 
-typedef ShPointer<ShHostStorage> ShHostStoragePtr;
-typedef ShPointer<const ShHostStorage> ShHostStorageCPtr;
+typedef Pointer<HostStorage> HostStoragePtr;
+typedef Pointer<const HostStorage> HostStorageCPtr;
 
-/** An ShMemory initially originating in CPU host memory.
- * @see ShMemory
- * @see ShHostStorage
+/** An Memory initially originating in CPU host memory.
+ * @see Memory
+ * @see HostStorage
  */
 class
-SH_DLLEXPORT ShHostMemory : public ShMemory {
+DLLEXPORT HostMemory : public Memory {
 public:
-  ShHostMemory(std::size_t length, ShValueType value_type, std::size_t align = 1);
-  ShHostMemory(std::size_t length, void* data, ShValueType value_type);
+  HostMemory(std::size_t length, ValueType value_type, std::size_t align = 1);
+  HostMemory(std::size_t length, void* data, ValueType value_type);
 
-  ~ShHostMemory();
+  ~HostMemory();
 
-  ShHostStoragePtr hostStorage();
-  ShPointer<const ShHostStorage> hostStorage() const;
+  HostStoragePtr hostStorage();
+  Pointer<const HostStorage> hostStorage() const;
 
 private:
-  ShHostStoragePtr m_hostStorage;
+  HostStoragePtr m_hostStorage;
   // NOT IMPLEMENTED
-  ShHostMemory& operator=(const ShHostMemory& other);
-  ShHostMemory(const ShHostMemory& other);
+  HostMemory& operator=(const HostMemory& other);
+  HostMemory(const HostMemory& other);
 };
 
-typedef ShPointer<ShHostMemory> ShHostMemoryPtr;
-typedef ShPointer<const ShHostMemory> ShHostMemoryCPtr;
+typedef Pointer<HostMemory> HostMemoryPtr;
+typedef Pointer<const HostMemory> HostMemoryCPtr;
 
 template<typename Functor>
-ShPointer<ShStorage> ShMemory::findStorage(const std::string& id, Functor& f)
+Pointer<Storage> Memory::findStorage(const std::string& id, Functor& f)
 {
   for (StorageList::iterator I = m_storages.begin(); I != m_storages.end(); ++I) {
     if ((*I)->id() == id && f(*I)) return *I;
@@ -308,7 +308,7 @@ ShPointer<ShStorage> ShMemory::findStorage(const std::string& id, Functor& f)
 }
 
 template<typename Functor>
-ShPointer<ShStorage> ShMemory::findStorage(const std::string& id, const Functor& f)
+Pointer<Storage> Memory::findStorage(const std::string& id, const Functor& f)
 {
   for (StorageList::iterator I = m_storages.begin(); I != m_storages.end(); ++I) {
     if ((*I)->id() == id && f(*I)) return *I;

@@ -20,9 +20,9 @@
 #ifndef SHUTIL_KERNELSURFMAP_HPP 
 #define SHUTIL_KERNELSURFMAP_HPP 
 
-#include "sh/ShProgram.hpp"
+#include "sh/Program.hpp"
 
-/** \file ShKernelSurfMap.hpp
+/** \file KernelSurfMap.hpp
  * 
  */
 
@@ -30,27 +30,27 @@ namespace ShUtil {
 
 using namespace SH;
 
-class ShKernelSurfMap {
+class KernelSurfMap {
   public:
     /** Bump program
      * Takes a gradient direction and applies 
-     * IN(0) ShAttrib2f gradient  - gradient
-     * IN(1) ShNormal3f normalt    - normalized normal vector (tangent space) 
+     * IN(0) Attrib2f gradient  - gradient
+     * IN(1) Normal3f normalt    - normalized normal vector (tangent space) 
      *
-     * OUT(0) ShNormal3f normalt   - perturbed normal (tangent space)
+     * OUT(0) Normal3f normalt   - perturbed normal (tangent space)
      */
-    static ShProgram bump();
+    static Program bump();
 
     /** VCS Bump program
      * Takes a gradient direction and applies 
-     * IN(0) ShAttrib2f gradient  - gradient
-     * IN(1) ShNormal3f normal    - normalized normal vector (VCS)
-     * IN(2) ShVector3f tangent   - normalized tangent vector (VCS)
-     * IN(3) ShVector3f tangent2  - normalized secondary tangent (VCS)
+     * IN(0) Attrib2f gradient  - gradient
+     * IN(1) Normal3f normal    - normalized normal vector (VCS)
+     * IN(2) Vector3f tangent   - normalized tangent vector (VCS)
+     * IN(3) Vector3f tangent2  - normalized secondary tangent (VCS)
      *
-     * OUT(0) ShNormal3f normal   - perturbed normal (VCS)
+     * OUT(0) Normal3f normal   - perturbed normal (VCS)
      */
-    static ShProgram vcsBump();
+    static Program vcsBump();
 };
 
 }

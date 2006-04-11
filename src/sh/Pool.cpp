@@ -17,25 +17,25 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#include "ShPool.hpp"
+#include "Pool.hpp"
 
-#ifdef SH_USE_MEMORY_POOL
+#ifdef USE_MEMORY_POOL
 
-#include "ShDebug.hpp"
+#include "Debug.hpp"
 
 namespace SH {
 
-ShPool::ShPool(std::size_t element_size, std::size_t block_size)
+Pool::Pool(std::size_t element_size, std::size_t block_size)
   : m_element_size(element_size),
     m_block_size(block_size),
     m_next(0)
 {
 }
 
-void* ShPool::alloc()
+void* Pool::alloc()
 {
   if (!m_next) {
-    //SH_DEBUG_PRINT("new pool");
+    //DEBUG_PRINT("new pool");
     char* block = new char[m_block_size * m_element_size];
     void* next = 0;
     for (std::size_t i = 0; i < m_block_size; i++) {
@@ -50,7 +50,7 @@ void* ShPool::alloc()
   return r;
 }
 
-void ShPool::free(void* ptr)
+void Pool::free(void* ptr)
 {
   *((void**)ptr) = m_next;
   m_next = ptr;
@@ -58,4 +58,4 @@ void ShPool::free(void* ptr)
 
 }
 
-#endif // SH_USE_MEMORY_POOL
+#endif // USE_MEMORY_POOL

@@ -18,7 +18,7 @@
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 #include "WGLPBufferContext.hpp"
-#include "ShError.hpp"
+#include "Error.hpp"
 
 namespace shgl {
 
@@ -42,7 +42,7 @@ WGLPBufferHandle::~WGLPBufferHandle()
 void WGLPBufferHandle::restore()
 {
   if (!wglMakeCurrent(m_dc, m_hglrc)) {
-    shError(ShException("Restoring WGL Context failed"));
+    error(Exception("Restoring WGL Context failed"));
   }
 }
 
@@ -72,7 +72,7 @@ PBufferHandlePtr WGLPBufferContext::activate()
   HGLRC old_hglrc = wglGetCurrentContext();
 
   if (!wglMakeCurrent(m_dc, m_hglrc)) {
-    shError(ShException("Activating WGLPBufferContext failed!"));
+    error(Exception("Activating WGLPBufferContext failed!"));
   }
 
   if (old_dc && old_hglrc) {
@@ -89,7 +89,7 @@ PBufferHandlePtr WGLPBufferContext::activate()
 WGLPBufferFactory::WGLPBufferFactory()
   : m_dc(0),
     m_format(0),
-    m_extension(SH_ARB_NO_FLOAT_EXT)
+    m_extension(ARB_NO_FLOAT_EXT)
 {
 }
 
@@ -113,7 +113,7 @@ void WGLPBufferFactory::init_dc()
     m_dc = CreateDC("DISPLAY", NULL, NULL, NULL);
   }
   if (!m_dc) {
-    shError(ShException("Could create device context"));
+    error(Exception("Could create device context"));
   }
 }
 
@@ -141,7 +141,7 @@ void WGLPBufferFactory::init_config()
     unsigned int items = 0;
     if (wglChoosePixelFormatARB(m_dc, &fb_attribs[0], NULL, 1, &m_format, &items)
 	&& items > 0) {
-      m_extension = SH_ARB_ATI_PIXEL_FORMAT_FLOAT;
+      m_extension = ARB_ATI_PIXEL_FORMAT_FLOAT;
     }
   }
 
@@ -155,18 +155,18 @@ void WGLPBufferFactory::init_config()
     unsigned int items = 0;
     if (wglChoosePixelFormatARB(m_dc, &fb_attribs[0], NULL, 1, &m_format, &items)
 	&& items > 0) {
-      m_extension = SH_ARB_NV_FLOAT_BUFFER;
+      m_extension = ARB_NV_FLOAT_BUFFER;
     }
   }
 
   if (!m_format) {
-    shError(ShException("Could not get WGL Pixelformat!\n"
+    error(Exception("Could not get WGL Pixelformat!\n"
 			"Your card may not support the appropriate extensions."));
   }
 
-  if (m_extension == SH_ARB_NO_FLOAT_EXT) {
+  if (m_extension == ARB_NO_FLOAT_EXT) {
     m_format = 0;
-    shError(ShException("Could not choose a floating-point extension!\n"
+    error(Exception("Could not choose a floating-point extension!\n"
                         "Your card may not support the appropriate extensions."));
   }
 }
@@ -203,7 +203,7 @@ WGLPBufferContextPtr WGLPBufferFactory::create_context(int width, int height,
 
   HPBUFFERARB pbuffer = wglCreatePbufferARB(m_dc, m_format, width, height, pbuffer_attribs);
   if (!pbuffer) {
-    shError(ShException("Could not make pbuffer!"));
+    error(Exception("Could not make pbuffer!"));
     return 0;
   }
 

@@ -21,8 +21,8 @@
 #define SHBASICBLOCK_HPP
 
 #include <list>
-#include "ShBlock.hpp"
-#include "ShStatement.hpp"
+#include "Block.hpp"
+#include "Statement.hpp"
 
 namespace SH {
 
@@ -33,27 +33,27 @@ namespace SH {
  * these assignments might be conditional).
  */
 class 
-SH_DLLEXPORT
-ShBasicBlock : public ShBlock {
+DLLEXPORT
+BasicBlock : public Block {
 public:
-  typedef std::list<ShStatement> ShStmtList;
-  typedef ShStmtList::iterator iterator;
-  typedef ShStmtList::const_iterator const_iterator;
-  typedef ShStmtList::reverse_iterator reverse_iterator;
-  typedef ShStmtList::const_reverse_iterator const_reverse_iterator;
+  typedef std::list<Statement> StmtList;
+  typedef StmtList::iterator iterator;
+  typedef StmtList::const_iterator const_iterator;
+  typedef StmtList::reverse_iterator reverse_iterator;
+  typedef StmtList::const_reverse_iterator const_reverse_iterator;
 
-  ~ShBasicBlock();
+  ~BasicBlock();
 
   void print(std::ostream& out, int indent) const;
   void graphvizDump(std::ostream& out) const;
 
   /**@name Add statement at start.
    * Adds the given statement after the statements in this block */
-  void addStatement(const ShStatement& stmt);
+  void addStatement(const Statement& stmt);
 
   /**@name Add statement at end.
    * Adds the given statement before the statements in this block */
-  void prependStatement(const ShStatement& stmt);
+  void prependStatement(const Statement& stmt);
 
   /* List ops 
    * @{ */
@@ -73,20 +73,20 @@ public:
 
   // Place all the elements of l before the iterator I and removes them
   // from l
-  void splice(iterator I, ShStmtList &l) { m_statements.splice(I, l); }
+  void splice(iterator I, StmtList &l) { m_statements.splice(I, l); }
 
   // Places all the elements starting from lI in l before the iterator I and
   // removes them from l
-  void splice(iterator I, ShStmtList &l, iterator lI) {
+  void splice(iterator I, StmtList &l, iterator lI) {
     m_statements.splice(I, l, lI, l.end());
   }
   
-  ShStmtList m_statements;
+  StmtList m_statements;
 //private:
 };
 
-typedef ShPointer<ShBasicBlock> ShBasicBlockPtr;
-typedef ShPointer<const ShBasicBlock> ShBasicBlockCPtr;
+typedef Pointer<BasicBlock> BasicBlockPtr;
+typedef Pointer<const BasicBlock> BasicBlockCPtr;
 
 }
 

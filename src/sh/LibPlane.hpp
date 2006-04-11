@@ -20,14 +20,14 @@
 #ifndef SHLIBPLANE_HPP
 #define SHLIBPLANE_HPP
 
-#include "ShAttrib.hpp"
-#include "ShLib.hpp"
+#include "Attrib.hpp"
+#include "Lib.hpp"
 
 namespace SH {
-SH_SHLIB_USUAL_OPERATIONS(SH_PLANE);
-SH_SHLIB_USUAL_SUBTRACT(SH_PLANE);
+SHLIB_USUAL_OPERATIONS(PLANE);
+SHLIB_USUAL_SUBTRACT(PLANE);
 
-SH_SHLIB_LEFT_MATRIX_OPERATION(SH_PLANE, operator|, M);
+SHLIB_LEFT_MATRIX_OPERATION(PLANE, operator|, M);
 
 }
 

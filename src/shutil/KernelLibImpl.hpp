@@ -21,21 +21,21 @@
 #define SHUTIL_KERNELLIBIMPL_HPP 
 
 #include <sstream>
-#include "sh/ShSyntax.hpp"
-#include "sh/ShPosition.hpp"
-#include "sh/ShManipulator.hpp"
-#include "sh/ShAlgebra.hpp"
-#include "sh/ShProgram.hpp"
-#include "sh/ShNibbles.hpp"
-#include "sh/ShTexCoord.hpp"
-#include "sh/ShVector.hpp"
-#include "sh/ShPoint.hpp"
-#include "sh/ShPosition.hpp"
-#include "sh/ShNormal.hpp"
-#include "ShKernelLib.hpp"
-#include "ShFunc.hpp"
+#include "sh/Syntax.hpp"
+#include "sh/Position.hpp"
+#include "sh/Manipulator.hpp"
+#include "sh/Algebra.hpp"
+#include "sh/Program.hpp"
+#include "sh/Nibbles.hpp"
+#include "sh/TexCoord.hpp"
+#include "sh/Vector.hpp"
+#include "sh/Point.hpp"
+#include "sh/Position.hpp"
+#include "sh/Normal.hpp"
+#include "KernelLib.hpp"
+#include "Func.hpp"
 
-/** \file ShKernelLibImpl.hpp
+/** \file KernelLibImpl.hpp
  * This is an implementation of useful kernels and nibbles (simple kernels).
  */
 
@@ -43,59 +43,59 @@ namespace ShUtil {
 
 using namespace SH;
 
-template<int N, ShBindingType Binding, typename T>
-ShProgram ShKernelLib::shVsh(const ShMatrix<N, N, Binding, T> &mv,
-                             const ShMatrix<N, N, Binding, T> &mvp,
+template<int N, BindingType Binding, typename T>
+Program KernelLib::vsh(const Matrix<N, N, Binding, T> &mv,
+                             const Matrix<N, N, Binding, T> &mvp,
                              int numTangents, int numLights)
 {
   int i;
-  ShProgram generalVsh = SH_BEGIN_VERTEX_PROGRAM {
+  Program generalVsh = SH_BEGIN_VERTEX_PROGRAM {
     // INPUTS
-    ShInputTexCoord2f SH_NAMEDECL(u, "texcoord");  
-    ShInputNormal3f SH_NAMEDECL(nm, "normal");     
-    ShVector3f tgt; 
-    ShVector3f tgt2; 
+    InputTexCoord2f NAMEDECL(u, "texcoord");  
+    InputNormal3f NAMEDECL(nm, "normal");     
+    Vector3f tgt; 
+    Vector3f tgt2; 
     if(numTangents > 0) {
-      ShInputVector3f SH_NAMEDECL(inTangent, "tangent");
+      InputVector3f NAMEDECL(inTangent, "tangent");
       tgt = inTangent;
       if( numTangents > 1) {
-        ShInputVector3f SH_NAMEDECL(inTangent2, "tangent2");
+        InputVector3f NAMEDECL(inTangent2, "tangent2");
         tgt2 = inTangent2;
       }  else {
         tgt2 = cross(nm, tgt);
       }
     }
-    ShInputPoint3f* lpv = new ShInputPoint3f[numLights];                 
+    InputPoint3f* lpv = new InputPoint3f[numLights];                 
     for(i = 0; i < numLights; ++i) lpv[i].name(makeName("lightPos", i));
-    ShInputPosition4f SH_NAMEDECL(pm, "posm");     
+    InputPosition4f NAMEDECL(pm, "posm");     
 
     // OUTPUTS
-    ShOutputTexCoord2f SH_NAMEDECL(uo, "texcoord");  
-    ShOutputPoint3f SH_NAMEDECL(pv, "posv");         
-    ShOutputPoint4f SH_NAMEDECL(pmo, "posm");
+    OutputTexCoord2f NAMEDECL(uo, "texcoord");  
+    OutputPoint3f NAMEDECL(pv, "posv");         
+    OutputPoint4f NAMEDECL(pmo, "posm");
     
     // VCS outputs
-    ShOutputNormal3f SH_NAMEDECL(nv, "normal");      
-    ShOutputVector3f SH_NAMEDECL(tv, "tangent");
-    ShOutputVector3f SH_NAMEDECL(tv2, "tangent2");
-    ShOutputVector3f SH_NAMEDECL(vv, "viewVec");     
-    ShOutputVector3f* hv = new ShOutputVector3f[numLights];    
+    OutputNormal3f NAMEDECL(nv, "normal");      
+    OutputVector3f NAMEDECL(tv, "tangent");
+    OutputVector3f NAMEDECL(tv2, "tangent2");
+    OutputVector3f NAMEDECL(vv, "viewVec");     
+    OutputVector3f* hv = new OutputVector3f[numLights];    
     for(i = 0; i < numLights; ++i) hv[i].name(makeName("halfVec", i).c_str());
-    ShOutputVector3f* lv = new ShOutputVector3f[numLights];    
+    OutputVector3f* lv = new OutputVector3f[numLights];    
     for(i = 0; i < numLights; ++i) lv[i].name(makeName("lightVec", i).c_str()); 
 
-    ShOutputPoint3f* lpo = new ShOutputPoint3f[numLights];    
+    OutputPoint3f* lpo = new OutputPoint3f[numLights];    
     for(i = 0; i < numLights; ++i) lpo[i].name(makeName("lightPos", i).c_str()); 
 
     // TCS outputs
-    ShOutputNormal3f SH_NAMEDECL(nvt, "normalt");      
-    ShOutputVector3f SH_NAMEDECL(vvt, "viewVect");     
-    ShOutputVector3f* hvt = new ShOutputVector3f[numLights];    
+    OutputNormal3f NAMEDECL(nvt, "normalt");      
+    OutputVector3f NAMEDECL(vvt, "viewVect");     
+    OutputVector3f* hvt = new OutputVector3f[numLights];    
     for(i = 0; i < numLights; ++i) hvt[i].name(makeName("halfVect", i).c_str());
-    ShOutputVector3f* lvt = new ShOutputVector3f[numLights];    
+    OutputVector3f* lvt = new OutputVector3f[numLights];    
     for(i = 0; i < numLights; ++i) lvt[i].name(makeName("lightVect", i).c_str()); 
 
-    ShOutputPosition4f SH_NAMEDECL(pd, "posh");      
+    OutputPosition4f NAMEDECL(pd, "posh");      
 
     uo = u;
     pv = (mv | pm)(0,1,2); 

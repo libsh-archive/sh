@@ -21,7 +21,7 @@
 #define SHEXCEPTION_HPP
 
 #include <string>
-#include "ShDllExport.hpp"
+#include "DllExport.hpp"
 
 namespace SH {
 
@@ -29,11 +29,11 @@ namespace SH {
  * You should derive from this class to make more specific exceptions.
  */
 class
-SH_DLLEXPORT ShException : public std::exception {
+DLLEXPORT Exception : public std::exception {
 public:
   /// Construct a general exception with the given message.
-  ShException(const std::string& message);
-  virtual ~ShException() throw (); // Make this class virtual in orer to get
+  Exception(const std::string& message);
+  virtual ~Exception() throw (); // Make this class virtual in orer to get
                           // RTTI info in.
   
   /// Return an informative message describing the exception.
@@ -47,57 +47,57 @@ protected:
 /** An exception representing a parse error.
  */
 class
-SH_DLLEXPORT ShParseException : public ShException {
+DLLEXPORT ParseException : public Exception {
 public:
-  ShParseException(const std::string& message);
+  ParseException(const std::string& message);
 };
 
 /** An exception representing a scoping violation
  */
 class
-SH_DLLEXPORT ShScopeException : public ShException {
+DLLEXPORT ScopeException : public Exception {
 public:
-  ShScopeException(const std::string& message);
+  ScopeException(const std::string& message);
 };
 
-/** An exception relating to an ShImage operation.
+/** An exception relating to an Image operation.
  */
 class
-SH_DLLEXPORT ShImageException : public ShException {
+DLLEXPORT ImageException : public Exception {
 public:
-  ShImageException(const std::string& message);
+  ImageException(const std::string& message);
 };
 
-/** An exception relating to an ShAlgebra operation.
+/** An exception relating to an Algebra operation.
  */
 class
-SH_DLLEXPORT ShAlgebraException : public ShException {
+DLLEXPORT AlgebraException : public Exception {
 public:
-  ShAlgebraException(const std::string& message);
+  AlgebraException(const std::string& message);
 };
 
-/** An exception relating to an ShOptimizer operation.
+/** An exception relating to an Optimizer operation.
  */
 class
-SH_DLLEXPORT ShOptimizerException : public ShException {
+DLLEXPORT OptimizerException : public Exception {
 public:
-  ShOptimizerException(const std::string& message);
+  OptimizerException(const std::string& message);
 };
 
-/** An exception relating to an ShTransformer operation.
+/** An exception relating to an Transformer operation.
  */
 class
-SH_DLLEXPORT ShTransformerException : public ShException {
+DLLEXPORT TransformerException : public Exception {
 public:
-  ShTransformerException(const std::string& message);
+  TransformerException(const std::string& message);
 };
 
-/** An exception relating to an ShBackend operation.
+/** An exception relating to an Backend operation.
  */
 class
-SH_DLLEXPORT ShBackendException : public ShException {
+DLLEXPORT BackendException : public Exception {
 public:
-  ShBackendException(const std::string& message);
+  BackendException(const std::string& message);
 };
 
 }

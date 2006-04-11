@@ -3,10 +3,10 @@ import common, semantic
 common.header()
 
 common.guard("SHTEXCOORD_HPP")
-common.inprint('#include "ShAttrib.hpp"')
+common.inprint('#include "Attrib.hpp"')
 common.namespace()
 
-decl = semantic.Class("TexCoord", "texture coordinate", "SH_TEXCOORD",
+decl = semantic.Class("TexCoord", "texture coordinate", "TEXCOORD",
                       """A texture coordinate.
 """)
 

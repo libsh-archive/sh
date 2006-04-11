@@ -17,57 +17,57 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SH_VARIANTFACTORYIMPL_HPP 
-#define SH_VARIANTFACTORYIMPL_HPP 
+#ifndef SHVARIANTFACTORYIMPL_HPP 
+#define SHVARIANTFACTORYIMPL_HPP 
 
-#include "ShVariant.hpp"
-#include "ShVariantFactory.hpp"
+#include "Variant.hpp"
+#include "VariantFactory.hpp"
 
 namespace SH {
 
-template<typename T, ShDataType DT>
-ShVariant* ShDataVariantFactory<T, DT>::generate(int N) const
+template<typename T, DataType DT>
+Variant* DataVariantFactory<T, DT>::generate(int N) const
 {
-  return new ShDataVariant<T, DT>(N);
+  return new DataVariant<T, DT>(N);
 }
 
-template<typename T, ShDataType DT>
-ShVariant* ShDataVariantFactory<T, DT>::generate(std::string s) const
+template<typename T, DataType DT>
+Variant* DataVariantFactory<T, DT>::generate(std::string s) const
 {
-  return new ShDataVariant<T, DT>(s);
+  return new DataVariant<T, DT>(s);
 }
 
-template<typename T, ShDataType DT>
-ShVariant* ShDataVariantFactory<T, DT>::generate(int N, void *data, bool managed) const
+template<typename T, DataType DT>
+Variant* DataVariantFactory<T, DT>::generate(int N, void *data, bool managed) const
 {
-  return new ShDataVariant<T, DT>(N, data, managed);
+  return new DataVariant<T, DT>(N, data, managed);
 }
 
-template<typename T, ShDataType DT>
-ShVariant* ShDataVariantFactory<T, DT>::generateZero(int N) const
+template<typename T, DataType DT>
+Variant* DataVariantFactory<T, DT>::generateZero(int N) const
 {
-  return new ShDataVariant<T, DT>(N);
+  return new DataVariant<T, DT>(N);
 }
 
-template<typename T, ShDataType DT>
-ShVariant* ShDataVariantFactory<T, DT>::generateOne(int N) const
+template<typename T, DataType DT>
+Variant* DataVariantFactory<T, DT>::generateOne(int N) const
 {
-  return new ShDataVariant<T, DT>(N, ShDataTypeConstant<T, DT>::One);
+  return new DataVariant<T, DT>(N, DataTypeConstant<T, DT>::One);
 }
 
-template<typename T, ShDataType DT>
-ShDataVariantFactory<T, DT>* ShDataVariantFactory<T, DT>::m_instance = 0;
+template<typename T, DataType DT>
+DataVariantFactory<T, DT>* DataVariantFactory<T, DT>::m_instance = 0;
 
-template<typename T, ShDataType DT>
-const ShDataVariantFactory<T, DT>*
-ShDataVariantFactory<T, DT>::instance() 
+template<typename T, DataType DT>
+const DataVariantFactory<T, DT>*
+DataVariantFactory<T, DT>::instance() 
 {
-  if(!m_instance) m_instance = new ShDataVariantFactory<T, DT>();
+  if(!m_instance) m_instance = new DataVariantFactory<T, DT>();
   return m_instance;
 }
 
-template<typename T, ShDataType DT>
-ShDataVariantFactory<T, DT>::ShDataVariantFactory()
+template<typename T, DataType DT>
+DataVariantFactory<T, DT>::DataVariantFactory()
 {}
 
 }

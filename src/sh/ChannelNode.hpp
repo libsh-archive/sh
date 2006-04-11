@@ -20,23 +20,23 @@
 #ifndef SHCHANNELNODE_HPP
 #define SHCHANNELNODE_HPP
 
-#include "ShDllExport.hpp"
-#include "ShVariableNode.hpp"
-#include "ShMemory.hpp"
+#include "DllExport.hpp"
+#include "VariableNode.hpp"
+#include "Memory.hpp"
 
 namespace SH {
 
 class
-SH_DLLEXPORT ShChannelNode : public ShVariableNode {
+DLLEXPORT ChannelNode : public VariableNode {
 public:
-  ShChannelNode(ShSemanticType specType, int elements, ShValueType valueType);
-  ShChannelNode(ShSemanticType specType, int elements, ShValueType valueType,
-                const ShMemoryPtr& memory, int count);
-  virtual ~ShChannelNode();
+  ChannelNode(SemanticType specType, int elements, ValueType valueType);
+  ChannelNode(SemanticType specType, int elements, ValueType valueType,
+                const MemoryPtr& memory, int count);
+  virtual ~ChannelNode();
 
-  void memory(const ShMemoryPtr& memory, int count);
-  ShPointer<const ShMemory> memory() const;
-  ShMemoryPtr memory();
+  void memory(const MemoryPtr& memory, int count);
+  Pointer<const Memory> memory() const;
+  MemoryPtr memory();
   
   int count() const { return m_count; }
   void count(int count) { m_count = count; }
@@ -48,18 +48,18 @@ public:
   void offset(int offset) { m_offset = offset; }
   
 private:
-  ShMemoryPtr m_memory;
+  MemoryPtr m_memory;
   int m_count;
   int m_stride;
   int m_offset;
 
   // NOT IMPLEMENTED
-  ShChannelNode(const ShChannelNode& other);
-  ShChannelNode& operator=(const ShChannelNode& other);
+  ChannelNode(const ChannelNode& other);
+  ChannelNode& operator=(const ChannelNode& other);
 };
 
-typedef ShPointer<ShChannelNode> ShChannelNodePtr;
-typedef ShPointer<const ShChannelNode> ShChannelNodeCPtr;
+typedef Pointer<ChannelNode> ChannelNodePtr;
+typedef Pointer<const ChannelNode> ChannelNodeCPtr;
 
 }
 #endif

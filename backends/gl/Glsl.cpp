@@ -36,8 +36,8 @@ GlslCodeStrategy* GlslCodeStrategy::create(void)
   return new GlslCodeStrategy;
 }
 
-ShBackendCodePtr GlslCodeStrategy::generate(const std::string& target,
-                                           const ShProgramNodeCPtr& shader,
+BackendCodePtr GlslCodeStrategy::generate(const std::string& target,
+                                           const ProgramNodeCPtr& shader,
                                            TextureStrategy* texture)
 {
   std::string::size_type loc = target.rfind(':');
@@ -47,7 +47,7 @@ ShBackendCodePtr GlslCodeStrategy::generate(const std::string& target,
   return code;
 }
 
-ShBackendSetPtr GlslCodeStrategy::generate_set(const SH::ShProgramSet& s)
+BackendSetPtr GlslCodeStrategy::generate_set(const SH::ProgramSet& s)
 {
   GlslSetPtr glsl_set = new GlslSet(s);
   return glsl_set;
@@ -77,7 +77,7 @@ unsigned int glslTarget(const std::string& unit)
 }
 
 GlslException::GlslException(const std::string& message)
-  : ShBackendException(std::string("GLSL error: ") + message)
+  : BackendException(std::string("GLSL error: ") + message)
 {
 }
 
@@ -117,10 +117,10 @@ void print_shader_source(GLhandleARB shader, std::ostream& out)
   }
 }
 
-string glsl_typename(ShValueType type, int size)
+string glsl_typename(ValueType type, int size)
 {
   stringstream s;
-  if (shIsInteger(type)) {
+  if (isInteger(type)) {
     if (size > 1) {
       s << "ivec";
     } else {

@@ -21,15 +21,15 @@
 #define SHUTIL_KERNELLIGHTIMPL_HPP 
 
 #include <sstream>
-#include "sh/ShSyntax.hpp"
-#include "sh/ShPosition.hpp"
-#include "sh/ShManipulator.hpp"
-#include "sh/ShAlgebra.hpp"
-#include "sh/ShProgram.hpp"
-#include "sh/ShNibbles.hpp"
-#include "ShKernelLight.hpp"
+#include "sh/Syntax.hpp"
+#include "sh/Position.hpp"
+#include "sh/Manipulator.hpp"
+#include "sh/Algebra.hpp"
+#include "sh/Program.hpp"
+#include "sh/Nibbles.hpp"
+#include "KernelLight.hpp"
 
-/** \file ShKernelLightImpl.hpp
+/** \file KernelLightImpl.hpp
  * This is an implementation of useful kernels and nibbles (simple kernels).
  */
 
@@ -38,30 +38,30 @@ namespace ShUtil {
 using namespace SH;
 
 template <typename T>
-ShProgram ShKernelLight::pointLight() {
-  ShProgram kernel =  SH_BEGIN_PROGRAM() {
-    typename T::InputType SH_DECL(lightColor);
-    typename T::OutputType SH_DECL(irrad) = lightColor;
+Program KernelLight::pointLight() {
+  Program kernel =  SH_BEGIN_PROGRAM() {
+    typename T::InputType DECL(lightColor);
+    typename T::OutputType DECL(irrad) = lightColor;
   } SH_END;
   return kernel;
 }
 
 template<typename T>
-ShProgram ShKernelLight::spotLight() {
-  ShProgram kernel =  SH_BEGIN_PROGRAM() {
-    typename T::InputType SH_DECL(lightColor);
-    ShInputAttrib1f SH_DECL(falloff);
-    ShInputAttrib1f SH_DECL(lightAngle);
-    ShInputVector3f SH_DECL(lightDir);
-    ShInputVector3f SH_DECL(lightVec);
+Program KernelLight::spotLight() {
+  Program kernel =  SH_BEGIN_PROGRAM() {
+    typename T::InputType DECL(lightColor);
+    InputAttrib1f DECL(falloff);
+    InputAttrib1f DECL(lightAngle);
+    InputVector3f DECL(lightDir);
+    InputVector3f DECL(lightVec);
 
-    typename T::OutputType SH_DECL(irrad); 
+    typename T::OutputType DECL(irrad); 
 
     lightDir = normalize(lightDir);
     lightVec = normalize(lightVec);
-    ShAttrib1f t = -lightDir | lightVec;
-    ShAttrib1f cosf = cos(falloff);
-    ShAttrib1f cosang = cos(lightAngle);
+    Attrib1f t = -lightDir | lightVec;
+    Attrib1f cosf = cos(falloff);
+    Attrib1f cosang = cos(lightAngle);
 
     irrad = lightColor;
     irrad *= t > cosang; // if outside light angle, always 0 
@@ -71,24 +71,24 @@ ShProgram ShKernelLight::spotLight() {
 }
 
 template<typename T>
-ShProgram ShKernelLight::texLight2D(const ShBaseTexture2D<T> &tex) {
-  ShProgram kernel =  SH_BEGIN_PROGRAM() {
-    ShInputAttrib1f SH_DECL(scaling);
-    ShInputAttrib1f SH_DECL(lightAngle);
-    ShInputVector3f SH_DECL(lightDir);
-    ShInputVector3f SH_DECL(lightUp);
-    ShInputVector3f SH_DECL(lightVec);
+Program KernelLight::texLight2D(const BaseTexture2D<T> &tex) {
+  Program kernel =  SH_BEGIN_PROGRAM() {
+    InputAttrib1f DECL(scaling);
+    InputAttrib1f DECL(lightAngle);
+    InputVector3f DECL(lightDir);
+    InputVector3f DECL(lightUp);
+    InputVector3f DECL(lightVec);
 
-    typename T::OutputType SH_DECL(irrad); 
+    typename T::OutputType DECL(irrad); 
 
     lightDir = normalize(lightDir);
     lightUp = normalize(lightUp);
     lightVec = normalize(lightVec);
-    ShVector3f lightHoriz = cross(lightDir, lightUp);
+    Vector3f lightHoriz = cross(lightDir, lightUp);
 
-    ShAttrib2f texcoord;
-    texcoord(0) = frac(((-lightVec | lightHoriz) + ShConstAttrib1f(0.5f)) * scaling);
-    texcoord(1) = frac(((-lightVec | lightUp) + ShConstAttrib1f(0.5f)) * scaling);
+    Attrib2f texcoord;
+    texcoord(0) = frac(((-lightVec | lightHoriz) + ConstAttrib1f(0.5f)) * scaling);
+    texcoord(1) = frac(((-lightVec | lightUp) + ConstAttrib1f(0.5f)) * scaling);
 
     irrad = tex(texcoord); 
   } SH_END;

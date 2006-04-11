@@ -20,15 +20,15 @@
 #ifndef SHPNGIMAGEIMPL_HPP
 #define SHPNGIMAGEIMPL_HPP
 
-#include "sh/ShDllExport.hpp"
-#include "ShPngImage.hpp"
+#include "sh/DllExport.hpp"
+#include "PngImage.hpp"
 
 namespace ShUtil {
 
 using namespace SH;
 using namespace std;
 
-struct ShPngImage {
+struct PngImage {
   static float* read_PNG(const string& filename, int& width, int& height, 
                          int& elements);
   static void write_PNG(const string& filename, const float* data, 
@@ -39,7 +39,7 @@ struct ShPngImage {
 
 /// Copy the contents of the image into a float array
 template<typename T>
-float* float_copy(const ShTypedImage<T>& image)
+float* float_copy(const TypedImage<T>& image)
 {
   int array_length = image.width() * image.height() * image.elements();
   float* float_data = new float[array_length];
@@ -55,10 +55,10 @@ float* float_copy(const ShTypedImage<T>& image)
 // Public functions
 
 template<typename T>
-void load_PNG(ShTypedImage<T>& image, const string& filename)
+void load_PNG(TypedImage<T>& image, const string& filename)
 {
   int width, height, depth;
-  float* png_data = ShPngImage::read_PNG(filename, width, height, depth);
+  float* png_data = PngImage::read_PNG(filename, width, height, depth);
 
   image.set_size(width, height, depth);
   T* storage_data = image.data();
@@ -72,18 +72,18 @@ void load_PNG(ShTypedImage<T>& image, const string& filename)
 }
 
 template<typename T>
-void save_PNG(const ShTypedImage<T>& image, const string& filename, int inverse_alpha)
+void save_PNG(const TypedImage<T>& image, const string& filename, int inverse_alpha)
 {
   float* float_data = float_copy(image);
-  ShPngImage::write_PNG(filename, float_data, inverse_alpha, image.width(), image.height(), image.elements());
+  PngImage::write_PNG(filename, float_data, inverse_alpha, image.width(), image.height(), image.elements());
   delete [] float_data;
 }
 
 template<typename T>
-void save_PNG16(const ShTypedImage<T>& image, const string& filename, int inverse_alpha)
+void save_PNG16(const TypedImage<T>& image, const string& filename, int inverse_alpha)
 {
   float* float_data = float_copy(image);
-  ShPngImage::write_PNG16(filename, float_data, inverse_alpha, image.width(), image.height(), image.elements());
+  PngImage::write_PNG16(filename, float_data, inverse_alpha, image.width(), image.height(), image.elements());
   delete [] float_data;
 }
 

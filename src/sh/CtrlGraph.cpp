@@ -17,43 +17,43 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#include "ShCtrlGraph.hpp"
+#include "CtrlGraph.hpp"
 #include <iostream>
 #include <cassert>
 #include <vector>
 #include <string>
-#include "ShBasicBlock.hpp"
-#include "ShToken.hpp"
-#include "ShTokenizer.hpp"
-#include "ShUtility.hpp"
-#include "ShParser.hpp"
-#include "ShVariable.hpp"
-#include "ShDebug.hpp"
+#include "BasicBlock.hpp"
+#include "Token.hpp"
+#include "Tokenizer.hpp"
+#include "Utility.hpp"
+#include "Parser.hpp"
+#include "Variable.hpp"
+#include "Debug.hpp"
 
 namespace SH {
 
-ShCtrlGraphNode::ShCtrlGraphNode()
+CtrlGraphNode::CtrlGraphNode()
   : follower(0), m_marked(false)
 {
 }
 
-ShCtrlGraphNode::~ShCtrlGraphNode() {
+CtrlGraphNode::~CtrlGraphNode() {
 }
 
-std::ostream& ShCtrlGraphNode::print(std::ostream& out, int indent) const
+std::ostream& CtrlGraphNode::print(std::ostream& out, int indent) const
 {
   if (marked()) return out;
   mark();
   
   if (block) block->print(out, indent);
   if (follower) {
-    shPrintIndent(out, indent);
+    printIndent(out, indent);
     out << "->" << std::endl;
     follower->print(out, indent + 2);
   }
   for (SuccessorList::const_iterator I = successors.begin();
        I != successors.end(); ++I) {
-    shPrintIndent(out, indent);
+    printIndent(out, indent);
     if (!I->cond.null()) {
       out << "[" << I->cond.name() << "]" << std::endl;
     }
@@ -63,7 +63,7 @@ std::ostream& ShCtrlGraphNode::print(std::ostream& out, int indent) const
   return out;
 }
 
-std::ostream& ShCtrlGraphNode::graphvizDump(std::ostream& out) const
+std::ostream& CtrlGraphNode::graphvizDump(std::ostream& out) const
 {
   if (marked()) return out;
   mark();
@@ -108,17 +108,17 @@ std::ostream& ShCtrlGraphNode::graphvizDump(std::ostream& out) const
   return out;
 }
 
-bool ShCtrlGraphNode::marked() const
+bool CtrlGraphNode::marked() const
 {
   return m_marked;
 }
 
-void ShCtrlGraphNode::mark() const
+void CtrlGraphNode::mark() const
 {
   m_marked = true;
 }
 
-void ShCtrlGraphNode::clearMarked() const
+void CtrlGraphNode::clearMarked() const
 {
   if (!marked()) return ;
   m_marked = false;
@@ -131,24 +131,24 @@ void ShCtrlGraphNode::clearMarked() const
   }
 }
 
-void ShCtrlGraphNode::append(const ShPointer<ShCtrlGraphNode>& node)
+void CtrlGraphNode::append(const Pointer<CtrlGraphNode>& node)
 {
   if (!node) return;
   assert(!follower);
   follower = node;
 }
 
-void ShCtrlGraphNode::append(const ShPointer<ShCtrlGraphNode>& node,
-                             ShVariable cond)
+void CtrlGraphNode::append(const Pointer<CtrlGraphNode>& node,
+                             Variable cond)
 {
-  if (node) successors.push_back(ShCtrlGraphBranch(node, cond));
+  if (node) successors.push_back(CtrlGraphBranch(node, cond));
 }
 
-ShCtrlGraphNodePtr ShCtrlGraphNode::split(ShBasicBlock::ShStmtList::iterator stmt) 
+CtrlGraphNodePtr CtrlGraphNode::split(BasicBlock::StmtList::iterator stmt) 
 {
   // make a new node to hold the statements after stmt
   // and move over the successors/follower info
-  ShCtrlGraphNodePtr after = new ShCtrlGraphNode();
+  CtrlGraphNodePtr after = new CtrlGraphNode();
   after->successors = successors;
   after->follower = follower;
   successors.clear();
@@ -158,122 +158,122 @@ ShCtrlGraphNodePtr ShCtrlGraphNode::split(ShBasicBlock::ShStmtList::iterator stm
   after->predecessors.push_back(this);
 
   // make a block for after and split up the statements
-  after->block = new ShBasicBlock();
+  after->block = new BasicBlock();
   ++stmt;
   after->block->splice(after->block->begin(), block->m_statements, stmt);
 
   return after;
 }
 
-void ShCtrlGraphNode::addDecl(const ShVariableNodePtr& node)
+void CtrlGraphNode::addDecl(const VariableNodePtr& node)
 {
   m_decls.insert(node);
 }
 
-bool ShCtrlGraphNode::hasDecl(const ShVariableNodePtr& node) const
+bool CtrlGraphNode::hasDecl(const VariableNodePtr& node) const
 {
   return m_decls.find(node) != m_decls.end();
 }
 
-void ShCtrlGraphNode::insert_decls(DeclIt f, DeclIt l)
+void CtrlGraphNode::insert_decls(DeclIt f, DeclIt l)
 {
   m_decls.insert(f, l);
 }
-ShCtrlGraphNode::DeclIt ShCtrlGraphNode::decl_begin() const
+CtrlGraphNode::DeclIt CtrlGraphNode::decl_begin() const
 {
   return m_decls.begin();
 }
 
-ShCtrlGraphNode::DeclIt ShCtrlGraphNode::decl_end() const
+CtrlGraphNode::DeclIt CtrlGraphNode::decl_end() const
 {
   return m_decls.end();
 }
 
-ShCtrlGraphBranch::ShCtrlGraphBranch(const ShPointer<ShCtrlGraphNode>& node,
-                                     ShVariable cond)
+CtrlGraphBranch::CtrlGraphBranch(const Pointer<CtrlGraphNode>& node,
+                                     Variable cond)
   : node(node), cond(cond)
 {
 }
 
-ShCtrlGraph::ShCtrlGraph(const ShCtrlGraphNodePtr& head, const ShCtrlGraphNodePtr& tail)
+CtrlGraph::CtrlGraph(const CtrlGraphNodePtr& head, const CtrlGraphNodePtr& tail)
   : m_entry(head),
     m_exit(tail)
 {
 }
 
-ShCtrlGraph::ShCtrlGraph(const ShBlockListPtr& blocks)
-  : m_entry(new ShCtrlGraphNode()),
-    m_exit(new ShCtrlGraphNode())
+CtrlGraph::CtrlGraph(const BlockListPtr& blocks)
+  : m_entry(new CtrlGraphNode()),
+    m_exit(new CtrlGraphNode())
 {
-  ShCtrlGraphNodePtr head, tail;
+  CtrlGraphNodePtr head, tail;
 
-  ShParser::instance()->parse(head, tail, blocks);
+  Parser::instance()->parse(head, tail, blocks);
 
   if(!head && !tail) {
     m_entry->append(m_exit);
   } else {
-    SH_DEBUG_ASSERT(head && tail);
+    DEBUG_ASSERT(head && tail);
     m_entry->append(head);
     tail->append(m_exit);
   }
 }
 
-ShCtrlGraph::~ShCtrlGraph()
+CtrlGraph::~CtrlGraph()
 {
 }
 
-ShCtrlGraphNodePtr ShCtrlGraph::entry() const
+CtrlGraphNodePtr CtrlGraph::entry() const
 {
   return m_entry;
 }
 
-ShCtrlGraphNodePtr ShCtrlGraph::exit() const
+CtrlGraphNodePtr CtrlGraph::exit() const
 {
   return m_exit;
 }
 
-ShCtrlGraphNodePtr ShCtrlGraph::prependEntry() {
-  ShCtrlGraphNodePtr newEntry = new ShCtrlGraphNode();
-  ShCtrlGraphNodePtr oldEntry = m_entry;
+CtrlGraphNodePtr CtrlGraph::prependEntry() {
+  CtrlGraphNodePtr newEntry = new CtrlGraphNode();
+  CtrlGraphNodePtr oldEntry = m_entry;
   newEntry->append(oldEntry);
   newEntry->mark();
   
   if( oldEntry->block ) {
-    SH_DEBUG_WARN( "Old entry to control graph did not have an empty block!");
+    DEBUG_WARN( "Old entry to control graph did not have an empty block!");
   } else {
-    oldEntry->block = new ShBasicBlock();
+    oldEntry->block = new BasicBlock();
   }
   m_entry = newEntry;
   return oldEntry;
 }
 
-ShCtrlGraphNodePtr ShCtrlGraph::appendExit() {
-  ShCtrlGraphNodePtr newExit = new ShCtrlGraphNode();
-  ShCtrlGraphNodePtr oldExit = m_exit;
+CtrlGraphNodePtr CtrlGraph::appendExit() {
+  CtrlGraphNodePtr newExit = new CtrlGraphNode();
+  CtrlGraphNodePtr oldExit = m_exit;
   oldExit->append(newExit);
   
   if( oldExit->block ) {
-    SH_DEBUG_WARN( "Old exit to control graph did not have an empty block!");
+    DEBUG_WARN( "Old exit to control graph did not have an empty block!");
   } else {
-    oldExit->block = new ShBasicBlock();
+    oldExit->block = new BasicBlock();
   }
   m_exit = newExit;
   return oldExit;
 }
 
-void ShCtrlGraph::prepend(ShPointer<ShCtrlGraph> cfg)
+void CtrlGraph::prepend(Pointer<CtrlGraph> cfg)
 {
   cfg->exit()->append(m_entry);
   m_entry = cfg->entry();
 }
 
-void ShCtrlGraph::append(ShPointer<ShCtrlGraph> cfg)
+void CtrlGraph::append(Pointer<CtrlGraph> cfg)
 {
   m_exit->append(cfg->entry());
   m_exit = cfg->exit();
 }
 
-std::ostream& ShCtrlGraph::print(std::ostream& out, int indent) const
+std::ostream& CtrlGraph::print(std::ostream& out, int indent) const
 {
   if (m_entry) {
     m_entry->clearMarked();
@@ -283,7 +283,7 @@ std::ostream& ShCtrlGraph::print(std::ostream& out, int indent) const
   return out;
 }
 
-std::ostream& ShCtrlGraph::graphvizDump(std::ostream& out) const
+std::ostream& CtrlGraph::graphvizDump(std::ostream& out) const
 {
   out << "digraph control {" << std::endl;
   
@@ -297,17 +297,17 @@ std::ostream& ShCtrlGraph::graphvizDump(std::ostream& out) const
 }
 
 struct ClearPreds {
-  void operator()(const ShCtrlGraphNodePtr& node) {
+  void operator()(const CtrlGraphNodePtr& node) {
     if (!node) return;
     node->predecessors.clear();
   }
 };
 
 struct ComputePreds {
-  void operator()(ShCtrlGraphNode* node) {
+  void operator()(CtrlGraphNode* node) {
     if (!node) return;
     
-    for (ShCtrlGraphNode::SuccessorList::iterator I = node->successors.begin();
+    for (CtrlGraphNode::SuccessorList::iterator I = node->successors.begin();
          I != node->successors.end(); ++I) {
       if (I->node) I->node->predecessors.push_back(node);
     }
@@ -316,7 +316,7 @@ struct ComputePreds {
 };
 
 
-void ShCtrlGraph::computePredecessors()
+void CtrlGraph::computePredecessors()
 {
   ClearPreds clear;
   dfs(clear);
@@ -325,7 +325,7 @@ void ShCtrlGraph::computePredecessors()
   dfs(comp);
 }
 
-typedef std::map<ShCtrlGraphNodePtr, ShCtrlGraphNodePtr> CtrlGraphCopyMap;
+typedef std::map<CtrlGraphNodePtr, CtrlGraphNodePtr> CtrlGraphCopyMap;
 
 struct CtrlGraphCopier {
   CtrlGraphCopier(CtrlGraphCopyMap& copyMap)
@@ -336,44 +336,44 @@ struct CtrlGraphCopier {
   // assignment operator could not be generated: declaration only
   CtrlGraphCopier& operator=(CtrlGraphCopier const&);
   
-  void operator()(const ShCtrlGraphNodePtr& node) {
+  void operator()(const CtrlGraphNodePtr& node) {
     if (!node) return;
-    ShCtrlGraphNodePtr newNode = new ShCtrlGraphNode(*node);
+    CtrlGraphNodePtr newNode = new CtrlGraphNode(*node);
     copyMap[node] = newNode;
   }
 
   CtrlGraphCopyMap& copyMap;
 };
 
-void ShCtrlGraph::copy(ShCtrlGraphNodePtr& newHead, ShCtrlGraphNodePtr& newTail) const
+void CtrlGraph::copy(CtrlGraphNodePtr& newHead, CtrlGraphNodePtr& newTail) const
 {
   CtrlGraphCopyMap copyMap;
   copyMap[0] = 0;
   
   CtrlGraphCopier copier(copyMap);
-  SH_DEBUG_ASSERT(m_entry);
-  SH_DEBUG_ASSERT(m_exit); // catch empty tails
+  DEBUG_ASSERT(m_entry);
+  DEBUG_ASSERT(m_exit); // catch empty tails
   m_entry->clearMarked();
   m_entry->dfs(copier);
 
   // Replace the successors and followers in the new graph with their new equivalents
   for (CtrlGraphCopyMap::iterator I = copyMap.begin(); I != copyMap.end(); ++I) {
-    ShCtrlGraphNodePtr node = I->second; // Get the new node
+    CtrlGraphNodePtr node = I->second; // Get the new node
     if (!node) continue;
-    for (ShCtrlGraphNode::SuccessorList::iterator J = node->successors.begin();
+    for (CtrlGraphNode::SuccessorList::iterator J = node->successors.begin();
          J != node->successors.end(); ++J) {
       J->node = copyMap[J->node];
     }
     node->follower = copyMap[node->follower];
     if (node->block) {
-      ShBasicBlockPtr new_block = new ShBasicBlock(*node->block);
+      BasicBlockPtr new_block = new BasicBlock(*node->block);
       node->block = new_block;
     }
   }
   newHead = copyMap[m_entry];
   newTail = copyMap[m_exit];
-  SH_DEBUG_ASSERT(newHead);
-  SH_DEBUG_ASSERT(newTail);
+  DEBUG_ASSERT(newHead);
+  DEBUG_ASSERT(newTail);
 
   m_entry->clearMarked();
 }

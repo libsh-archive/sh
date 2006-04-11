@@ -22,9 +22,9 @@
 
 #include <string>
 #include "GlBackend.hpp"
-#include "ShBackend.hpp"
-#include "ShProgram.hpp"
-#include "ShException.hpp"
+#include "Backend.hpp"
+#include "Program.hpp"
+#include "Exception.hpp"
 
 namespace shgl {
 
@@ -32,10 +32,10 @@ class GlslCodeStrategy : public CodeStrategy {
 public:
   GlslCodeStrategy(void);
   
-  SH::ShBackendCodePtr generate(const std::string& target,
-                                const SH::ShProgramNodeCPtr& shader,
+  SH::BackendCodePtr generate(const std::string& target,
+                                const SH::ProgramNodeCPtr& shader,
                                 TextureStrategy* textures);
-  SH::ShBackendSetPtr generate_set(const SH::ShProgramSet& s);
+  SH::BackendSetPtr generate_set(const SH::ProgramSet& s);
   bool use_default_set() const;
 
   void unbind_all_programs();
@@ -46,16 +46,16 @@ public:
 
 unsigned int glslTarget(const std::string& unit);
 
-class GlslException : public SH::ShBackendException {
+class GlslException : public SH::BackendException {
 public:
   GlslException(const std::string& message);
 };
 
-enum GlslProgramType { SH_GLSL_FP, SH_GLSL_VP }; 
+enum GlslProgramType { GLSL_FP, GLSL_VP }; 
 
 void print_infolog(GLhandleARB obj, std::ostream& out = std::cerr);
 void print_shader_source(GLhandleARB shader, std::ostream& out = std::cerr);
-std::string glsl_typename(SH::ShValueType type, int size);
+std::string glsl_typename(SH::ValueType type, int size);
 }
 
 #endif

@@ -17,7 +17,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#include "ShLib.hpp" // ShLibNoise needs to be included from within ShLib
+#include "Lib.hpp" // LibNoise needs to be included from within Lib
 
 #ifndef SHLIBNOISE_HPP
 #define SHLIBNOISE_HPP
@@ -40,33 +40,33 @@ namespace SH {
  * This appears to reduce correlation in the output components when input components are 
  * similar, but the behaviour needs to be studied further.
  *
- * \sa template<int N, int M, typename T> ShGeneric<N, T> hashlcg(const ShGeneric<M, T>& p)
+ * \sa template<int N, int M, typename T> Generic<N, T> hashlcg(const Generic<M, T>& p)
  */
 template<int N, int M, typename T>
-ShGeneric<N, T> hash(const ShGeneric<M, T>& p); 
+Generic<N, T> hash(const Generic<M, T>& p); 
 
 template<int N, int M, typename T>
-ShGeneric<N, T> texhash(const ShGeneric<M, T>& p); 
+Generic<N, T> texhash(const Generic<M, T>& p); 
 
 // Returns summed octaves of cell noise 
 // @{
 template<int N, int M, typename T>
-ShGeneric<N, T> cellnoise(const ShGeneric<M, T> &p, bool useTexture = true);
+Generic<N, T> cellnoise(const Generic<M, T> &p, bool useTexture = true);
 
 template<int N, int M, int K, typename T1, typename T2>
-ShGeneric<N, CT1T2> cellnoise(const ShGeneric<M, T1> &p, 
-                              const ShGeneric<K, T2> &amp, 
+Generic<N, CT1T2> cellnoise(const Generic<M, T1> &p, 
+                              const Generic<K, T2> &amp, 
                               bool useTexture = true);
 // @}
 
 // Returns summed octaves of signed cell noise 
 // @{
 template<int N, int M, typename T>
-ShGeneric<N, T> scellnoise(const ShGeneric<M, T> &p, bool useTexture = true);
+Generic<N, T> scellnoise(const Generic<M, T> &p, bool useTexture = true);
 
 template<int N, int M, int K, typename T1, typename T2>
-ShGeneric<N, CT1T2> scellnoise(const ShGeneric<M, T1> &p, 
-                               const ShGeneric<K, T2> &amp,
+Generic<N, CT1T2> scellnoise(const Generic<M, T1> &p, 
+                               const Generic<K, T2> &amp,
                                bool useTexture = true); 
 // @}
 // @}
@@ -80,66 +80,66 @@ ShGeneric<N, CT1T2> scellnoise(const ShGeneric<M, T1> &p,
 // Returns summed octaves of Perlin noise
 // @{
 template<int N, int M, typename T>
-ShGeneric<N, T> noise(const ShGeneric<M, T> &p, bool useTexture = true);
+Generic<N, T> noise(const Generic<M, T> &p, bool useTexture = true);
 
 template<int N, int M, int K, typename T1, typename T2>
-ShGeneric<N, CT1T2> noise(const ShGeneric<M, T1> &p,
-                          const ShGeneric<K, T2> &amp,
+Generic<N, CT1T2> noise(const Generic<M, T1> &p,
+                          const Generic<K, T2> &amp,
                           bool useTexture = true);
 // @}
 
 // Returns summed octaves of signed Perlin noise
 // @{
 template<int N, int M, typename T>
-ShGeneric<N, T> snoise(const ShGeneric<M, T> &p, bool useTexture = true);
+Generic<N, T> snoise(const Generic<M, T> &p, bool useTexture = true);
 
 template<int N, int M, int K, typename T1, typename T2>
-ShGeneric<N, CT1T2> snoise(const ShGeneric<M, T1> &p,
-                          const ShGeneric<K, T2> &amp,
+Generic<N, CT1T2> snoise(const Generic<M, T1> &p,
+                          const Generic<K, T2> &amp,
                           bool useTexture = true);
 // @}
 
 // Returns summed octaves of Perlin improved noise
 // @{
 template<int N, int M, typename T>
-ShGeneric<N, T> perlin(const ShGeneric<M, T> &p, bool useTexture = true);
+Generic<N, T> perlin(const Generic<M, T> &p, bool useTexture = true);
 
 template<int N, int M, int K, typename T1, typename T2>
-ShGeneric<N, CT1T2> perlin(const ShGeneric<M, T1> &p,
-                           const ShGeneric<K, T2> &amp,
+Generic<N, CT1T2> perlin(const Generic<M, T1> &p,
+                           const Generic<K, T2> &amp,
                            bool useTexture = true);
 // @}
 
 // Returns summed octaves of signed Perlin improved noise
 // @{
 template<int N, int M, typename T>
-ShGeneric<N, T> sperlin(const ShGeneric<M, T> &p, bool useTexture = true);
+Generic<N, T> sperlin(const Generic<M, T> &p, bool useTexture = true);
 
 template<int N, int M, int K, typename T1, typename T2>
-ShGeneric<N, CT1T2> sperlin(const ShGeneric<M, T1> &p, 
-                            const ShGeneric<K, T2> &amp, 
+Generic<N, CT1T2> sperlin(const Generic<M, T1> &p, 
+                            const Generic<K, T2> &amp, 
                             bool useTexture = true);
 // @}
 
 // Returns summed octaves of bilinearly interpolated cell noise 
 // @{
 template<int N, int M, typename T>
-ShGeneric<N, T> linnoise(const ShGeneric<M, T> &p, bool useTexture = true);
+Generic<N, T> linnoise(const Generic<M, T> &p, bool useTexture = true);
 
 template<int N, int M, int K, typename T1, typename T2>
-ShGeneric<N, CT1T2> linnoise(const ShGeneric<M, T1> &p, 
-                             const ShGeneric<K, T2> &amp, 
+Generic<N, CT1T2> linnoise(const Generic<M, T1> &p, 
+                             const Generic<K, T2> &amp, 
                              bool useTexture = true);
 // @}
 
 // Returns summed octaves of bilinearly interpolated signed cell noise 
 // @{
 template<int N, int M, typename T>
-ShGeneric<N, T> slinnoise(const ShGeneric<M, T> &p, bool useTexture = true);
+Generic<N, T> slinnoise(const Generic<M, T> &p, bool useTexture = true);
 
 template<int N, int M, int K, typename T1, typename T2>
-ShGeneric<N, CT1T2> slinnoise(const ShGeneric<M, T1> &p, 
-                              const ShGeneric<K, T2> &amp,
+Generic<N, CT1T2> slinnoise(const Generic<M, T1> &p, 
+                              const Generic<K, T2> &amp,
                               bool useTexture = true); 
 // @}
 
@@ -154,11 +154,11 @@ ShGeneric<N, CT1T2> slinnoise(const ShGeneric<M, T1> &p,
 // useTexture determines whether procedureal hash is used or texture lookup
 // @{
 template<int N, int M, typename T>
-ShGeneric<N, T> turbulence(const ShGeneric<M, T> &p, bool useTexture = true);
+Generic<N, T> turbulence(const Generic<M, T> &p, bool useTexture = true);
 
 template<int N, int M, int K, typename T1, typename T2>
-ShGeneric<N, CT1T2> turbulence(const ShGeneric<M, T1> &p, 
-                               const ShGeneric<K, T2> &amp, 
+Generic<N, CT1T2> turbulence(const Generic<M, T1> &p, 
+                               const Generic<K, T2> &amp, 
                                bool useTexture = true);
 // @}
 
@@ -166,11 +166,11 @@ ShGeneric<N, CT1T2> turbulence(const ShGeneric<M, T1> &p,
  * @{
  */
 template<int N, int M, typename T>
-ShGeneric<N, T> sturbulence(const ShGeneric<M, T> &p, bool useTexture = true);
+Generic<N, T> sturbulence(const Generic<M, T> &p, bool useTexture = true);
 
 template<int N, int M, int K, typename T1, typename T2>
-ShGeneric<N, CT1T2> sturbulence(const ShGeneric<M, T1> &p,
-                                const ShGeneric<K, T2> &amp, 
+Generic<N, CT1T2> sturbulence(const Generic<M, T1> &p,
+                                const Generic<K, T2> &amp, 
                                 bool useTexture = true);
 // @}
 
@@ -179,6 +179,6 @@ ShGeneric<N, CT1T2> sturbulence(const ShGeneric<M, T1> &p,
 } // namespace SH
 #endif // _WIN32
 
-#include "ShLibNoiseImpl.hpp"
+#include "LibNoiseImpl.hpp"
 
 #endif // SHLIBNOISE_HPP

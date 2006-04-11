@@ -21,9 +21,9 @@
 #define GLSLVARIABLEMAP_HPP
 
 #include "Glsl.hpp"
-#include "ShVariableNode.hpp"
-#include "ShProgramNode.hpp"
-#include "ShInternals.hpp"
+#include "VariableNode.hpp"
+#include "ProgramNode.hpp"
+#include "Internals.hpp"
 #include "GlslVariable.hpp"
 #include <map>
 #include <set>
@@ -36,7 +36,7 @@ namespace shgl {
 struct GlslBindingSpecs {
   GlslVarBinding binding;
   int max_bindings;
-  SH::ShSemanticType semantic_type;
+  SH::SemanticType semantic_type;
   bool allow_generic;
 };
 
@@ -48,13 +48,13 @@ struct GlslVariableDeclaration {
 class GlslVariableMap {
 public:
   typedef std::list<GlslVariableDeclaration> DeclarationList;
-  typedef std::list<SH::ShVariableNodePtr> NodeList;
+  typedef std::list<SH::VariableNodePtr> NodeList;
 
 private:
-  typedef std::map<const SH::ShVariableNodePtr, GlslVariable> VarMap;
+  typedef std::map<const SH::VariableNodePtr, GlslVariable> VarMap;
 
-  SH::ShProgramNode* m_shader;
-  SH::ShVarTransformMap* m_original_vars;
+  SH::ProgramNode* m_shader;
+  SH::VarTransformMap* m_original_vars;
   GlslProgramType m_unit;
 
   unsigned m_nb_uniform_variables;
@@ -71,36 +71,36 @@ private:
 
   enum BuiltInPass {USER_INDEX, EXACT_SEMANTIC, GENERIC };
 
-  void allocate_builtin(const SH::ShVariableNodePtr& node,
+  void allocate_builtin(const SH::VariableNodePtr& node,
                         const GlslBindingSpecs* specs, 
                         std::map<GlslVarBinding, std::set<int> >& bindings,
                         BuiltInPass pass_type);
   void allocate_builtin_inputs();
   void allocate_builtin_outputs();
-  void allocate_generic_vertex_input(const SH::ShVariableNodePtr& node, int index);
+  void allocate_generic_vertex_input(const SH::VariableNodePtr& node, int index);
   void allocate_generic_vertex_inputs();
-  void allocate_temp(const SH::ShVariableNodePtr& node);
+  void allocate_temp(const SH::VariableNodePtr& node);
   
-  void map_insert(const SH::ShVariableNodePtr& node, GlslVariable var);
+  void map_insert(const SH::VariableNodePtr& node, GlslVariable var);
 
-  std::string real_resolve(const SH::ShVariable& v, const std::string& array_index, int index);
-  std::string swizzle(const SH::ShVariable& v, int var_size, bool force = false) const;
-  std::string repeat_scalar(const std::string& name, SH::ShValueType type, int size) const;
+  std::string real_resolve(const SH::Variable& v, const std::string& array_index, int index);
+  std::string swizzle(const SH::Variable& v, int var_size, bool force = false) const;
+  std::string repeat_scalar(const std::string& name, SH::ValueType type, int size) const;
 
 public:
-  GlslVariableMap(SH::ShProgramNode* shader, SH::ShVarTransformMap* original_vars, 
+  GlslVariableMap(SH::ProgramNode* shader, SH::VarTransformMap* original_vars, 
                   GlslProgramType unit);
   ~GlslVariableMap();
 
-  std::string resolve(const SH::ShVariable& v, int index = -1);
-  std::string resolve(const SH::ShVariable& v, const SH::ShVariable& index);
+  std::string resolve(const SH::Variable& v, int index = -1);
+  std::string resolve(const SH::Variable& v, const SH::Variable& index);
 
-  const GlslVariable& variable(const SH::ShVariableNodePtr& node)
+  const GlslVariable& variable(const SH::VariableNodePtr& node)
   {
     return m_varmap[node];
   }
 
-  bool contains(const SH::ShVariableNodePtr& node) const
+  bool contains(const SH::VariableNodePtr& node) const
   {
     return (m_varmap.find(node) != m_varmap.end());
   }
@@ -110,7 +110,7 @@ public:
   /// This version is only necessary since GlslCode needs very fast access to
   /// this map when updating uniforms and thus we can't afford the double-
   /// search involved in calling contains followed by variable.
-  bool contains(const SH::ShVariableNodePtr& node, const GlslVariable*& var) const
+  bool contains(const SH::VariableNodePtr& node, const GlslVariable*& var) const
   {
     VarMap::const_iterator i = m_varmap.find(node);
     if (i != m_varmap.end()) {

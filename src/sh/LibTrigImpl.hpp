@@ -20,112 +20,112 @@
 #ifndef SHLIBTRIGIMPL_HPP
 #define SHLIBTRIGIMPL_HPP
 
-#include "ShLibTrig.hpp"
-#include "ShAttrib.hpp"
-#include "ShInstructions.hpp"
+#include "LibTrig.hpp"
+#include "Attrib.hpp"
+#include "Instructions.hpp"
 
 namespace SH {
 
 template<int N, typename T>
-ShGeneric<N, T> acos(const ShGeneric<N, T>& var)
+Generic<N, T> acos(const Generic<N, T>& var)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  Attrib<N, TEMP, T> t;
   shACOS(t, var);
   return t;
 }
 
 template<int N, typename T>
-ShGeneric<N, T> asin(const ShGeneric<N, T>& var)
+Generic<N, T> asin(const Generic<N, T>& var)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  Attrib<N, TEMP, T> t;
   shASIN(t, var);
   return t;
 }
 
 template<int N, typename T>
-ShGeneric<N, T> atan(const ShGeneric<N, T>& var)
+Generic<N, T> atan(const Generic<N, T>& var)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  Attrib<N, TEMP, T> t;
   shATAN(t, var);
   return t;
 }
 
 template<int N, typename T>
-ShGeneric<N, T> atan2(const ShGeneric<N, T>& y, const ShGeneric<N, T>& x)
+Generic<N, T> atan2(const Generic<N, T>& y, const Generic<N, T>& x)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  Attrib<N, TEMP, T> t;
   shATAN2(t, y, x);
   return t;
 }
 
 template<int N, typename T>
-ShGeneric<N, T> cos(const ShGeneric<N, T>& var)
+Generic<N, T> cos(const Generic<N, T>& var)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  Attrib<N, TEMP, T> t;
   shCOS(t, var);
   return t;
 }
 
 template<int N, typename T>
-ShGeneric<N, T> sin(const ShGeneric<N, T>& var)
+Generic<N, T> sin(const Generic<N, T>& var)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  Attrib<N, TEMP, T> t;
   shSIN(t, var);
   return t;
 }
 
 template<int N, typename T>
-ShGeneric<N, T> tan(const ShGeneric<N, T>& var)
+Generic<N, T> tan(const Generic<N, T>& var)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  Attrib<N, TEMP, T> t;
   shTAN(t, var);
   return t;
 }
 
 template<int N, typename T>
-ShGeneric<N, T> cosh(const ShGeneric<N, T>& var)
+Generic<N, T> cosh(const Generic<N, T>& var)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  Attrib<N, TEMP, T> t;
   shCOSH(t, var);
   return t;
 }
 
 template<int N, typename T>
-ShGeneric<N, T> sinh(const ShGeneric<N, T>& var)
+Generic<N, T> sinh(const Generic<N, T>& var)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  Attrib<N, TEMP, T> t;
   shSINH(t, var);
   return t;
 }
 
 template<int N, typename T>
-ShGeneric<N, T> tanh(const ShGeneric<N, T>& var)
+Generic<N, T> tanh(const Generic<N, T>& var)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  Attrib<N, TEMP, T> t;
   shTANH(t, var);
   return t;
 }
 
 template<int N, typename T>
-ShGeneric<N, T> acosh(const ShGeneric<N, T>& var)
+Generic<N, T> acosh(const Generic<N, T>& var)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  Attrib<N, TEMP, T> t;
   shACOSH(t, var);
   return t;
 }
 
 template<int N, typename T>
-ShGeneric<N, T> asinh(const ShGeneric<N, T>& var)
+Generic<N, T> asinh(const Generic<N, T>& var)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  Attrib<N, TEMP, T> t;
   shASINH(t, var);
   return t;
 }
 
 template<int N, typename T>
-ShGeneric<N, T> atanh(const ShGeneric<N, T>& var)
+Generic<N, T> atanh(const Generic<N, T>& var)
 {
-  ShAttrib<N, SH_TEMP, T> t;
+  Attrib<N, TEMP, T> t;
   shATANH(t, var);
   return t;
 }

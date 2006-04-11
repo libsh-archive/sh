@@ -20,45 +20,45 @@
 #ifndef SHTEXDATAIMPL_HPP
 #define SHTEXDATAIMPL_HPP
 
-#include "ShTexData.hpp"
-#include "ShError.hpp"
-#include "ShContext.hpp"
+#include "TexData.hpp"
+#include "Error.hpp"
+#include "Context.hpp"
 
 namespace SH {
 
 template<typename T, int N, typename T2>
-ShTexData<T, N, T2>::ShTexData(const ShTextureNodePtr& node, const ShGeneric<N, T2>& coords, bool indexed)
+TexData<T, N, T2>::TexData(const TextureNodePtr& node, const Generic<N, T2>& coords, bool indexed)
 {
-  if (ShContext::current()->parsing()) {
-    ShVariable tex_var(node);
-    ShStatement stmt(*this, tex_var, indexed ? SH_OP_TEXI : SH_OP_TEX, coords);
-    ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
+  if (Context::current()->parsing()) {
+    Variable tex_var(node);
+    Statement stmt(*this, tex_var, indexed ? OP_TEXI : OP_TEX, coords);
+    Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
   } else {
-    SH_DEBUG_WARN("Immediate mode texture lookup is not yet implemented.");
+    DEBUG_WARN("Immediate mode texture lookup is not yet implemented.");
     // TODO
   }
 }
 
 template<typename T, int N, typename T2>
-ShTexData<T, N, T2>::ShTexData(const ShTextureNodePtr& node, const ShGeneric<N, T2>& coords,
-                               const ShGeneric<N, T2>& dx, const ShGeneric<N, T2>& dy)
+TexData<T, N, T2>::TexData(const TextureNodePtr& node, const Generic<N, T2>& coords,
+                               const Generic<N, T2>& dx, const Generic<N, T2>& dy)
 {
-  if (ShContext::current()->parsing()) {
-    ShVariable tex_var(node);
-    ShStatement stmt(*this, SH_OP_TEXD, tex_var, coords, join(dx, dy));
-    ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
+  if (Context::current()->parsing()) {
+    Variable tex_var(node);
+    Statement stmt(*this, OP_TEXD, tex_var, coords, join(dx, dy));
+    Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
   } else {
-    shError(ShScopeException("Cannot do derivative texture lookup in immediate mode"));
+    error(ScopeException("Cannot do derivative texture lookup in immediate mode"));
   }
 }
 
 template<typename T, int N, typename T2>
-ShTexData<T, N, T2>& ShTexData<T, N, T2>::operator=(const T& a)
+TexData<T, N, T2>& TexData<T, N, T2>::operator=(const T& a)
 {
-  if (ShContext::current()->parsing()) {
-    shError(ShScopeException("Cannot assign to a texture in retained mode"));
+  if (Context::current()->parsing()) {
+    error(ScopeException("Cannot assign to a texture in retained mode"));
   } else {
-    SH_DEBUG_WARN("Immediate mode texture assignment is not yet implemented.");
+    DEBUG_WARN("Immediate mode texture assignment is not yet implemented.");
     // TODO
   }
   return *this;

@@ -23,11 +23,11 @@
 #include <vector>
 #include <iosfwd>
 #include <string>
-#include "ShDllExport.hpp"
-#include "ShRefCount.hpp"
-#include "ShProgram.hpp"
-#include "ShProgramSet.hpp"
-#include "ShVariableNode.hpp"
+#include "DllExport.hpp"
+#include "RefCount.hpp"
+#include "Program.hpp"
+#include "ProgramSet.hpp"
+#include "VariableNode.hpp"
 
 #if defined(_WIN32)
 #elif defined(__APPLE__) && !defined(AUTOTOOLS)
@@ -38,21 +38,21 @@
 
 namespace SH  {
 
-class ShStream;
+class Stream;
 
 class
-SH_DLLEXPORT ShBackendCode : public ShRefCountable {
+DLLEXPORT BackendCode : public RefCountable {
 public:
-  virtual ~ShBackendCode();
+  virtual ~BackendCode();
 
   /// Used by a register allocater to signal that a register should be
   /// allocated to var. Return true iff the allocation succeeded.
-  virtual bool allocateRegister(const ShVariableNodePtr& var) = 0;
+  virtual bool allocateRegister(const VariableNodePtr& var) = 0;
 
   /// Used by the register allocator to signal that the register used
   /// by var can be used by other registers in future
   /// allocateRegister() calls.
-  virtual void freeRegister(const ShVariableNodePtr& var) = 0;
+  virtual void freeRegister(const VariableNodePtr& var) = 0;
   
   /// Upload this shader code to the GPU.
   virtual void upload() = 0;
@@ -67,7 +67,7 @@ public:
   virtual void update() = 0;
 
   /// Update the value of a uniform parameter after it has changed.
-  virtual void updateUniform(const ShVariableNodePtr& uniform) = 0;
+  virtual void updateUniform(const VariableNodePtr& uniform) = 0;
 
   virtual std::ostream& print(std::ostream& out) = 0;
 
@@ -80,14 +80,14 @@ public:
   virtual std::ostream& describe_bindings(std::ostream& out) = 0;
 };
 
-typedef ShPointer<ShBackendCode> ShBackendCodePtr;
-typedef ShPointer<const ShBackendCode> ShBackendCodeCPtr;
+typedef Pointer<BackendCode> BackendCodePtr;
+typedef Pointer<const BackendCode> BackendCodeCPtr;
 
 // A backend-specific set of programs, to be linked together/bound at once
 class
-SH_DLLEXPORT ShBackendSet : public ShRefCountable {
+DLLEXPORT BackendSet : public RefCountable {
 public:
-  virtual ~ShBackendSet();
+  virtual ~BackendSet();
 
   virtual void link() = 0;
 
@@ -95,14 +95,14 @@ public:
   virtual void unbind() = 0;
 };
 
-typedef ShPointer<ShBackendSet> ShBackendSetPtr;
-typedef ShPointer<const ShBackendSet> ShBackendSetCPtr;
+typedef Pointer<BackendSet> BackendSetPtr;
+typedef Pointer<const BackendSet> BackendSetCPtr;
 
-class ShTransformer;
+class Transformer;
 class
-SH_DLLEXPORT ShBackend : public ShRefCountable {
+DLLEXPORT Backend : public RefCountable {
 public:
-  virtual ~ShBackend();
+  virtual ~Backend();
 
   /** Short name of the backend (e.g. "arb", "cc", "glsl")*/
   std::string name() const { return m_name;}
@@ -111,13 +111,13 @@ public:
   std::string version() const { return m_version; }
 
   /** Generate the backend code for a particular shader. */
-  virtual ShBackendCodePtr generate_code(const std::string& target,
-                                         const ShProgramNodeCPtr& shader) = 0;
+  virtual BackendCodePtr generate_code(const std::string& target,
+                                         const ProgramNodeCPtr& shader) = 0;
 
-  virtual ShBackendSetPtr generate_set(const ShProgramSet& s);
+  virtual BackendSetPtr generate_set(const ProgramSet& s);
   
   /** Execute a stream program, if supported */
-  virtual void execute(const ShProgramNodeCPtr& program, ShStream& dest) = 0;
+  virtual void execute(const ProgramNodeCPtr& program, Stream& dest) = 0;
   
   /** Unbind all programs bound under the backend */
   virtual void unbind_all_programs();
@@ -138,14 +138,14 @@ public:
   static std::string target_handler(const std::string& target, bool restrict_to_selected);
 
   /** Returns a backend that can run the specified target */
-  static ShPointer<ShBackend> get_backend(const std::string& target);
+  static Pointer<Backend> get_backend(const std::string& target);
 
   /** Returns a list of targets derived from a generic target
       name. e.g. "arb:vertex, glsl:vertex" is returned when the
       generic target is "gpu:vertex". */
   static std::list<std::string> derived_targets(const std::string& target);
 
-  typedef ShBackend* InstantiateEntryPoint();
+  typedef Backend* InstantiateEntryPoint();
   typedef int TargetCostEntryPoint(const std::string &);
 
   /** Add a backend to the list of loaded backends. */
@@ -159,7 +159,7 @@ public:
   typedef lt_dlhandle_struct* LibraryHandle;
 #endif
   
-  class LibraryInformation : public ShRefCountable {
+  class LibraryInformation : public RefCountable {
   public:
     LibraryInformation(LibraryHandle handle, InstantiateEntryPoint* instantiate_function, TargetCostEntryPoint* target_cost_function) :
       m_handle(handle), m_instantiate_function(instantiate_function), m_target_cost_function(target_cost_function)
@@ -174,12 +174,12 @@ public:
     TargetCostEntryPoint* m_target_cost_function;
   };
 
-  typedef std::map<std::string, ShPointer<LibraryInformation> > LibraryMap;
-  typedef std::map<std::string, ShPointer<ShBackend> > BackendMap;
+  typedef std::map<std::string, Pointer<LibraryInformation> > LibraryMap;
+  typedef std::map<std::string, Pointer<Backend> > BackendMap;
   typedef std::set<std::string> BackendSet;
   
 protected:
-  ShBackend(const std::string& name, const std::string& version);
+  Backend(const std::string& name, const std::string& version);
   
 private:
   static BackendMap* m_instantiated_backends;
@@ -221,11 +221,11 @@ private:
                            std::list<std::string>& derived_targets);
 
   /** Instantiate and initialize the backend */
-  static ShPointer<ShBackend> instantiate_backend(const std::string& backend_name);
+  static Pointer<Backend> instantiate_backend(const std::string& backend_name);
 };
 
-typedef ShPointer<ShBackend> ShBackendPtr;
-typedef ShPointer<const ShBackend> ShBackendCPtr;
+typedef Pointer<Backend> BackendPtr;
+typedef Pointer<const Backend> BackendCPtr;
 
 }
 

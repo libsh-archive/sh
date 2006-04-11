@@ -32,12 +32,12 @@
 # define LOCAL_BACKEND_DIRNAME ".shbackends"
 #endif
 
-#include "ShBackend.hpp"
-#include "ShProgram.hpp"
-#include "ShDebug.hpp"
-#include "ShInternals.hpp"
-#include "ShTransformer.hpp"
-#include "ShSyntax.hpp"
+#include "Backend.hpp"
+#include "Program.hpp"
+#include "Debug.hpp"
+#include "Internals.hpp"
+#include "Transformer.hpp"
+#include "Syntax.hpp"
 
 #include <algorithm>
 #include <cctype>
@@ -46,7 +46,7 @@
 namespace {
 
 template<typename EntryPoint>
-EntryPoint* load_function(SH::ShBackend::LibraryHandle module, const char* name)
+EntryPoint* load_function(SH::Backend::LibraryHandle module, const char* name)
 {
 #if defined(_WIN32)
   return (EntryPoint*)GetProcAddress((HMODULE)module, name);  
@@ -66,28 +66,28 @@ namespace SH {
 
 using namespace std;
 
-ShBackend::BackendMap* ShBackend::m_instantiated_backends = 0;
-ShBackend::BackendSet* ShBackend::m_selected_backends = 0;
-ShBackend::LibraryMap* ShBackend::m_loaded_libraries = 0;
-bool ShBackend::m_done_init = false;
-bool ShBackend::m_all_backends_loaded = false;
+Backend::BackendMap* Backend::m_instantiated_backends = 0;
+Backend::BackendSet* Backend::m_selected_backends = 0;
+Backend::LibraryMap* Backend::m_loaded_libraries = 0;
+bool Backend::m_done_init = false;
+bool Backend::m_all_backends_loaded = false;
 
-ShBackendCode::~ShBackendCode()
+BackendCode::~BackendCode()
 {
 }
 
-ShBackendSet::~ShBackendSet()
+BackendSet::~BackendSet()
 {
 }
 
-// A default implementation of ShBackendSet, usable for any backends
+// A default implementation of BackendSet, usable for any backends
 // that don't involve special linking.
-class ShTrivialBackendSet : public ShBackendSet {
+class TrivialBackendSet : public BackendSet {
 public:
-  ShTrivialBackendSet(const ShProgramSet& s,
-                      const ShBackendPtr& backend);
+  TrivialBackendSet(const ProgramSet& s,
+                      const BackendPtr& backend);
   
-  virtual ~ShTrivialBackendSet();
+  virtual ~TrivialBackendSet();
 
   virtual void link();
 
@@ -95,65 +95,65 @@ public:
   virtual void unbind();
 
 protected:
-  list<ShBackendCodePtr> m_code;
+  list<BackendCodePtr> m_code;
 };
 
-typedef ShPointer<ShTrivialBackendSet> ShTrivialBackendSetPtr;
-typedef ShPointer<const ShTrivialBackendSet> ShTrivialBackendSetCPtr;
+typedef Pointer<TrivialBackendSet> TrivialBackendSetPtr;
+typedef Pointer<const TrivialBackendSet> TrivialBackendSetCPtr;
 
-ShTrivialBackendSet::ShTrivialBackendSet(const ShProgramSet& s,
-                                         const ShBackendPtr& backend)
+TrivialBackendSet::TrivialBackendSet(const ProgramSet& s,
+                                         const BackendPtr& backend)
 {
-  for (ShProgramSet::const_iterator I = s.begin(); I != s.end(); ++I) {
+  for (ProgramSet::const_iterator I = s.begin(); I != s.end(); ++I) {
     m_code.push_back((*I)->code(backend));
   }
 }
 
-ShTrivialBackendSet::~ShTrivialBackendSet()
+TrivialBackendSet::~TrivialBackendSet()
 {
 }
 
-void ShTrivialBackendSet::link()
+void TrivialBackendSet::link()
 {
 }
 
-void ShTrivialBackendSet::bind()
+void TrivialBackendSet::bind()
 {
-  for (list<ShBackendCodePtr>::iterator I = m_code.begin(); I != m_code.end(); ++I) {
+  for (list<BackendCodePtr>::iterator I = m_code.begin(); I != m_code.end(); ++I) {
     (*I)->bind();
   }
 }
 
-void ShTrivialBackendSet::unbind()
+void TrivialBackendSet::unbind()
 {
   // TODO: This may not quite have the correct semantics
-  for (list<ShBackendCodePtr>::iterator I = m_code.begin(); I != m_code.end(); ++I) {
+  for (list<BackendCodePtr>::iterator I = m_code.begin(); I != m_code.end(); ++I) {
     (*I)->unbind();
   }
 }
  
-ShBackend::ShBackend(const string& name, const string& version)
+Backend::Backend(const string& name, const string& version)
   : m_name(name), m_version(version)
 {
 }
 
-ShBackend::~ShBackend()
+Backend::~Backend()
 {
-  SH_DEBUG_ASSERT(!m_name.empty());
-  SH_DEBUG_ASSERT(m_loaded_libraries->find(m_name) != m_loaded_libraries->end());
+  DEBUG_ASSERT(!m_name.empty());
+  DEBUG_ASSERT(m_loaded_libraries->find(m_name) != m_loaded_libraries->end());
   LibraryHandle handle = (*m_loaded_libraries)[m_name]->handle();
   
   // handle may be null if library was loaded by app (i.e. statically linked)
   if (handle) {
 #if defined(_WIN32)
     if (!FreeLibrary((HMODULE)handle)) {
-      SH_DEBUG_ERROR("Could not unload the " << m_name << " library.");
+      DEBUG_ERROR("Could not unload the " << m_name << " library.");
     }
 #elif defined(__APPLE__) && !defined(AUTOTOOLS)
     CFRelease(handle);
 #else
     if (!lt_dlclose(handle)) {
-      SH_DEBUG_ERROR("Could not unload the " << m_name << " library: " << lt_dlerror());
+      DEBUG_ERROR("Could not unload the " << m_name << " library: " << lt_dlerror());
     }
 #endif
   }
@@ -163,18 +163,18 @@ ShBackend::~ShBackend()
   m_selected_backends->erase(m_name);
 }
 
-ShBackendSetPtr ShBackend::generate_set(const ShProgramSet& s)
+BackendSetPtr Backend::generate_set(const ProgramSet& s)
 {
-  return new ShTrivialBackendSet(s, this);
+  return new TrivialBackendSet(s, this);
 }
 
-string ShBackend::lookup_filename(const string& backend_name)
+string Backend::lookup_filename(const string& backend_name)
 {
   init();
   string libname = "libsh" + backend_name;
 
 #if defined(_WIN32)
-# ifdef SH_DEBUG
+# ifdef DEBUG
     libname += "_DEBUG";
 # endif
   libname += ".DLL";
@@ -189,7 +189,7 @@ string ShBackend::lookup_filename(const string& backend_name)
   return libname;
 }
 
-bool ShBackend::is_valid_name(const string& backend_name)
+bool Backend::is_valid_name(const string& backend_name)
 {
   unsigned length = backend_name.size();
   if (0 == length) return false;
@@ -207,7 +207,7 @@ bool ShBackend::is_valid_name(const string& backend_name)
   return true;
 }
 
-void ShBackend::register_backend(const std::string& backend_name, InstantiateEntryPoint *instantiate, TargetCostEntryPoint *target_cost)
+void Backend::register_backend(const std::string& backend_name, InstantiateEntryPoint *instantiate, TargetCostEntryPoint *target_cost)
 {
   init();
   
@@ -218,7 +218,7 @@ void ShBackend::register_backend(const std::string& backend_name, InstantiateEnt
   (*m_loaded_libraries)[backend_name] = new LibraryInformation(NULL, instantiate, target_cost);
 }
 
-bool ShBackend::load_library(const string& filename)
+bool Backend::load_library(const string& filename)
 {
   init();
 
@@ -229,7 +229,7 @@ bool ShBackend::load_library(const string& filename)
   std::transform(filename.begin(), filename.end(), uc_filename.begin(), toupper);
   string::size_type extension_pos = uc_filename.rfind("_DEBUG.DLL");
   if (uc_filename.npos == extension_pos) {
-#ifdef SH_DEBUG
+#ifdef DEBUG
     // refuse to load non-debugging libraries
     return false;
 #else
@@ -272,29 +272,29 @@ bool ShBackend::load_library(const string& filename)
 #endif
 
   if (!module) {
-    SH_DEBUG_WARN("Could not open " << filename);
+    DEBUG_WARN("Could not open " << filename);
     return false;
   }
 
-  string init_function_name = "shBackend_libsh" + backend_name + "_instantiate";
-  string target_cost_function_name = "shBackend_libsh" + backend_name + "_target_cost";
+  string init_function_name = "backend_libsh" + backend_name + "_instantiate";
+  string target_cost_function_name = "backend_libsh" + backend_name + "_target_cost";
   
   InstantiateEntryPoint* instantiate = load_function<InstantiateEntryPoint>(module, init_function_name.c_str());
   TargetCostEntryPoint* target_cost = load_function<TargetCostEntryPoint>(module, target_cost_function_name.c_str());
 
   if (!instantiate) {
-    SH_DEBUG_ERROR("Could not find " << init_function_name);
+    DEBUG_ERROR("Could not find " << init_function_name);
   }
 
   if (!target_cost) {
-    SH_DEBUG_ERROR("Could not find " << target_cost_function_name);
+    DEBUG_ERROR("Could not find " << target_cost_function_name);
   }
 
   (*m_loaded_libraries)[backend_name] = new LibraryInformation(module, instantiate, target_cost);
   return true;
 }
 
-void ShBackend::load_libraries(const string& directory)
+void Backend::load_libraries(const string& directory)
 {
 #ifndef _WIN32
   DIR* dirp = opendir(directory.c_str());
@@ -333,16 +333,16 @@ void ShBackend::load_libraries(const string& directory)
 }
 
 
-ShBackendPtr ShBackend::instantiate_backend(const string& backend_name)
+BackendPtr Backend::instantiate_backend(const string& backend_name)
 {
   init();
-  ShBackend* backend = 0;
+  Backend* backend = 0;
 
   if (m_instantiated_backends->find(backend_name) != m_instantiated_backends->end()) {
     return (*m_instantiated_backends)[backend_name];
   }
 
-  SH_DEBUG_ASSERT(m_loaded_libraries->find(backend_name) != m_loaded_libraries->end());
+  DEBUG_ASSERT(m_loaded_libraries->find(backend_name) != m_loaded_libraries->end());
   InstantiateEntryPoint* instantiate = (*m_loaded_libraries)[backend_name]->instantiate_function();
 
   if (instantiate) {
@@ -356,31 +356,31 @@ ShBackendPtr ShBackend::instantiate_backend(const string& backend_name)
   return backend;
 }
 
-bool ShBackend::use_backend(const string& backend_name)
+bool Backend::use_backend(const string& backend_name)
 {
   init();
   m_selected_backends->insert(backend_name);
   return load_library(lookup_filename(backend_name));
 }
 
-bool ShBackend::have_backend(const string& backend_name)
+bool Backend::have_backend(const string& backend_name)
 {
   init();
   return load_library(lookup_filename(backend_name));
 }
 
-void ShBackend::clear_backends()
+void Backend::clear_backends()
 {
   init();
   m_selected_backends->clear();
 }
 
-int ShBackend::target_cost(const string& backend_name, const string& target)
+int Backend::target_cost(const string& backend_name, const string& target)
 {
   init();
   int cost = 0;
 
-  SH_DEBUG_ASSERT(m_loaded_libraries->find(backend_name) != m_loaded_libraries->end());
+  DEBUG_ASSERT(m_loaded_libraries->find(backend_name) != m_loaded_libraries->end());
   TargetCostEntryPoint* func = (*m_loaded_libraries)[backend_name]->target_cost_function();
 
   if (func) {
@@ -390,7 +390,7 @@ int ShBackend::target_cost(const string& backend_name, const string& target)
   return cost;
 }
 
-void ShBackend::load_all_backends()
+void Backend::load_all_backends()
 {
   if (m_all_backends_loaded) return;
 
@@ -418,7 +418,7 @@ void ShBackend::load_all_backends()
 #else
   string backend_dir = "";
   {
-    const char* env_var = getenv("SH_BACKEND_DIR");
+    const char* env_var = getenv("BACKEND_DIR");
     if (env_var) {
       backend_dir = string(env_var);
     }
@@ -444,7 +444,7 @@ void ShBackend::load_all_backends()
   m_all_backends_loaded = true;
 }
 
-string ShBackend::target_handler(const string& target, bool restrict_to_selected)
+string Backend::target_handler(const string& target, bool restrict_to_selected)
 {
   init();
 
@@ -476,7 +476,7 @@ string ShBackend::target_handler(const string& target, bool restrict_to_selected
   return best_backend;
 }
 
-ShPointer<ShBackend> ShBackend::get_backend(const string& target)
+Pointer<Backend> Backend::get_backend(const string& target)
 {
   init();
 
@@ -487,13 +487,13 @@ ShPointer<ShBackend> ShBackend::get_backend(const string& target)
   } else {
     cerr << "Could not find a backend that supports the '" << target << "' target." << endl;
     if (m_selected_backends->size() > 0) {
-      cerr << "Try removing all shUseBackend() and shSetBackend() calls to search all installed backends." << endl;
+      cerr << "Try removing all useBackend() and setBackend() calls to search all installed backends." << endl;
     }
     return 0;
   }
 }
 
-void ShBackend::init()
+void Backend::init()
 {
   if (m_done_init) return;
   
@@ -503,14 +503,14 @@ void ShBackend::init()
 
 #if !defined(_WIN32) && (!defined(__APPLE__) || defined(AUTOTOOLS))
   if (lt_dlinit()) {
-    SH_DEBUG_ERROR("Error initializing ltdl: " << lt_dlerror());
+    DEBUG_ERROR("Error initializing ltdl: " << lt_dlerror());
   }
 
   string userpath(getenv("HOME"));
   userpath += "/";
   userpath += LOCAL_BACKEND_DIRNAME;
   if (lt_dladdsearchdir(userpath.c_str())) {
-    SH_DEBUG_ERROR("Could not add " + userpath + " to search dir: " << lt_dlerror());
+    DEBUG_ERROR("Could not add " + userpath + " to search dir: " << lt_dlerror());
   }
 
   char* install_prefix = br_find_prefix(SH_INSTALL_PREFIX);
@@ -518,21 +518,21 @@ void ShBackend::init()
   searchpath += "/lib/sh";
   free(install_prefix);
   if (lt_dladdsearchdir(searchpath.c_str())) {
-    SH_DEBUG_ERROR("Could not add " + searchpath + " to search dir: " << lt_dlerror());
+    DEBUG_ERROR("Could not add " + searchpath + " to search dir: " << lt_dlerror());
   }
 #endif /* _WIN32 */
 
   m_done_init = true;
 }
 
-void ShBackend::unbind_all_programs()
+void Backend::unbind_all_programs()
 {
-  while (ShContext::current()->begin_bound() != ShContext::current()->end_bound()) {
-    shUnbind(ShContext::current()->begin_bound()->second);
+  while (Context::current()->begin_bound() != Context::current()->end_bound()) {
+    unbind(Context::current()->begin_bound()->second);
   }
 }
 
-void ShBackend::unbind_all_backends()
+void Backend::unbind_all_backends()
 {
   init();
   for (BackendMap::iterator i = m_instantiated_backends->begin();
@@ -541,7 +541,7 @@ void ShBackend::unbind_all_backends()
   }
 }
 
-void ShBackend::check_target(const string& target, const string& generic_target, 
+void Backend::check_target(const string& target, const string& generic_target, 
                              list<string>& derived_targets)
 {
   load_all_backends();
@@ -555,7 +555,7 @@ void ShBackend::check_target(const string& target, const string& generic_target,
   }
 }
 
-list<string> ShBackend::derived_targets(const string& target)
+list<string> Backend::derived_targets(const string& target)
 {
   list<string> ret;
 

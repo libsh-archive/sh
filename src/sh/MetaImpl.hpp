@@ -17,20 +17,20 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SH_METAIMPL_HPP
-#define SH_METAIMPL_HPP
+#ifndef SHMETAIMPL_HPP
+#define SHMETAIMPL_HPP
 
-#include "ShMeta.hpp"
+#include "Meta.hpp"
 
 namespace SH {
 
-inline ShMeta::ShMeta(const ShMeta &other)
+inline Meta::Meta(const Meta &other)
   : m_meta(0)
 {
   *this = other;
 }
 
-inline const ShMeta & ShMeta::operator=(const ShMeta &other)
+inline const Meta & Meta::operator=(const Meta &other)
 {
   if(other.m_meta) {
     m_meta = new MetaMap();
@@ -42,57 +42,57 @@ inline const ShMeta & ShMeta::operator=(const ShMeta &other)
   return *this;
 }
 
-inline ShMeta::~ShMeta()
+inline Meta::~Meta()
 {
   delete m_meta;
 }
 
-inline std::string ShMeta::name() const
+inline std::string Meta::name() const
 {
   return meta("n"); 
 }
 
-inline void ShMeta::name(const std::string& n)
+inline void Meta::name(const std::string& n)
 {
   meta("n", n);
 }
 
-inline bool ShMeta::has_name() const
+inline bool Meta::has_name() const
 {
   return !meta("n").empty(); 
 }
 
-inline bool ShMeta::internal() const
+inline bool Meta::internal() const
 {
   return !meta("i").empty(); 
 }
 
-inline void ShMeta::internal(bool i)
+inline void Meta::internal(bool i)
 {
   meta("i", i ? "1" : "");
 }
 
-inline std::string ShMeta::title() const
+inline std::string Meta::title() const
 {
   return meta("t");
 }
 
-inline void ShMeta::title(const std::string& t)
+inline void Meta::title(const std::string& t)
 {
   meta("t", t);
 }
 
-inline std::string ShMeta::description() const
+inline std::string Meta::description() const
 {
   return meta("d");
 }
 
-inline void ShMeta::description(const std::string& d)
+inline void Meta::description(const std::string& d)
 {
   meta("d", d);
 }
 
-inline std::string ShMeta::meta(const std::string& key) const
+inline std::string Meta::meta(const std::string& key) const
 {
   if (!m_meta) return std::string(); 
 
@@ -101,25 +101,25 @@ inline std::string ShMeta::meta(const std::string& key) const
   return I->second;
 }
 
-inline ShMeta::MetaMap::const_iterator ShMeta::begin_meta() const
+inline Meta::MetaMap::const_iterator Meta::begin_meta() const
 {
   if (!m_meta) m_meta = new MetaMap();
   return m_meta->begin();
 }
 
-inline ShMeta::MetaMap::const_iterator ShMeta::end_meta() const
+inline Meta::MetaMap::const_iterator Meta::end_meta() const
 {
   if (!m_meta) m_meta = new MetaMap();
   return m_meta->end();
 }
 
-inline void ShMeta::meta(const std::string& key, const std::string& value)
+inline void Meta::meta(const std::string& key, const std::string& value)
 {
   if(!m_meta) m_meta = new MetaMap();
   (*m_meta)[key] = value;
 }
 
-inline bool ShMeta::has_meta(const std::string& key) const
+inline bool Meta::has_meta(const std::string& key) const
 {
   return m_meta && (m_meta->find(key) != m_meta->end());
 }

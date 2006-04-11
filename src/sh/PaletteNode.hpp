@@ -21,7 +21,7 @@
 #define SHPALETTENODE_HPP
 
 #include <cstddef>
-#include "ShVariableNode.hpp"
+#include "VariableNode.hpp"
 
 namespace SH {
 
@@ -30,33 +30,33 @@ namespace SH {
  * Represents a palette (i.e. a uniform array of variables)
  * internally.
  *
- * To use palettes, refer to the ShPalette class instead.
+ * To use palettes, refer to the Palette class instead.
  *
- * @see ShPalette
+ * @see Palette
  */
-class SH_DLLEXPORT ShPaletteNode : public ShVariableNode {
+class DLLEXPORT PaletteNode : public VariableNode {
 public:
-  ShPaletteNode(int elements, ShSemanticType semantic, ShValueType valueType, std::size_t length);
+  PaletteNode(int elements, SemanticType semantic, ValueType valueType, std::size_t length);
 
-  /// Set the VariableNode corresponding to the given index. Only ShPalette should call this.
-  void set_node(std::size_t index, const ShVariableNodePtr& node);
+  /// Set the VariableNode corresponding to the given index. Only Palette should call this.
+  void set_node(std::size_t index, const VariableNodePtr& node);
 
   /// Return the number of variables represented by this palette.
   std::size_t palette_length() const;
 
   /// Return one of the variables represented by this palette.
-  ShVariableNodeCPtr get_node(std::size_t index) const;
+  VariableNodeCPtr get_node(std::size_t index) const;
 
   /// Return one of the variables represented by this palette.
-  ShVariableNodePtr get_node(std::size_t index);
+  VariableNodePtr get_node(std::size_t index);
 
 private:
   std::size_t m_length;
-  ShVariableNodePtr* m_nodes;
+  VariableNodePtr* m_nodes;
 };
 
-typedef ShPointer<ShPaletteNode> ShPaletteNodePtr;
-typedef ShPointer<const ShPaletteNode> ShPaletteNodeCPtr;
+typedef Pointer<PaletteNode> PaletteNodePtr;
+typedef Pointer<const PaletteNode> PaletteNodeCPtr;
 
 }
 

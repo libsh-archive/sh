@@ -22,15 +22,15 @@
 
 #include <string>
 #include <map>
-#include "ShDllExport.hpp"
-#include "ShProgram.hpp"
+#include "DllExport.hpp"
+#include "Program.hpp"
 
 namespace SH {
 
 class
-SH_DLLEXPORT ShContext {
+DLLEXPORT Context {
 public:
-  static ShContext* current();
+  static Context* current();
 
   /// 0 means no optimizations. The default level is 2.
   int optimization() const;
@@ -51,10 +51,10 @@ public:
   bool optimization_disabled(const std::string& name) const;
 
   bool is_bound(const std::string& target);
-  ShProgramNodePtr bound_program(const std::string& target);
+  ProgramNodePtr bound_program(const std::string& target);
 
   
-  typedef std::map<std::string, ShProgram> BoundProgramMap;
+  typedef std::map<std::string, Program> BoundProgramMap;
 
   BoundProgramMap::iterator begin_bound()
   {
@@ -67,57 +67,57 @@ public:
   }
 
   /// \internal
-  void set_binding(const std::string& unit, const ShProgram& program);
+  void set_binding(const std::string& unit, const Program& program);
   /// \internal
   void unset_binding(const std::string& unit);
 
   /// The program currently being constructed. May be null.
-  ShProgramNodePtr parsing();
+  ProgramNodePtr parsing();
 
   /// Start constructing the given program
-  void enter(const ShProgramNodePtr& program);
+  void enter(const ProgramNodePtr& program);
 
   /// Finish constructing the current program
   void exit();
   
 private:
-  ShContext();
+  Context();
 
   int m_optimization;
   bool m_throw_errors;
   
   BoundProgramMap m_bound;
-  std::stack<ShProgramNodePtr> m_parsing;
+  std::stack<ProgramNodePtr> m_parsing;
 
   std::set<std::string> m_disabled_optimizations;
   
-  static ShContext* m_instance;
+  static Context* m_instance;
 
   // NOT IMPLEMENTED
-  ShContext(const ShContext& other);
-  ShContext& operator=(const ShContext& other);
+  Context(const Context& other);
+  Context& operator=(const Context& other);
 };
 
-typedef ShContext::BoundProgramMap::iterator ShBoundIterator;
+typedef Context::BoundProgramMap::iterator BoundIterator;
 
 /// Check whether a program is bound to the given target
-SH_DLLEXPORT
-bool shIsBound(const std::string& target);
+DLLEXPORT
+bool isBound(const std::string& target);
 
 /// Return the program bound to the given target
-SH_DLLEXPORT
-ShProgramNodePtr shBound(const std::string& target);
+DLLEXPORT
+ProgramNodePtr bound(const std::string& target);
 
 /// Get beginning of bound program map for current context
-inline ShBoundIterator shBeginBound()
+inline BoundIterator beginBound()
 {
-  return ShContext::current()->begin_bound();
+  return Context::current()->begin_bound();
 }
 
 /// Get end of bound program map for current context
-inline ShBoundIterator shEndBound()
+inline BoundIterator endBound()
 {
-  return ShContext::current()->end_bound();
+  return Context::current()->end_bound();
 }
 
 }

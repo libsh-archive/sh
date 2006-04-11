@@ -21,36 +21,36 @@
 #define SHFRACTION_HPP
 
 #include <limits>
-#include "ShUtility.hpp"
+#include "Utility.hpp"
 
 namespace SH {
 
 /** Determines the computation used for intermediate values 
  * This means that the maximum fractiona type T supported has half as many bits
  * as the largets integer type supported in hardware */ 
-template<typename T> struct ShFractionLongType { typedef T type; };
+template<typename T> struct FractionLongType { typedef T type; };
 
 // @todo range - making certain assumptions about sizes of type 
 // Make sure these are valid under all circumstances
 // May want to use int instead of short in some cases if hardware needs
 // to convert shorts.
-template<> struct ShFractionLongType<int> { typedef long long type; };
-template<> struct ShFractionLongType<short> { typedef int type; };
-template<> struct ShFractionLongType<char> { typedef short type; };
-template<> struct ShFractionLongType<unsigned int> { typedef unsigned long long type; };
-template<> struct ShFractionLongType<unsigned short> { typedef unsigned int type; };
-template<> struct ShFractionLongType<unsigned char> { typedef unsigned short type; };
+template<> struct FractionLongType<int> { typedef long long type; };
+template<> struct FractionLongType<short> { typedef int type; };
+template<> struct FractionLongType<char> { typedef short type; };
+template<> struct FractionLongType<unsigned int> { typedef unsigned long long type; };
+template<> struct FractionLongType<unsigned short> { typedef unsigned int type; };
+template<> struct FractionLongType<unsigned char> { typedef unsigned short type; };
 
-template<typename T> struct ShFractionSignedLongType { typedef T type; };
+template<typename T> struct FractionSignedLongType { typedef T type; };
 
 // @todo range - making certain assumptions about sizes of type; 
 // Make sure these are valid under all circumstances
-template<> struct ShFractionSignedLongType<int> { typedef long long type; };
-template<> struct ShFractionSignedLongType<short> { typedef int type; };
-template<> struct ShFractionSignedLongType<char> { typedef short type; };
-template<> struct ShFractionSignedLongType<unsigned int> { typedef long long type; };
-template<> struct ShFractionSignedLongType<unsigned short> { typedef int type; };
-template<> struct ShFractionSignedLongType<unsigned char> { typedef short type; };
+template<> struct FractionSignedLongType<int> { typedef long long type; };
+template<> struct FractionSignedLongType<short> { typedef int type; };
+template<> struct FractionSignedLongType<char> { typedef short type; };
+template<> struct FractionSignedLongType<unsigned int> { typedef long long type; };
+template<> struct FractionSignedLongType<unsigned short> { typedef int type; };
+template<> struct FractionSignedLongType<unsigned char> { typedef short type; };
 
 /*** Sh class for fraction types represented in integers.  
  *
@@ -61,10 +61,10 @@ template<> struct ShFractionSignedLongType<unsigned char> { typedef short type; 
 
 /** 
  * This param does not exist any more because the default param broke some stuff 
- * like ShIsFraction in ShStorageType.hpp under VC.NET, and I don't have time to 
+ * like IsFraction in StorageType.hpp under VC.NET, and I don't have time to 
  * fix it right now.  
  *
- * All ShFractions are by default clamped.
+ * All Fractions are by default clamped.
  * Everything that was commented out has been marked with a @todo clamp
  *
  *
@@ -76,12 +76,12 @@ template<> struct ShFractionSignedLongType<unsigned char> { typedef short type; 
  */
 
 template<typename T /* @todo clamp , bool Clamp=true */>
-struct ShFraction {
+struct Fraction {
 
   // Type to use for operations that require temps with twice the bits
   // (and when clamping is on)
-  typedef typename ShFractionLongType<T>::type LongType; 
-  typedef typename ShFractionSignedLongType<T>::type SignedLongType; 
+  typedef typename FractionLongType<T>::type LongType; 
+  typedef typename FractionSignedLongType<T>::type SignedLongType; 
 
   // The usual type used in computation
   // @todo clamp typedef typename SelectType<Clamp, LongType, T>::type CompType; 
@@ -98,19 +98,19 @@ struct ShFraction {
   T m_val;
 
   /** Constructs an fraction with undefined value */
-  ShFraction();
+  Fraction();
 
   /** Constructs an fraction */
-  ShFraction(double value);
+  Fraction(double value);
 
   /** Makes a fraction and clamps from the computation type */
-  static ShFraction make_fraction(CompType value);
+  static Fraction make_fraction(CompType value);
 
   /** Makes a fraction and clamps from the signed type */
-  static ShFraction make_fraction_signed(SignedLongType value);
+  static Fraction make_fraction_signed(SignedLongType value);
 
   template<typename T2>
-  ShFraction(const ShFraction<T2> &other);
+  Fraction(const Fraction<T2> &other);
 
   /** accessor methods **/
   operator double() const;
@@ -119,36 +119,36 @@ struct ShFraction {
 
 
   /** Arithmetic operators **/
-  ShFraction& operator=(double value);
-  ShFraction& operator=(const ShFraction& other);
-  ShFraction& operator+=(double value);
-  ShFraction& operator+=(const ShFraction& other);
-  ShFraction& operator-=(double value);
-  ShFraction& operator-=(const ShFraction& other);
-  ShFraction& operator*=(double value);
-  ShFraction& operator*=(const ShFraction& other);
-  ShFraction& operator/=(double value);
-  ShFraction& operator/=(const ShFraction& other);
+  Fraction& operator=(double value);
+  Fraction& operator=(const Fraction& other);
+  Fraction& operator+=(double value);
+  Fraction& operator+=(const Fraction& other);
+  Fraction& operator-=(double value);
+  Fraction& operator-=(const Fraction& other);
+  Fraction& operator*=(double value);
+  Fraction& operator*=(const Fraction& other);
+  Fraction& operator/=(double value);
+  Fraction& operator/=(const Fraction& other);
 
   /** Float modulus - result is always positive 
    *@{*/
-  ShFraction& operator%=(double value);
-  ShFraction& operator%=(const ShFraction& other);
+  Fraction& operator%=(double value);
+  Fraction& operator%=(const Fraction& other);
   // @}
 
   /** Scalar arithmetic operators **/
 
   /** Negation **/
-  ShFraction operator-() const;
+  Fraction operator-() const;
 
   /** Output operator **/
   template<typename TT>
-  friend std::ostream& operator<<(std::ostream& out, const ShFraction<TT> &value);
+  friend std::ostream& operator<<(std::ostream& out, const Fraction<TT> &value);
 
 
   /** Input operator (format matches output) **/
   template<typename TT>
-  friend std::istream& operator>>(std::istream& out, ShFraction<TT> &value);
+  friend std::istream& operator>>(std::istream& out, Fraction<TT> &value);
 
   private:
     // convert value to double
@@ -166,149 +166,149 @@ struct ShFraction {
 };
 
 template<typename T/* @todo clamp , bool Clamp */>
-const T ShFraction<T>::ONE = std::numeric_limits<T>::max(); 
+const T Fraction<T>::ONE = std::numeric_limits<T>::max(); 
 
 template<typename T/* @todo clamp , bool Clamp */>
-const T ShFraction<T>::MAX = ShFraction<T>::ONE; 
+const T Fraction<T>::MAX = Fraction<T>::ONE; 
 
 template<typename T/* @todo clamp , bool Clamp */>
-const T ShFraction<T>::MIN = is_signed ? -ShFraction<T>::ONE : 0;  
+const T Fraction<T>::MIN = is_signed ? -Fraction<T>::ONE : 0;  
 
 /** Arithmetic operators **/
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> operator+(const ShFraction<T> &a, const ShFraction<T> &b);
+Fraction<T> operator+(const Fraction<T> &a, const Fraction<T> &b);
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> operator-(const ShFraction<T> &a, const ShFraction<T> &b);
+Fraction<T> operator-(const Fraction<T> &a, const Fraction<T> &b);
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> operator*(const ShFraction<T> &a, const ShFraction<T> &b);
+Fraction<T> operator*(const Fraction<T> &a, const Fraction<T> &b);
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> operator/(const ShFraction<T> &a, const ShFraction<T> &b);
+Fraction<T> operator/(const Fraction<T> &a, const Fraction<T> &b);
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> operator%(const ShFraction<T> &a, const ShFraction<T> &b);
+Fraction<T> operator%(const Fraction<T> &a, const Fraction<T> &b);
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> cbrt(const ShFraction<T> &a);
+Fraction<T> cbrt(const Fraction<T> &a);
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> exp(const ShFraction<T> &a);
+Fraction<T> exp(const Fraction<T> &a);
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> exp2(const ShFraction<T> &a);
+Fraction<T> exp2(const Fraction<T> &a);
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> exp10(const ShFraction<T> &a);
+Fraction<T> exp10(const Fraction<T> &a);
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> log(const ShFraction<T> &a);
+Fraction<T> log(const Fraction<T> &a);
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> log2(const ShFraction<T> &a);
+Fraction<T> log2(const Fraction<T> &a);
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> log10(const ShFraction<T> &a);
+Fraction<T> log10(const Fraction<T> &a);
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> frac(const ShFraction<T> &a);
+Fraction<T> frac(const Fraction<T> &a);
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> fmod(const ShFraction<T> &a, const ShFraction<T> &b);
+Fraction<T> fmod(const Fraction<T> &a, const Fraction<T> &b);
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> pow(const ShFraction<T> &a, const ShFraction<T> &b);
+Fraction<T> pow(const Fraction<T> &a, const Fraction<T> &b);
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> rcp(const ShFraction<T> &a);
+Fraction<T> rcp(const Fraction<T> &a);
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> rsq(const ShFraction<T> &a);
+Fraction<T> rsq(const Fraction<T> &a);
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> sgn(const ShFraction<T> &a);
+Fraction<T> sgn(const Fraction<T> &a);
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> sqrt(const ShFraction<T> &a);
+Fraction<T> sqrt(const Fraction<T> &a);
 
 /** Trig Operators */
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> acos(const ShFraction<T> &a);
+Fraction<T> acos(const Fraction<T> &a);
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> asin(const ShFraction<T> &a);
+Fraction<T> asin(const Fraction<T> &a);
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> atan(const ShFraction<T> &a);
+Fraction<T> atan(const Fraction<T> &a);
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> atan2(const ShFraction<T> &a, const ShFraction<T> &b);
+Fraction<T> atan2(const Fraction<T> &a, const Fraction<T> &b);
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> cos(const ShFraction<T> &a); 
+Fraction<T> cos(const Fraction<T> &a); 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> sin(const ShFraction<T> &a);
+Fraction<T> sin(const Fraction<T> &a);
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> tan(const ShFraction<T> &a);
+Fraction<T> tan(const Fraction<T> &a);
 
 /** Comparison Operators **/
 template<typename T/* @todo clamp , bool Clamp */>
-bool operator<(const ShFraction<T> &a, const ShFraction<T> &b);
+bool operator<(const Fraction<T> &a, const Fraction<T> &b);
 
 template<typename T/* @todo clamp , bool Clamp */>
-bool operator<=(const ShFraction<T> &a, const ShFraction<T> &b);
+bool operator<=(const Fraction<T> &a, const Fraction<T> &b);
 
 template<typename T/* @todo clamp , bool Clamp */>
-bool operator>(const ShFraction<T> &a, const ShFraction<T> &b);
+bool operator>(const Fraction<T> &a, const Fraction<T> &b);
 
 template<typename T/* @todo clamp , bool Clamp */>
-bool operator>=(const ShFraction<T> &a, const ShFraction<T> &b);
+bool operator>=(const Fraction<T> &a, const Fraction<T> &b);
 
 template<typename T/* @todo clamp , bool Clamp */>
-bool  operator==(const ShFraction<T> &a, const ShFraction<T> &b);
+bool  operator==(const Fraction<T> &a, const Fraction<T> &b);
 
 template<typename T/* @todo clamp , bool Clamp */>
-bool operator!=(const ShFraction<T> &a, const ShFraction<T> &b);
+bool operator!=(const Fraction<T> &a, const Fraction<T> &b);
 
 /** Clamping operators **/
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> min(const ShFraction<T> &a, const ShFraction<T> &b);
+Fraction<T> min(const Fraction<T> &a, const Fraction<T> &b);
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> max(const ShFraction<T> &a, const ShFraction<T> &b);
+Fraction<T> max(const Fraction<T> &a, const Fraction<T> &b);
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> floor(const ShFraction<T> &a);
+Fraction<T> floor(const Fraction<T> &a);
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> ceil(const ShFraction<T> &a);
+Fraction<T> ceil(const Fraction<T> &a);
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> rnd(const ShFraction<T> &a);
+Fraction<T> rnd(const Fraction<T> &a);
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> abs(const ShFraction<T> &a);
+Fraction<T> abs(const Fraction<T> &a);
 
 /** Misc Operators **/
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> cond(const ShFraction<T> &a, const ShFraction<T> &b, const ShFraction<T> &c);
+Fraction<T> cond(const Fraction<T> &a, const Fraction<T> &b, const Fraction<T> &c);
 
 template<typename T/* @todo clamp , bool Clamp */>
-ShFraction<T> lerp(const ShFraction<T> &a, const ShFraction<T> &b, const ShFraction<T> &c);
+Fraction<T> lerp(const Fraction<T> &a, const Fraction<T> &b, const Fraction<T> &c);
 
-typedef ShFraction<int> ShFracInt;
-typedef ShFraction<short> ShFracShort;
-typedef ShFraction<char> ShFracByte;
+typedef Fraction<int> FracInt;
+typedef Fraction<short> FracShort;
+typedef Fraction<char> FracByte;
 
-typedef ShFraction<unsigned int> ShFracUInt;
-typedef ShFraction<unsigned short> ShFracUShort;
-typedef ShFraction<unsigned char> ShFracUByte;
+typedef Fraction<unsigned int> FracUInt;
+typedef Fraction<unsigned short> FracUShort;
+typedef Fraction<unsigned char> FracUByte;
 
 }
 
 
-#include "ShFractionImpl.hpp"
+#include "FractionImpl.hpp"
   
 #endif

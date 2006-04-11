@@ -17,30 +17,30 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#include "ShDllExport.hpp"
-#include "ShStorageType.hpp"
+#include "DllExport.hpp"
+#include "StorageType.hpp"
 
 namespace SH {
 
-#define SH_STORAGETYPE_NAME_SPEC_DEF(T, str)\
-const char* __ShStorageTypeName<T >::name = str; 
+#define STORAGETYPE_NAME_SPEC_DEF(T, str)\
+const char* __StorageTypeName<T >::name = str; 
 
-SH_STORAGETYPE_NAME_SPEC_DEF(ShHalf, "h");
-SH_STORAGETYPE_NAME_SPEC_DEF(float, "f");
-SH_STORAGETYPE_NAME_SPEC_DEF(double, "d");
+STORAGETYPE_NAME_SPEC_DEF(Half, "h");
+STORAGETYPE_NAME_SPEC_DEF(float, "f");
+STORAGETYPE_NAME_SPEC_DEF(double, "d");
 
-SH_STORAGETYPE_NAME_SPEC_DEF(char, "b");
-SH_STORAGETYPE_NAME_SPEC_DEF(short, "s");
-SH_STORAGETYPE_NAME_SPEC_DEF(int, "i");
-SH_STORAGETYPE_NAME_SPEC_DEF(unsigned char, "ub");
-SH_STORAGETYPE_NAME_SPEC_DEF(unsigned short, "us");
-SH_STORAGETYPE_NAME_SPEC_DEF(unsigned int, "ui");
+STORAGETYPE_NAME_SPEC_DEF(char, "b");
+STORAGETYPE_NAME_SPEC_DEF(short, "s");
+STORAGETYPE_NAME_SPEC_DEF(int, "i");
+STORAGETYPE_NAME_SPEC_DEF(unsigned char, "ub");
+STORAGETYPE_NAME_SPEC_DEF(unsigned short, "us");
+STORAGETYPE_NAME_SPEC_DEF(unsigned int, "ui");
 
-SH_STORAGETYPE_NAME_SPEC_DEF(ShFracByte, "fb");
-SH_STORAGETYPE_NAME_SPEC_DEF(ShFracShort, "fs");
-SH_STORAGETYPE_NAME_SPEC_DEF(ShFracInt, "fi");
-SH_STORAGETYPE_NAME_SPEC_DEF(ShFracUByte, "fub");
-SH_STORAGETYPE_NAME_SPEC_DEF(ShFracUShort, "fus");
-SH_STORAGETYPE_NAME_SPEC_DEF(ShFracUInt, "fui");
+STORAGETYPE_NAME_SPEC_DEF(FracByte, "fb");
+STORAGETYPE_NAME_SPEC_DEF(FracShort, "fs");
+STORAGETYPE_NAME_SPEC_DEF(FracInt, "fi");
+STORAGETYPE_NAME_SPEC_DEF(FracUByte, "fub");
+STORAGETYPE_NAME_SPEC_DEF(FracUShort, "fus");
+STORAGETYPE_NAME_SPEC_DEF(FracUInt, "fui");
 
 }

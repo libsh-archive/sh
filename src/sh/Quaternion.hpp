@@ -21,75 +21,75 @@
 #define SHQUATERNION_HPP
 
 #include <iostream>
-#include "ShLib.hpp"
+#include "Lib.hpp"
 
 namespace SH {
 
 /** A Quaternion.
  */
-template<ShBindingType B, typename T = float>
-class ShQuaternion
+template<BindingType B, typename T = float>
+class Quaternion
 {
-  template <ShBindingType B2, typename T2>
+  template <BindingType B2, typename T2>
   friend std::ostream& operator<<(std::ostream& out, 
-                                  const ShQuaternion<B2, T2>& q);
+                                  const Quaternion<B2, T2>& q);
 public:
-  typedef typename ShHostType<T>::type HostType;
+  typedef typename HostType<T>::type HostType;
   
-  /** \brief Constructor for ShQuaternion.
+  /** \brief Constructor for Quaternion.
    *    
-   *  Creates a identity ShQuaternion
+   *  Creates a identity Quaternion
    */
-  ShQuaternion();
+  Quaternion();
 
-  /** \brief Constructor for ShQuaternion with a quaternion as parameter.
+  /** \brief Constructor for Quaternion with a quaternion as parameter.
    *
-   * Creates a ShQuaternion where each element is equal to the one in the 
+   * Creates a Quaternion where each element is equal to the one in the 
    * parameters
    * \param other the quaternion from which we will get the values from 
    */  
-  template<ShBindingType B2> 
-  ShQuaternion(const ShQuaternion<B2, T>& other);
+  template<BindingType B2> 
+  Quaternion(const Quaternion<B2, T>& other);
 
   
-  /** \brief Constructor for ShQuaternion with a 4-vector as parameter.
+  /** \brief Constructor for Quaternion with a 4-vector as parameter.
    *
-   * Creates a ShQuaternion where each element is equal to the one in 
+   * Creates a Quaternion where each element is equal to the one in 
    * the parameters
    * \param values 4-vector from which we will get the values from 
    */  
-  template<ShBindingType B2>
-  ShQuaternion(const ShAttrib<4, B2, T, SH_VECTOR>& values);
+  template<BindingType B2>
+  Quaternion(const Attrib<4, B2, T, VECTOR>& values);
   
   
-  /** \brief Constructor for ShQuaternion with an angle and axis of rotation.
+  /** \brief Constructor for Quaternion with an angle and axis of rotation.
    *
-   * Creates a unit ShQuaternion defined by a rotation
+   * Creates a unit Quaternion defined by a rotation
    * \param angle angle in radians of the rotation
    * \param axis axis of rotation
    */  
-  template<ShBindingType B2, ShBindingType B3>
-  ShQuaternion(const ShAttrib<1, B2, T>& angle, 
-               const ShAttrib<3, B3, T, SH_VECTOR>& axis);
+  template<BindingType B2, BindingType B3>
+  Quaternion(const Attrib<1, B2, T>& angle, 
+               const Attrib<3, B3, T, VECTOR>& axis);
   
   
-  /** \brief Constructor for ShQuaternion with a rotation matrix.
+  /** \brief Constructor for Quaternion with a rotation matrix.
    *
-   * Creates a unit ShQuaternion defined by a rotation
+   * Creates a unit Quaternion defined by a rotation
    * \param mat matrix defining the rotation
    * \pre det(mat) = 1
    */  
-  template<ShBindingType B2>
-  ShQuaternion(const ShMatrix<4, 4, B2, T>& mat);
+  template<BindingType B2>
+  Quaternion(const Matrix<4, 4, B2, T>& mat);
   
   /** \brief Definition of assignment to another quaternion
    *
    * Returns the address of a quaternion from which the values were copied from
    * other
-   * \param other ShQuaternion from which we will get the values from
+   * \param other Quaternion from which we will get the values from
    */  
-  template<ShBindingType B2> 
-  ShQuaternion& operator=(const ShQuaternion<B2, T>& other);
+  template<BindingType B2> 
+  Quaternion& operator=(const Quaternion<B2, T>& other);
 
   /** \brief Definition of the add-assign operation with another quaternion
    *
@@ -97,8 +97,8 @@ public:
    * quaternion + right
    * \param right the other quaternion added to this one
    */  
-  template<ShBindingType B2>
-  ShQuaternion& operator+=(const ShQuaternion<B2, T>& right);
+  template<BindingType B2>
+  Quaternion& operator+=(const Quaternion<B2, T>& right);
   
   /** \brief Definition of the minus-assign operation with another quaternion
    *
@@ -106,8 +106,8 @@ public:
    * quaternion - right
    * \param right the other quaternion subtracted from this one
    */  
-  template<ShBindingType B2>
-  ShQuaternion& operator-=(const ShQuaternion<B2, T>& right);
+  template<BindingType B2>
+  Quaternion& operator-=(const Quaternion<B2, T>& right);
   
   /** \brief Definition of the times-assign operation with another quaternion
    *
@@ -115,8 +115,8 @@ public:
    * quaternion * right 
    * \param right the other quaternion multiplied to this one
    */  
-  template<ShBindingType B2>
-  ShQuaternion& operator*=(const ShQuaternion<B2, T>& right);
+  template<BindingType B2>
+  Quaternion& operator*=(const Quaternion<B2, T>& right);
 
   
   /** \brief Definition of the times-assign operation with a scalar
@@ -125,76 +125,76 @@ public:
    * quaternion (each component) multiplied by right
    * \param right the scalar multiplied to this quaternion
    */  
-  template<ShBindingType B2>
-  ShQuaternion& operator*=(const ShAttrib<1, B2, T>& right);
+  template<BindingType B2>
+  Quaternion& operator*=(const Attrib<1, B2, T>& right);
   
   /** \brief Definition of the times-assign operation with a 3-vector
    *
    * Returns the address of a quaternion where the result is the current 
-   * quaternion * ShQuaternion(0.0, right)
+   * quaternion * Quaternion(0.0, right)
    * \param right 3-vector converted to a quaternion multiplied to this one
    */  
-  template<ShBindingType B2>
-  ShQuaternion& operator*=(const ShAttrib<3, B2, T, SH_VECTOR>& right);
+  template<BindingType B2>
+  Quaternion& operator*=(const Attrib<3, B2, T, VECTOR>& right);
   
   /** \brief Definition of the times-assign operation with a 3-normal
    *
    * Returns the address of a quaternion where the result is the current 
-   * quaternion * ShQuaternion(0.0, right)
+   * quaternion * Quaternion(0.0, right)
    * \param right 3-normal converted to a quaternion multiplied to this one
    */  
-  template<ShBindingType B2>
-  ShQuaternion& operator*=(const ShAttrib<3, B2, T, SH_NORMAL>& right);
+  template<BindingType B2>
+  Quaternion& operator*=(const Attrib<3, B2, T, NORMAL>& right);
 
   /** \brief Definition of the add operation with another quaternion
    *
-   * Returns a new ShQuaternion equals to the current quaternion + q2
+   * Returns a new Quaternion equals to the current quaternion + q2
    * \param q2 the other quaternion added to this one
    */  
-  template<ShBindingType B2>
-  ShQuaternion<SH_TEMP, T> operator+(const ShQuaternion<B2, T>& q2);
+  template<BindingType B2>
+  Quaternion<TEMP, T> operator+(const Quaternion<B2, T>& q2);
   
   /** \brief Definition of the subtract operation with another quaternion
    *
-   * Returns a new ShQuaternion equals to the current quaternion - q2
+   * Returns a new Quaternion equals to the current quaternion - q2
    * \param q2 the other quaternion subtracted from this one
    */  
-  template<ShBindingType B2>
-  ShQuaternion<SH_TEMP, T> operator-(const ShQuaternion<B2, T>& q2);
+  template<BindingType B2>
+  Quaternion<TEMP, T> operator-(const Quaternion<B2, T>& q2);
 
   /** \brief Definition of the multiply operation with another quaternion
    *
-   * Returns a new ShQuaternion equals to the current quaternion * q2
+   * Returns a new Quaternion equals to the current quaternion * q2
    * \param q2 the other quaternion multiplied to this one
    */  
-  template<ShBindingType B2>
-  ShQuaternion<SH_TEMP, T> operator*(const ShQuaternion<B2, T>& q2);
+  template<BindingType B2>
+  Quaternion<TEMP, T> operator*(const Quaternion<B2, T>& q2);
   
   /** \brief Definition of the multiply operation with a scalar
    *
-   * Returns a new ShQuaternion equals to the current quaternion * c
+   * Returns a new Quaternion equals to the current quaternion * c
    * \param c the scalar multiplied to this one
    */  
-  template<ShBindingType B2>
-  ShQuaternion<SH_TEMP, T> operator*(const ShAttrib<1, B2, T>& c);
+  template<BindingType B2>
+  Quaternion<TEMP, T> operator*(const Attrib<1, B2, T>& c);
   
   /** \brief Definition of the times operation with a 3-vector
    *
-   * Returns a new ShQuaternion equals to the current 
-   * quaternion * ShQuaternion(0.0, right)
+   * Returns a new Quaternion equals to the current 
+   * quaternion * Quaternion(0.0, right)
    * \param q2 3-vector converted to a quaternion multiplied to this one
    */  
-  template<ShBindingType B2>
-  ShQuaternion<SH_TEMP, T> operator*(const ShAttrib<3, B2, T, SH_VECTOR>& q2);
+  template<BindingType B2>
+  Quaternion<TEMP, T> operator*(const Attrib<3, B2, T, VECTOR>& q2);
   
   /** \brief Definition of the times operation with a 3-normal
    *
-   * Returns a new ShQuaternion equals to the current 
-   * quaternion * ShQuaternion(0.0, right)
+   * Returns a new Quaternion equals to the current 
+   * quaternion * Quaternion(0.0, right)
    * \param q2 3-normal converted to a quaternion multiplied to this one
    */  
-  template<ShBindingType B2>
-  ShQuaternion<SH_TEMP, T> operator*(const ShAttrib<3, B2, T, SH_NORMAL>& q2);
+  template<BindingType B2>
+  Quaternion<TEMP, T> operator*(const Attrib<3, B2, T, NORMAL>& q2);
 
   /** \brief Definition of the normalize function
    *
@@ -235,51 +235,51 @@ public:
    * Returns the dot product between this quaternion and q
    * \param q quaternion we're taking the dot product with
    */
-  template<ShBindingType B2>
-  ShAttrib<1, SH_TEMP, T> dot(const ShQuaternion<B2, T>& q) const;
+  template<BindingType B2>
+  Attrib<1, TEMP, T> dot(const Quaternion<B2, T>& q) const;
   
   /** \brief Definition of the conjugate function
    * 
    * Returns the conjugate of this quaternion
    */
-  ShQuaternion<SH_TEMP, T> conjugate() const;
+  Quaternion<TEMP, T> conjugate() const;
   
   /** \brief Definition of the inverse function
    * 
    * Returns the inverse of this quaternion (same as conjugate if unit)
    */
-  ShQuaternion<SH_TEMP, T> inverse() const;
+  Quaternion<TEMP, T> inverse() const;
   
   /** \brief Definition of the getMatrix function
    * 
    * Returns the rotation matrix defined by this quaternion
    * \pre this quaternion is unit
    */
-  ShMatrix<4, 4, SH_TEMP, T> getMatrix() const;
+  Matrix<4, 4, TEMP, T> getMatrix() const;
 
   /** \brief Definition of the getVector function
    * 
    * Returns the values of this quaternion as a vector
    */
-  ShAttrib<4, SH_TEMP, T, SH_VECTOR> getVector() const;
+  Attrib<4, TEMP, T, VECTOR> getVector() const;
 private:
-  ShAttrib<4, B, T, SH_VECTOR> m_data;
+  Attrib<4, B, T, VECTOR> m_data;
 };
 
-template<ShBindingType B, typename T, ShBindingType B2>
-extern ShQuaternion<SH_TEMP, T> 
-operator*(const ShAttrib<1, B2, T>& c, const ShQuaternion<B, T>& q); 
+template<BindingType B, typename T, BindingType B2>
+extern Quaternion<TEMP, T> 
+operator*(const Attrib<1, B2, T>& c, const Quaternion<B, T>& q); 
 
-template<ShBindingType B1, ShBindingType B2, typename T>
-extern ShQuaternion<SH_TEMP, T>
-slerp(const ShQuaternion<B1, T>& q1, const ShQuaternion<B2, T>& q2, 
-    const ShAttrib1f& t);
+template<BindingType B1, BindingType B2, typename T>
+extern Quaternion<TEMP, T>
+slerp(const Quaternion<B1, T>& q1, const Quaternion<B2, T>& q2, 
+    const Attrib1f& t);
 
-typedef ShQuaternion<SH_INPUT, float> ShInputQuaternionf;
-typedef ShQuaternion<SH_OUTPUT, float> ShOutputQuaternionf;
-typedef ShQuaternion<SH_TEMP, float> ShQuaternionf;
+typedef Quaternion<INPUT, float> InputQuaternionf;
+typedef Quaternion<OUTPUT, float> OutputQuaternionf;
+typedef Quaternion<TEMP, float> Quaternionf;
 }
 
-#include "ShQuaternionImpl.hpp"
+#include "QuaternionImpl.hpp"
 
 #endif

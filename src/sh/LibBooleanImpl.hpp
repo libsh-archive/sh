@@ -20,258 +20,258 @@
 #ifndef SHLIBBOOLEANIMPL_HPP
 #define SHLIBBOOLEANIMPL_HPP
 
-#include "ShLibBoolean.hpp"
-#include "ShInstructions.hpp"
-#include "ShAttrib.hpp"
+#include "LibBoolean.hpp"
+#include "Instructions.hpp"
+#include "Attrib.hpp"
 
 namespace SH {
 
 template<int N, typename T1, typename T2>
-ShGeneric<N, CT1T2> operator<(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right)
+Generic<N, CT1T2> operator<(const Generic<N, T1>& left, const Generic<N, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CT1T2> t;
+  Attrib<N, TEMP, CT1T2> t;
   shSLT(t, left, right);
   return t;
 }
 template<int N, typename T1, typename T2>
-ShGeneric<N, CT1T2> operator<(const ShGeneric<N, T1>& left, const ShGeneric<1, T2>& right)
+Generic<N, CT1T2> operator<(const Generic<N, T1>& left, const Generic<1, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CT1T2> t;
+  Attrib<N, TEMP, CT1T2> t;
   shSLT(t, left, right);
   return t;
 }
 template<int N, typename T1, typename T2>
-ShGeneric<N, CT1T2> operator<(const ShGeneric<1, T1>& left, const ShGeneric<N, T2>& right)
+Generic<N, CT1T2> operator<(const Generic<1, T1>& left, const Generic<N, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CT1T2> t;
+  Attrib<N, TEMP, CT1T2> t;
   shSLT(t, left, right);
   return t;
 }
 template<typename T1, typename T2>
-ShGeneric<1, CT1T2> operator<(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right)
+Generic<1, CT1T2> operator<(const Generic<1, T1>& left, const Generic<1, T2>& right)
 {
-  ShAttrib<1, SH_TEMP, CT1T2> t;
+  Attrib<1, TEMP, CT1T2> t;
   shSLT(t, left, right);
   return t;
 }
-SH_SHLIB_CONST_SCALAR_OP(operator<);
-SH_SHLIB_CONST_N_OP_BOTH(operator<);
+SHLIB_CONST_SCALAR_OP(operator<);
+SHLIB_CONST_N_OP_BOTH(operator<);
 
 template<int N, typename T1, typename T2>
-ShGeneric<N, CT1T2> operator<=(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right)
+Generic<N, CT1T2> operator<=(const Generic<N, T1>& left, const Generic<N, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CT1T2> t;
+  Attrib<N, TEMP, CT1T2> t;
   shSLE(t, left, right);
   return t;
 }
 template<int N, typename T1, typename T2>
-ShGeneric<N, CT1T2> operator<=(const ShGeneric<N, T1>& left, const ShGeneric<1, T2>& right)
+Generic<N, CT1T2> operator<=(const Generic<N, T1>& left, const Generic<1, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CT1T2> t;
+  Attrib<N, TEMP, CT1T2> t;
   shSLE(t, left, right);
   return t;
 }
 template<int N, typename T1, typename T2>
-ShGeneric<N, CT1T2> operator<=(const ShGeneric<1, T1>& left, const ShGeneric<N, T2>& right)
+Generic<N, CT1T2> operator<=(const Generic<1, T1>& left, const Generic<N, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CT1T2> t;
+  Attrib<N, TEMP, CT1T2> t;
   shSLE(t, left, right);
   return t;
 }
 template<typename T1, typename T2>
-ShGeneric<1, CT1T2> operator<=(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right)
+Generic<1, CT1T2> operator<=(const Generic<1, T1>& left, const Generic<1, T2>& right)
 {
-  ShAttrib<1, SH_TEMP, CT1T2> t;
+  Attrib<1, TEMP, CT1T2> t;
   shSLE(t, left, right);
   return t;
 }
-SH_SHLIB_CONST_SCALAR_OP(operator<=);
-SH_SHLIB_CONST_N_OP_BOTH(operator<=);
+SHLIB_CONST_SCALAR_OP(operator<=);
+SHLIB_CONST_N_OP_BOTH(operator<=);
 
 template<int N, typename T1, typename T2>
-ShGeneric<N, CT1T2> operator>(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right)
+Generic<N, CT1T2> operator>(const Generic<N, T1>& left, const Generic<N, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CT1T2> t;
+  Attrib<N, TEMP, CT1T2> t;
   shSGT(t, left, right);
   return t;
 }
 template<int N, typename T1, typename T2>
-ShGeneric<N, CT1T2> operator>(const ShGeneric<N, T1>& left, const ShGeneric<1, T2>& right)
+Generic<N, CT1T2> operator>(const Generic<N, T1>& left, const Generic<1, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CT1T2> t;
+  Attrib<N, TEMP, CT1T2> t;
   shSGT(t, left, right);
   return t;
 }
 template<int N, typename T1, typename T2>
-ShGeneric<N, CT1T2> operator>(const ShGeneric<1, T1>& left, const ShGeneric<N, T2>& right)
+Generic<N, CT1T2> operator>(const Generic<1, T1>& left, const Generic<N, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CT1T2> t;
+  Attrib<N, TEMP, CT1T2> t;
   shSGT(t, left, right);
   return t;
 }
 template<typename T1, typename T2>
-ShGeneric<1, CT1T2> operator>(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right)
+Generic<1, CT1T2> operator>(const Generic<1, T1>& left, const Generic<1, T2>& right)
 {
-  ShAttrib<1, SH_TEMP, CT1T2> t;
+  Attrib<1, TEMP, CT1T2> t;
   shSGT(t, left, right);
   return t;
 }
-SH_SHLIB_CONST_SCALAR_OP(operator>);
-SH_SHLIB_CONST_N_OP_BOTH(operator>);
+SHLIB_CONST_SCALAR_OP(operator>);
+SHLIB_CONST_N_OP_BOTH(operator>);
 
 template<int N, typename T1, typename T2>
-ShGeneric<N, CT1T2> operator>=(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right)
+Generic<N, CT1T2> operator>=(const Generic<N, T1>& left, const Generic<N, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CT1T2> t;
+  Attrib<N, TEMP, CT1T2> t;
   shSGE(t, left, right);
   return t;
 }
 template<int N, typename T1, typename T2>
-ShGeneric<N, CT1T2> operator>=(const ShGeneric<N, T1>& left, const ShGeneric<1, T2>& right)
+Generic<N, CT1T2> operator>=(const Generic<N, T1>& left, const Generic<1, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CT1T2> t;
+  Attrib<N, TEMP, CT1T2> t;
   shSGE(t, left, right);
   return t;
 }
 template<int N, typename T1, typename T2>
-ShGeneric<N, CT1T2> operator>=(const ShGeneric<1, T1>& left, const ShGeneric<N, T2>& right)
+Generic<N, CT1T2> operator>=(const Generic<1, T1>& left, const Generic<N, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CT1T2> t;
+  Attrib<N, TEMP, CT1T2> t;
   shSGE(t, left, right);
   return t;
 }
 template<typename T1, typename T2>
-ShGeneric<1, CT1T2> operator>=(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right)
+Generic<1, CT1T2> operator>=(const Generic<1, T1>& left, const Generic<1, T2>& right)
 {
-  ShAttrib<1, SH_TEMP, CT1T2> t;
+  Attrib<1, TEMP, CT1T2> t;
   shSGE(t, left, right);
   return t;
 }
-SH_SHLIB_CONST_SCALAR_OP(operator>=);
-SH_SHLIB_CONST_N_OP_BOTH(operator>=);
+SHLIB_CONST_SCALAR_OP(operator>=);
+SHLIB_CONST_N_OP_BOTH(operator>=);
 
 template<int N, typename T1, typename T2>
-ShGeneric<N, CT1T2> operator==(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right)
+Generic<N, CT1T2> operator==(const Generic<N, T1>& left, const Generic<N, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CT1T2> t;
+  Attrib<N, TEMP, CT1T2> t;
   shSEQ(t, left, right);
   return t;
 }
 template<int N, typename T1, typename T2>
-ShGeneric<N, CT1T2> operator==(const ShGeneric<N, T1>& left, const ShGeneric<1, T2>& right)
+Generic<N, CT1T2> operator==(const Generic<N, T1>& left, const Generic<1, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CT1T2> t;
+  Attrib<N, TEMP, CT1T2> t;
   shSEQ(t, left, right);
   return t;
 }
 template<int N, typename T1, typename T2>
-ShGeneric<N, CT1T2> operator==(const ShGeneric<1, T1>& left, const ShGeneric<N, T2>& right)
+Generic<N, CT1T2> operator==(const Generic<1, T1>& left, const Generic<N, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CT1T2> t;
+  Attrib<N, TEMP, CT1T2> t;
   shSEQ(t, left, right);
   return t;
 }
 template<typename T1, typename T2>
-ShGeneric<1, CT1T2> operator==(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right)
+Generic<1, CT1T2> operator==(const Generic<1, T1>& left, const Generic<1, T2>& right)
 {
-  ShAttrib<1, SH_TEMP, CT1T2> t;
+  Attrib<1, TEMP, CT1T2> t;
   shSEQ(t, left, right);
   return t;
 }
-SH_SHLIB_CONST_SCALAR_OP(operator==);
-SH_SHLIB_CONST_N_OP_BOTH(operator==);
+SHLIB_CONST_SCALAR_OP(operator==);
+SHLIB_CONST_N_OP_BOTH(operator==);
 
 template<int N, typename T1, typename T2>
-ShGeneric<N, CT1T2> operator!=(const ShGeneric<N, T1>& left, const ShGeneric<N, T2>& right)
+Generic<N, CT1T2> operator!=(const Generic<N, T1>& left, const Generic<N, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CT1T2> t;
+  Attrib<N, TEMP, CT1T2> t;
   shSNE(t, left, right);
   return t;
 }
 template<int N, typename T1, typename T2>
-ShGeneric<N, CT1T2> operator!=(const ShGeneric<N, T1>& left, const ShGeneric<1, T2>& right)
+Generic<N, CT1T2> operator!=(const Generic<N, T1>& left, const Generic<1, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CT1T2> t;
+  Attrib<N, TEMP, CT1T2> t;
   shSNE(t, left, right);
   return t;
 }
 template<int N, typename T1, typename T2>
-ShGeneric<N, CT1T2> operator!=(const ShGeneric<1, T1>& left, const ShGeneric<N, T2>& right)
+Generic<N, CT1T2> operator!=(const Generic<1, T1>& left, const Generic<N, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CT1T2> t;
+  Attrib<N, TEMP, CT1T2> t;
   shSNE(t, left, right);
   return t;
 }
 template<typename T1, typename T2>
-ShGeneric<1, CT1T2> operator!=(const ShGeneric<1, T1>& left, const ShGeneric<1, T2>& right)
+Generic<1, CT1T2> operator!=(const Generic<1, T1>& left, const Generic<1, T2>& right)
 {
-  ShAttrib<1, SH_TEMP, CT1T2> t;
+  Attrib<1, TEMP, CT1T2> t;
   shSNE(t, left, right);
   return t;
 }
-SH_SHLIB_CONST_SCALAR_OP(operator!=);
-SH_SHLIB_CONST_N_OP_BOTH(operator!=);
+SHLIB_CONST_SCALAR_OP(operator!=);
+SHLIB_CONST_N_OP_BOTH(operator!=);
 
 template<int N, typename T1, typename T2, typename T3>
-ShGeneric<N, CT1T2T3> cond(const ShGeneric<N, T1>& condition, 
-                           const ShGeneric<N, T2>& left,
-                           const ShGeneric<N, T3>& right)
+Generic<N, CT1T2T3> cond(const Generic<N, T1>& condition, 
+                           const Generic<N, T2>& left,
+                           const Generic<N, T3>& right)
 {
-  ShAttrib<N, SH_TEMP, CT1T2T3> t;
+  Attrib<N, TEMP, CT1T2T3> t;
   shCOND(t, condition, left, right);
   return t;
 }
 template<int N, typename T1, typename T2, typename T3>
-ShGeneric<N, CT1T2T3> cond(const ShGeneric<1, T1>& condition,
-                           const ShGeneric<N, T2>& left,
-                           const ShGeneric<N, T3>& right)
+Generic<N, CT1T2T3> cond(const Generic<1, T1>& condition,
+                           const Generic<N, T2>& left,
+                           const Generic<N, T3>& right)
 {
-  ShAttrib<N, SH_TEMP, CT1T2T3> t;
+  Attrib<N, TEMP, CT1T2T3> t;
   shCOND(t, condition, left, right);
   return t;
 }
 template<typename T1, typename T2, typename T3>
-ShGeneric<1, CT1T2T3> cond(const ShGeneric<1, T1>& condition, 
-                           const ShGeneric<1, T2>& left,
-                           const ShGeneric<1, T3>& right)
+Generic<1, CT1T2T3> cond(const Generic<1, T1>& condition, 
+                           const Generic<1, T2>& left,
+                           const Generic<1, T3>& right)
 {
-  ShAttrib<1, SH_TEMP, CT1T2T3> t;
+  Attrib<1, TEMP, CT1T2T3> t;
   shCOND(t, condition, left, right);
   return t;
 }
 template<int N, typename T1, typename T2>
-ShGeneric<N, CT1T2> cond(const CT1T2& condition, 
-                         const ShGeneric<N, T1>& left, 
-                         const ShGeneric<N, T2>& right)
+Generic<N, CT1T2> cond(const CT1T2& condition, 
+                         const Generic<N, T1>& left, 
+                         const Generic<N, T2>& right)
 {
-  ShAttrib<N, SH_TEMP, CT1T2> t;
-  shCOND(t, ShAttrib<1, SH_CONST, CT1T2>(condition), left, right);
+  Attrib<N, TEMP, CT1T2> t;
+  shCOND(t, Attrib<1, CONST, CT1T2>(condition), left, right);
   return t;
 }
 
 template<int N, typename T>
-ShGeneric<N, T> operator!(const ShGeneric<N, T>& a)
+Generic<N, T> operator!(const Generic<N, T>& a)
 {
   return static_cast<T>(1) - (a > static_cast<T>(0));
 }
 
 
 template<int N, typename T1, typename T2>
-ShGeneric<N, CT1T2> operator&&(const ShGeneric<N, T1>& a, const ShGeneric<N, T2>& b)
+Generic<N, CT1T2> operator&&(const Generic<N, T1>& a, const Generic<N, T2>& b)
 {
   return min(a,b);
 }
 
 template<int N, typename T1, typename T2>
-ShGeneric<N, CT1T2> operator||(const ShGeneric<N, T1>& a, const ShGeneric<N, T2>& b)
+Generic<N, CT1T2> operator||(const Generic<N, T1>& a, const Generic<N, T2>& b)
 {
   return max(a,b);
 }
 
 template<int N, typename T>
-ShGeneric<1, T> any(const ShGeneric<N, T>& a)
+Generic<1, T> any(const Generic<N, T>& a)
 {
-  ShAttrib<1, SH_TEMP, T> t = a(0);
+  Attrib<1, TEMP, T> t = a(0);
   for (int i = 1; i < N; i++) {
     t = t || a(i);
   }
@@ -279,9 +279,9 @@ ShGeneric<1, T> any(const ShGeneric<N, T>& a)
 }
 
 template<int N, typename T>
-ShGeneric<1, T> all(const ShGeneric<N, T>& a)
+Generic<1, T> all(const Generic<N, T>& a)
 {
-  ShAttrib<1, SH_TEMP, T> t = a(0);
+  Attrib<1, TEMP, T> t = a(0);
   for (int i = 1; i < N; i++) {
     t = t && a(i);
   }

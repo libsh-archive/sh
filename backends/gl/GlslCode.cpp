@@ -21,42 +21,42 @@
 #include <iostream>
 #include <fstream>
 
-#include "ShStorageType.hpp"
-#include "ShOptimizations.hpp"
+#include "StorageType.hpp"
+#include "Optimizations.hpp"
 
-//#define SH_GLSL_DEBUG
+//#define GLSL_DEBUG
 
 namespace shgl {
 
 using namespace SH;
 using namespace std;
 
-struct GlslError : public ShException {
+struct GlslError : public Exception {
 public:
   GlslError(const std::string& message)
-    : ShException(std::string("GLSL Backend: ") + message)
+    : Exception(std::string("GLSL Backend: ") + message)
   {
   }
 };
 
 GlslSet* GlslSet::m_current = 0;
 
-GlslCode::GlslCode(const ShProgramNodeCPtr& shader, const std::string& unit,
+GlslCode::GlslCode(const ProgramNodeCPtr& shader, const std::string& unit,
 		   TextureStrategy* texture) 
   : m_texture(texture), m_target("glsl:" + unit), m_arb_shader(0),
     m_indent(0), m_varmap(NULL), m_nb_textures(0), m_bound(0)
 {
-  m_originalShader = const_cast<ShProgramNode*>(shader.object());
+  m_originalShader = const_cast<ProgramNode*>(shader.object());
   
   if (unit == "fragment"){
-    m_unit = SH_GLSL_FP;
+    m_unit = GLSL_FP;
   } else if (unit == "vertex") {
-    m_unit = SH_GLSL_VP;  
+    m_unit = GLSL_VP;  
   }
 
   // Query the GL vendor string
   m_vendor = VENDOR_UNKNOWN;
-  const GLubyte* vendor = SH_GL_CHECK_ERROR(glGetString(GL_VENDOR));
+  const GLubyte* vendor = GL_CHECK_ERROR(glGetString(GL_VENDOR));
   if (vendor) {
     std::string s(reinterpret_cast<const char*>(vendor));
     if (s.find("NVIDIA") != s.npos) {
@@ -77,41 +77,41 @@ GlslCode::~GlslCode()
 
   if (m_arb_shader != 0) {
     // Shouldn't be bound, ever
-    SH_DEBUG_ASSERT(!m_bound);
-    SH_GL_CHECK_ERROR(glDeleteObjectARB(m_arb_shader));
+    DEBUG_ASSERT(!m_bound);
+    GL_CHECK_ERROR(glDeleteObjectARB(m_arb_shader));
   }
   delete m_varmap;
 }
 
 void GlslCode::generate()
 {
-  ShProgramNodePtr temp_shader = m_originalShader->clone();
+  ProgramNodePtr temp_shader = m_originalShader->clone();
   m_shader = temp_shader.object();
   m_shader->acquireRef();
   temp_shader = NULL;
 
-  ShContext::current()->enter(m_shader);
+  Context::current()->enter(m_shader);
 
-  ShTransformer transform(m_shader);
-  ShVarTransformMap* original_vars = new ShVarTransformMap;
+  Transformer transform(m_shader);
+  VarTransformMap* original_vars = new VarTransformMap;
   transform.convertInputOutput(original_vars);
   transform.convertTextureLookups();
 
-  ShTransformer::ValueTypeMap convert_map;
-  convert_map[SH_DOUBLE] = SH_FLOAT; 
-  convert_map[SH_HALF] = SH_FLOAT;
-  convert_map[SH_INT] = SH_FLOAT;
-  convert_map[SH_SHORT] = SH_FLOAT;
-  convert_map[SH_BYTE] = SH_FLOAT;
-  convert_map[SH_UINT] = SH_FLOAT;
-  convert_map[SH_USHORT] = SH_FLOAT;
-  convert_map[SH_UBYTE] = SH_FLOAT;
-  convert_map[SH_FINT] = SH_FLOAT;
-  convert_map[SH_FSHORT] = SH_FLOAT;
-  convert_map[SH_FBYTE] = SH_FLOAT;
-  convert_map[SH_FUINT] = SH_FLOAT;
-  convert_map[SH_FUSHORT] = SH_FLOAT;
-  convert_map[SH_FUBYTE] = SH_FLOAT;
+  Transformer::ValueTypeMap convert_map;
+  convert_map[DOUBLE] = FLOAT; 
+  convert_map[HALF] = FLOAT;
+  convert_map[INT] = FLOAT;
+  convert_map[SHORT] = FLOAT;
+  convert_map[BYTE] = FLOAT;
+  convert_map[UINT] = FLOAT;
+  convert_map[USHORT] = FLOAT;
+  convert_map[UBYTE] = FLOAT;
+  convert_map[FINT] = FLOAT;
+  convert_map[FSHORT] = FLOAT;
+  convert_map[FBYTE] = FLOAT;
+  convert_map[FUINT] = FLOAT;
+  convert_map[FUSHORT] = FLOAT;
+  convert_map[FUBYTE] = FLOAT;
   
   transform.convertToFloat(convert_map);
   transform.splitTuples(4, m_splits);
@@ -125,8 +125,8 @@ void GlslCode::generate()
   } else {
     m_shader->releaseRef();
     m_shader = m_originalShader;
-    ShContext::current()->exit();
-    ShContext::current()->enter(m_shader);
+    Context::current()->exit();
+    Context::current()->enter(m_shader);
   }
 
   // Initialize the extensions map
@@ -138,10 +138,10 @@ void GlslCode::generate()
   
   // Code generation
   try {
-    ShStructural structural(m_shader->ctrlGraph);
+    Structural structural(m_shader->ctrlGraph);
     m_shader->ctrlGraph->entry()->clearMarked();
     gen_structural_node(structural.head());
-#ifdef SH_GLSL_DEBUG
+#ifdef GLSL_DEBUG
     std::ofstream f("structural.dot");
     structural.dump(f);
     std::system("dot -Tps structural.dot -o structural.ps");
@@ -151,21 +151,21 @@ void GlslCode::generate()
   }
   catch (...) {
     m_shader->ctrlGraph->entry()->clearMarked();
-    ShContext::current()->exit();
+    Context::current()->exit();
     throw;
   }
 
-  ShContext::current()->exit();
+  Context::current()->exit();
 }
 
 void GlslCode::upload()
 {
-  if (SH_GLSL_VP == m_unit) {
+  if (GLSL_VP == m_unit) {
     m_arb_shader = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
-  } else if (SH_GLSL_FP == m_unit) {
+  } else if (GLSL_FP == m_unit) {
     m_arb_shader = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
   }
-  SH_DEBUG_ASSERT(m_arb_shader);
+  DEBUG_ASSERT(m_arb_shader);
 
   stringstream code;
   print(code);
@@ -173,8 +173,8 @@ void GlslCode::upload()
 
   const char* code_string = s.c_str();
   GLint code_len = s.size();
-  SH_GL_CHECK_ERROR(glShaderSourceARB(m_arb_shader, 1, &code_string, &code_len));
-  SH_GL_CHECK_ERROR(glCompileShaderARB(m_arb_shader));
+  GL_CHECK_ERROR(glShaderSourceARB(m_arb_shader, 1, &code_string, &code_len));
+  GL_CHECK_ERROR(glCompileShaderARB(m_arb_shader));
 
   // Check compilation
   GLint compiled;
@@ -187,9 +187,9 @@ void GlslCode::upload()
     os << "Shader code:" << endl;
     print_shader_source(m_arb_shader, os);
     os << endl;
-    shError(GlslError(os.str()));
+    error(GlslError(os.str()));
     return;
-#ifdef SH_GLSL_DEBUG
+#ifdef GLSL_DEBUG
   } else {
     std::ostringstream os;
     os << "Shader compile status (target = " << m_target << "): OK" << endl << endl;
@@ -206,14 +206,14 @@ void GlslCode::upload()
 // This must be done before linking the glsl program
 void GlslCode::bind_generic_attributes(GLhandleARB glsl_program)
 {
-  SH_DEBUG_ASSERT(m_arb_shader);
-  if (m_unit != SH_GLSL_VP) return; // generic attributes are only for vertex programs right now
+  DEBUG_ASSERT(m_arb_shader);
+  if (m_unit != GLSL_VP) return; // generic attributes are only for vertex programs right now
 
-  for (ShProgramNode::VarList::const_iterator i = m_shader->begin_inputs(); 
+  for (ProgramNode::VarList::const_iterator i = m_shader->begin_inputs(); 
        i != m_shader->end_inputs(); i++) {
     const GlslVariable& var = m_varmap->variable(*i);
     if (var.attribute() >= 0) {
-      SH_GL_CHECK_ERROR(glBindAttribLocationARB(glsl_program, var.attribute(), var.name().c_str()));
+      GL_CHECK_ERROR(glBindAttribLocationARB(glsl_program, var.attribute(), var.name().c_str()));
     }
   }
 }
@@ -245,7 +245,7 @@ void GlslCode::bind()
 void GlslCode::unbind()
 {
   if (!m_bound) return;
-  SH_DEBUG_ASSERT(GlslSet::current());
+  DEBUG_ASSERT(GlslSet::current());
   
   if (!m_fallback_set) m_fallback_set = new GlslSet;
 
@@ -272,9 +272,9 @@ void GlslCode::set_bound(GLhandleARB program)
 {
   m_bound = program;
   if (program) {
-    ShContext::current()->set_binding(m_target, ShProgram(m_originalShader));
+    Context::current()->set_binding(m_target, Program(m_originalShader));
   } else {
-    ShContext::current()->unset_binding(m_target);
+    Context::current()->unset_binding(m_target);
   }
 }
 
@@ -282,23 +282,23 @@ void GlslCode::upload_uniforms()
 {
   if (!m_bound) return;
   
-  SH_DEBUG_ASSERT(m_varmap);
+  DEBUG_ASSERT(m_varmap);
 
   for (GlslVariableMap::NodeList::iterator i = m_varmap->node_begin();
        i != m_varmap->node_end(); i++) {
-    ShVariableNodePtr node = *i;
+    VariableNodePtr node = *i;
     
     if (node->hasValues() && node->uniform()) {
       // Normal uniforms
       updateUniform(node); 
     } else {
       // Palettes are implemented as uniform arrays
-      ShPaletteNodePtr palette = shref_dynamic_cast<ShPaletteNode>(*i);
+      PaletteNodePtr palette = shref_dynamic_cast<PaletteNode>(*i);
       if (palette) {
         const GlslVariable& var(m_varmap->variable(palette));
 
         for (unsigned i=0; i < palette->palette_length(); i++) {
-          ShVariableNodePtr uniform = palette->get_node(i);
+          VariableNodePtr uniform = palette->get_node(i);
           stringstream name;
           name << var.name() << "[" << i << "]";
           real_update_uniform(uniform, name.str().c_str());
@@ -308,19 +308,19 @@ void GlslCode::upload_uniforms()
   }
 }
 
-void GlslCode::update_float_uniform(const ShVariableNodePtr& node, const GLint location)
+void GlslCode::update_float_uniform(const VariableNodePtr& node, const GLint location)
 {
   // Space for temporary data if we need it during data conversion
   GLfloat data[4];
   const GLfloat *values;
 
   const int uniform_size = node->size();
-  if (node->valueType() == SH_FLOAT) {
+  if (node->valueType() == FLOAT) {
     values = static_cast<const float *>(node->getVariant()->array());
   }
   else {
     // Componentwise cast to float and copy
-    typedef ShDataVariant<GLfloat, SH_HOST> FloatVariant;
+    typedef DataVariant<GLfloat, HOST> FloatVariant;
     FloatVariant floatVariant(uniform_size);
     floatVariant.set(node->getVariant());
     for (int i = 0; i < uniform_size; ++i)
@@ -328,26 +328,26 @@ void GlslCode::update_float_uniform(const ShVariableNodePtr& node, const GLint l
     values = data;
   }
 
-  // TODO: Create a SH_GL_DEBUG_CHECK_ERROR that gets compiled out in release?
+  // TODO: Create a GL_DEBUG_CHECK_ERROR that gets compiled out in release?
   switch (uniform_size) {
   case 1:    
-    SH_GL_CHECK_ERROR(glUniform1fvARB(location, 1, values));
+    GL_CHECK_ERROR(glUniform1fvARB(location, 1, values));
     break;
   case 2:
-    SH_GL_CHECK_ERROR(glUniform2fvARB(location, 1, values));
+    GL_CHECK_ERROR(glUniform2fvARB(location, 1, values));
     break;
   case 3:
-    SH_GL_CHECK_ERROR(glUniform3fvARB(location, 1, values));
+    GL_CHECK_ERROR(glUniform3fvARB(location, 1, values));
     break;
   case 4:
-    SH_GL_CHECK_ERROR(glUniform4fvARB(location, 1, values));
+    GL_CHECK_ERROR(glUniform4fvARB(location, 1, values));
     break;
   default:
-    SH_DEBUG_ASSERT(0); // Unsupported size
+    DEBUG_ASSERT(0); // Unsupported size
   }
 }
 
-void GlslCode::update_int_uniform(const ShVariableNodePtr& node, const GLint location)
+void GlslCode::update_int_uniform(const VariableNodePtr& node, const GLint location)
 {
   const int uniform_size = node->size();
 
@@ -355,12 +355,12 @@ void GlslCode::update_int_uniform(const ShVariableNodePtr& node, const GLint loc
   GLint data[4];
   const GLint *values;
 
-  if (node->valueType() == SH_INT) {
+  if (node->valueType() == INT) {
     values = static_cast<const GLint *>(node->getVariant()->array());
   }
   else {
     // Componentwise cast to float and copy
-    typedef ShDataVariant<GLint, SH_HOST> IntVariant;
+    typedef DataVariant<GLint, HOST> IntVariant;
     IntVariant intVariant(uniform_size);
     intVariant.set(node->getVariant());
     for (int i = 0; i < uniform_size; ++i)
@@ -368,30 +368,30 @@ void GlslCode::update_int_uniform(const ShVariableNodePtr& node, const GLint loc
     values = data;
   }
 
-  // TODO: Create a SH_GL_DEBUG_CHECK_ERROR that gets compiled out in release?
+  // TODO: Create a GL_DEBUG_CHECK_ERROR that gets compiled out in release?
   switch (uniform_size) {
   case 1:
-    SH_GL_CHECK_ERROR(glUniform1ivARB(location, 1, values));
+    GL_CHECK_ERROR(glUniform1ivARB(location, 1, values));
     break;
   case 2:
-    SH_GL_CHECK_ERROR(glUniform2ivARB(location, 1, values));
+    GL_CHECK_ERROR(glUniform2ivARB(location, 1, values));
     break;
   case 3:
-    SH_GL_CHECK_ERROR(glUniform3ivARB(location, 1, values));
+    GL_CHECK_ERROR(glUniform3ivARB(location, 1, values));
     break;
   case 4:
-    SH_GL_CHECK_ERROR(glUniform4ivARB(location, 1, values));
+    GL_CHECK_ERROR(glUniform4ivARB(location, 1, values));
     break;
   default:
-    SH_DEBUG_ASSERT(0); // Unsupported size
+    DEBUG_ASSERT(0); // Unsupported size
   }
 }
 
-void GlslCode::updateUniform(const ShVariableNodePtr& uniform)
+void GlslCode::updateUniform(const VariableNodePtr& uniform)
 {
   if (!m_bound) return;
 
-  SH_DEBUG_ASSERT(uniform);
+  DEBUG_ASSERT(uniform);
 
   // Variable is in the map?
   const GlslVariable *var;
@@ -402,21 +402,21 @@ void GlslCode::updateUniform(const ShVariableNodePtr& uniform)
   }
   else {
     // Check to see if the uniform was split
-    SH::ShTransformer::VarSplitMap::iterator split = m_splits.find(uniform);
+    SH::Transformer::VarSplitMap::iterator split = m_splits.find(uniform);
     if (split != m_splits.end()) {
-      ShTransformer::VarNodeVec &splitVec = split->second;
-      ShVariantCPtr uniformVariant = uniform->getVariant();
+      Transformer::VarNodeVec &splitVec = split->second;
+      VariantCPtr uniformVariant = uniform->getVariant();
 
       int offset = 0;
       int copySwiz[4];
-      for (ShTransformer::VarNodeVec::iterator it = splitVec.begin();
+      for (Transformer::VarNodeVec::iterator it = splitVec.begin();
 	         it != splitVec.end(); offset += (*it)->size(), ++it) {
 	      // TODO switch to properly swizzled version
         for (int i=0; i < (*it)->size(); ++i) {
 	        copySwiz[i] = i + offset;
 	      }
         (*it)->setVariant(uniformVariant->get(false,
-          ShSwizzle(uniform->size(), (*it)->size(), copySwiz))); 
+          Swizzle(uniform->size(), (*it)->size(), copySwiz))); 
         updateUniform(*it);
       }
     }
@@ -424,12 +424,12 @@ void GlslCode::updateUniform(const ShVariableNodePtr& uniform)
   }  
 }
 
-void GlslCode::real_update_uniform(const ShVariableNodePtr& uniform, const string& name)
+void GlslCode::real_update_uniform(const VariableNodePtr& uniform, const string& name)
 {
   // TODO: cache these?
   GLint location = glGetUniformLocationARB(m_bound, name.c_str());
   if (location != -1) {
-    if (shIsInteger(uniform->valueType())) {
+    if (isInteger(uniform->valueType())) {
       update_int_uniform(uniform, location);
     } else {
       update_float_uniform(uniform, location);
@@ -448,10 +448,10 @@ string GlslCode::print_decl(const GlslVariableDeclaration& decl)
 
 ostream& GlslCode::print(ostream& out)
 {
-  SH_DEBUG_ASSERT(m_varmap);
+  DEBUG_ASSERT(m_varmap);
   const string BLOCK_INDENT("    ");
 
-  out << "// OpenGL " << ((m_unit == SH_GLSL_VP) ? "Vertex" : "Fragment") << " Program" << endl;
+  out << "// OpenGL " << ((m_unit == GLSL_VP) ? "Vertex" : "Fragment") << " Program" << endl;
 
   // Declare extensions
   for (ExtensionMap::const_iterator i = m_glsl_extensions.begin();
@@ -516,19 +516,19 @@ ostream& GlslCode::describe_interface(ostream& out)
 
 ostream& GlslCode::describe_bindings(ostream& out)
 {
-  SH_DEBUG_ASSERT(m_varmap);
+  DEBUG_ASSERT(m_varmap);
 
   out << "Inputs:" << endl;
-  for (ShProgramNode::VarList::const_iterator i = m_shader->begin_inputs(); 
+  for (ProgramNode::VarList::const_iterator i = m_shader->begin_inputs(); 
        i != m_shader->end_inputs(); ++i) {
-    ShVariableNodePtr var = *i;
+    VariableNodePtr var = *i;
     out << "  " << var->name() << " => " << m_varmap->variable(var).name() << endl;
   }
 
   out << "Outputs:" << endl;
-  for (ShProgramNode::VarList::const_iterator i = m_shader->begin_outputs(); 
+  for (ProgramNode::VarList::const_iterator i = m_shader->begin_outputs(); 
        i != m_shader->end_outputs(); ++i) {
-    ShVariableNodePtr var = *i;
+    VariableNodePtr var = *i;
     out << "  " << var->name() << " => " << m_varmap->variable(var).name() << endl;
   }
 
@@ -553,30 +553,30 @@ void GlslCode::append_line(const string& line, bool append_semicolon)
   m_lines.push_back(l);
 }
 
-void GlslCode::gen_structural_node(const ShStructuralNodePtr& node)
+void GlslCode::gen_structural_node(const StructuralNodePtr& node)
 {
   if (!node) return;
 
-  if (node->type == ShStructuralNode::UNREDUCED) {
-    ShBasicBlockPtr block = node->cfg_node->block;
-    if (block) for (ShBasicBlock::ShStmtList::const_iterator I = block->begin();
+  if (node->type == StructuralNode::UNREDUCED) {
+    BasicBlockPtr block = node->cfg_node->block;
+    if (block) for (BasicBlock::StmtList::const_iterator I = block->begin();
                     I != block->end(); ++I) {
-      const ShStatement& stmt = *I;
+      const Statement& stmt = *I;
       emit(stmt);
     }
   } 
-  else if (node->type == ShStructuralNode::BLOCK) {
-    for (ShStructuralNode::StructNodeList::const_iterator I = node->structnodes.begin();
+  else if (node->type == StructuralNode::BLOCK) {
+    for (StructuralNode::StructNodeList::const_iterator I = node->structnodes.begin();
          I != node->structnodes.end(); ++I) {
       gen_structural_node(*I);
     }
   } 
-  else if (node->type == ShStructuralNode::IFELSE) {
-    ShStructuralNodePtr header = node->structnodes.front();
+  else if (node->type == StructuralNode::IFELSE) {
+    StructuralNodePtr header = node->structnodes.front();
 
-    ShVariable cond;
-    ShStructuralNodePtr ifnode, elsenode;
-    for (ShStructuralNode::SuccessorList::iterator I = header->succs.begin();
+    Variable cond;
+    StructuralNodePtr ifnode, elsenode;
+    for (StructuralNode::SuccessorList::iterator I = header->succs.begin();
          I != header->succs.end(); ++I) {
       if (I->first.node()) {
         ifnode = I->second;
@@ -598,12 +598,12 @@ void GlslCode::gen_structural_node(const ShStructuralNodePtr& node)
 
     append_line("} // if", false);
   } 
-  else if (node->type == ShStructuralNode::IF) {
-    ShStructuralNodePtr header = node->structnodes.front();
+  else if (node->type == StructuralNode::IF) {
+    StructuralNodePtr header = node->structnodes.front();
 
-    ShStructuralNode::SuccessorList::iterator B = header->succs.begin();
-    ShVariable cond = B->first;
-    ShStructuralNodePtr ifnode = B->second;
+    StructuralNode::SuccessorList::iterator B = header->succs.begin();
+    Variable cond = B->first;
+    StructuralNodePtr ifnode = B->second;
 
     gen_structural_node(header);
     append_line("if (bool(" + resolve(cond.node()) + ")) {", false);
@@ -612,10 +612,10 @@ void GlslCode::gen_structural_node(const ShStructuralNodePtr& node)
     m_indent--;
     append_line("} // if", false);
   } 
-  else if (node->type == ShStructuralNode::WHILELOOP) {
-    ShStructuralNodePtr header = node->structnodes.front();
-    ShVariable cond = header->succs.front().first;
-    ShStructuralNodePtr body = node->structnodes.back();
+  else if (node->type == StructuralNode::WHILELOOP) {
+    StructuralNodePtr header = node->structnodes.front();
+    Variable cond = header->succs.front().first;
+    StructuralNodePtr body = node->structnodes.back();
 
     append_line("// evaluate loop condition:", false);
     gen_structural_node(header);
@@ -630,13 +630,13 @@ void GlslCode::gen_structural_node(const ShStructuralNodePtr& node)
     
     append_line("} // while", false);
   } 
-  else if (node->type == ShStructuralNode::SELFLOOP) {
-    ShStructuralNodePtr loopnode = node->structnodes.front();
+  else if (node->type == StructuralNode::SELFLOOP) {
+    StructuralNodePtr loopnode = node->structnodes.front();
 
     bool condexit = true; // true if the condition causes us to exit the
                           // loop, rather than continue it
-    ShVariable cond;
-    for (ShStructuralNode::SuccessorList::iterator I = loopnode->succs.begin();
+    Variable cond;
+    for (StructuralNode::SuccessorList::iterator I = loopnode->succs.begin();
          I != loopnode->succs.end(); ++I) {
       if (I->first.node()) {
         condexit = (I->second != loopnode);
@@ -657,16 +657,16 @@ void GlslCode::gen_structural_node(const ShStructuralNodePtr& node)
 
     append_line("} // while", false);
   } 
-  else if (ShStructuralNode::PROPINT == node->type) {
+  else if (StructuralNode::PROPINT == node->type) {
     append_line("// Multi-exit infinite loop", false);
     append_line("while (true) {", false);
     m_indent++;
 
     int continue_levels=0;
-    ShStructuralNode* continue_destination=0;
+    StructuralNode* continue_destination=0;
 
-    set<ShStructuralNode*> seen; // keep track of the nodes we have seen already
-    ShStructuralNodePtr n = node->structnodes.front(); 
+    set<StructuralNode*> seen; // keep track of the nodes we have seen already
+    StructuralNodePtr n = node->structnodes.front(); 
     while (seen.find(n.object()) == seen.end()) {
       // Close the continue block if necessary
       if (continue_destination && n.object() == continue_destination) {
@@ -681,14 +681,14 @@ void GlslCode::gen_structural_node(const ShStructuralNodePtr& node)
       gen_structural_node(n);
       if (n->succs.size() > 1) {
         // Figure out which branch is the conditional one
-        pair<ShVariable, ShStructuralNodePtr> branch_pair = n->succs.front(); // conditional successor
-        pair<ShVariable, ShStructuralNodePtr> default_pair = n->succs.back(); // non-conditional successor
+        pair<Variable, StructuralNodePtr> branch_pair = n->succs.front(); // conditional successor
+        pair<Variable, StructuralNodePtr> default_pair = n->succs.back(); // non-conditional successor
         if (!branch_pair.first.node()) {
           branch_pair = n->succs.back();
           default_pair = n->succs.front();
         }
-        ShVariable branch_cond = branch_pair.first;
-        const ShStructuralNodePtr branch_node = branch_pair.second;
+        Variable branch_cond = branch_pair.first;
+        const StructuralNodePtr branch_node = branch_pair.second;
 
         // Check if the non-conditional node leaves the PROPINT node
         if (default_pair.second == node->succs.front().second) {
@@ -728,13 +728,13 @@ void GlslCode::gen_structural_node(const ShStructuralNodePtr& node)
     append_line("} // infinite while loop", false);
   }
   else {
-    SH_DEBUG_WARN("Unknown ShStructuralNode type encountered.  Generated code may be incomplete.");
+    DEBUG_WARN("Unknown StructuralNode type encountered.  Generated code may be incomplete.");
   }
 }
 
-string GlslCode::resolve(const ShVariable& v, int index, int size) const
+string GlslCode::resolve(const Variable& v, int index, int size) const
 {
-  SH_DEBUG_ASSERT(m_varmap);
+  DEBUG_ASSERT(m_varmap);
 
   if ((0 == size) || (v.size() == size)) {
     return m_varmap->resolve(v, index);
@@ -743,9 +743,9 @@ string GlslCode::resolve(const ShVariable& v, int index, int size) const
   }
 }
 
-string GlslCode::resolve(const ShVariable& v, const ShVariable& index) const
+string GlslCode::resolve(const Variable& v, const Variable& index) const
 {
-  SH_DEBUG_ASSERT(m_varmap);
+  DEBUG_ASSERT(m_varmap);
   return m_varmap->resolve(v, index);
 }
 
@@ -766,9 +766,9 @@ void GlslCode::allocate_textures()
   }
 
   // reserve and allocate any preset texunits
-  for (ShProgramNode::TexList::const_iterator i = m_shader->textures.begin();
+  for (ProgramNode::TexList::const_iterator i = m_shader->textures.begin();
        i != m_shader->textures.end(); i++) {
-    ShTextureNodePtr node = *i;
+    TextureNodePtr node = *i;
     
     if (!node->meta("opengl:texunit").empty() ||
 	      !node->meta("opengl:preset").empty()) {
@@ -795,14 +795,14 @@ void GlslCode::allocate_textures()
   
   // TODO: Cache this result? We may want something like ArbLimits here (GlslLimits perhaps)
   GLint max_texture_units;
-  SH_GL_CHECK_ERROR(glGetIntegerv((SH_GLSL_VP == m_unit ?
+  GL_CHECK_ERROR(glGetIntegerv((GLSL_VP == m_unit ?
     GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS_ARB : GL_MAX_TEXTURE_IMAGE_UNITS_ARB),
     &max_texture_units));
 
   // allocate remaining textures units with respect to the reserved list
-  for (ShProgramNode::TexList::const_iterator i = m_shader->textures.begin();
+  for (ProgramNode::TexList::const_iterator i = m_shader->textures.begin();
        i != m_shader->textures.end(); i++) {
-    ShTextureNodePtr node = *i;
+    TextureNodePtr node = *i;
     
     if (node->meta("opengl:texunit").empty() &&
 	      node->meta("opengl:preset").empty()) {
@@ -829,22 +829,22 @@ void GlslCode::bind_textures()
 {
   if (!m_bound) return;
   
-  for (ShProgramNode::TexList::const_iterator i = m_shader->textures.begin();
+  for (ProgramNode::TexList::const_iterator i = m_shader->textures.begin();
        i != m_shader->textures.end(); i++) {
-    ShTextureNodePtr texture = *i;
+    TextureNodePtr texture = *i;
 
     if (m_texture_units.find(texture) == m_texture_units.end()) {
       cerr << "Texture '" << texture->name() << "' has no assigned unit." << endl;
       continue;
     }
     
-    const GlslVariable& var(m_varmap->variable(shref_dynamic_cast<ShVariableNode>(texture)));
+    const GlslVariable& var(m_varmap->variable(shref_dynamic_cast<VariableNode>(texture)));
     GLint location = glGetUniformLocationARB(m_bound, var.name().c_str());
 
     if (location != -1) {
       int index = m_texture_units[texture].index;
 
-      SH_GL_CHECK_ERROR(glUniform1iARB(location, index));
+      GL_CHECK_ERROR(glUniform1iARB(location, index));
       
       if (!m_texture_units[texture].preset) {
 	m_texture->bindTexture(texture, GL_TEXTURE0 + index, false);

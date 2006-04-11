@@ -24,64 +24,64 @@
 #include <vector>
 #include <set>
 #include <map>
-#include "ShProgram.hpp"
-#include "ShInfo.hpp"
-#include "ShStatement.hpp"
+#include "Program.hpp"
+#include "Info.hpp"
+#include "Statement.hpp"
 
 // Uncomment this to turn on optimizer debugging using dot.
 // Warning: This is very verbose!
-//#define SH_DEBUG_OPTIMIZER
+//#define DEBUG_OPTIMIZER
 
 namespace SH {
 
 /// Optimize the program with the given optimization level.
-SH_DLLEXPORT
-void optimize(ShProgram& p, int level);
-SH_DLLEXPORT
-void optimize(const ShProgramNodePtr& p, int level);
+DLLEXPORT
+void optimize(Program& p, int level);
+DLLEXPORT
+void optimize(const ProgramNodePtr& p, int level);
 
 /// Optimize the program with the current context's default
 /// optimization level.
-SH_DLLEXPORT
-void optimize(ShProgram& p);
-SH_DLLEXPORT
-void optimize(const ShProgramNodePtr& p);
+DLLEXPORT
+void optimize(Program& p);
+DLLEXPORT
+void optimize(const ProgramNodePtr& p);
 
 // Internal stuff.
 
 // Add value tracking information to the given program's CFG
 // statements.
 // If it already exists, overwrite it.
-SH_DLLEXPORT
-void add_value_tracking(ShProgram& prg);
+DLLEXPORT
+void add_value_tracking(Program& prg);
 
 /// Insert instructions representing each conditional branch
-SH_DLLEXPORT
-void insert_branch_instructions(ShProgram& prg);
+DLLEXPORT
+void insert_branch_instructions(Program& prg);
 
 /// Remove instructions representing conditional branches
-SH_DLLEXPORT
-void remove_branch_instructions(ShProgram& prg);
+DLLEXPORT
+void remove_branch_instructions(Program& prg);
 
 /// Merge blocks with redundant edges
-SH_DLLEXPORT
-void straighten(ShProgram& p, bool& changed);
+DLLEXPORT
+void straighten(Program& p, bool& changed);
 
 /// Remove code that serves no purpose in the given program
-SH_DLLEXPORT
-void remove_dead_code(ShProgram& p, bool& changed);
+DLLEXPORT
+void remove_dead_code(Program& p, bool& changed);
 
 /// Propagate constants and lift uniform computations
-SH_DLLEXPORT
-void propagate_constants(ShProgram& p);
+DLLEXPORT
+void propagate_constants(Program& p);
 
 /* per statement uddu chains */
 struct 
-SH_DLLEXPORT
-ValueTracking : public ShInfo {
-  ValueTracking(ShStatement* stmt);
+DLLEXPORT
+ValueTracking : public Info {
+  ValueTracking(Statement* stmt);
 
-  ShInfo* clone() const;
+  Info* clone() const;
 
   
   struct Def {
@@ -90,18 +90,18 @@ ValueTracking : public ShInfo {
       STMT
     };
 
-    Def(ShStatement* stmt, int index)
+    Def(Statement* stmt, int index)
       : kind(STMT), node(0), stmt(stmt), index(index)
     {
     }
 
-    Def(const ShVariableNodePtr& node, int index)
+    Def(const VariableNodePtr& node, int index)
       : kind(INPUT), node(node), stmt(0), index(index) 
     {}
     
     Kind kind;
-    ShVariableNodePtr node;
-    ShStatement* stmt;
+    VariableNodePtr node;
+    Statement* stmt;
     int index; ///< represents swizzled index (no swizzling for INPUTS)
 
     bool operator<(const Def& other) const
@@ -129,12 +129,12 @@ ValueTracking : public ShInfo {
       STMT
     };
 
-    Use(ShStatement* stmt, int source, int index)
+    Use(Statement* stmt, int source, int index)
       : kind(STMT), node(0), stmt(stmt), source(source), index(index)
     {
     }
 
-    Use(const ShVariableNodePtr& node, int index)
+    Use(const VariableNodePtr& node, int index)
       : kind(OUTPUT), node(node), stmt(0), source(0), index(index)
     {
     }
@@ -160,8 +160,8 @@ ValueTracking : public ShInfo {
     friend std::ostream& operator<<(std::ostream& out, const Use& use);
 
     Kind kind;
-    ShVariableNodePtr node;
-    ShStatement* stmt;
+    VariableNodePtr node;
+    Statement* stmt;
     int source; // source variable
     int index; // tuple index (swizzled)
   };
@@ -184,24 +184,24 @@ ValueTracking : public ShInfo {
 };
 
 /* du chains for all inputs in a program */
-struct InputValueTracking: public ShInfo 
+struct InputValueTracking: public Info 
 {
-  ShInfo* clone() const;
+  Info* clone() const;
   
   friend std::ostream& operator<<(std::ostream& out, const InputValueTracking& ivt);
 
-  typedef std::map<ShVariableNodePtr, ValueTracking::TupleDefUseChain> InputTupleDefUseChain; 
+  typedef std::map<VariableNodePtr, ValueTracking::TupleDefUseChain> InputTupleDefUseChain; 
   InputTupleDefUseChain inputUses;
 };
 
 /* ud chains for all outputs in a program */
-struct OutputValueTracking: public ShInfo 
+struct OutputValueTracking: public Info 
 {
-  ShInfo* clone() const;
+  Info* clone() const;
 
   friend std::ostream& operator<<(std::ostream& out, const OutputValueTracking& ovt);
 
-  typedef std::map<ShVariableNodePtr, ValueTracking::TupleUseDefChain> OutputTupleUseDefChain; 
+  typedef std::map<VariableNodePtr, ValueTracking::TupleUseDefChain> OutputTupleUseDefChain; 
   OutputTupleUseDefChain outputDefs;
 };
 

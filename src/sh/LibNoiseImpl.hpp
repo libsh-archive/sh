@@ -20,19 +20,19 @@
 #ifndef SHLIBNOISEIMPL_HPP
 #define SHLIBNOISEIMPL_HPP
 
-#include "ShLibNoise.hpp"
-#include "ShArray.hpp"
-#include "ShImage3D.hpp"
+#include "LibNoise.hpp"
+#include "Array.hpp"
+#include "Image3D.hpp"
 
 namespace SH {
 
 static const int MRG_REPS = 2; // total instructions for hashmrg will be MRG_REPS * N * 2 + 2 
 
 template<int N, int M, typename T>
-ShGeneric<N, T> hash(const ShGeneric<M, T>& p)
+Generic<N, T> hash(const Generic<M, T>& p)
 {
-  ShAttrib<N, SH_TEMP, T> result = cast<N>(frac(p * 0.01));
-  ShGeneric<N, T> a = fillcast<N>(ShConstAttrib4f(M_PI * M_PI * M_PI * M_PI, 
+  Attrib<N, TEMP, T> result = cast<N>(frac(p * 0.01));
+  Generic<N, T> a = fillcast<N>(ConstAttrib4f(M_PI * M_PI * M_PI * M_PI, 
                                                   std::exp(4.0), 
                                                   std::pow(13.0, M_PI / 2.0), 
                                                   std::sqrt(1997.0)));
@@ -46,7 +46,7 @@ ShGeneric<N, T> hash(const ShGeneric<M, T>& p)
 }
 
 template<int N, int M, typename T>
-ShGeneric<N, T> texhash(const ShGeneric<M, T>& p)
+Generic<N, T> texhash(const Generic<M, T>& p)
 {
   return hash<N>(p);
 }
@@ -56,7 +56,7 @@ ShGeneric<N, T> texhash(const ShGeneric<M, T>& p)
  * P = period of the noise texture
  */
 template<int M, typename T, int P = 16>
-class ShNoise 
+class Noise 
 {
 public:
   /** \brief Generates a single octave Perlin noise with frequency 1
@@ -64,45 +64,45 @@ public:
    * If useTexture is on, then the pattern * repeats at every P cells.
    */
   template<int K>
-  static ShGeneric<M, T> noise(const ShGeneric<K, T> &p, bool useTexture);
+  static Generic<M, T> noise(const Generic<K, T> &p, bool useTexture);
 
   /** \brief Generates a single octave Perlin improved noise with
    * frequency 1 in each of K dimensions.  
    * If useTexture is on, then the pattern repeats at every P cells.
    */
   template<int K>
-  static ShGeneric<M, T> perlin(const ShGeneric<K, T> &p, bool useTexture);
+  static Generic<M, T> perlin(const Generic<K, T> &p, bool useTexture);
   
   /** \brief Generates a cell noise value using unit cube cells  */
   template<int K>
-  static ShGeneric<M, T> cellnoise(const ShGeneric<K, T> &p, bool useTexture);
+  static Generic<M, T> cellnoise(const Generic<K, T> &p, bool useTexture);
   
   /** \brief Generates a single octave of bilinearly interpolated cellnoise */
   template<int K>
-  static ShGeneric<M, T> linnoise(const ShGeneric<K, T> &p, bool useTexture);
+  static Generic<M, T> linnoise(const Generic<K, T> &p, bool useTexture);
 
 private:
-  static ShAttrib<1, SH_CONST, T> constP, invP;
+  static Attrib<1, CONST, T> constP, invP;
   static bool m_init;
-  static ShArray3D<ShAttrib<M, SH_TEMP, T, SH_COLOR> > noiseTex; ///< pseudorandom 2D perlin noise texture 
+  static Array3D<Attrib<M, TEMP, T, COLOR> > noiseTex; ///< pseudorandom 2D perlin noise texture 
   
   static void init();
 };
 
 template<int M, typename T, int P>
-ShArray3D<ShAttrib<M, SH_TEMP, T, SH_COLOR> > ShNoise<M, T, P>::noiseTex(P, P, P); // pseudorandom 3D noise texture
+Array3D<Attrib<M, TEMP, T, COLOR> > Noise<M, T, P>::noiseTex(P, P, P); // pseudorandom 3D noise texture
 
 template<int M, typename T, int P>
-bool ShNoise<M, T, P>::m_init = false; // whether Perlin is initialized. 
+bool Noise<M, T, P>::m_init = false; // whether Perlin is initialized. 
 
 template<int M, typename T, int P>
-ShAttrib<1, SH_CONST, T> ShNoise<M, T, P>::constP(P);
+Attrib<1, CONST, T> Noise<M, T, P>::constP(P);
 
 template<int M, typename T, int P>
-ShAttrib<1, SH_CONST, T> ShNoise<M, T, P>::invP(1.0 / P);
+Attrib<1, CONST, T> Noise<M, T, P>::invP(1.0 / P);
 
 template<int M, typename T, int P>
-void ShNoise<M, T, P>::init() {
+void Noise<M, T, P>::init() {
   if(m_init) return;
 
   int i, j, k, l;
@@ -115,7 +115,7 @@ void ShNoise<M, T, P>::init() {
 #else
   srand48(13);
 #endif
-  ShImage3D noiseImage(P, P, P, M);
+  Image3D noiseImage(P, P, P, M);
   for(k = 0; k < P; ++k) {
    for(i = 0; i < P; ++i) for(j = 0; j < P; ++j) for(l = 0; l < M; ++l) {
 #ifdef _WIN32
@@ -129,14 +129,14 @@ void ShNoise<M, T, P>::init() {
 }
 
 template<int M, typename T>
-ShGeneric<M, T> _psmootht(const ShGeneric<M, T> &t) 
+Generic<M, T> _psmootht(const Generic<M, T> &t) 
 {
   return t * t * t * mad(t, mad(t, 6.0f, fillcast<M>(-15.0f)), fillcast<M>(10.0f)); 
 }
 
 template<int M, typename T, int P>
 template<int K>
-ShGeneric<M, T> ShNoise<M, T, P>::noise(const ShGeneric<K, T> &p, bool useTexture) 
+Generic<M, T> Noise<M, T, P>::noise(const Generic<K, T> &p, bool useTexture) 
 {
   // TODO: implement the real algorithm
   return perlin(p, useTexture);
@@ -144,13 +144,13 @@ ShGeneric<M, T> ShNoise<M, T, P>::noise(const ShGeneric<K, T> &p, bool useTextur
 
 template<int M, typename T, int P>
 template<int K>
-ShGeneric<M, T> ShNoise<M, T, P>::perlin(const ShGeneric<K, T> &p, bool useTexture) 
+Generic<M, T> Noise<M, T, P>::perlin(const Generic<K, T> &p, bool useTexture) 
 {
   init();
   int i, j;
-  typedef ShAttrib<K, SH_TEMP, T> TempType;
-  typedef ShAttrib<M, SH_TEMP, T> ResultType;
-  typedef ShAttrib<K, SH_CONST, T> ConstTempType;
+  typedef Attrib<K, TEMP, T> TempType;
+  typedef Attrib<M, TEMP, T> ResultType;
+  typedef Attrib<K, CONST, T> ConstTempType;
   static const int NUM_SAMPLES = 1 << K;
 
   TempType rp = frac(p); // offset from integer lattice point
@@ -184,7 +184,7 @@ ShGeneric<M, T> ShNoise<M, T, P>::perlin(const ShGeneric<K, T> &p, bool useTextu
     }
   }
 
-  TempType t = _psmootht(rp); //ShNoise's improved polynomial interpolant 
+  TempType t = _psmootht(rp); //Noise's improved polynomial interpolant 
   for(i = K - 1; i >= 0; --i) {
     int offset = 1 << i; 
     for(j = 0; j < offset; ++j) {
@@ -197,10 +197,10 @@ ShGeneric<M, T> ShNoise<M, T, P>::perlin(const ShGeneric<K, T> &p, bool useTextu
 
 template<int M, typename T, int P>
 template<int K>
-ShGeneric<M, T> ShNoise<M, T, P>::cellnoise(const ShGeneric<K, T> &p, bool useTexture)
+Generic<M, T> Noise<M, T, P>::cellnoise(const Generic<K, T> &p, bool useTexture)
 {
   init();
-  ShAttrib<K, SH_TEMP, T> ip;
+  Attrib<K, TEMP, T> ip;
 
   ip = floor(p);
 
@@ -213,31 +213,31 @@ ShGeneric<M, T> ShNoise<M, T, P>::cellnoise(const ShGeneric<K, T> &p, bool useTe
 
 template<int M, typename T, int P>
 template<int K>
-ShGeneric<M, T> ShNoise<M, T, P>::linnoise(const ShGeneric<K, T> &p, bool useTexture)
+Generic<M, T> Noise<M, T, P>::linnoise(const Generic<K, T> &p, bool useTexture)
 {
   // TODO: implement the real algorithm
   return cellnoise(p, useTexture);
 }
 
 #ifdef _WIN32
-#define SHNOISE_WITH_AMP(name) \
+#define NOISE_WITH_AMP(name) \
 template<int N, int M, int K, typename T1, typename T2>\
-  ShGeneric<N, CT1T2> name(const ShGeneric<M, T1> &p, const ShGeneric<K, T2> &amp, bool useTexture=true) {\
-    ShAttrib<N, SH_TEMP, CT1T2> result; \
+  Generic<N, CT1T2> name(const Generic<M, T1> &p, const Generic<K, T2> &amp, bool useTexture=true) {\
+    Attrib<N, TEMP, CT1T2> result; \
     int freq = 1;\
-    result *= ShDataTypeInfo<CT1T2, SH_HOST>::Zero; \
+    result *= DataTypeInfo<CT1T2, HOST>::Zero; \
     for(int i = 0; i < K; ++i, freq *= 2) {\
       result = mad(name<N>(p * freq, useTexture), amp(i), result);\
     }\
     return result;\
   }
 #else
-#define SHNOISE_WITH_AMP(name) \
+#define NOISE_WITH_AMP(name) \
 template<int N, int M, int K, typename T1, typename T2>\
-  ShGeneric<N, CT1T2> name(const ShGeneric<M, T1> &p, const ShGeneric<K, T2> &amp, bool useTexture) {\
-    ShAttrib<N, SH_TEMP, CT1T2> result; \
+  Generic<N, CT1T2> name(const Generic<M, T1> &p, const Generic<K, T2> &amp, bool useTexture) {\
+    Attrib<N, TEMP, CT1T2> result; \
     int freq = 1;\
-    result *= ShDataTypeInfo<CT1T2, SH_HOST>::Zero; \
+    result *= DataTypeInfo<CT1T2, HOST>::Zero; \
     for(int i = 0; i < K; ++i, freq *= 2) {\
       result = mad(name<N>(p * freq, useTexture), amp(i), result);\
     }\
@@ -247,103 +247,103 @@ template<int N, int M, int K, typename T1, typename T2>\
 
 template<int N, int M, typename T>
 #ifdef _WIN32
-ShGeneric<N, T> noise(const ShGeneric<M, T> &p, bool useTexture=true) {
+Generic<N, T> noise(const Generic<M, T> &p, bool useTexture=true) {
 #else
-ShGeneric<N, T> noise(const ShGeneric<M, T> &p, bool useTexture) {
+Generic<N, T> noise(const Generic<M, T> &p, bool useTexture) {
 #endif
-  return ShNoise<N, T>::noise(p, useTexture);
+  return Noise<N, T>::noise(p, useTexture);
 }
-SHNOISE_WITH_AMP(noise);
+NOISE_WITH_AMP(noise);
 
 template<int N, int M, typename T>
 #ifdef _WIN32
-ShGeneric<N, T> snoise(const ShGeneric<M, T> &p, bool useTexture=true) {
+Generic<N, T> snoise(const Generic<M, T> &p, bool useTexture=true) {
 #else
-ShGeneric<N, T> snoise(const ShGeneric<M, T> &p, bool useTexture) {
+Generic<N, T> snoise(const Generic<M, T> &p, bool useTexture) {
 #endif
   return mad( noise<N>(p, useTexture), 2.0f, fillcast<N>(-1.0f));
 }
-SHNOISE_WITH_AMP(snoise);
+NOISE_WITH_AMP(snoise);
 
 template<int N, int M, typename T>
 #ifdef _WIN32
-ShGeneric<N, T> perlin(const ShGeneric<M, T> &p, bool useTexture=true) {
+Generic<N, T> perlin(const Generic<M, T> &p, bool useTexture=true) {
 #else
-ShGeneric<N, T> perlin(const ShGeneric<M, T> &p, bool useTexture) {
+Generic<N, T> perlin(const Generic<M, T> &p, bool useTexture) {
 #endif
-  return ShNoise<N, T>::perlin(p, useTexture);
+  return Noise<N, T>::perlin(p, useTexture);
 }
-SHNOISE_WITH_AMP(perlin);
+NOISE_WITH_AMP(perlin);
 
 template<int N, int M, typename T>
 #ifdef _WIN32
-ShGeneric<N, T> sperlin(const ShGeneric<M, T> &p, bool useTexture=true) {
+Generic<N, T> sperlin(const Generic<M, T> &p, bool useTexture=true) {
 #else
-ShGeneric<N, T> sperlin(const ShGeneric<M, T> &p, bool useTexture) {
+Generic<N, T> sperlin(const Generic<M, T> &p, bool useTexture) {
 #endif
   return mad( perlin<N>(p, useTexture), 2.0f, fillcast<N>(-1.0f));
 }
-SHNOISE_WITH_AMP(sperlin);
+NOISE_WITH_AMP(sperlin);
 
 template<int N, int M, typename T>
 #ifdef _WIN32
-ShGeneric<N, T> cellnoise(const ShGeneric<M, T> &p, bool useTexture=true) {
+Generic<N, T> cellnoise(const Generic<M, T> &p, bool useTexture=true) {
 #else
-ShGeneric<N, T> cellnoise(const ShGeneric<M, T> &p, bool useTexture) {
+Generic<N, T> cellnoise(const Generic<M, T> &p, bool useTexture) {
 #endif
-  return ShNoise<N, T>::cellnoise(p, useTexture);
+  return Noise<N, T>::cellnoise(p, useTexture);
 }
-SHNOISE_WITH_AMP(cellnoise);
+NOISE_WITH_AMP(cellnoise);
 
 template<int N, int M, typename T>
 #ifdef _WIN32
-ShGeneric<N, T> scellnoise(const ShGeneric<M, T> &p, bool useTexture=true) {
+Generic<N, T> scellnoise(const Generic<M, T> &p, bool useTexture=true) {
 #else
-ShGeneric<N, T> scellnoise(const ShGeneric<M, T> &p, bool useTexture) {
+Generic<N, T> scellnoise(const Generic<M, T> &p, bool useTexture) {
 #endif
   return mad( cellnoise<N>(p, useTexture), 2.0f, fillcast<N>(-1.0f));
 }
-SHNOISE_WITH_AMP(scellnoise);
+NOISE_WITH_AMP(scellnoise);
 
 template<int N, int M, typename T>
 #ifdef _WIN32
-ShGeneric<N, T> linnoise(const ShGeneric<M, T> &p, bool useTexture=true) {
+Generic<N, T> linnoise(const Generic<M, T> &p, bool useTexture=true) {
 #else
-ShGeneric<N, T> linnoise(const ShGeneric<M, T> &p, bool useTexture) {
+Generic<N, T> linnoise(const Generic<M, T> &p, bool useTexture) {
 #endif
-  return ShNoise<N, T>::linnoise(p, useTexture);
+  return Noise<N, T>::linnoise(p, useTexture);
 }
-SHNOISE_WITH_AMP(linnoise);
+NOISE_WITH_AMP(linnoise);
 
 template<int N, int M, typename T>
 #ifdef _WIN32
-ShGeneric<N, T> slinnoise(const ShGeneric<M, T> &p, bool useTexture=true) {
+Generic<N, T> slinnoise(const Generic<M, T> &p, bool useTexture=true) {
 #else
-ShGeneric<N, T> slinnoise(const ShGeneric<M, T> &p, bool useTexture) {
+Generic<N, T> slinnoise(const Generic<M, T> &p, bool useTexture) {
 #endif
   return mad( linnoise<N>(p, useTexture), 2.0f, fillcast<N>(-1.0f));
 }
-SHNOISE_WITH_AMP(slinnoise);
+NOISE_WITH_AMP(slinnoise);
 
 template<int N, int M, typename T>
 #ifdef _WIN32
-ShGeneric<N, T> turbulence(const ShGeneric<M, T> &p, bool useTexture=true) {
+Generic<N, T> turbulence(const Generic<M, T> &p, bool useTexture=true) {
 #else
-ShGeneric<N, T> turbulence(const ShGeneric<M, T> &p, bool useTexture) {
+Generic<N, T> turbulence(const Generic<M, T> &p, bool useTexture) {
 #endif
   return abs(sperlin<N>(p, useTexture));
 }
-SHNOISE_WITH_AMP(turbulence);
+NOISE_WITH_AMP(turbulence);
 
 template<int N, int M, typename T>
 #ifdef _WIN32
-ShGeneric<N, T> sturbulence(const ShGeneric<M, T> &p, bool useTexture=true) {
+Generic<N, T> sturbulence(const Generic<M, T> &p, bool useTexture=true) {
 #else
-ShGeneric<N, T> sturbulence(const ShGeneric<M, T> &p, bool useTexture) {
+Generic<N, T> sturbulence(const Generic<M, T> &p, bool useTexture) {
 #endif
   return mad(abs(sperlin<N>(p, useTexture)), 2.0f, fillcast<N>(-1.0f));
 }
-SHNOISE_WITH_AMP(sturbulence);
+NOISE_WITH_AMP(sturbulence);
 
 } // namespace SH
 

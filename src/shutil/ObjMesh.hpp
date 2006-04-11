@@ -23,34 +23,34 @@
 #include <iosfwd>
 
 #include "sh/sh.hpp"
-#include "ShMesh.hpp"
+#include "Mesh.hpp"
 
 namespace ShUtil {
 
 using namespace SH;
 
-struct ShObjVertex; 
-struct ShObjFace;
-struct ShObjEdge;
+struct ObjVertex; 
+struct ObjFace;
+struct ObjEdge;
 
-typedef ShMeshType<ShObjVertex, ShObjFace, ShObjEdge> ShObjMeshType;
+typedef MeshType<ObjVertex, ObjFace, ObjEdge> ObjMeshType;
 
-struct ShObjVertex: public ShMeshVertex<ShObjMeshType> {
-  ShPoint3f pos; // vertex position
+struct ObjVertex: public MeshVertex<ObjMeshType> {
+  Point3f pos; // vertex position
 
   /** \brief Constructs a vertex with the given position */
-  ShObjVertex(const ShPoint3f &p);
+  ObjVertex(const Point3f &p);
 };
 
-struct ShObjFace: public ShMeshFace<ShObjMeshType> {
-  ShNormal3f normal; // face normal
+struct ObjFace: public MeshFace<ObjMeshType> {
+  Normal3f normal; // face normal
 };
 
-struct ShObjEdge: public ShMeshEdge<ShObjMeshType> {
+struct ObjEdge: public MeshEdge<ObjMeshType> {
   // properties for start vertex in this edge's face
-  ShNormal3f normal;  
-  ShVector3f tangent;
-  ShTexCoord2f texcoord;
+  Normal3f normal;  
+  Vector3f tangent;
+  TexCoord2f texcoord;
 };
 
 /* OBJ file mesh where each vertex stores its position,
@@ -60,15 +60,15 @@ struct ShObjEdge: public ShMeshEdge<ShObjMeshType> {
  * Each face in the object mesh is a triangle. (Triangulation
  * happens on loading from the OBJ file)
  */
-class ShObjMesh: public ShMesh<ShObjMeshType> {
+class ObjMesh: public Mesh<ObjMeshType> {
   public:
-    typedef ShMesh<ShObjMeshType> ParentType;
+    typedef Mesh<ObjMeshType> ParentType;
 
     /** \brief Constructs an empty mesh */
-    ShObjMesh();
+    ObjMesh();
 
-    /** \brief Constructs ShObjMesh from an input stream of an OBJ file */
-    ShObjMesh(std::istream &in);
+    /** \brief Constructs ObjMesh from an input stream of an OBJ file */
+    ObjMesh(std::istream &in);
 
     /** \brief Deletes current mesh and reads in a new mesh from an OBJ file */
     std::istream& readObj(std::istream &in);
@@ -105,7 +105,7 @@ class ShObjMesh: public ShMesh<ShObjMeshType> {
     void consolidateVertices();
 
     /** \brief Sets mesh data to data from an OBJ file */
-    friend std::istream& operator>>(std::istream &in, ShObjMesh &mesh);
+    friend std::istream& operator>>(std::istream &in, ObjMesh &mesh);
 };
 
 }

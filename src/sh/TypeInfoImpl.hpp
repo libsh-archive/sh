@@ -20,46 +20,46 @@
 #ifndef SHTYPEINFOIMPL_HPP
 #define SHTYPEINFOIMPL_HPP
 
-#include "ShTypeInfo.hpp"
-#include "ShVariantFactory.hpp"
+#include "TypeInfo.hpp"
+#include "VariantFactory.hpp"
 
 namespace SH {
 
-template<typename T, ShDataType DT>
-const typename ShDataTypeInfo<T, DT>::type
-ShDataTypeInfo<T, DT>::Zero = ShDataTypeConstant<T, DT>::Zero; 
+template<typename T, DataType DT>
+const typename DataTypeInfo<T, DT>::type
+DataTypeInfo<T, DT>::Zero = DataTypeConstant<T, DT>::Zero; 
 
-template<typename T, ShDataType DT>
-const typename ShDataTypeInfo<T, DT>::type
-ShDataTypeInfo<T, DT>::One = ShDataTypeConstant<T, DT>::One; 
+template<typename T, DataType DT>
+const typename DataTypeInfo<T, DT>::type
+DataTypeInfo<T, DT>::One = DataTypeConstant<T, DT>::One; 
 
-template<typename T, ShDataType DT>
-const char* ShDataTypeInfo<T, DT>::name() const 
+template<typename T, DataType DT>
+const char* DataTypeInfo<T, DT>::name() const 
 {
-  return ShStorageTypeInfo<T>::name;
+  return StorageTypeInfo<T>::name;
 }
 
-template<typename T, ShDataType DT>
-int ShDataTypeInfo<T, DT>::datasize() const 
+template<typename T, DataType DT>
+int DataTypeInfo<T, DT>::datasize() const 
 {
-  return sizeof(typename ShDataTypeCppType<T, DT>::type); 
+  return sizeof(typename DataTypeCppType<T, DT>::type); 
 }
 
-template<typename T, ShDataType DT>
-const ShVariantFactory* ShDataTypeInfo<T, DT>::variantFactory() const
+template<typename T, DataType DT>
+const VariantFactory* DataTypeInfo<T, DT>::variantFactory() const
 {
-  return ShDataVariantFactory<T, DT>::instance();
+  return DataVariantFactory<T, DT>::instance();
 }
 
-template<typename T, ShDataType DT>
-const ShDataTypeInfo<T, DT>* ShDataTypeInfo<T, DT>::instance() 
+template<typename T, DataType DT>
+const DataTypeInfo<T, DT>* DataTypeInfo<T, DT>::instance() 
 {
-  if(!m_instance) m_instance = new ShDataTypeInfo<T, DT>();
+  if(!m_instance) m_instance = new DataTypeInfo<T, DT>();
   return m_instance;
 }
 
-template<typename T, ShDataType DT>
-ShDataTypeInfo<T, DT>* ShDataTypeInfo<T, DT>::m_instance = 0;
+template<typename T, DataType DT>
+DataTypeInfo<T, DT>* DataTypeInfo<T, DT>::m_instance = 0;
 
 
 }

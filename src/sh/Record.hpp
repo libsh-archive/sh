@@ -21,28 +21,28 @@
 #define SHRECORD_HPP
 
 #include <list>
-#include "ShDllExport.hpp"
-#include "ShVariable.hpp"
+#include "DllExport.hpp"
+#include "Variable.hpp"
 
-/** @file ShRecord.hpp
- * Basically a duplicate of ShStream.  May want to merge the two in the future if Attribs and Channels gain equivalence.
+/** @file Record.hpp
+ * Basically a duplicate of Stream.  May want to merge the two in the future if Attribs and Channels gain equivalence.
  */
 namespace SH {
 
 /** Dynamic list of variables.
  * The record keep track (by reference) of an ordered lists of 
  * data variables, to be used as inputs and outputs of record operations.
- * @see ShChannel
+ * @see Channel
  */
 class
-SH_DLLEXPORT ShRecord {
+DLLEXPORT Record {
 public:
-  typedef std::list<ShVariable> VarList; 
+  typedef std::list<Variable> VarList; 
   typedef VarList::iterator iterator;
   typedef VarList::const_iterator const_iterator;
 
-  ShRecord();
-  ShRecord(const ShVariable &var);
+  Record();
+  Record(const Variable &var);
   
   const_iterator begin() const;
   const_iterator end() const;
@@ -50,27 +50,27 @@ public:
   iterator end();
   size_t size() const;
 
-  void append(const ShVariable& variable);
-  void prepend(const ShVariable& variable);
+  void append(const Variable& variable);
+  void prepend(const Variable& variable);
 
-  void append(const ShRecord& rec);
-  void prepend(const ShRecord& rec);
+  void append(const Record& rec);
+  void prepend(const Record& rec);
 
   // Assigns one record to another.
   // In retained mode, this inserts assignment statements into the current
-  // ShProgram.  
-  ShRecord& operator=(const ShRecord &other);
+  // Program.  
+  Record& operator=(const Record &other);
 
   // Execute fully bound record program and place results in record.
-  ShRecord& operator=(const ShProgram& program);
+  Record& operator=(const Program& program);
 
-  // Converts a ShRecord containing only uniforms into a stream
+  // Converts a Record containing only uniforms into a stream
   // (Must be unswizzled uniforms (and not constants), as this uses the variable's
   // variant arrays directly as the channel memory
   //
   // If you change any of the values here, you must call 
   // update_all on the nodes
-  //ShStream toStream();
+  //Stream toStream();
   
 private:
   VarList m_vars;
@@ -79,69 +79,69 @@ private:
 /** Combine two records.
  * This concatenates the list of variables in the component records.
  */
-SH_DLLEXPORT
-ShRecord combine(const ShVariable &left, const ShVariable &right);
+DLLEXPORT
+Record combine(const Variable &left, const Variable &right);
 
 /** Combine a record and a variable.
  * This concatenates the given variable to the end of the list of
  * variables in the record.
  */
-SH_DLLEXPORT
-ShRecord combine(const ShRecord& left, const ShVariable& right);
+DLLEXPORT
+Record combine(const Record& left, const Variable& right);
 
 /** Combine a variable and a record.
  * This concatenates the given variable to the start of the list of
  * variables in the record.
  */
-SH_DLLEXPORT
-ShRecord combine(const ShVariable& left, const ShRecord& right);
+DLLEXPORT
+Record combine(const Variable& left, const Record& right);
 
-SH_DLLEXPORT
-ShRecord combine(const ShRecord& left, const ShRecord& right);
+DLLEXPORT
+Record combine(const Record& left, const Record& right);
 
 /** An operator alias for combine between variables.
  */
-SH_DLLEXPORT
-ShRecord operator&(const ShVariable& left, const ShVariable& right);
+DLLEXPORT
+Record operator&(const Variable& left, const Variable& right);
 
 /** An operator alias for combine between a record and a variable.
  */
-SH_DLLEXPORT
-ShRecord operator&(const ShRecord& left, const ShVariable& right);
+DLLEXPORT
+Record operator&(const Record& left, const Variable& right);
 
 /** An operator alias for combine between a variable and a record.
  */
-SH_DLLEXPORT
-ShRecord operator&(const ShVariable& left, const ShRecord& right);
+DLLEXPORT
+Record operator&(const Variable& left, const Record& right);
 
 /** An operator alias for combine between two records.
  */
-SH_DLLEXPORT
-ShRecord operator&(const ShRecord& left, const ShRecord& right);
+DLLEXPORT
+Record operator&(const Record& left, const Record& right);
 
 /** Apply a program to a record. 
  * This function connects records onto the output of programs
  * TODO: is this right?  why is the record argument first?
  */
-SH_DLLEXPORT
-ShProgram connect(const ShRecord& rec, const ShProgram& program);
+DLLEXPORT
+Program connect(const Record& rec, const Program& program);
 
 /** An operator alias for connect(p,s).
  */
-SH_DLLEXPORT
-ShProgram operator<<(const ShProgram& program, const ShRecord& rec);
+DLLEXPORT
+Program operator<<(const Program& program, const Record& rec);
 
 /** Send program outputs to a record 
  * This should only be used internally as the program the gets generated
  * will be turned into dust by dead code elimination in general usage.
  */
-SH_DLLEXPORT
-ShProgram connect(const ShProgram& program, const ShRecord& rec);
+DLLEXPORT
+Program connect(const Program& program, const Record& rec);
 
 /** An operator alias for connect(
  */
-SH_DLLEXPORT
-ShProgram operator<<(const ShRecord& rec, const ShProgram& program);
+DLLEXPORT
+Program operator<<(const Record& rec, const Program& program);
 
 }
 

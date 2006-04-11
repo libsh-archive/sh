@@ -17,40 +17,40 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#include "ShProgram.hpp"
-#include "ShBackend.hpp"
-#include "ShStream.hpp"
-#include "ShRecord.hpp"
-#include "ShAlgebra.hpp"
+#include "Program.hpp"
+#include "Backend.hpp"
+#include "Stream.hpp"
+#include "Record.hpp"
+#include "Algebra.hpp"
 
 namespace SH {
 
-ShProgram::ShProgram()
-  : ShMetaForwarder(0),
+Program::Program()
+  : MetaForwarder(0),
     m_node(0)
 {
 }
 
-ShProgram::ShProgram(const std::string& target)
-  : ShMetaForwarder(0),
-    m_node(new ShProgramNode(target))
+Program::Program(const std::string& target)
+  : MetaForwarder(0),
+    m_node(new ProgramNode(target))
 {
   real_meta(m_node.object());
 }
 
-ShProgram::ShProgram(const ShProgram& other)
-  : ShMetaForwarder(other.m_node.object()),
+Program::Program(const Program& other)
+  : MetaForwarder(other.m_node.object()),
     m_node(other.m_node)
 {
 }
 
-ShProgram::ShProgram(const ShProgramNodePtr& node)
-  : ShMetaForwarder(node.object()),
+Program::Program(const ProgramNodePtr& node)
+  : MetaForwarder(node.object()),
     m_node(node)
 {
 }
 
-ShProgram& ShProgram::operator=(const ShProgram& other)
+Program& Program::operator=(const Program& other)
 {
   m_node = other.m_node;
   real_meta(m_node.object());
@@ -59,69 +59,69 @@ ShProgram& ShProgram::operator=(const ShProgram& other)
 
 // Call operators for channels and streams.
 // Equivalent to operator<< invocations.
-ShProgram ShProgram::operator()(const ShStream& s0) const
+Program Program::operator()(const Stream& s0) const
 {
   return (*this) << s0;
 }
 
-ShProgram ShProgram::operator()(const ShStream& s0,
-                                 const ShStream& s1) const
+Program Program::operator()(const Stream& s0,
+                                 const Stream& s1) const
 {
   return (*this) << s0 << s1;
 }
 
-ShProgram ShProgram::operator()(const ShStream& s0,
-                                 const ShStream& s1,
-                                 const ShStream& s2) const
+Program Program::operator()(const Stream& s0,
+                                 const Stream& s1,
+                                 const Stream& s2) const
 {
   return (*this) << s0 << s1 << s2;
 }
 
-ShProgram ShProgram::operator()(const ShStream& s0,
-                                 const ShStream& s1,
-                                 const ShStream& s2,
-                                 const ShStream& s3) const
+Program Program::operator()(const Stream& s0,
+                                 const Stream& s1,
+                                 const Stream& s2,
+                                 const Stream& s3) const
 {
   return (*this) << s0 << s1 << s2 << s3;
 }
 
-ShProgram ShProgram::operator()(const ShStream& s0,
-                                 const ShStream& s1,
-                                 const ShStream& s2,
-                                 const ShStream& s3,
-                                 const ShStream& s4) const
+Program Program::operator()(const Stream& s0,
+                                 const Stream& s1,
+                                 const Stream& s2,
+                                 const Stream& s3,
+                                 const Stream& s4) const
 {
   return (*this) << s0 << s1 << s2 << s3 << s4;
 }
 
-ShProgram ShProgram::operator()(const ShRecord &rec) const 
+Program Program::operator()(const Record &rec) const 
 {
   return (*this) << rec; 
 }
 
-ShProgram ShProgram::operator()(const ShVariable &v0) const 
+Program Program::operator()(const Variable &v0) const 
 {
   return (*this) << v0; 
 }
 
-ShProgram ShProgram::operator()(const ShVariable &v0, 
-                                const ShVariable &v1) const
+Program Program::operator()(const Variable &v0, 
+                                const Variable &v1) const
 {
   return operator()(v0 & v1);
 
 }
 
-ShProgram ShProgram::operator()(const ShVariable &v0, 
-                                const ShVariable &v1, 
-                                const ShVariable &v2) const
+Program Program::operator()(const Variable &v0, 
+                                const Variable &v1, 
+                                const Variable &v2) const
 {
   return operator()(v0 & v1 & v2);
 }
 
-ShProgram ShProgram::operator()(const ShVariable &v0, 
-                                const ShVariable &v1, 
-                                const ShVariable &v2, 
-                                const ShVariable &v3) const
+Program Program::operator()(const Variable &v0, 
+                                const Variable &v1, 
+                                const Variable &v2, 
+                                const Variable &v3) const
 {
   return operator()(v0 & v1 & v2 & v3);
 }

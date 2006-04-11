@@ -23,16 +23,16 @@
 #include <climits>
 #include <cmath>
 #include <algorithm>
-#include "ShDataType.hpp"
+#include "DataType.hpp"
 
 namespace SH {
 
 /** Returns the boolean cond in the requested data type */
-template<typename T, ShDataType DT>
+template<typename T, DataType DT>
 inline
-typename ShDataTypeCppType<T, DT>::type shDataTypeCond(bool cond) 
+typename DataTypeCppType<T, DT>::type dataTypeCond(bool cond) 
 {
-  return cond ? ShDataTypeConstant<T, DT>::One : ShDataTypeConstant<T, DT>::Zero;
+  return cond ? DataTypeConstant<T, DT>::One : DataTypeConstant<T, DT>::Zero;
 }
 
 /** Returns a whether the two values are exactly the same.
@@ -41,7 +41,7 @@ typename ShDataTypeCppType<T, DT>::type shDataTypeCond(bool cond)
  */
 template<typename T>
 inline
-bool shDataTypeEqual(const T &a, 
+bool dataTypeEqual(const T &a, 
                      const T &b) 
 {
   return a == b;
@@ -54,7 +54,7 @@ bool shDataTypeEqual(const T &a,
  */
 template<typename T>
 inline
-bool shDataTypeIsPositive(const T &a)
+bool dataTypeIsPositive(const T &a)
 {
   return a > 0; 
 }
@@ -65,11 +65,11 @@ bool shDataTypeIsPositive(const T &a)
  * All the built-in types can use C++ casts
  * for all the casts required by Sh internally.
  */
-template<typename T1, ShDataType DT1, typename T2, ShDataType DT2>
-void shDataTypeCast(typename ShDataTypeCppType<T1, DT1>::type &dest,
-                    const typename ShDataTypeCppType<T2, DT2>::type &src)
+template<typename T1, DataType DT1, typename T2, DataType DT2>
+void dataTypeCast(typename DataTypeCppType<T1, DT1>::type &dest,
+                    const typename DataTypeCppType<T2, DT2>::type &src)
 {
-  typedef typename ShDataTypeCppType<T1, DT1>::type desttype; 
+  typedef typename DataTypeCppType<T1, DT1>::type desttype; 
   dest = static_cast<desttype>(src);
 }
 

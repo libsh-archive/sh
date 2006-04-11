@@ -23,8 +23,8 @@
 namespace SH {
 
 template<typename T>
-ShPalette<T>::ShPalette(std::size_t size)
-  : m_node(new ShPaletteNode(T::typesize, T::semantic_type, T::value_type, size)),
+Palette<T>::Palette(std::size_t size)
+  : m_node(new PaletteNode(T::typesize, T::semantic_type, T::value_type, size)),
     m_data(new T[size])
 {
   for (std::size_t i = 0; i < size; i++) {
@@ -33,32 +33,32 @@ ShPalette<T>::ShPalette(std::size_t size)
 }
 
 template<typename T>
-ShPalette<T>::~ShPalette()
+Palette<T>::~Palette()
 {
   delete [] m_data;
 }
 
 template<typename T>
-const T& ShPalette<T>::operator[](std::size_t index) const
+const T& Palette<T>::operator[](std::size_t index) const
 {
   return m_data[index];
 }
 
 template<typename T>
-T& ShPalette<T>::operator[](std::size_t index)
+T& Palette<T>::operator[](std::size_t index)
 {
   return m_data[index];
 }
 
 template<typename T>
 template<typename T2>
-T ShPalette<T>::operator[](const ShGeneric<1, T2>& index) const
+T Palette<T>::operator[](const Generic<1, T2>& index) const
 {
-  if (ShContext::current()->parsing()) {
+  if (Context::current()->parsing()) {
     T t;
-    ShVariable palVar(m_node);
-    ShStatement stmt(t, palVar, SH_OP_PAL, index);
-    ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
+    Variable palVar(m_node);
+    Statement stmt(t, palVar, OP_PAL, index);
+    Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
     return t;
   } else {
     return m_data[(std::size_t)index.getValue(0)];

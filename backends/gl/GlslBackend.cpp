@@ -64,7 +64,7 @@ extern "C" {
 #ifdef _WIN32
   __declspec(dllexport) 
 #endif
-  GlslBackend* shBackend_libshglsl_instantiate()
+  GlslBackend* backend_libshglsl_instantiate()
   {
     return new GlslBackend();
   }
@@ -72,7 +72,7 @@ extern "C" {
 #ifdef _WIN32
   __declspec(dllexport) 
 #endif
-  int shBackend_libshglsl_target_cost(const std::string& target)
+  int backend_libshglsl_target_cost(const std::string& target)
   {
     if ("glsl:vertex" == target)   return 1;
     if ("glsl:fragment" == target) return 1;

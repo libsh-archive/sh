@@ -23,10 +23,10 @@ using namespace SH;
 
 int main()
 {
-  shInit();
-  ShMatrix4x4f m;
+  init();
+  Matrix4x4f m;
   int i, j;
   for (i = 0; i < 1000000; i++) // 1 million
     for (j = 0; j < 4; j++)
-      m[j] = ShConstAttrib4f(0, 0, 0, 0);
+      m[j] = ConstAttrib4f(0, 0, 0, 0);
 }

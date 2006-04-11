@@ -21,18 +21,18 @@
 #define SHCASTMANAGER_HPP
 
 #include <map>
-#include "ShHashMap.hpp"
-#include "ShRefCount.hpp"
-#include "ShGraph.hpp"
-#include "ShTypeInfo.hpp"
+#include "HashMap.hpp"
+#include "RefCount.hpp"
+#include "Graph.hpp"
+#include "TypeInfo.hpp"
 
 namespace SH {
 
-class ShVariant;
-class ShVariantCast;
+class Variant;
+class VariantCast;
 
 /** 
- * The ShCastManager class holds information about automatically 
+ * The CastManager class holds information about automatically 
  * performed type promotions and type conversions 
  *
  * It also holds the precedence DAG for types. 
@@ -42,7 +42,7 @@ class ShVariantCast;
  * succinctly, but probably would be too confusing to end users if 
  * automatic promotions could end up in cycles...
  *
- * and the ShCastManager class can answer queries like 
+ * and the CastManager class can answer queries like 
  * -finding a "least common ancestor" of two types using only 
  *  automatic promotions.
  *  (useful to decide what intermediate type to use during computation)
@@ -54,68 +54,68 @@ class ShVariantCast;
  *  (useful for explicit casts where that particular cast is not registered
  *  but a sequence of casts that produces the same type conversion exists)
  *
- * The ShCastManager does an online preprocessing step as automatic/explicit
+ * The CastManager does an online preprocessing step as automatic/explicit
  * casts are registered so that lookups are O(1) (or O(k) where k is the length
  * of the cast sequence for ops that return these).
  *
  */
-struct ShCastMgrEdge;
-struct ShCastMgrVertex;
-typedef ShGraphType<ShCastMgrVertex, ShCastMgrEdge> ShCastMgrGraphType;
+struct CastMgrEdge;
+struct CastMgrVertex;
+typedef GraphType<CastMgrVertex, CastMgrEdge> CastMgrGraphType;
 
 struct 
-SH_DLLEXPORT
-ShCastMgrEdge: public ShGraphEdge<ShCastMgrGraphType> 
+DLLEXPORT
+CastMgrEdge: public GraphEdge<CastMgrGraphType> 
 {
   // Creates an edges describing a relationship between two types.
   // automatic = true iff the cast is automatic
   // precedence = true iff this is an edge in the precedenced DAG 
-  ShCastMgrEdge(const ShVariantCast *caster, bool automatic);
-  ShCastMgrEdge(const ShCastMgrEdge &other);
+  CastMgrEdge(const VariantCast *caster, bool automatic);
+  CastMgrEdge(const CastMgrEdge &other);
 
   std::ostream& graphvizDump(std::ostream& out) const;
 
-  const ShVariantCast *m_caster;
+  const VariantCast *m_caster;
   bool m_auto; ///< indicates whether this is an automatic promotion 
 };
 
 struct 
-SH_DLLEXPORT
-ShCastMgrVertex: public ShGraphVertex<ShCastMgrGraphType>
+DLLEXPORT
+CastMgrVertex: public GraphVertex<CastMgrGraphType>
 {
-  ShCastMgrVertex(ShValueType valueType, ShDataType dataType);
-  ShCastMgrVertex(const ShCastMgrVertex &other);
+  CastMgrVertex(ValueType valueType, DataType dataType);
+  CastMgrVertex(const CastMgrVertex &other);
 
   std::ostream& graphvizDump(std::ostream& out) const;
 
-  ShValueType m_valueType;
-  ShDataType m_dataType;
+  ValueType m_valueType;
+  DataType m_dataType;
 };
 
 class 
-SH_DLLEXPORT
-ShCastMgrGraph: public ShGraph<ShCastMgrGraphType>
+DLLEXPORT
+CastMgrGraph: public Graph<CastMgrGraphType>
 {
   public:
-    ShCastMgrGraph();
+    CastMgrGraph();
 
     // functions to use instead of default addVertex, addEdge
-    ShCastMgrVertex *addVertex(ShValueType valueType, ShDataType dataType);
+    CastMgrVertex *addVertex(ValueType valueType, DataType dataType);
 
     // Use this function instead of the default addVertex/addEdge
     // automatically adds src/dest indices and sets start/end on the edge 
-    void addEdge(ShCastMgrEdge* edge); 
+    void addEdge(CastMgrEdge* edge); 
 
   protected:
-    typedef ShPairHashMap<ShValueType, ShDataType, ShCastMgrVertex*> VertexArray;
+    typedef PairHashMap<ValueType, DataType, CastMgrVertex*> VertexArray;
     VertexArray m_vert;
 };
 
 class 
-SH_DLLEXPORT
-ShCastManager {
+DLLEXPORT
+CastManager {
   public:
-    void addCast(const ShVariantCast *caster, bool automatic);
+    void addCast(const VariantCast *caster, bool automatic);
 
     // initializes caches, checks cast graph for errors 
     // (duplicate edges, cycles) 
@@ -128,7 +128,7 @@ ShCastManager {
      * When dest, src have same type, this just becomes a data copy.
      * @{
      */
-    void doCast(ShVariant *dest, const ShVariant *src);
+    void doCast(Variant *dest, const Variant *src);
     // @}
 
     /** Casts src to the requested type and puts the result in dest
@@ -138,23 +138,23 @@ ShCastManager {
      * is responsible for deallocation with delete)
      * @{
      */
-    bool doAllocCast(ShVariant *& dest, ShVariant *src,
-        ShValueType valueType, ShDataType dataType);
-    bool doAllocCast(const ShVariant *& dest, const ShVariant *src,
-        ShValueType valueType, ShDataType dataType);
+    bool doAllocCast(Variant *& dest, Variant *src,
+        ValueType valueType, DataType dataType);
+    bool doAllocCast(const Variant *& dest, const Variant *src,
+        ValueType valueType, DataType dataType);
     // @}
 
     // returns distance of a cast using automatic promotions 
     // -1 if the cast is impossible
-    int castDist(ShValueType destValueType, ShValueType srcValueType);
+    int castDist(ValueType destValueType, ValueType srcValueType);
 
     std::ostream& graphvizDump(std::ostream& out) const;
 
-    static ShCastManager* instance();
+    static CastManager* instance();
 
   protected:
-    // graph of available ShVariantCast objects (explicit and automatic)
-    ShCastMgrGraph m_casts;
+    // graph of available VariantCast objects (explicit and automatic)
+    CastMgrGraph m_casts;
 
     // TODO the two graphs should realy be one with a different 
     // distance functor 
@@ -162,10 +162,10 @@ ShCastManager {
     // add cached versions of cast order for different casts between indices
     // FirstCastMap[dest][destdt][src][srcdt] holds the first caster to use for 
     // getting from src to dest (or 0 if no cast path exists)
-    typedef ShPairPairHashMap<ShValueType, ShDataType, ShValueType, ShDataType, 
-              const ShVariantCast*> FirstCastMap;
+    typedef PairPairHashMap<ValueType, DataType, ValueType, DataType, 
+              const VariantCast*> FirstCastMap;
 
-    typedef ShPairHashMap<ShValueType, ShValueType, int> CastDistMap;
+    typedef PairHashMap<ValueType, ValueType, int> CastDistMap;
 
     // shortest paths using any kind of cast
     FirstCastMap m_castStep;
@@ -173,7 +173,7 @@ ShCastManager {
     // shortest distance only in precedence DAG 
     CastDistMap m_autoDist;
 
-    static ShCastManager* m_instance;
+    static CastManager* m_instance;
 };
 
 }

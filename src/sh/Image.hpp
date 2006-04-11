@@ -21,9 +21,9 @@
 #define SHIMAGE_HPP
 
 #include <string>
-#include "ShDllExport.hpp"
-#include "ShRefCount.hpp"
-#include "ShMemory.hpp"
+#include "DllExport.hpp"
+#include "RefCount.hpp"
+#include "Memory.hpp"
 
 namespace SH {
 
@@ -33,16 +33,16 @@ namespace SH {
  * then be shared with array, table, and texture objects.
  */
 template<typename T>
-class ShTypedImage : public ShRefCountable {
+class TypedImage : public RefCountable {
 public:
-  ShTypedImage(); ///< Construct an empty image
-  ShTypedImage(int width, int height, int depth); ///< Construct a black
+  TypedImage(); ///< Construct an empty image
+  TypedImage(int width, int height, int depth); ///< Construct a black
                                              ///image at the given width/height/depth
-  ShTypedImage(const ShTypedImage& other); ///< Copy an image
+  TypedImage(const TypedImage& other); ///< Copy an image
 
-  ~ShTypedImage();
+  ~TypedImage();
 
-  ShTypedImage& operator=(const ShTypedImage& other); ///< Copy the data from
+  TypedImage& operator=(const TypedImage& other); ///< Copy the data from
                                             ///one image to another
 
   int width() const; ///< Determine the width of the image
@@ -60,25 +60,25 @@ public:
                                                ///particular component
                                                ///from the image.
 
-  ShTypedImage getNormalImage();
+  TypedImage getNormalImage();
 
   const T* data() const;
   T* data();
   
   void dirty();
-  ShMemoryPtr memory();
-  ShPointer<const ShMemory> memory() const;
+  MemoryPtr memory();
+  Pointer<const Memory> memory() const;
   
 private:
   int m_width, m_height;
   int m_elements;
-  ShHostMemoryPtr m_memory;
+  HostMemoryPtr m_memory;
 };
 
-typedef ShTypedImage<float> ShImage;
+typedef TypedImage<float> Image;
 
 }
 
-#include "ShImageImpl.hpp"
+#include "ImageImpl.hpp"
 
 #endif

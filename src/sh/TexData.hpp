@@ -22,27 +22,27 @@
 
 #ifndef SH_DO_NOT_INCLUDE_GENERIC_IMPL
 #define SH_DO_NOT_INCLUDE_GENERIC_IMPL
-#include "ShGeneric.hpp"
+#include "Generic.hpp"
 #undef SH_DO_NOT_INCLUDE_GENERIC_IMPL
 #else
-#include "ShGeneric.hpp"
+#include "Generic.hpp"
 #endif
-#include "ShTextureNode.hpp"
+#include "TextureNode.hpp"
 
 namespace SH {
 
 template<typename T, int N, typename T2>
-class ShTexData : public T {
+class TexData : public T {
 public:
-  ShTexData(const ShTextureNodePtr& node, const ShGeneric<N, T2>& coords, bool indexed);
-  ShTexData(const ShTextureNodePtr& node, const ShGeneric<N, T2>& coords,
-            const ShGeneric<N, T2>& dx, const ShGeneric<N, T2>& dy);
+  TexData(const TextureNodePtr& node, const Generic<N, T2>& coords, bool indexed);
+  TexData(const TextureNodePtr& node, const Generic<N, T2>& coords,
+            const Generic<N, T2>& dx, const Generic<N, T2>& dy);
 
-  ShTexData& operator=(const T& a);
+  TexData& operator=(const T& a);
 };
 
 } // namespace
 
-#include "ShTexDataImpl.hpp"
+#include "TexDataImpl.hpp"
 
 #endif // SHTEXDATA_HPP

@@ -20,15 +20,15 @@
 #ifndef SHUTIL_FUNC_HPP 
 #define SHUTIL_FUNC_HPP 
 
-#include "sh/ShVariable.hpp"
-#include "sh/ShAttrib.hpp"
+#include "sh/Variable.hpp"
+#include "sh/Attrib.hpp"
 
 #ifndef _WIN32
 namespace ShUtil {
 
 using namespace SH;
 
-/** \file ShFunc.hpp
+/** \file Func.hpp
  * \brief Miscellaneous small Sh utility functions.  
  */
 
@@ -36,12 +36,12 @@ using namespace SH;
  * does change of basis on v to the orthonormal basis b0, b1, b2
  */
 template<typename T>
-ShGeneric<3, T> changeBasis(const ShGeneric<3, T> &b0, const ShGeneric<3, T> &b1,
-                            const ShGeneric<3, T> &b2, const ShGeneric<3, T> &v); 
+Generic<3, T> changeBasis(const Generic<3, T> &b0, const Generic<3, T> &b1,
+                            const Generic<3, T> &b2, const Generic<3, T> &v); 
 
 } // namespace
 #endif
 
-#include "ShFuncImpl.hpp"
+#include "FuncImpl.hpp"
 
 #endif // SHUTIL_FUNC_HPP 

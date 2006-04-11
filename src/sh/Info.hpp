@@ -22,7 +22,7 @@
 
 #include <list>
 #include <string>
-#include "ShDllExport.hpp"
+#include "DllExport.hpp"
 
 namespace SH {
 
@@ -30,23 +30,23 @@ namespace SH {
  * to certain Sh objects for internal usage. 
  */
 class 
-SH_DLLEXPORT
-ShInfo {
+DLLEXPORT
+Info {
 public:
-  virtual ~ShInfo();
-  virtual ShInfo* clone() const = 0;
+  virtual ~Info();
+  virtual Info* clone() const = 0;
   
 protected:
-  ShInfo();
+  Info();
 };
 
 /** A simple Info class for attaching string comments to objects */
 class
-SH_DLLEXPORT
-ShInfoComment: public ShInfo {
+DLLEXPORT
+InfoComment: public Info {
 public:
-  ShInfoComment(const std::string& comment); 
-  ShInfo* clone() const;
+  InfoComment(const std::string& comment); 
+  Info* clone() const;
 
   std::string comment; 
 };
@@ -57,18 +57,18 @@ public:
  * it must call this operator=.
  */
 class
-SH_DLLEXPORT ShInfoHolder {
+DLLEXPORT InfoHolder {
 public:
 
-  ShInfoHolder();
+  InfoHolder();
 
   // Clones the info list from other 
-  ShInfoHolder(const ShInfoHolder &other);
+  InfoHolder(const InfoHolder &other);
 
   // Makes this list equal to a clone of other's list
-  ShInfoHolder& operator=(const ShInfoHolder &other);
+  InfoHolder& operator=(const InfoHolder &other);
 
-  ~ShInfoHolder();
+  ~InfoHolder();
 
   // Return the first entry in info whose type matches T, or 0 if no
   // such entry exists.
@@ -84,22 +84,22 @@ public:
   void destroy_info();
 
   // Add the given statement information to the end of the info list.
-  void add_info(ShInfo* new_info);
+  void add_info(Info* new_info);
 
   // Remove the given statement information from the list.
   // Does not delete it, so be careful!
-  void remove_info(ShInfo* old_info);
+  void remove_info(Info* old_info);
 
 private:
   void erase_all();
 
-  typedef std::list<ShInfo*> InfoList;
+  typedef std::list<Info*> InfoList;
   InfoList info;
 
 };
 
 } // namespace SH
 
-#include "ShInfoImpl.hpp"
+#include "InfoImpl.hpp"
 
 #endif

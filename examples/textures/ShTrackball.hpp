@@ -24,14 +24,14 @@
 
 namespace SH {
 
-class ShTrackball {
+class Trackball {
 public:
-  ShTrackball() : m_width(0.0), m_height(0.0) {}
+  Trackball() : m_width(0.0), m_height(0.0) {}
   
-  ~ShTrackball() {}
+  ~Trackball() {}
 
   void resize(float width, float height);
-  ShMatrix4x4f rotate(float sx, float sy, float ex, float ey) const;
+  Matrix4x4f rotate(float sx, float sy, float ex, float ey) const;
 
 private:
   float m_width, m_height;

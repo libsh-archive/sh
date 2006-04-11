@@ -19,112 +19,112 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include <sstream>
-#include "ShDebug.hpp"
-#include "ShVariableNode.hpp"
-#include "ShError.hpp"
-#include "ShAlgebra.hpp"
-#include "ShFixedManipulator.hpp"
+#include "Debug.hpp"
+#include "VariableNode.hpp"
+#include "Error.hpp"
+#include "Algebra.hpp"
+#include "FixedManipulator.hpp"
 
 namespace SH {
 
-ShFixedManipulatorNode::ShFixedManipulatorNode() {
+FixedManipulatorNode::FixedManipulatorNode() {
 }
 
-ShFixedManipulatorNode::~ShFixedManipulatorNode() {
+FixedManipulatorNode::~FixedManipulatorNode() {
 }
 
-ShKeepNode::ShKeepNode(int numChannels) 
+KeepNode::KeepNode(int numChannels) 
   : m_numChannels(numChannels) {
 }
 
-ShProgram ShKeepNode::applyToInputs(ShManipVarIterator &finger, ShManipVarIterator end) const {
-  ShProgram result = SH_BEGIN_PROGRAM() {
+Program KeepNode::applyToInputs(ManipVarIterator &finger, ManipVarIterator end) const {
+  Program result = SH_BEGIN_PROGRAM() {
     for(int i = 0; i < m_numChannels; ++i, ++finger) {
       if(finger == end) {
-        shError(ShAlgebraException("Not enough ShProgram channels for shKeep manipulator"));
+        error(AlgebraException("Not enough Program channels for keep manipulator"));
       }
-      ShVariable inout = (*finger)->clone(SH_INOUT);
+      Variable inout = (*finger)->clone(INOUT);
     }
   } SH_END;
   return result;
 }
 
-ShProgram ShKeepNode::applyToOutputs(ShManipVarIterator &finger, ShManipVarIterator end) const {
+Program KeepNode::applyToOutputs(ManipVarIterator &finger, ManipVarIterator end) const {
   return applyToInputs(finger, end);
 }
 
-ShFixedManipulator shKeep(int numChannels) {
-  return new ShKeepNode(numChannels);
+FixedManipulator keep(int numChannels) {
+  return new KeepNode(numChannels);
 }
 
 
-ShLoseNode::ShLoseNode(int numChannels) 
+LoseNode::LoseNode(int numChannels) 
   : m_numChannels(numChannels) {
 }
 
-ShProgram ShLoseNode::applyToInputs(ShManipVarIterator &finger, ShManipVarIterator end) const {
-  //SH_DEBUG_PRINT( "Applying lose " << m_numChannels  );
-  ShProgram result = SH_BEGIN_PROGRAM() {
+Program LoseNode::applyToInputs(ManipVarIterator &finger, ManipVarIterator end) const {
+  //DEBUG_PRINT( "Applying lose " << m_numChannels  );
+  Program result = SH_BEGIN_PROGRAM() {
     for(int i = 0; i < m_numChannels; ++i, ++finger) {
       if(finger == end) {
-        shError(ShAlgebraException("Not enough ShProgram input channels for shLose manipulator"));
+        error(AlgebraException("Not enough Program input channels for lose manipulator"));
       }
-      ShVariable output((*finger)->clone(SH_OUTPUT));
+      Variable output((*finger)->clone(OUTPUT));
     }
   } SH_END;
   return result;
 }
 
-ShProgram ShLoseNode::applyToOutputs(ShManipVarIterator &finger, ShManipVarIterator end) const {
-  ShProgram result = SH_BEGIN_PROGRAM() {
+Program LoseNode::applyToOutputs(ManipVarIterator &finger, ManipVarIterator end) const {
+  Program result = SH_BEGIN_PROGRAM() {
     for(int i = 0; i < m_numChannels; ++i, ++finger) {
       if(finger == end) {
-        shError(ShAlgebraException("Not enough ShProgram output channels for shLose manipulator"));
+        error(AlgebraException("Not enough Program output channels for lose manipulator"));
       }
-      ShVariable input((*finger)->clone(SH_INPUT));
+      Variable input((*finger)->clone(INPUT));
     }
   } SH_END;
   return result;
 }
 
-ShFixedManipulator shLose(int numChannels) {
-  return new ShLoseNode(numChannels);
+FixedManipulator lose(int numChannels) {
+  return new LoseNode(numChannels);
 }
 
-ShDupNode::ShDupNode(int numDups) 
+DupNode::DupNode(int numDups) 
   : m_numDups(numDups) {
 }
 
-ShProgram ShDupNode::applyToInputs(ShManipVarIterator &finger, ShManipVarIterator end) const {
-  ShProgram result = SH_BEGIN_PROGRAM() {
-    ShVariable input;
+Program DupNode::applyToInputs(ManipVarIterator &finger, ManipVarIterator end) const {
+  Program result = SH_BEGIN_PROGRAM() {
+    Variable input;
     for(int i = 0; i < m_numDups; ++i, ++finger) {
       if(finger == end) {
-        shError(ShAlgebraException("Not enough ShProgram input channels for shDup manipulator"));
+        error(AlgebraException("Not enough Program input channels for dup manipulator"));
       }
       if(i == 0) {
-        input = (*finger)->clone(SH_INPUT);
+        input = (*finger)->clone(INPUT);
       }
       if((*finger)->size() != input.size()) {
-        shError(ShAlgebraException("Duplicating type " + input.node()->nameOfType()
+        error(AlgebraException("Duplicating type " + input.node()->nameOfType()
               + " to incompatible type " + (*finger)->nameOfType()));
       }
-      ShVariable output((*finger)->clone(SH_OUTPUT));
+      Variable output((*finger)->clone(OUTPUT));
       shASN(output, input);
     }
   } SH_END;
   return result;
 }
 
-ShProgram ShDupNode::applyToOutputs(ShManipVarIterator &finger, ShManipVarIterator end) const {
-  ShProgram result = SH_BEGIN_PROGRAM() {
+Program DupNode::applyToOutputs(ManipVarIterator &finger, ManipVarIterator end) const {
+  Program result = SH_BEGIN_PROGRAM() {
     if(finger == end) {
-      shError(ShAlgebraException("Not enough ShProgram output channels for shDup manipulator"));
+      error(AlgebraException("Not enough Program output channels for dup manipulator"));
     }
-    ShVariable input((*finger)->clone(SH_INPUT));
+    Variable input((*finger)->clone(INPUT));
 
     for(int i = 0; i < m_numDups; ++i) {
-      ShVariable output((*finger)->clone(SH_OUTPUT));
+      Variable output((*finger)->clone(OUTPUT));
       shASN(output, input);
     }
     ++finger;
@@ -132,73 +132,73 @@ ShProgram ShDupNode::applyToOutputs(ShManipVarIterator &finger, ShManipVarIterat
   return result;
 }
 
-ShFixedManipulator shDup(int numDups) {
-  return new ShDupNode(numDups);
+FixedManipulator dup(int numDups) {
+  return new DupNode(numDups);
 }
 
-ShProgramManipNode::ShProgramManipNode(const ShProgram &p) 
+ProgramManipNode::ProgramManipNode(const Program &p) 
   : p(p) {
 }
 
-ShProgram ShProgramManipNode::applyToInputs(ShManipVarIterator &finger, ShManipVarIterator end) const {
+Program ProgramManipNode::applyToInputs(ManipVarIterator &finger, ManipVarIterator end) const {
   std::size_t i;
   for(i = 0; i < p.node()->outputs.size() && finger != end; ++i, ++finger);
   // allow extra outputs from p 
   return p; 
 }
 
-ShProgram ShProgramManipNode::applyToOutputs(ShManipVarIterator &finger, ShManipVarIterator end) const {
+Program ProgramManipNode::applyToOutputs(ManipVarIterator &finger, ManipVarIterator end) const {
   std::size_t i;
   for(i = 0; i < p.node()->inputs.size() && finger != end; ++i, ++finger);
   // allow extra inputs from p 
   return p; 
 }
 
-ShTreeManipNode::ShTreeManipNode(const ShFixedManipulator &a, const ShFixedManipulator &b) 
+TreeManipNode::TreeManipNode(const FixedManipulator &a, const FixedManipulator &b) 
   : a(a), b(b) {
-  SH_DEBUG_ASSERT(a);
-  SH_DEBUG_ASSERT(b);
+  DEBUG_ASSERT(a);
+  DEBUG_ASSERT(b);
 }
 
-ShProgram ShTreeManipNode::applyToInputs(ShManipVarIterator &finger, ShManipVarIterator end) const {
-  ShProgram aProgram = a->applyToInputs(finger, end);
-  ShProgram bProgram = b->applyToInputs(finger, end);
+Program TreeManipNode::applyToInputs(ManipVarIterator &finger, ManipVarIterator end) const {
+  Program aProgram = a->applyToInputs(finger, end);
+  Program bProgram = b->applyToInputs(finger, end);
   return aProgram & bProgram; 
 }
 
-ShProgram ShTreeManipNode::applyToOutputs(ShManipVarIterator &finger, ShManipVarIterator end) const {
-  ShProgram aProgram = a->applyToOutputs(finger, end);
-  ShProgram bProgram = b->applyToOutputs(finger, end);
+Program TreeManipNode::applyToOutputs(ManipVarIterator &finger, ManipVarIterator end) const {
+  Program aProgram = a->applyToOutputs(finger, end);
+  Program bProgram = b->applyToOutputs(finger, end);
   return aProgram & bProgram; 
 }
 
-ShProgram operator<<(const ShProgram &p, const ShFixedManipulator &m) {
-  ShManipVarIterator finger = p.node()->inputs.begin();
-  ShProgram manipulator = m->applyToInputs(finger, p.node()->inputs.end()); 
+Program operator<<(const Program &p, const FixedManipulator &m) {
+  ManipVarIterator finger = p.node()->inputs.begin();
+  Program manipulator = m->applyToInputs(finger, p.node()->inputs.end()); 
   return p << manipulator;
 }
 
-ShProgram operator<<(const ShFixedManipulator &m, const ShProgram &p) {
-  ShManipVarIterator finger = p.node()->outputs.begin();
-  ShProgram manipulator = m->applyToOutputs(finger, p.node()->outputs.end()); 
+Program operator<<(const FixedManipulator &m, const Program &p) {
+  ManipVarIterator finger = p.node()->outputs.begin();
+  Program manipulator = m->applyToOutputs(finger, p.node()->outputs.end()); 
   return manipulator << p;
 }
 
-ShFixedManipulator operator&(const ShFixedManipulator &m, const ShFixedManipulator &n) {
+FixedManipulator operator&(const FixedManipulator &m, const FixedManipulator &n) {
   if (!m) {
     return n;
   }
   if (!n) {
     return m;
   }
-  return new ShTreeManipNode(m, n);
+  return new TreeManipNode(m, n);
 }
 
-ShFixedManipulator operator&(const ShFixedManipulator &m, const ShProgram &p) {
-  return m & new ShProgramManipNode(p);
+FixedManipulator operator&(const FixedManipulator &m, const Program &p) {
+  return m & new ProgramManipNode(p);
 }
-ShFixedManipulator operator&(const ShProgram &p, const ShFixedManipulator &m) {
-  return new ShProgramManipNode(p) & m; 
+FixedManipulator operator&(const Program &p, const FixedManipulator &m) {
+  return new ProgramManipNode(p) & m; 
 }
 
 }

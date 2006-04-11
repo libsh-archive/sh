@@ -22,23 +22,23 @@
 
 #include <string>
 #include <map>
-#include "ShDllExport.hpp"
+#include "DllExport.hpp"
 
 namespace SH {
 
 class
-SH_DLLEXPORT ShMeta {
+DLLEXPORT Meta {
 public:
-  ShMeta()
+  Meta()
     : m_meta(0) 
   {
   }
 
-  ShMeta(const ShMeta &other);
+  Meta(const Meta &other);
 
-  const ShMeta & operator=(const ShMeta &other);
+  const Meta & operator=(const Meta &other);
 
-  virtual ~ShMeta();
+  virtual ~Meta();
   
   virtual std::string name() const;
   virtual void name(const std::string& n);
@@ -68,6 +68,6 @@ private:
 
 }
 
-#include "ShMetaImpl.hpp"
+#include "MetaImpl.hpp"
 
 #endif

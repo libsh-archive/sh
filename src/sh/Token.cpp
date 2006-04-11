@@ -18,15 +18,15 @@
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 #include <iostream>
-#include "ShToken.hpp"
-#include "ShTokenizer.hpp"
-#include "ShUtility.hpp"
+#include "Token.hpp"
+#include "Tokenizer.hpp"
+#include "Utility.hpp"
 
 namespace SH {
 
 /** Names of token types.
- * Change this if you change the ShTokenType enumeration.
- * @see ShTokenType
+ * Change this if you change the TokenType enumeration.
+ * @see TokenType
  */
 char* tokenNames[] = {
   "IF",
@@ -48,32 +48,32 @@ char* tokenNames[] = {
   "DEFAULT"
 };
 
-ShToken::ShToken(ShTokenType type)
+Token::Token(TokenType type)
   : m_type(type)
 {
 }
 
-ShToken::~ShToken()
+Token::~Token()
 {
 }
 
-ShTokenType ShToken::type()
+TokenType Token::type()
 {
   return m_type;
   
 }
 
 
-void ShToken::print(std::ostream& out, int indent) const
+void Token::print(std::ostream& out, int indent) const
 {
-  shPrintIndent(out, indent);
+  printIndent(out, indent);
   out << tokenNames[m_type];
   if (!arguments.empty()) out << "<";
   out << std::endl;
   
-  for (std::vector<ShTokenArgument>::const_iterator I = arguments.begin();
+  for (std::vector<TokenArgument>::const_iterator I = arguments.begin();
        I != arguments.end(); ++I) {
-    shPrintIndent(out, indent + 2);
+    printIndent(out, indent + 2);
     out << I->result.name() << ", initialized using" << std::endl;
     I->blockList->print(out, indent + 2);
   }
