@@ -6,7 +6,13 @@ use File::Copy;
 use File::Find;
 use File::Temp;
 
-# Directories which contain files to be "licensified"
+my $COLOR_GREEN  = "[32m";
+my $COLOR_RED    = "[31m";
+my $COLOR_BLUE   = "[34m";
+my $COLOR_YELLOW = "[33m";
+my $COLOR_NORMAL = "[0m";
+
+# Directories which contain files to be processed
 my @SRC_DIRS = ('backends', 'src', 'test', 'examples');
 
 sub process_file
@@ -25,9 +31,9 @@ sub process_file
     if (open OUTPUT, ">$filename") {
         print OUTPUT foreach @lines;
         close OUTPUT;
-        print "done.\n";
+        print $COLOR_GREEN . "done" . $COLOR_NORMAL . ".\n";
     } else {
-        print "skipped.\n";
+        print $COLOR_YELLOW . "skipped" . $COLOR_NORMAL . ".\n";
     }
 }
 
