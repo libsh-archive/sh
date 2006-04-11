@@ -10,6 +10,7 @@ use File::Temp;
 my @SRC_DIRS = ('backends', 'src', 'test', 'examples');
 
 my %special_macros = (
+# control flow
     "BEGIN"    => "SH_BEGIN",
     "END"      => "SH_END",
     "IF"       => "SH_IF",
@@ -25,6 +26,11 @@ my %special_macros = (
     "BREAK"    => "SH_BREAK",
     "CONTINUE" => "SH_CONTINUE",
     "RETURN"   => "SH_RETURN",
+# other:
+    "ORT"      => "SHORT",
+    "ADER"     => "SHADER",
+    "LIB"      => "SHLIB",
+    "INSTALL"  => "SH_INSTALL",
 );
 
 my %reserved_words = (
@@ -95,16 +101,19 @@ sub process_file
     }
     close INPUT;
 
-    open OUTPUT, ">$filename" or die "Cannot open $filename as output.";
-    print OUTPUT foreach @lines;
-    close OUTPUT;
-    print "done.\n";
+    if (open OUTPUT, ">$filename") {
+        print OUTPUT foreach @lines;
+        close OUTPUT;
+        print "done.\n";
+    } else {
+        print "skipped.\n";
+    }
 }
 
 sub process_standard_files
 {
     # Find all .hpp and .cpp files in the standard directories
-    File::Find::find sub { /^.*\.[ch]pp\z/s && process_file($_) }, @SRC_DIRS;
+    File::Find::find sub { /^.*\.[ch]pp(\.py)?\z/s && process_file($_) }, @SRC_DIRS;
 }
 
 sub main
