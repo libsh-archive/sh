@@ -16,7 +16,9 @@ common = test.cpp test.hpp
 clean:
 	@rm -f *.log
 	@rm -f testlist
+	@mv offset_stride.cpp offset_stride.cpp.keep
 	@rm -f $(TESTS:=.cpp) ccstream.cpp
+	@mv offset_stride.cpp.keep offset_stride.cpp
 
 %.cpp: %.cpp.py shtest.py common.py
 	python $< > $@
