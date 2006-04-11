@@ -17,8 +17,8 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#ifndef FBOCACHE_HPP
-#define FBOCACHE_HPP
+#ifndef SHFBOCACHE_HPP
+#define SHFBOCACHE_HPP
 
 #include "GlTextureStorage.hpp"
 

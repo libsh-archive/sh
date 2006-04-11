@@ -17,8 +17,8 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#ifndef ARBINST_HPP
-#define ARBINST_HPP
+#ifndef SHARBINST_HPP
+#define SHARBINST_HPP
 
 #include "Variable.hpp"
 

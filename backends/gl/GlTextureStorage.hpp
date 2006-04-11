@@ -17,8 +17,8 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#ifndef GLTEXTURESTORAGE_HPP
-#define GLTEXTURESTORAGE_HPP
+#ifndef SHGLTEXTURESTORAGE_HPP
+#define SHGLTEXTURESTORAGE_HPP
 
 #include "VariableType.hpp"
 #include "Memory.hpp"

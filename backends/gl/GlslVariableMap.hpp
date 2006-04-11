@@ -17,8 +17,8 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#ifndef GLSLVARIABLEMAP_HPP
-#define GLSLVARIABLEMAP_HPP
+#ifndef SHGLSLVARIABLEMAP_HPP
+#define SHGLSLVARIABLEMAP_HPP
 
 #include "Glsl.hpp"
 #include "VariableNode.hpp"
@@ -135,4 +135,4 @@ public:
 
 }
 
-#endif /* GLSLVARIABLEMAP_HPP */
+#endif /* SHGLSLVARIABLEMAP_HPP */

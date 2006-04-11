@@ -17,8 +17,8 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#ifndef ARBREG_HPP
-#define ARBREG_HPP
+#ifndef SHARBREG_HPP
+#define SHARBREG_HPP
 
 #include <string>
 #include <iosfwd>

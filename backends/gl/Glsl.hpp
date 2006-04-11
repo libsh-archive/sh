@@ -17,8 +17,8 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#ifndef GLSL_HPP
-#define GLSL_HPP
+#ifndef SHGLSL_HPP
+#define SHGLSL_HPP
 
 #include <string>
 #include "GlBackend.hpp"
