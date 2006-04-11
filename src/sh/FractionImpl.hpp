@@ -502,11 +502,11 @@ template<typename T/* @todo clamp , bool Clamp */>
 Fraction<T> rnd(const Fraction<T> &a) 
 {
   T ONE = Fraction<T>::ONE;
-  T HALF = ONE >> 1; // slightly less than half
+  T ONE_HALF = ONE >> 1; // slightly less than half
   T result;
-  if(a.m_val > SH_HALF) {
+  if(a.m_val > ONE_HALF) {
     result = ONE;
-  } else if(!Fraction<T>::is_signed || result > -SH_HALF) {
+  } else if(!Fraction<T>::is_signed || result > - ONE_HALF) {
     result = 0;
   } else {
     result = -ONE;

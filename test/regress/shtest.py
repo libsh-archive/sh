@@ -49,7 +49,7 @@ def number_literal(n):
 
 def init_matrix(indent, arg, argtype, varname):
     out = ''
-    out += indent + make_variable(arg, 'TEMP', argtype) + ' ' + varname + ';\n'
+    out += indent + make_variable(arg, 'SH_TEMP', argtype) + ' ' + varname + ';\n'
     i = 0
     for row in arg:
         j = 0
@@ -63,14 +63,14 @@ def init_matrix(indent, arg, argtype, varname):
 
 def init_attrib(indent, arg, argtype, varname):
     out = indent
-    out += make_variable(arg, 'CONST', argtype) + ' ' + varname
+    out += make_variable(arg, 'SH_CONST', argtype) + ' ' + varname
     out += '(' + ', '.join([("(" + argtype + ")(" + number_literal(a) + ")") for a in arg]) + ')'
     out += ';\n'
     return out
 
 def init_scalar(indent, arg, argtype, varname, immediate):
     out = indent
-    out += make_variable(arg, 'CONST', argtype, immediate) + ' ' + varname
+    out += make_variable(arg, 'SH_CONST', argtype, immediate) + ' ' + varname
     out += '(' + argtype + '(' + number_literal(arg) + '));\n'
     return out
 
@@ -324,9 +324,9 @@ class StreamTest(Test):
                     programs[testname].append(progname)
                     out.write('  Program ' + progname + ' = SH_BEGIN_PROGRAM("stream") {\n')
                     for j, (arg, argtype) in enumerate(src_arg_types):
-                        out.write('    ' + make_variable(arg, 'INPUT', argtype)
+                        out.write('    ' + make_variable(arg, 'SH_INPUT', argtype)
                                   + ' ' + string.ascii_lowercase[j] + ';\n')
-                    out.write('    ' + make_variable(test[0], 'OUTPUT', types[0]) +  ' out;\n')
+                    out.write('    ' + make_variable(test[0], 'SH_OUTPUT', types[0]) +  ' out;\n')
                     out.write('    ' + str(call) + ';\n')
                     out.write('  } SH_END;\n\n')
                     out.write('  ' + progname + '.name("' + progname + '");\n')
@@ -373,7 +373,7 @@ class ImmediateTest(Test):
                 out.write(init_inputs('    ', src_arg_types, False))
                 out.write(init_expected('    ', test[0], types[0], False))
                 out.write('\n')
-                out.write('    ' + make_variable(test[0], 'TEMP', types[0], False) +  ' out;\n')
+                out.write('    ' + make_variable(test[0], 'SH_TEMP', types[0], False) +  ' out;\n')
                 out.write('    ' + str(call) + ';\n')
                 out.write('\n')
                 self.start_catch(out)
@@ -395,7 +395,7 @@ if __name__ == "__main__":
     foo.add_call(Call(Call.infix, '+', 2))
     foo.add_call(Call(Call.call, 'add', 2))
     foo.add_make_test((3, 5, 7), [(0, 1, 2), (3, 4, 5)])
-    foo.add_make_test((4, 5, 6), [(1,), (3, 4, 5)], ['i', 'INT'])
+    foo.add_make_test((4, 5, 6), [(1,), (3, 4, 5)], ['i', 'SH_INT'])
     foo.add_make_test((8, 9, 10), [(1, 2, 3), (7,)])
     foo.add_make_test((8,), [(1,), (7,)])
     foo.add_make_test((0, 0, 0), [(4, 5, 6), (-4, -5, -6)])
@@ -405,7 +405,7 @@ if __name__ == "__main__":
     foo.add_call(Call(Call.infix, '+', 2))
     foo.add_call(Call(Call.call, 'add', 2))
     foo.add_make_test((3, 5, 7), [(0, 1, 2), (3, 4, 5)])
-    foo.add_make_test((4, 5, 6), [(1,), (3, 4, 5)], ['i', 'INT'])
+    foo.add_make_test((4, 5, 6), [(1,), (3, 4, 5)], ['i', 'SH_INT'])
     foo.add_make_test((8, 9, 10), [(1, 2, 3), (7,)])
     foo.add_make_test((8,), [(1,), (7,)])
     foo.add_make_test((0, 0, 0), [(4, 5, 6), (-4, -5, -6)])

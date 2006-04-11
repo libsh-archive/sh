@@ -24,8 +24,8 @@
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 
-#ifndef SH_ATTRIBIMPL_HPP
-#define SH_ATTRIBIMPL_HPP
+#ifndef ATTRIBIMPL_HPP
+#define ATTRIBIMPL_HPP
 
 #include "Attrib.hpp"
 #include "Context.hpp"
@@ -1511,4 +1511,4 @@ Attrib<4, Binding, T, Semantic, Swizzled>::operator-() const
 
 } // namespace SH
 
-#endif // SH_ATTRIBIMPL_HPP
+#endif // ATTRIBIMPL_HPP

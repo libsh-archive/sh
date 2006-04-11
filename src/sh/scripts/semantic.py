@@ -1,6 +1,6 @@
 import common, re
 
-# TODO: CONST
+# TODO: SH_CONST
 
 types = {"Half": "h", 
          "float": "f", 
@@ -82,7 +82,7 @@ class Class:
         common.doxygen(self.comment)
 
     def open(self):
-        common.inprint("""template<int N, BindingType Binding, typename T=float, SemanticType Semantic=ATTRIB, bool Swizzled=false>
+        common.inprint("""template<int N, BindingType Binding, typename T=float, SemanticType Semantic=SH_ATTRIB, bool Swizzled=false>
 class """ + self.name + " : public " + self.parent + self.parentargs + """ {
 public:""")
         common.indent()
@@ -189,11 +189,11 @@ typedef typename HostType<T>::type host_type;
 typedef typename MemType<T>::type mem_type; 
 static const BindingType binding_type = Binding;
 static const SemanticType semantic_type = Semantic;\n""")
-        common.inprint("typedef " + self.name + "<" + self.sizevar(size) + ", INPUT, T, Semantic> InputType;")
-        common.inprint("typedef " + self.name + "<" + self.sizevar(size) + ", OUTPUT, T, Semantic> OutputType;")
-        common.inprint("typedef " + self.name + "<" + self.sizevar(size) + ", INOUT, T, Semantic> InOutType;")
-        common.inprint("typedef " + self.name + "<" + self.sizevar(size) + ", TEMP, T, Semantic> TempType;")
-        common.inprint("typedef " + self.name + "<" + self.sizevar(size) + ", CONST, T, Semantic> ConstType;")
+        common.inprint("typedef " + self.name + "<" + self.sizevar(size) + ", SH_INPUT, T, Semantic> InputType;")
+        common.inprint("typedef " + self.name + "<" + self.sizevar(size) + ", SH_OUTPUT, T, Semantic> OutputType;")
+        common.inprint("typedef " + self.name + "<" + self.sizevar(size) + ", SH_INOUT, T, Semantic> InOutType;")
+        common.inprint("typedef " + self.name + "<" + self.sizevar(size) + ", SH_TEMP, T, Semantic> TempType;")
+        common.inprint("typedef " + self.name + "<" + self.sizevar(size) + ", SH_CONST, T, Semantic> ConstType;")
 
     def private_constants(self, size):
         common.inprint("private:")
@@ -206,11 +206,11 @@ static const SemanticType semantic_type = Semantic;\n""")
         name = self.name.replace('', '', 1)
         for t in types:
             for i in range(1, 5):
-                common.inprint("typedef Attrib<" + str(i) + ", INPUT, " + t + ", " + self.enum + "> Input" + name + str(i) + types[t] + ";")
-                common.inprint("typedef Attrib<" + str(i) + ", OUTPUT, " + t + ", " + self.enum + "> Output" + name + str(i) + types[t] + ";")
-                common.inprint("typedef Attrib<" + str(i) + ", INOUT, " + t + ", " + self.enum + "> InOut" + name + str(i) + types[t] + ";")
-                common.inprint("typedef Attrib<" + str(i) + ", TEMP, " + t + ", " + self.enum + ">  " + name + str(i) + types[t] + ";")
-                common.inprint("typedef Attrib<" + str(i) + ", CONST, " + t + ", " + self.enum + "> Const" + name + str(i) + types[t] + ";")
+                common.inprint("typedef Attrib<" + str(i) + ", SH_INPUT, " + t + ", " + self.enum + "> Input" + name + str(i) + types[t] + ";")
+                common.inprint("typedef Attrib<" + str(i) + ", SH_OUTPUT, " + t + ", " + self.enum + "> Output" + name + str(i) + types[t] + ";")
+                common.inprint("typedef Attrib<" + str(i) + ", SH_INOUT, " + t + ", " + self.enum + "> InOut" + name + str(i) + types[t] + ";")
+                common.inprint("typedef Attrib<" + str(i) + ", SH_TEMP, " + t + ", " + self.enum + ">  " + name + str(i) + types[t] + ";")
+                common.inprint("typedef Attrib<" + str(i) + ", SH_CONST, " + t + ", " + self.enum + "> Const" + name + str(i) + types[t] + ";")
             common.inprint("\n")
 
 class Impl:
@@ -418,7 +418,7 @@ class Impl:
 def instantiate(name):
     # @todo check that this works with types properly 
     for i in range(1, 5):
-        for b in ["INPUT", "OUTPUT", "INOUT", "TEMP", "CONST"]:
+        for b in ["SH_INPUT", "SH_OUTPUT", "SH_INOUT", "SH_TEMP", "SH_CONST"]:
             for t in types:  
                 for s in ["false", "true"]:
                     common.inprint("template class " + name + "<" + str(i) +
