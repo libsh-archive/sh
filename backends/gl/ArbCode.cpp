@@ -646,7 +646,7 @@ ostream& ArbCode::print(ostream& out)
 
   if (m_numHalfTemps > 0) { 
     DEBUG_ASSERT(halfSupport); // assume half support...
-    out << "  ORT TEMP ";
+    out << "  SHORT TEMP ";
     for (int i = 0; i < m_numHalfTemps; i++) {
       if (i > 0) out << ", ";
       out << ArbReg(ARB_REG_HALF_TEMP, i);
