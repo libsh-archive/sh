@@ -35,12 +35,26 @@ my %reserved_words = (
     "while"    => "internal_while",
     "for"      => "internal_for",
     "do"       => "internal_do",
+    "and"      => "logical_and",
+    "or"       => "logical_or",
+    "not"      => "logical_not",
+);
+
+my %reserved_classnames = (
+    "Util"       => "ShUtil",
 );
 
 sub substituted_macro
 {
     $_ = shift;
     $_ = $special_macros{$_} if exists $special_macros{$_};
+    return $_;
+}
+
+sub substituted_classname
+{
+    $_ = shift;
+    $_ = $reserved_classnames{$_} if exists $reserved_classnames{$_};
     return $_;
 }
 
@@ -67,7 +81,7 @@ sub process_file
         s/(^|[^a-zA-Z])SH_?([A-Z]+)/$1 . &substituted_macro($2)/eg;
 
         # Class names
-        s/([^a-zA-Z]?)Sh([A-Z])/\1\2/g;
+        s/(^|[^a-zA-Z])Sh([A-Z]+[a-z]+)/$1 . &substituted_classname($2)/eg;
 
         # Function names (e.g. nibbles)
         s/(^|[^a-zA-Z])sh([A-Z]+[a-z]+)/$1 . &to_lower($2)/eg;
