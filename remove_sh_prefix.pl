@@ -81,8 +81,8 @@ sub process_file
     my @lines;
     while (<INPUT>) {
         # Header guards
-        s/ SH([A-Z]+)_HPP/ XYZXYZ\1_HPP/g;
-        s/ SHUTIL_([A-Z]+)_HPP/ ZZZZZZ\1_HPP/g;
+        s/([ "])SH([A-Z]+)_HPP/\1XYZheaderguardXYZ\2_HPP/g;
+        s/([ "])SHUTIL_([A-Z]+)_HPP/\1ZZZheaderguardZZZ\2_HPP/g;
         
         # Macros/enums
         s/(^|[^a-zA-Z_])SH_?([A-Z]+)/$1 . &substituted_macro($2)/eg;
@@ -94,8 +94,8 @@ sub process_file
         s/(^|[^a-zA-Z])sh([A-Z]+[a-z]+)/$1 . &to_lower($2)/eg;
 
 	# Restore header guard
-        s/ XYZXYZ([A-Z]+)_HPP/ SH\1_HPP/g;
-        s/ ZZZZZZ([A-Z]+)_HPP/ SHUTIL_\1_HPP/g;
+        s/XYZheaderguardXYZ([A-Z]+)_HPP/SH\1_HPP/g;
+        s/ZZZheaderguardZZZ([A-Z]+)_HPP/SHUTIL_\1_HPP/g;
 
         push @lines, $_;
     }
