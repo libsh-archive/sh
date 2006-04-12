@@ -17,8 +17,8 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#ifndef HPP
-#define HPP
+#ifndef SH_HPP
+#define SH_HPP
 
 #include "DllExport.hpp"
 #include "Exception.hpp"
@@ -81,4 +81,4 @@
  */
 
 
-#endif
+#endif /* SH_HPP */
