@@ -39,6 +39,8 @@ public:
   // reads backend from command line (default gcc) 
   Test(int argc, char** argv);
 
+  void ignore_backend(std::string backend);
+
   template <class T>
   void pretty_print(std::string varname, int size, const T *values)
   {

@@ -31,6 +31,7 @@ int main(int argc, char* argv[])
   int total_tests = 6;
 
   Test test(argc, argv);
+  test.ignore_backend("host");
 
   Program prg = SH_BEGIN_PROGRAM("stream") {
     InputAttrib1f a;

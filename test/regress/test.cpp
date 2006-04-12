@@ -41,6 +41,11 @@ Test::Test(int argc, char** argv)
   if (m_backend != "host") SH::setBackend(m_backend); 
 }
 
+void Test::ignore_backend(string backend)
+{
+  if (m_backend == backend) exit(77);
+}
+
 void Test::print_values(const char* varname, const std::string& values)
 {
   std::cout << varname << " = [ ";
