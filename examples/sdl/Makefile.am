@@ -6,4 +6,4 @@ EXTRA_DIST = README
 
 bin_PROGRAMS = shsdlex
 shsdlex_CXXFLAGS = @SDL_CFLAGS@
-shsdlex_SOURCES = main.cpp ShTrackball.cpp ShTrackball.hpp Camera.cpp Camera.hpp
+shsdlex_SOURCES = main.cpp Trackball.cpp Trackball.hpp Camera.cpp Camera.hpp
