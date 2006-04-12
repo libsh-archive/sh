@@ -311,18 +311,18 @@ int main(int argc, char** argv)
     Util::load_PNG(ks_images[1], filename);
     delete [] filename;
 #else
-    Util::load_PNG(kd_images[0], "tex_rustkd.png");
-    Util::load_PNG(ks_images[0], "tex_rustks.png");
-    Util::load_PNG(kd_images[1], "tex_kd.png");
-    Util::load_PNG(ks_images[1], "tex_ks.png");
+    ShUtil::load_PNG(kd_images[0], "tex_rustkd.png");
+    ShUtil::load_PNG(ks_images[0], "tex_rustks.png");
+    ShUtil::load_PNG(kd_images[1], "tex_kd.png");
+    ShUtil::load_PNG(ks_images[1], "tex_ks.png");
 
     for (int i=1; i < MIPMAP_LEVELS; i++) {
       stringstream s;
       s << "tex_kd" << i << ".png";
-      Util::load_PNG(kd_images[1 + i], s.str());
+      ShUtil::load_PNG(kd_images[1 + i], s.str());
     }
 #endif
-  } 
+  }
   catch (const Exception& e) {
 #ifdef __APPLE__
     CFStringRef s = CFStringCreateWithCString(kCFAllocatorDefault, e.message().c_str(), kCFStringEncodingASCII);

@@ -113,7 +113,7 @@ namespace shgl {
 using namespace SH;
 
 #ifdef _WIN32
-LRESULT CALLBACK glWindowProc(HWND hWnd, SH_UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK glWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
   // An empty WindowProc, we need one to create a window. For now
   // just pass everything through DefWindowProc.
@@ -249,7 +249,7 @@ GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrateg
       if (error != ERROR_CLASS_ALREADY_EXISTS) {
         std::stringstream msg;
         msg << "RegisterClassEx failed (" << error << ")";
-        error(Exception(msg.str()));
+        SH::error(Exception(msg.str()));
       }
     }
 

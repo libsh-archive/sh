@@ -186,7 +186,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\examples\textures\ShTrackball.cpp"
+				RelativePath="..\..\examples\textures\Trackball.cpp"
 				>
 			</File>
 		</Filter>
@@ -200,7 +200,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\examples\textures\ShTrackball.hpp"
+				RelativePath="..\..\examples\textures\Trackball.hpp"
 				>
 			</File>
 		</Filter>
