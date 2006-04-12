@@ -165,9 +165,6 @@ void init_gl(void)
 
 void init_sh()
 {
-  // set OpenGL backend
-  setBackend("arb");
-
   // Sh data
   Matrix4x4f mv;
   Matrix4x4f mvp;
@@ -255,6 +252,9 @@ int main(int argc, char** argv)
     init_gl();
 
     // initialize Sh
+    if (argc > 1) {
+      useBackend(argv[1]);
+    }
     init_sh();
   
     glutMainLoop();

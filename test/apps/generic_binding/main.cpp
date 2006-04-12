@@ -243,7 +243,7 @@ int main(int argc, char** argv)
     useBackend(argv[1]);
   }
 
-  init();
+  ::init();
   initShaders();
   bind(*shaders);
 
