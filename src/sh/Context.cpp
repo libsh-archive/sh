@@ -35,6 +35,7 @@ Context* Context::current()
     // init_types requires a Context object, 
     TypeInfo::init();
 
+#ifndef __APPLE__
     // Enable binary relocation (from autopackage)
     BrInitError error;
     int init_passed = br_init_lib(&error);
@@ -42,6 +43,7 @@ Context* Context::current()
       DEBUG_WARN("BinReloc failed to initialize (error code " 
         << error << "). Will fallback to hardcoded default paths.");
     }
+#endif
   }
   return m_instance;
 }
