@@ -1202,7 +1202,6 @@ void ArbCode::allocSemanticInputs(const ArbLimits& limits)
       }
 
       if (specs.allowGeneric && (index > -1)) {
-        cerr << node->name() << " was bound in allocSemanticInputs" << endl;
         m_registers[node] = new ArbReg(SH_ARB_REG_ATTRIB, m_numInputs++, node->name());
         m_reglist.push_back(m_registers[node]);
         m_registers[node]->binding.type = specs.binding;
