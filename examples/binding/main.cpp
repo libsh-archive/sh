@@ -160,9 +160,6 @@ void init_gl(void)
 
 void init_sh()
 {
-  // set OpenGL backend
-  setBackend("glsl");
-
   // Sh data
   Matrix4x4f mv;
   Matrix4x4f mvp;
@@ -213,7 +210,7 @@ void init_sh()
     oclr = pos(inrm|ilightv)*diffuse + ambient;
   } SH_END;
 
-#if 1
+#if 0
   cout << "Vertex Unit:" << endl;
   vsh.node()->code()->print(cout);
   cout << "--" << endl;
@@ -240,6 +237,9 @@ int main(int argc, char** argv)
     init_gl();
 
     // initialize Sh
+    if (argc > 1) {
+      setBackend(argv[1]);
+    }
     init_sh();
   
     glutMainLoop();
