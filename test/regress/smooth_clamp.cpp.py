@@ -27,7 +27,6 @@ def insert_into3(test):
     test.add_make_test((1.0,), [(99.9,), (-50.5,), (0.1,)], ['f', 'f', 'f', 'f'])
     test.add_make_test((0.8, 1.0), [(0.1, -0.1), (1.0, 2.0), (-3.0, -4.0)], ['f', 'f', 'f', 'f'])
     test.add_make_test((0.5, 0.5, 0.5), [(1.0, 2.0, 3.0), (1.0, 2.0, 3.0), (1.0, 2.0, 3.0)], ['f', 'f', 'f', 'f'])
-    test.add_make_test((0.501961, 0.0, 0.501961, 0.0), [(1.0, -2.0, 3.0, -4.0), (1.0, 2.0, 3.0, 4.0), (1.0, 2.0, 3.0, 4.0)], ['fui', 'f', 'f', 'f'])
 
 # Test the smoothstep function in stream programs
 test = shtest.StreamTest('smoothstep', 3)
