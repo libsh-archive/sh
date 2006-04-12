@@ -635,7 +635,7 @@ ostream& ArbCode::print(ostream& out)
     if (halfSupport) {
       out << "  LONG TEMP ";
     } else {
-      out << "  SH_TEMP ";
+      out << "  TEMP ";
     }
     for (int i = 0; i < m_numTemps; i++) {
       if (i > 0) out << ", ";
