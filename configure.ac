@@ -165,6 +165,9 @@ AC_CONFIG_FILES([Makefile
 		 src/sh/Makefile
 		 src/shutil/Makefile
 		 test/Makefile
+		 test/apps/break_continue/Makefile
+		 test/apps/generic_binding/Makefile
+		 test/apps/mipmapping/Makefile
 		 test/regress/Makefile
 		 test/sandbox/Makefile
 		 backends/Makefile

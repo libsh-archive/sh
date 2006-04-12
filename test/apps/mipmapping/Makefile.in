@@ -4,9 +4,8 @@ EXECUTABLES = $(SOURCES:.cpp=)
 OBJECTS = $(SOURCES:.cpp=.o)
 DEPENDS = $(SOURCES:.cpp=.d)
 CPPFLAGS = -I$(src_dir)
-#CXXFLAGS = -g -O0 -Wall
 CXXFLAGS = -g -O2 -Wall
-LDFLAGS = $(src_dir)/sh/libsh.la -lGL -lglut
+LDFLAGS = @prefix@/lib/libsh.la -lGL -lglut
 
 all: main
 
