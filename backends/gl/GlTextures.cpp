@@ -175,6 +175,7 @@ GLenum shGlInternalFormat(const ShTextureNodePtr& node, bool forceRGB)
     break;
   }
   if (forceRGB) {
+#ifndef __APPLE__
     // The NV_float_buffer extension is only used on older NVIDIA hardware
     // (the one that doesn't support ATI_texture_float extension) very old
     // such hardware (FX5200 in particular) supports writing only to RGBA
@@ -182,6 +183,7 @@ GLenum shGlInternalFormat(const ShTextureNodePtr& node, bool forceRGB)
     if (formats == fpformats_nv || formats == halfformats_nv) {
       return formats[3];
     }
+#endif
     if (node->size() <= 2) {
       return formats[node->size() - 1 + 2];
     }
