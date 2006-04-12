@@ -265,6 +265,26 @@ GLenum shGlType(ShValueType valueType, ShValueType &convertedType) {
   return result;
 }
 
+
+GlTextures::ActiveTexture::ActiveTexture(GLenum texture_unit)
+  : texture_unit(texture_unit)
+{
+  // Save old texture unit
+  GLint temp;
+  SH_GL_CHECK_ERROR(glGetIntegerv(GL_ACTIVE_TEXTURE_ARB, &temp));
+  last_unit = temp;
+
+  // Set new one
+  SH_GL_CHECK_ERROR(glActiveTextureARB(texture_unit));
+}
+
+GlTextures::ActiveTexture::~ActiveTexture()
+{
+  // Restore old texture unit
+  SH_GL_CHECK_ERROR(glActiveTextureARB(last_unit));
+}
+
+
 struct StorageFinder {
 
   enum LookFor {
@@ -349,7 +369,7 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node, GLenum target, bool w
   if (!node) return;
 
   if (!node->meta("opengl:texid").empty()) {
-    SH_GL_CHECK_ERROR(glActiveTextureARB(target));
+    ActiveTexture active_texture(target);
     GLuint name;
     std::istringstream is(node->meta("opengl:texid"));
     is >> name; // TODO: Check for errors
@@ -401,7 +421,13 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node, GLenum target, bool w
     if (I == GlTextureName::endNames()) {
       // Need to allocate new storages
       GlTextureNamePtr texname = new GlTextureName(GL_TEXTURE_CUBE_MAP);
+
+      std::ostringstream os;
+      os << texname->value();
+      node->meta("opengl:alloc_texid", os.str());
+
       texname->params(node->traits());
+
       for (int i = 0; i < 6; i++) {
         ShCubeDirection dir = static_cast<ShCubeDirection>(i);
         if (!node->memory(dir, 0)) {
@@ -455,11 +481,8 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node, GLenum target, bool w
         }
       }
 
-      SH_GL_CHECK_ERROR(glActiveTextureARB(target));
-      SH_GL_CHECK_ERROR(glBindTexture(GL_TEXTURE_CUBE_MAP, texname->value()));
-      std::ostringstream os;
-      os << texname->value();
-      node->meta("opengl:alloc_texid", os.str());
+      ActiveTexture active_texture(target);
+      SH_GL_CHECK_ERROR(glBindTexture(GL_TEXTURE_CUBE_MAP, texname->value()));      
     } else {
       // Just synchronize the storages
       GlTextureName::StorageList::const_iterator S;
@@ -468,7 +491,7 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node, GLenum target, bool w
         if (!s) continue;
         s->sync();
       }
-      SH_GL_CHECK_ERROR(glActiveTextureARB(target));
+      ActiveTexture active_texture(target);
       SH_GL_CHECK_ERROR(glBindTexture(GL_TEXTURE_CUBE_MAP, (*I)->value()));
       std::ostringstream os;
       os << (*I)->value();
@@ -515,6 +538,10 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node, GLenum target, bool w
           name = storage->texName();
         } else {
           name = new GlTextureName(shGlTargets[node->dims()]);
+
+          std::ostringstream os;
+          os << name->value();
+          node->meta("opengl:alloc_texid", os.str());
         }
 
         // Copy traits (interpolation, etc) if they have changed
@@ -558,13 +585,9 @@ void GlTextures::bindTexture(const ShTextureNodePtr& node, GLenum target, bool w
       storage->write(true);
     }
     else {
-      SH_GL_CHECK_ERROR(glActiveTextureARB(target));
+      ActiveTexture active_texture(target);
       SH_GL_CHECK_ERROR(glBindTexture(shGlTargets[node->dims()], name->value()));
-    }
-
-    std::ostringstream os;
-    os << name->value();
-    node->meta("opengl:alloc_texid", os.str());
+    }    
   }
 }
 
