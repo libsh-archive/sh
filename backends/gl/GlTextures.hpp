@@ -32,6 +32,17 @@ public:
   
   void bindTexture(const SH::TextureNodePtr& texture,
                    GLenum target, bool write);
+
+private:
+  // Utility for setting/maintaining active textures
+  struct ActiveTexture {
+    ActiveTexture(GLenum texture_unit);
+    ~ActiveTexture();
+  
+    GLenum texture_unit;
+    GLenum last_unit;
+  };
+
 };
 
 }
