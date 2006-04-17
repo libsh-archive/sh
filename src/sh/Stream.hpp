@@ -22,10 +22,9 @@
 
 #include <list>
 #include "DllExport.hpp"
+#include "BaseTexture.hpp"
 
 namespace SH {
-
-class BaseTexture;
 
 /** Dynamic list of channels.
  * The stream keep track (by reference) of an ordered lists of 

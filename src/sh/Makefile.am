@@ -84,7 +84,8 @@ libsh_la_SOURCES += LibNoise.hpp LibNoiseImpl.hpp
 libsh_la_SOURCES += LibWorley.hpp LibWorleyImpl.hpp
 
 # Textures and arrays
-libsh_la_SOURCES += BaseTexture.hpp BaseTextureImpl.hpp BaseTexture.cpp
+libsh_la_SOURCES += BaseTexture.hpp BaseTexture.cpp
+libsh_la_SOURCES += BaseTextureND.hpp BaseTextureNDImpl.hpp
 libsh_la_SOURCES += Array.hpp Table.hpp Texture.hpp
 libsh_la_SOURCES += Wrap.hpp Interp.hpp MIPFilter.hpp
 libsh_la_SOURCES += TextureNode.hpp Image.hpp ImageImpl.hpp Image3D.hpp
@@ -167,7 +168,7 @@ incinc_HEADERS += sh.hpp shmacros.hpp
 incinc_HEADERS += Matrix.hpp MatrixImpl.hpp
 incinc_HEADERS += Array.hpp Table.hpp Texture.hpp
 incinc_HEADERS += Wrap.hpp
-incinc_HEADERS += BaseTexture.hpp BaseTextureImpl.hpp
+incinc_HEADERS += BaseTexture.hpp BaseTextureND.hpp BaseTextureNDImpl.hpp
 incinc_HEADERS += TextureNode.hpp Image.hpp ImageImpl.hpp Image3D.hpp
 incinc_HEADERS += TexData.hpp TexDataImpl.hpp
 incinc_HEADERS += LinearAllocator.hpp

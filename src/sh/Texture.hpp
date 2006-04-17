@@ -21,6 +21,7 @@
 #define SHTEXTURE_HPP
 
 #include "BaseTexture.hpp"
+#include "BaseTextureND.hpp"
 
 namespace SH {
 
