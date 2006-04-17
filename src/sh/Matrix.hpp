@@ -17,8 +17,8 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHSHMATRIX_HPP
-#define SHSHMATRIX_HPP
+#ifndef SHMATRIX_HPP
+#define SHMATRIX_HPP
 
 #include "Meta.hpp"
 #include "Variable.hpp"
@@ -355,5 +355,4 @@ typedef Matrix<4, 4, SH_TEMP, float> Matrix4x4f;
 
 #include "MatrixImpl.hpp"
 
-#endif
-
+#endif // SHMATRIX_HPP

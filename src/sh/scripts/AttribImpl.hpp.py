@@ -2,7 +2,7 @@ import common, semantic
 
 common.header()
 
-common.guard("ATTRIBIMPL_HPP")
+common.guard("SHATTRIBIMPL_HPP")
 common.inprint('#include "Attrib.hpp"')
 common.inprint('#include "Context.hpp"')
 common.inprint('#include "Statement.hpp"')
@@ -138,4 +138,4 @@ impl = Impl()
 impl.implement_all()
 
 common.endnamespace()
-common.endguard("ATTRIBIMPL_HPP")
+common.endguard("SHATTRIBIMPL_HPP")

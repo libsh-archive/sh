@@ -497,4 +497,4 @@ void Matrix<Rows, Cols, Binding, T>::getValues(host_type dest[]) const
 
 }
 
-#endif
+#endif // SHMATRIXIMPL_HPP
