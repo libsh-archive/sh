@@ -198,7 +198,6 @@ struct TransformerParent {
  void start(const ProgramNodePtr& program) { m_program = program; }
  void handleVarList(ProgramNode::VarList &varlist, BindingType type) {}
  void handleTexList(ProgramNode::TexList &texlist) {}
- void handleChannelList(ProgramNode::ChannelList &chanlist) {}
  void handlePaletteList(ProgramNode::PaletteList &palettelist) {}
 
  bool handleStmt(BasicBlock::StmtList::iterator &I, const CtrlGraphNodePtr& node) { return false; }

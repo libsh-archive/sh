@@ -30,6 +30,7 @@
 #include "Backend.hpp"
 #include "Transformer.hpp"
 #include "Optimizations.hpp"
+#include "BaseTexture.hpp"
 
 namespace SH {
 

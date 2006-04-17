@@ -27,9 +27,9 @@
 #include "Syntax.hpp"
 #include "Algebra.hpp"
 #include "Memory.hpp"
-#include "ChannelNode.hpp"
 #include "Stream.hpp"
 #include "Record.hpp"
+#include "BaseTexture.hpp"
 
 namespace SH {
 

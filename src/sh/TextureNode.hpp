@@ -111,7 +111,7 @@ public:
                 int size, // scalars per tuple 
                 ValueType valueType, // type index 
                 const TextureTraits&,
-                int width, int height = 1, int depth = 1, int max_nb_elements = -1);
+                int width, int height = 1, int depth = 1);
   virtual ~TextureNode();
 
   TextureDims dims() const;
@@ -130,7 +130,7 @@ public:
   int width() const; // valid for all texture nodes
   int height() const; // 1 for SH_TEXTURE_1D
   int depth() const; // 1 unless SH_TEXTURE_3D
-  int count() const; // number of elements  
+    
   int mipmap_levels();
   int num_memories() const;
 
@@ -139,14 +139,10 @@ public:
   void setTexSize(int w, int h, int d);
   const Variable& texSizeVar() const;
 
-  void count(int n);
-
   /// Generates the mipmaps levels if necessary (returns TRUE if it did, otherwise FALSE)
   bool build_mipmaps(CubeDirection dir = CUBE_POS_X);
   
 private:
-  int m_count; // max nb of elements sent to the GPU or -1 if unknown (used by the stream backend)
-
   TextureDims m_dims;
   
   MemoryPtr* m_memory; // array

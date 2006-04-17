@@ -20,7 +20,6 @@
 #ifndef SHGLXPBUFFERCONTEXT_HPP
 #define SHGLXPBUFFERCONTEXT_HPP
 
-#include "Stream.hpp"
 #include "Program.hpp"
 #include "PBufferContext.hpp"
 

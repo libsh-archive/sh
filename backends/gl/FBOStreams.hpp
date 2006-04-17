@@ -30,7 +30,7 @@ struct FBOStreams : public StreamStrategy {
   FBOStreams();
   virtual ~FBOStreams();
 
-  void execute(const SH::ProgramNodeCPtr& program, 
+  void execute(const SH::Program& program, 
                SH::Stream& dest, TextureStrategy *texture);
 
   virtual StreamStrategy* create();

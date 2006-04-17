@@ -17,34 +17,22 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#include "Stream.hpp"
 #include "Program.hpp"
-#include "ChannelNode.hpp"
+#include "Stream.hpp"
 #include "Syntax.hpp"
 #include "Algebra.hpp"
 #include "Context.hpp"
+#include "BaseTexture.hpp"
 
 namespace SH {
-
-// May want to move this elsewhere
-Program connect(const ChannelNodePtr& node, const Program& program)
-{
-  Program nibble = SH_BEGIN_PROGRAM() {
-    Variable out(node->clone(SH_OUTPUT));
-
-    Variable streamVar(node);
-    Statement stmt(out, OP_FETCH, streamVar);
-    Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
-  } SH_END_PROGRAM;
-  return connect(nibble, program);
-}
 
 Stream::Stream()
 {
 }
-Stream::Stream(const ChannelNodePtr& channel)
+
+Stream::Stream(const BaseTexture& array)
 {
-  append(channel);
+  append(array);
 }
 
 Stream::const_iterator Stream::begin() const
@@ -67,19 +55,19 @@ Stream::iterator Stream::end()
   return m_nodes.end();
 }
 
-int Stream::size() const
+Stream::size_type Stream::size() const
 {
   return m_nodes.size();
 }
 
-void Stream::append(const ChannelNodePtr& node)
+void Stream::append(const BaseTexture& array)
 {
-  m_nodes.push_back(node);
+  m_nodes.push_back(array);
 }
 
-void Stream::prepend(const ChannelNodePtr& node)
+void Stream::prepend(const BaseTexture& array)
 {
-  m_nodes.push_front(node);
+  m_nodes.push_front(array);
 }
 
 Stream combine(const Stream& left, const Stream& right)
@@ -92,7 +80,43 @@ Stream combine(const Stream& left, const Stream& right)
   return stream;
 }
 
+Stream combine(const BaseTexture& left, const BaseTexture& right)
+{
+  Stream stream(left);
+  stream.append(right);
+  return stream;
+}
+
+Stream combine(const Stream& left, const BaseTexture& right)
+{
+  Stream stream = left;
+  stream.append(right);
+  return stream;
+}
+
+Stream combine(const BaseTexture& left, const Stream& right)
+{
+  Stream stream = right;
+  stream.prepend(left);
+  return stream;
+}
+
 Stream operator&(const Stream& left, const Stream& right)
+{
+  return combine(left, right);
+}
+
+Stream operator&(const BaseTexture& left, const BaseTexture& right)
+{
+  return combine(left, right);
+}
+
+Stream operator&(const Stream& left, const BaseTexture& right)
+{
+  return combine(left, right);
+}
+
+Stream operator&(const BaseTexture& left, const Stream& right)
 {
   return combine(left, right);
 }
@@ -114,12 +138,26 @@ Program operator<<(const Program& program, const Stream& stream)
   return connect(stream, program);
 }
 
+Program connect(const BaseTexture& array,
+                  const Program& program)
+{
+  Program result = program;
+  result.append_input(array);
+  return result;
+}
+
+Program operator<<(const Program& program,
+                     const BaseTexture& array)
+{
+  return connect(array, program);
+}
+
 Stream& Stream::operator=(const Program& program)
 {
   DEBUG_ASSERT(program.node());
   BackendPtr backend = Backend::get_backend(program.target());
   DEBUG_ASSERT(backend);
-  backend->execute(program.node(), *this);
+  backend->execute(program, *this);
   return *this;
 }
 

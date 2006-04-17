@@ -28,144 +28,6 @@ namespace shgl {
 using namespace SH;
 using namespace std;
 
-void ChannelGatherer::operator()(const CtrlGraphNode* node)
-{
-  if (!node) return;
-
-  BasicBlockPtr block = node->block;
-  if (!block) return;
-
-  for (BasicBlock::StmtList::iterator I = block->begin(); I != block->end(); ++I) {
-    const Statement& stmt = *I;
-    if (stmt.op != OP_FETCH) continue;
-
-    // TODO: ought to complain here
-    if (stmt.src[0].node()->kind() != SH_STREAM) continue;
-    
-    ChannelNodePtr channel = shref_dynamic_cast<ChannelNode>(stmt.src[0].node());
-
-    TextureNodePtr tex;
-    TextureTraits traits = ArrayTraits();
-
-    tex = new TextureNode(dims, channel->size(), channel->valueType(),
-                            traits, 1, 1, 1, 0);
-    tex->memory(channel->memory(), 0);
-    
-    VariableNodePtr os1(new VariableNode(SH_TEMP, 4, SH_FLOAT));
-    VariableNodePtr os2(new VariableNode(SH_TEMP, 4, SH_FLOAT));
-
-    channel_map.insert(std::make_pair(channel, ChannelData(tex, os1, os2)));
-  }
-}
-
-TexFetcher::TexFetcher(ChannelMap& channel_map,
-                       const VariableNodePtr& tc_node,
-                       bool indexed, bool os_calculation,
-                       const VariableNodePtr& tex_size_node,
-                       const ProgramNodePtr& program)
-    : channel_map(channel_map),
-      tc_node(tc_node),
-      indexed(indexed),
-      os_calculation(os_calculation),
-      tex_size_node(tex_size_node),
-      program(program)
-{
-}
-
-void TexFetcher::operator()(CtrlGraphNode* node)
-{
-  if (!node->block) return;
-  for (BasicBlock::StmtList::iterator I = node->block->begin();
-       I != node->block->end(); ++I) {
-    Statement& stmt = *I;
-    if (stmt.op != OP_FETCH && stmt.op != OP_LOOKUP) continue;
-      
-    if (!stmt.src[0].node()) {
-      DEBUG_WARN("FETCH/LOOKUP from null stream");
-      continue;
-    }
-    if (stmt.src[0].node()->kind() != SH_STREAM) {
-      DEBUG_WARN("FETCH/LOOKUP from non-stream");
-      continue;
-    }
-      
-    ChannelNodePtr stream_node = shref_dynamic_cast<ChannelNode>(stmt.src[0].node());
-    ChannelMap::const_iterator J = channel_map.find(stream_node);
-    if (J == channel_map.end()) {
-      DEBUG_WARN("Stream node " << stream_node.object() << ", " << stream_node->name() << " not found in input map");
-      continue;
-    }
-
-    if (!J->second.tex_var) {
-      DEBUG_WARN("No texture allocated for stream node");
-      continue;
-    }
-
-    Variable tex_var(J->second.tex_var);
-    Variable os1_var(J->second.os1_var);
-    Variable os2_var(J->second.os2_var);
-
-    if (stmt.op == OP_FETCH) {
-      Variable coords_var(tc_node);
-      if (os_calculation) {
-        Context::current()->enter(program);
-        Variable result(new VariableNode(SH_TEMP, 4, SH_FLOAT));
-        Context::current()->exit();
-
-        BasicBlock::StmtList new_stmts;
-
-        //
-        // The calculation we are doing here is:
-        //
-        // i = i*stride + offset + bias
-        // x = frac(i)
-        // y = i/width + (0.5 - x)*2*bias
-        //
-        // z = z*s + o + b
-        // w = 1
-        new_stmts.push_back(Statement(result(2,3), OP_MAD, coords_var(2,3), os1_var(0,2), os1_var(1,3)));
-        // x = frac z
-        new_stmts.push_back(Statement(result(0), OP_FRAC, result(2)));
-        // y = x*-2*b + y*0 + z/wi + w*b
-        new_stmts.push_back(Statement(result(1), result, OP_DOT, os2_var));
-
-        if (indexed) {
-          Variable tex_size_var(tex_size_node);
-          new_stmts.push_back(Statement(result(0,1), result(0,1), OP_MUL, tex_size_var(2,2)));
-          new_stmts.push_back(Statement(stmt.dest, tex_var, OP_TEXI, result(0,1)));
-        }
-        else {
-          new_stmts.push_back(Statement(stmt.dest, tex_var, OP_TEX, result(0,1)));
-        }
-
-        I = node->block->erase(I);
-        node->block->splice(I, new_stmts);
-        I--;
-      }
-      else {
-        if (indexed) {
-          stmt = Statement(stmt.dest, tex_var, OP_TEXI, coords_var(0,1));
-        }
-        else {
-          stmt = Statement(stmt.dest, tex_var, OP_TEX, coords_var(0,1));
-        }
-      }
-    } else {
-      // Make sure our actualy index is a temporary in the program.
-      Context::current()->enter(program);
-      Variable coordsVar(new VariableNode(SH_TEMP, 2, SH_FLOAT));
-      Context::current()->exit();
-        
-      BasicBlock::StmtList new_stmts;
-      new_stmts.push_back(Statement(coordsVar(0), stmt.src[1], OP_MOD, J->second.tex_var->texSizeVar()(0)));
-      new_stmts.push_back(Statement(coordsVar(1), stmt.src[1], OP_DIV, J->second.tex_var->texSizeVar()(0)));
-      new_stmts.push_back(Statement(stmt.dest, tex_var, OP_TEXI, coordsVar));
-      I = node->block->erase(I);
-      node->block->splice(I, new_stmts);
-      I--;
-    }
-  }
-}
 
 // Extract the backend name from the target if there is one (including the colon)
 string get_target_backend(const ProgramNodeCPtr& program)
@@ -182,86 +44,187 @@ string get_target_backend(const ProgramNodeCPtr& program)
 
 StreamCache::StreamCache(ProgramNode* stream_program,
                          ProgramNode* vertex_program,
-                         int tex_size, int max_outputs,
-                         FloatExtension float_extension)
+                         int max_outputs, FloatExtension float_extension)
   : m_stream_program(stream_program),
     m_vertex_program(vertex_program),
-    m_tex_size(tex_size),
     m_max_outputs(max_outputs),
     m_float_extension(float_extension)
 {
-  TextureDims dims(SH_TEXTURE_2D);
+}
+
+void StreamCache::generate_programs(ProgramVersion version)
+{
+  TextureDims dims = SH_TEXTURE_2D;
   
-  switch (m_float_extension) {
-  case ARB_NV_FLOAT_BUFFER:
-    dims = SH_TEXTURE_RECT;
+  switch (version & ~SINGLE_OUTPUT) {
+  case OS_NONE_2D:
+  case OS_1D:
+  case OS_2D:
+    switch (m_float_extension) {
+    case ARB_NV_FLOAT_BUFFER:
+      dims = SH_TEXTURE_RECT;
+      break;
+    case ARB_ATI_PIXEL_FORMAT_FLOAT:
+      dims = SH_TEXTURE_2D;
+      break;
+    default:
+      DEBUG_ASSERT(false);
+      break;
+    }
     break;
-  case ARB_ATI_PIXEL_FORMAT_FLOAT:
-    dims = SH_TEXTURE_2D;
-    break;
-  default:
-    DEBUG_ASSERT(false);
+  
+  case OS_NONE_3D:
+  case OS_3D:
+    dims = SH_TEXTURE_3D;
     break;
   }
+ 
+  split_program(m_stream_program, m_programs[version],
+                get_target_backend(m_stream_program) + "fragment",
+                (version & SINGLE_OUTPUT) ? 1 : m_max_outputs);
 
-  ChannelGatherer gatherer(m_channel_map, dims);
-  stream_program->ctrlGraph->dfs(gatherer);
+  for (std::list<ProgramNodePtr>::iterator I = m_programs[version].begin();
+       I != m_programs[version].end(); ++I) {
+         
+    string target = get_target_backend(m_stream_program) + "fragment";
 
-  for (int i = 0; i < NUM_SET_TYPES; ++i) {
-    split_program(stream_program, m_programs[i],
-                  get_target_backend(stream_program) + "fragment",
-                  i == SINGLE_OUTPUT ? 1 : max_outputs);
-
-    for (std::list<ProgramNodePtr>::iterator I = m_programs[i].begin();
-         I != m_programs[i].end(); ++I) {
-      Program with_tc = Program(*I) & lose<TexCoord4f>("streamcoord");
-      TexFetcher fetcher(m_channel_map, with_tc.node()->inputs.back(),
-                         dims == SH_TEXTURE_RECT, 
-                         i != NO_OFFSET_STRIDE,
-                         m_output_stride.node(),
-                         with_tc.node());
-      with_tc.node()->ctrlGraph->dfs(fetcher);
-
-      optimize(with_tc);
+    for (ProgramNode::VarList::const_iterator input = (*I)->begin_inputs();
+         input != (*I)->end_inputs(); ++input) {
+      InputData input_data;
+      input_data.tex =
+        new TextureNode(dims, (*input)->size(), (*input)->valueType(),
+                          ArrayTraits(), 1, 1, 1);
+      m_inputs[version].push_back(input_data);
+    }
     
-      if (i != NO_OFFSET_STRIDE) {
-        string target = get_target_backend(stream_program) + "fragment";
-        Program preamble = SH_BEGIN_PROGRAM(target) {
-          InputTexCoord4f DECL(streamcoord);
-          OutputTexCoord4f DECL(index);
-          // index = (x - bias, y - bias, -bias, 1-bias)
-          index = streamcoord - m_output_offset(3,3,3,3);
-          // z = (x + y*width + z*dest_offset/bias)/dest_stride
-          index(2) = index(0,1,2) | m_output_offset(0,1,2);
+    Program preamble;
+    switch (version & ~SINGLE_OUTPUT) {
+    case OS_NONE_2D:
+      preamble = SH_BEGIN_PROGRAM(target) {
+        InputTexCoord2f DECL(streamcoord);
 
-          Attrib1f DECL(stride);
-          // stride = z*width
-          stride = index(2) * m_output_stride(0);
-          discard(frac(stride) - m_output_stride(1));
-        } SH_END_PROGRAM;
-        with_tc = with_tc << preamble;
-      }
+        InputList::iterator input_data = m_inputs[version].begin();
+        for (ProgramNode::VarList::const_iterator input = (*I)->begin_inputs();
+             input != (*I)->end_inputs(); ++input, ++input_data) {
+          Variable out((*input)->clone(SH_OUTPUT));
+          Variable tex(input_data->tex);
+          if (m_float_extension == ARB_NV_FLOAT_BUFFER) {
+            Statement stmt(out, tex, OP_TEXI, streamcoord);
+            Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
+          }
+          else {
+            Statement stmt(out, tex, OP_TEX, streamcoord);
+            Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
+          }
+        }
+      } SH_END_PROGRAM;
+      break;
+    
+    case OS_NONE_3D:
+      DEBUG_ASSERT(false /* TODO */);
+      break;
+    
+    case OS_1D:
+      preamble = SH_BEGIN_PROGRAM(target) {
+        InputTexCoord4f DECL(streamcoord);
+            
+        Attrib4f DECL(index);
+        // index = (x - bias, y - bias, -bias, 1-bias)
+        index = streamcoord - m_output_offset(3,3,3,3);
+        // z = (x + y*width + z*dest_offset/bias)/dest_stride
+        index(2) = index(0,1,2) | m_output_offset(0,1,2);
+
+        Attrib1f DECL(stride);
+        // stride = z*width
+        stride = index(2) * m_output_stride(0);
+        discard(frac(stride) - m_output_stride(1));
+
+        InputList::iterator input_data = m_inputs[version].begin();
+        for (ProgramNode::VarList::const_iterator input = (*I)->begin_inputs();
+             input != (*I)->end_inputs(); ++input, ++input_data) {
+
+          TexCoord4f DECL(coord);
+          Variable tex(input_data->tex);
+          Variable out((*input)->clone(SH_OUTPUT));
+          
+          // The calculation we are doing here is:
+          //
+          // i = i*stride + offset + bias
+          // x = frac(i)
+          // y = i/width + (0.5 - x)*2*bias
+          //
+          // z = z*s + o + b
+          // w = 1
+          coord(2,3) = mad(index(2,3), input_data->os1(0,2), input_data->os1(1,3));
+          // x = frac z
+          coord(0) = frac(coord(2));
+          // y = x*-2*b + y*0 + z/wi + w*b
+          coord(1) = coord | input_data->os2;
+          
+          if (m_float_extension == ARB_NV_FLOAT_BUFFER) {
+            coord(0,1) *= m_output_stride(2,2);
+            Statement stmt(out, tex, OP_TEXI, coord(0,1));
+            Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
+          }
+          else {
+            Statement stmt(out, tex, OP_TEX, coord(0,1));
+            Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
+          }
+        }
+      } SH_END_PROGRAM;
+      break;
       
-      *I = with_tc.node();
+    case OS_2D:
+      preamble = SH_BEGIN_PROGRAM(target) {
+        InputTexCoord2f DECL(streamcoord);
+
+        TexCoord2f DECL(index);
+        // (x, y) = ((x, y) - bias - offset) / stride
+        index = mad(streamcoord, m_output_offset(0,1), m_output_offset(2,3));
+        
+        Attrib2f DECL(stride);
+        // stride = index * size
+        stride = index * m_output_stride(0, 1);
+        Attrib4f DECL(disc);
+        disc = (frac(stride) - m_output_stride(2, 3))(0,1,0,1);
+        discard(disc);
+
+        InputList::iterator input_data = m_inputs[version].begin();
+        for (ProgramNode::VarList::const_iterator input = (*I)->begin_inputs();
+             input != (*I)->end_inputs(); ++input, ++input_data) {
+          Variable out((*input)->clone(SH_OUTPUT));
+          Variable tex(input_data->tex);
+          
+          TexCoord2f DECL(coord);
+          coord = mad(index, input_data->os1(0,1), input_data->os1(2,3));
+          
+          if (m_float_extension == ARB_NV_FLOAT_BUFFER) {
+            coord *= m_output_stride(0, 1);
+            Statement stmt(out, tex, OP_TEXI, coord);
+            Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
+          }
+          else {
+            Statement stmt(out, tex, OP_TEX, coord);
+            Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
+          }
+        }
+      } SH_END_PROGRAM;
+      break;
+         
+    default:
+      DEBUG_ASSERT(false);
+      break;
+      
     }
 
-    for (std::list<ProgramNodePtr>::iterator I = m_programs[i].begin(); 
-         I != m_programs[i].end(); ++I) {
-      m_program_sets[i].push_back(new ProgramSet(Program(vertex_program),
-                                                   Program(*I)));
-    }
+    Program prog = Program(*I) << preamble;
+    *I = prog.node();
   }
 
-  for (ChannelMap::iterator I = m_channel_map.begin(); I != m_channel_map.end(); ++I) {
-    ChannelNode* channel = I->first.object();
-    TextureNode* texture = I->second.tex_var.object();
-
-    DEBUG_ASSERT(channel);
-    DEBUG_ASSERT(texture);
-
-    texture->memory(channel->memory(), 0);
-    texture->setTexSize(tex_size, tex_size);
-    texture->count(channel->count());
+  for (std::list<ProgramNodePtr>::iterator I = m_programs[version].begin(); 
+       I != m_programs[version].end(); ++I) {
+    m_program_sets[version].push_back(new ProgramSet(Program(m_vertex_program),
+                                                     Program(*I)));
   }
 }
 
@@ -272,91 +235,148 @@ Info* StreamCache::clone() const
 //  return new FBOStreamCache(m_stream_program, m_vertex_program, m_max_outputs);
 }
 
-void StreamCache::update_destination(int dest_offset, int dest_stride)
+void StreamCache::update_destination(ProgramVersion version, const BaseTexture& tex,
+                                     int width, int height, int depth)
 {
-  if (m_float_extension == ARB_NV_FLOAT_BUFFER) {
-    float bias = 0.5;
-    float z = (float)dest_offset/m_tex_size/dest_stride/bias;
-    m_output_offset = Attrib4f(1.0/m_tex_size/dest_stride, 
-                                 1.0/dest_stride, z, bias);
-    m_output_stride = Attrib3f((float)m_tex_size, 
-                                 0.5/dest_stride, m_tex_size);
+  if ((version & ~SINGLE_OUTPUT) == OS_1D) {
+    int stride, offset;
+    tex.get_stride(&stride, 1);
+    tex.get_offset(&offset, 1);
+    if (m_float_extension == ARB_NV_FLOAT_BUFFER) {
+      float bias = 0.5;
+      float z = (float)offset/width/stride/bias;
+      m_output_offset = Attrib4f(1.0/width/stride, 1.0/stride, z, bias);
+      m_output_stride = Attrib4f((float)width, 0.5/stride, width, 0);
+    }
+    else {
+      float bias = 1.0/(2*width);
+      float z = (float)offset/width/stride/bias;
+      m_output_offset = Attrib4f(1.0/stride, (float)width/stride, z, bias);
+      m_output_stride = Attrib4f((float)width, 0.5/stride, width, 0);
+    }
   }
-  else {
-    float bias = 1.0/(2*m_tex_size);
-    float z = (float)dest_offset/m_tex_size/dest_stride/bias;
-    m_output_offset = Attrib4f(1.0/dest_stride, 
-                                 (float)m_tex_size/dest_stride, z, bias);
-    m_output_stride = Attrib3f((float)m_tex_size,
-                                 0.5/dest_stride, m_tex_size);
+  
+  if ((version & ~SINGLE_OUTPUT) == OS_2D) {
+    int stride[2], offset[2];
+    tex.get_stride(stride, 2);
+    tex.get_offset(offset, 2);
+    if (m_float_extension == ARB_NV_FLOAT_BUFFER) {
+      m_output_offset = Attrib4f(1/(float)stride[0], 1/(float)stride[1],
+                                   -(offset[0] + 0.5)/stride[0],
+                                   -(offset[1] + 0.5)/stride[1]);
+      m_output_stride = Attrib4f(width, height, 
+                                   0.5/stride[0], 0.5/stride[1]);
+    }
+    else {
+      m_output_offset = Attrib4f(1/(float)stride[0], 1/(float)stride[1],
+                                   -(offset[0] + 0.5)/width/stride[0],
+                                   -(offset[1] + 0.5)/height/stride[1]);
+      m_output_stride = Attrib4f(width, height,
+                                   0.5/stride[0], 0.5/stride[1]);
+    }
   }
 }
 
-void StreamCache::update_channels()
+void StreamCache::update_channels(ProgramVersion version, const Stream& stream)
 {
-  for (ChannelMap::iterator I = m_channel_map.begin(); I != m_channel_map.end(); ++I) {
-    ChannelNode* channel = I->first.object();
-    TextureNode* texture = I->second.tex_var.object();
+  if (m_program_sets[version].empty())
+    generate_programs(version);
 
-    DEBUG_ASSERT(channel);
-    DEBUG_ASSERT(texture);
+  DEBUG_ASSERT(stream.size() == m_inputs[version].size());
+  InputList::iterator I = m_inputs[version].begin();
+  Stream::const_iterator J = stream.begin();
+  for (; I != m_inputs[version].end(); ++I, ++J) {
+    I->tex->memory(J->node()->memory(0), 0);
     
-    // TODO: potentially increase the texture size
-    texture->memory(channel->memory(), 0);
+    if (J->node()->dims() == SH_TEXTURE_1D) {
+      int tex_size = 1;
+      while (tex_size * tex_size < J->node()->width())
+        tex_size <<= 1;
+      I->tex->setTexSize(tex_size, tex_size);
+    }
+    else {
+      I->tex->setTexSize(J->node()->width(), J->node()->height());
+    }
+    
+    if ((version & ~SINGLE_OUTPUT) == OS_1D) {
+      //
+      // See TexFetcher::operator() for explanation of the two
+      // offset/stride parameters
+      //
+      int stride, offset;
+      J->get_stride(&stride, 1);
+      J->get_offset(&offset, 1);
+      float os1_val[4];
+      float one_over_w = 1/(float)I->tex->width();
+      os1_val[0] = stride;
+      os1_val[1] = offset * one_over_w + one_over_w/2;
+      os1_val[2] = 0;
+      os1_val[3] = 1;
+      I->os1.setValues(os1_val);
 
-    Attrib4f os1(I->second.os1_var.object(), Swizzle(), false);
-    Attrib4f os2(I->second.os2_var.object(), Swizzle(), false);
-
-    //
-    // See TexFetcher::operator() for explanation of the two
-    // offset/stride parameters
-    //
-    float os1_val[4];
-    float one_over_w = 1/(float)m_tex_size;
-    os1_val[0] = (float)channel->stride();
-    os1_val[1] = channel->offset() * one_over_w + one_over_w/2;
-    os1_val[2] = 0;
-    os1_val[3] = 1;
-    os1.setValues(os1_val);
-
-    float os2_val[4];
-    os2_val[0] = -one_over_w;
-    os2_val[1] = 0;
-    os2_val[2] = one_over_w;
-    os2_val[3] = one_over_w/2;
-    os2.setValues(os2_val);
+      float os2_val[4];
+      os2_val[0] = -one_over_w;
+      os2_val[1] = 0;
+      os2_val[2] = one_over_w;
+      os2_val[3] = one_over_w/2;
+      I->os2.setValues(os2_val);
+    }
+    
+    if ((version & ~SINGLE_OUTPUT) == OS_2D) {
+      int stride[2], offset[2];
+      J->get_stride(stride, 2);
+      J->get_offset(offset, 2);
+      
+      float os_val[4];
+      os_val[0] = stride[0];
+      os_val[1] = stride[1];
+      os_val[2] = offset[0] + 0.5;
+      os_val[3] = offset[1] + 0.5;
+      if (m_float_extension != ARB_NV_FLOAT_BUFFER) {
+        os_val[2] /= J->node()->width();
+        os_val[3] /= J->node()->height();
+      }
+      I->os1.setValues(os_val);
+    } 
   }
 }
 
-void StreamCache::freeze_inputs(bool state)
+void StreamCache::freeze_inputs(ProgramVersion version, bool state)
 {
-  for (ChannelMap::iterator I = m_channel_map.begin(); I != m_channel_map.end(); ++I) {
-    I->second.tex_var->memory(0)->freeze(state);
+  if (m_program_sets[version].empty())
+    generate_programs(version);
+
+  for (InputList::iterator I = m_inputs[version].begin(); I != m_inputs[version].end(); ++I) {
+    I->tex->memory(0)->freeze(state);
   }
 }
 
-StreamCache::set_iterator StreamCache::sets_begin(SetType type)
+StreamCache::set_iterator StreamCache::sets_begin(ProgramVersion version)
 {
-  DEBUG_ASSERT(type >= NO_OFFSET_STRIDE && type <= SINGLE_OUTPUT);
-  return m_program_sets[type].begin();
+  DEBUG_ASSERT(version >= 0 && version < NUM_PROGRAM_VERSIONS);
+  DEBUG_ASSERT(!m_program_sets[version].empty());
+  return m_program_sets[version].begin();
 }
 
-StreamCache::set_iterator StreamCache::sets_end(SetType type)
+StreamCache::set_iterator StreamCache::sets_end(ProgramVersion version)
 {
-  DEBUG_ASSERT(type >= NO_OFFSET_STRIDE && type <= SINGLE_OUTPUT);
-  return m_program_sets[type].end();
+  DEBUG_ASSERT(version >= 0 && version < NUM_PROGRAM_VERSIONS);
+  DEBUG_ASSERT(!m_program_sets[version].empty());
+  return m_program_sets[version].end();
 }
 
-StreamCache::set_const_iterator StreamCache::sets_begin(SetType type) const
+StreamCache::set_const_iterator StreamCache::sets_begin(ProgramVersion version) const
 {
-  DEBUG_ASSERT(type >= NO_OFFSET_STRIDE && type <= SINGLE_OUTPUT);
-  return m_program_sets[type].begin();
+  DEBUG_ASSERT(version >= 0 && version < NUM_PROGRAM_VERSIONS);
+  DEBUG_ASSERT(!m_program_sets[version].empty());
+  return m_program_sets[version].begin();
 }
 
-StreamCache::set_const_iterator StreamCache::sets_end(SetType type) const
+StreamCache::set_const_iterator StreamCache::sets_end(ProgramVersion version) const
 {
-  DEBUG_ASSERT(type >= NO_OFFSET_STRIDE && type <= SINGLE_OUTPUT);
-  return m_program_sets[type].end();
+  DEBUG_ASSERT(version >= 0 && version < NUM_PROGRAM_VERSIONS);
+  DEBUG_ASSERT(!m_program_sets[version].empty());
+  return m_program_sets[version].end();
 }
 
 void split_program(ProgramNode* program,

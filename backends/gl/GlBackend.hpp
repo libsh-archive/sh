@@ -144,7 +144,7 @@ struct TextureStrategy {
 struct StreamStrategy {
   virtual ~StreamStrategy() {}
   virtual StreamStrategy* create() = 0;
-  virtual void execute(const SH::ProgramNodeCPtr& program, 
+  virtual void execute(const SH::Program& program, 
                        SH::Stream& dest,
                        TextureStrategy* texture) = 0;
 };
@@ -173,7 +173,7 @@ public:
   virtual void unbind_all_programs();
 
   // execute a stream program, if supported
-  virtual void execute(const SH::ProgramNodeCPtr& program, SH::Stream& dest);
+  virtual void execute(const SH::Program& program, SH::Stream& dest);
 
 protected:
   GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrategy* stream,

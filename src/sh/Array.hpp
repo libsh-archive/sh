@@ -48,12 +48,17 @@ public:
   Array1D()
     : BaseTexture1D<T>(ArrayTraits())
   {}
-  Array1D(int width)
-    : BaseTexture1D<T>(width, ArrayTraits())
-  {}
+  Array1D(int width);
+  Array1D(const MemoryPtr& mem, int width);
+  
   typedef ArrayRect<T> rectangular_type;
   typedef BaseTexture1D<T> base_type;
   typedef T return_type;
+  
+  Array1D& operator=(const Program& program);
+  
+  typename T::mem_type* read_data();
+  typename T::mem_type* write_data();
 };
 
 /** Two-dimensional square power-of-two array.
@@ -65,12 +70,17 @@ public:
   Array2D()
     : BaseTexture2D<T>(ArrayTraits())
   {}
-  Array2D(int width, int height)
-    : BaseTexture2D<T>(width, height, ArrayTraits())
-  {}
+  Array2D(int width, int height);
+  Array2D(const MemoryPtr& mem, int width, int height);
+
   typedef ArrayRect<T> rectangular_type;
   typedef BaseTexture2D<T> base_type;
   typedef T return_type;
+  
+  Array2D& operator=(const Program& program);
+
+  typename T::mem_type* read_data();
+  typename T::mem_type* write_data();
 };
 
 /** Two-dimensional non-square array.
@@ -82,12 +92,17 @@ public:
   ArrayRect()
     : BaseTextureRect<T>(ArrayTraits())
   {}
-  ArrayRect(int width, int height)
-    : BaseTextureRect<T>(width, height, ArrayTraits())
-  {}
+  ArrayRect(int width, int height);
+  ArrayRect(const MemoryPtr& mem, int width, int height);
+
   typedef ArrayRect<T> rectangular_type;
   typedef BaseTextureRect<T> base_type;
   typedef T return_type;
+  
+  ArrayRect& operator=(const Program& program);
+
+  typename T::mem_type* read_data();
+  typename T::mem_type* write_data();
 };
 
 /** Three-dimensional array.
@@ -99,12 +114,17 @@ public:
   Array3D()
     : BaseTexture3D<T>(ArrayTraits())
   {}
-  Array3D(int width, int height, int depth)
-    : BaseTexture3D<T>(width, height, depth, ArrayTraits())
-  {}
+  Array3D(int width, int height, int depth);
+  Array3D(const MemoryPtr& mem, int width, int height, int depth);
+
   typedef ArrayRect<T> rectangular_type;
   typedef BaseTexture3D<T> base_type;
   typedef T return_type;
+  
+  Array3D& operator=(const Program& program);
+
+  typename T::mem_type* read_data();
+  typename T::mem_type* write_data();
 };
 
 /** Cube array.
@@ -127,5 +147,7 @@ public:
 };
 
 }
+
+#include "ArrayImpl.hpp"
 
 #endif

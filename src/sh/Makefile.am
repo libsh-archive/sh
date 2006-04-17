@@ -130,9 +130,9 @@ libsh_la_SOURCES += Nibbles.hpp NibblesImpl.hpp
 libsh_la_SOURCES += FixedManipulator.hpp FixedManipulator.cpp
 
 # Streams
-libsh_la_SOURCES += ChannelNode.hpp ChannelNode.cpp
 libsh_la_SOURCES += Channel.hpp ChannelImpl.hpp
 libsh_la_SOURCES += Stream.hpp StreamImpl.hpp Stream.cpp
+libsh_la_SOURCES += LibStream.hpp LibStreamImpl.hpp
 
 # Palettes
 libsh_la_SOURCES += Palette.hpp PaletteImpl.hpp
@@ -183,7 +183,7 @@ incinc_HEADERS += Algebra.hpp Internals.hpp
 incinc_HEADERS += FixedManipulator.hpp
 incinc_HEADERS += Manipulator.hpp ManipulatorImpl.hpp
 incinc_HEADERS += Nibbles.hpp NibblesImpl.hpp
-incinc_HEADERS += ChannelNode.hpp Channel.hpp ChannelImpl.hpp
+incinc_HEADERS += Channel.hpp ChannelImpl.hpp
 incinc_HEADERS += Stream.hpp StreamImpl.hpp
 incinc_HEADERS += Quaternion.hpp QuaternionImpl.hpp
 incinc_HEADERS += TypeInfo.hpp TypeInfoImpl.hpp 

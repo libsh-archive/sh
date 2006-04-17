@@ -31,7 +31,6 @@
 #include "CtrlGraph.hpp"
 #include "TextureNode.hpp"
 #include "PaletteNode.hpp"
-#include "ChannelNode.hpp"
 #include "Meta.hpp"
 
 namespace SH {
@@ -132,7 +131,6 @@ public:
   typedef std::set<VariableNodePtr> VarSet;
   typedef std::list<VariableNodePtr> VarList;
   typedef std::list<TextureNodePtr> TexList;
-  typedef std::list<ChannelNodePtr> ChannelList;
   typedef std::list<PaletteNodePtr> PaletteList;
 
   VarList::const_iterator begin_inputs() const         { return inputs.begin(); }
@@ -149,8 +147,6 @@ public:
   VarList::const_iterator end_all_parameters() const   { return all_uniforms.end(); }
   TexList::const_iterator begin_textures() const       { return textures.begin(); }
   TexList::const_iterator end_textures() const         { return textures.end(); }
-  ChannelList::const_iterator begin_channels() const   { return channels.begin(); }
-  ChannelList::const_iterator end_channels() const     { return channels.end(); }
   PaletteList::const_iterator begin_palettes() const   { return palettes.begin(); }
   PaletteList::const_iterator end_palettes() const     { return palettes.end(); }
   
@@ -162,7 +158,6 @@ public:
   VarList uniforms; ///< Uniform variables used in the optimized program
   VarList all_uniforms; ///< All uniform variables including recursively dependent ones
   TexList textures; ///< Textures used in this program
-  ChannelList channels; ///< Channels used in FETCH instructions in this program
   PaletteList palettes; ///< Palettes used in PAL instructions in this program
 
   /** Return the name of the backend for which the program is

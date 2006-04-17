@@ -23,6 +23,7 @@
 #include <vector>
 #include "DllExport.hpp"
 #include "Program.hpp"
+#include "BaseTexture.hpp"
 
 namespace SH {
 

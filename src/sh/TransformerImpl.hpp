@@ -169,7 +169,6 @@ bool DefaultTransformer<T>::transform(const ProgramNodePtr& p) {
   T::handleVarList(p->uniforms, SH_TEMP);
 
   T::handleTexList(p->textures);
-  T::handleChannelList(p->channels);
   T::handlePaletteList(p->palettes);
 
   p->ctrlGraph->dfs(*this);

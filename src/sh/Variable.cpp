@@ -23,6 +23,7 @@
 #include "Debug.hpp"
 #include "Record.hpp"
 #include "Program.hpp"
+#include "BaseTexture.hpp"
 
 namespace SH {
 

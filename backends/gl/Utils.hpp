@@ -22,7 +22,6 @@
 
 #include <map>
 #include <list>
-#include "ChannelNode.hpp"
 #include "TextureNode.hpp"
 #include "CtrlGraph.hpp"
 #include "ProgramNode.hpp"
@@ -37,104 +36,59 @@ enum FloatExtension {
   ARB_NO_FLOAT_EXT
 };
 
-struct ChannelData {
-  ChannelData(SH::TextureNodePtr t, 
-              SH::VariableNodePtr o1,
-              SH::VariableNodePtr o2)
-    : tex_var(t), os1_var(o1), os2_var(o2) { }
-
-  SH::TextureNodePtr tex_var;
-  SH::VariableNodePtr os1_var, os2_var;
-};
-
-typedef std::map<SH::ChannelNodePtr, ChannelData> ChannelMap;
-
-// Find all the channels read by a given program. Make textures for them.
-struct ChannelGatherer {
-  ChannelGatherer(ChannelMap& channel_map, SH::TextureDims dims)
-    : channel_map(channel_map),
-      dims(dims)
-  {
-  }
-
-  // assignment operator could not be generated
-  ChannelGatherer& operator=(ChannelGatherer const&);
-
-  void operator()(const SH::CtrlGraphNode* node);
-  
-  ChannelMap& channel_map;
-  SH::TextureDims dims;
-};
-
-
-// Replace FETCH and LOOKUP operations with texture fetches
-// Run this after a pass with channelgatherer.
-class TexFetcher {
-public:
-  TexFetcher(ChannelMap& channel_map,
-             const SH::VariableNodePtr& tc_node,
-             bool indexed, bool os_calculation,
-             const SH::VariableNodePtr& tex_size_node,
-             const SH::ProgramNodePtr& program);
-
-  void operator()(SH::CtrlGraphNode* node);
-
-private:
-  // assignment operator could not be generated
-  TexFetcher& operator=(TexFetcher const&);
-
-  ChannelMap& channel_map;
-  SH::VariableNodePtr tc_node;
-  bool indexed, os_calculation;
-  SH::VariableNodePtr tex_size_node;
-  SH::ProgramNodePtr program;
-};
 
 class StreamCache : public SH::Info {
 public:
   StreamCache(SH::ProgramNode* stream_program,
               SH::ProgramNode* vertex_program,
-              int tex_size, int max_outputs, FloatExtension ext);
+              int max_outputs, FloatExtension ext);
 
   SH::Info* clone() const;
 
-  void update_channels();
-  void update_destination(int dest_offset, int dest_stride);
+  typedef int ProgramVersion;
+  static const int OS_NONE_2D           = 0x00;
+  static const int OS_NONE_3D           = 0x01;
+  static const int OS_1D                = 0x02;
+  static const int OS_2D                = 0x03;
+  static const int OS_3D                = 0x04;
+  static const int SINGLE_OUTPUT        = 0x08;
+  static const int NUM_PROGRAM_VERSIONS = 16;
 
-  void build_sets(SH::ProgramNode* vertex_program);
-  
-  void freeze_inputs(bool state);
+  void freeze_inputs(ProgramVersion version, bool state);
+  void update_channels(ProgramVersion version, const SH::Stream& stream);
+  void update_destination(ProgramVersion version, const SH::BaseTexture& tex,
+                          int width, int height, int depth);
 
   typedef std::list<SH::ProgramSetPtr>::iterator set_iterator;
   typedef std::list<SH::ProgramSetPtr>::const_iterator set_const_iterator;
   typedef std::list<SH::ProgramNodePtr>::iterator program_iterator;
   typedef std::list<SH::ProgramNodePtr>::const_iterator program_const_iterator;
 
-  enum SetType {
-    NO_OFFSET_STRIDE = 0,
-    FULL,
-    SINGLE_OUTPUT,
-    NUM_SET_TYPES
-  };
-
-  set_iterator sets_begin(SetType type);
-  set_iterator sets_end(SetType type);
-  set_const_iterator sets_begin(SetType type) const;
-  set_const_iterator sets_end(SetType type) const;
-
-  int tex_size() { return m_tex_size; }
+  set_iterator sets_begin(ProgramVersion version);
+  set_iterator sets_end(ProgramVersion version);
+  set_const_iterator sets_begin(ProgramVersion version) const;
+  set_const_iterator sets_end(ProgramVersion version) const;
 
 private:
+  void generate_programs(ProgramVersion version);
+  
+  struct InputData {
+    SH::TextureNodePtr tex;
+    SH::Attrib4f os1, os2;
+  };
+  typedef std::vector<InputData> InputList;
+
+  InputList m_inputs[NUM_PROGRAM_VERSIONS];
+  std::list<SH::ProgramNodePtr> m_programs[NUM_PROGRAM_VERSIONS];
+  std::list<SH::ProgramSetPtr> m_program_sets[NUM_PROGRAM_VERSIONS];
+
   SH::ProgramNode* m_stream_program;
   SH::ProgramNode* m_vertex_program;
-  ChannelMap m_channel_map;
-  std::list<SH::ProgramNodePtr> m_programs[NUM_SET_TYPES];
-  std::list<SH::ProgramSetPtr> m_program_sets[NUM_SET_TYPES];
-  int m_tex_size;
+
   int m_max_outputs;
   FloatExtension m_float_extension;
   SH::Attrib4f m_output_offset;
-  SH::Attrib3f m_output_stride;
+  SH::Attrib4f m_output_stride;
 
   StreamCache(const StreamCache& other);
   StreamCache& operator=(const StreamCache& other);
@@ -144,7 +98,7 @@ void split_program(SH::ProgramNode* program,
                    std::list<SH::ProgramNodePtr>& programs,
                    const std::string& target, int chunk_size);
 
-std::string get_target_backend(const SH::ProgramNodeCPtr &program);
+std::string get_target_backend(const SH::ProgramNodeCPtr& program);
 
 }
 

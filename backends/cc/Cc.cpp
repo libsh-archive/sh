@@ -262,11 +262,6 @@ void CcBackendCode::allocate_outputs(void)
   m_code << std::endl;
 }
 
-void CcBackendCode::allocate_channels(void) 
-{
-  allocate_varlist(m_program->channels, StreamPrefix, "channels", "const"); 
-}
-
 void CcBackendCode::allocate_textures(void) 
 {
   allocate_varlist(m_program->textures, TexturePrefix, "textures", "const"); 
@@ -439,7 +434,6 @@ bool CcBackendCode::generate(void)
   allocate_consts();
   allocate_inputs();
   allocate_outputs();
-  allocate_channels();
   allocate_textures();
   allocate_uniforms();
   allocate_temps();
@@ -631,7 +625,7 @@ void CcBackendCode::delete_temporary_files()
   }
 }
 
-bool CcBackendCode::execute(Stream& dest) 
+bool CcBackendCode::execute(const Stream& src, Stream& dest) 
 {
   if (!m_shader_func) {
     if (!generate()) {
@@ -641,36 +635,38 @@ bool CcBackendCode::execute(Stream& dest)
   }
 
   int num_outputs = dest.size();
-  int num_streams = m_program->channels.size();
+  int num_inputs = src.size();
   int num_textures = m_program->textures.size();
-  void** inputs = NULL;
+  void** inputs = new void*[num_inputs];
   void** outputs = new void*[num_outputs]; 
-  void** streams = new void*[num_streams];
+  void** streams = NULL;
   void** textures = new void*[num_textures];
   std::vector<int> output_sizes(num_outputs); // sizes of each output element in bytes 
   std::vector<int> output_types(num_outputs);
-  std::vector<int> stream_sizes(num_streams); // sizes of each stream element in bytes 
-  std::vector<int> stream_types(num_streams);
+  std::vector<int> input_sizes(num_inputs); // sizes of each stream element in bytes 
+  std::vector<int> input_types(num_inputs);
     
-  int sidx = 0;
+  int iidx = 0;
     
   CC_DEBUG_PRINT("Assigning input channels to arrays");
-  for(ProgramNode::ChannelList::const_iterator I = m_program->begin_channels()
-        ;I != m_program->end_channels(); ++I, ++sidx) {
-    ChannelNodePtr channel = (*I);
-    HostStoragePtr storage = shref_dynamic_cast<HostStorage>(channel->memory()->findStorage("host"));
-      
-    int datasize = typeInfo(channel->valueType(), MEM)->datasize();
-    stream_sizes[sidx] = datasize * channel->size() * channel->stride();
-    stream_types[sidx] = channel->valueType();
+  for(Stream::const_iterator I = src.begin(); I != src.end(); ++I, ++iidx) {
+    HostStoragePtr storage = shref_dynamic_cast<HostStorage>(I->node()->memory(0)->findStorage("host"));
+
+    int datasize = typeInfo(I->node()->valueType(), MEM)->datasize();
+    int stride, count, offset;
+    I->get_stride(&stride, 1);
+    I->get_count(&count, 1);
+    I->get_offset(&offset, 1);
+    input_sizes[iidx] = datasize * I->node()->size() * stride;
+    input_types[iidx] = I->node()->valueType();
 
     if (!storage) {
-      storage = new HostStorage(channel->memory().object(),
-				  datasize * channel->size() * channel->count(), channel->valueType());
+      storage = new HostStorage(I->node()->memory(0).object(),
+				  datasize * I->node()->size() * count, I->node()->valueType());
     }
-    storage->dirty();
-    streams[sidx] = reinterpret_cast<char*>(storage->data()) +
-                    datasize * channel->size() * channel->offset();
+//    storage->dirty();
+    inputs[iidx] = reinterpret_cast<char*>(storage->data()) +
+                    datasize * I->node()->size() * offset;
   }
 
   int tidx = 0;
@@ -688,52 +684,55 @@ bool CcBackendCode::execute(Stream& dest)
   // @todo code below is *exactly* the same as the code above for streams...
   // factor this out
   int oidx = 0;
-  int count = 0;
+  int dest_count = 0;
 
     
   CC_DEBUG_PRINT("Assigning output channels to arrays");
   for(Stream::NodeList::iterator I = dest.begin()
         ;I != dest.end(); ++I, ++oidx) {
-    ChannelNodePtr channel = (*I);
     HostStoragePtr storage = shref_dynamic_cast<HostStorage>(
-								 channel->memory()->findStorage("host"));
+								 I->node()->memory(0)->findStorage("host"));
 
-    int datasize = typeInfo(channel->valueType(), MEM)->datasize();
-    output_sizes[oidx] = datasize * channel->size() * channel->stride();
-    output_types[oidx] = channel->valueType();
+    int stride, count, offset;
+    I->get_stride(&stride, 1);
+    I->get_count(&count, 1);
+    I->get_offset(&offset, 1);
+
+    int datasize = typeInfo(I->node()->valueType(), MEM)->datasize();
+    output_sizes[oidx] = datasize * I->node()->size() * stride;
+    output_types[oidx] = I->node()->valueType();
 
     if (!storage) {
       CC_DEBUG_PRINT("  Allocating new storage?");
-      storage = new HostStorage(channel->memory().object(),
-				  datasize * channel->size() * channel->count(), channel->valueType());
+      storage = new HostStorage(I->node()->memory(0).object(),
+				  datasize * I->node()->size() * count, I->node()->valueType());
     }
     storage->dirty();
     outputs[oidx] = reinterpret_cast<char*>(storage->data()) +
-                    datasize * channel->size() * channel->offset();
+                    datasize * I->node()->size() * offset;
     CC_DEBUG_PRINT("  outputs[" << oidx << "] = " << outputs[oidx]);
 
-    if (count == 0) {
-      count = channel->count();
-    } else if (count != channel->count()) {
+    if (dest_count == 0) {
+      dest_count = count;
+    } else if (dest_count != count) {
       CC_DEBUG_PRINT("channel count discrepancy...");
       return false;
     }
   }
 
       
-  for(int i = 0; i < count; i++) {
-    CC_DEBUG_PRINT("execution " << i << " of " << count);
+  for(int i = 0; i < dest_count; i++) {
     m_shader_func(inputs, m_params, streams, textures, outputs);
 
-    for(int j = 0; j < num_streams; j++) {
+    for(int j = 0; j < num_inputs; j++) {
       CC_DEBUG_PRINT("advancing input stream "
 			<< j
 			<< " by "
-			<< stream_sizes[j] 
+			<< input_sizes[j] 
 			<< " bytes." );
       // @todo type - not sure if void pointers inc by 1 byte,
       // so cast
-      streams[j] = reinterpret_cast<char*>(streams[j]) + stream_sizes[j]; 
+      inputs[j] = reinterpret_cast<char*>(inputs[j]) + input_sizes[j]; 
     }
     for(int j = 0; j < num_outputs; j++) {
       CC_DEBUG_PRINT("advancing output stream "
@@ -769,15 +768,15 @@ BackendCodePtr CcBackend::generate_code(const std::string& target,
   return backendcode;
 }
 
-void CcBackend::execute(const ProgramNodeCPtr& program, Stream& dest) 
+void CcBackend::execute(const Program& program, Stream& dest) 
 {
   CC_DEBUG_PRINT(__FUNCTION__);
 
-  ProgramNodePtr prg = shref_const_cast<ProgramNode>(program);
+  ProgramNodePtr prg = shref_const_cast<ProgramNode>(program.node());
   Pointer<Backend> b(this);
     
   CcBackendCodePtr backendcode = shref_dynamic_cast<CcBackendCode>(prg->code(b)); // = new CcBackendCode(program);
-  backendcode->execute(dest);
+  backendcode->execute(program.stream_inputs(), dest);
   backendcode->delete_temporary_files();
 }
 

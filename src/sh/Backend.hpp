@@ -117,7 +117,7 @@ public:
   virtual BackendSetPtr generate_set(const ProgramSet& s);
   
   /** Execute a stream program, if supported */
-  virtual void execute(const ProgramNodeCPtr& program, Stream& dest) = 0;
+  virtual void execute(const Program& program, Stream& dest) = 0;
   
   /** Unbind all programs bound under the backend */
   virtual void unbind_all_programs();

@@ -23,12 +23,12 @@
 #include "DllExport.hpp"
 #include "ProgramNode.hpp"
 #include "Backend.hpp"
+#include "Stream.hpp"
 
 namespace SH {
 
-class Stream;
-template<typename T> class Channel;
 class Record;
+class BaseTexture;
 
 /** Thin wrapper around ProgramNode.
  */
@@ -143,46 +143,39 @@ public:
   ProgramNode::VarList::const_iterator end_all_parameters() const   { return m_node->end_all_parameters(); }
   ProgramNode::TexList::const_iterator begin_textures() const       { return m_node->begin_textures(); }
   ProgramNode::TexList::const_iterator end_textures() const         { return m_node->end_textures(); }
-  ProgramNode::ChannelList::const_iterator begin_channels() const   { return m_node->begin_channels(); }
-  ProgramNode::ChannelList::const_iterator end_channels() const     { return m_node->end_channels(); }
   ProgramNode::PaletteList::const_iterator begin_palettes() const   { return m_node->begin_palettes(); }
   ProgramNode::PaletteList::const_iterator end_palettes() const     { return m_node->end_palettes(); }
 
+  void append_input(const BaseTexture& input) { m_stream_inputs.append(input); }
+  const Stream& stream_inputs() const { return m_stream_inputs; }
+
   // Call operators for channels and streams.
   // Equivalent to operator<< invocations.
-  // Note that the template functions are implemented in
-  // ChannelImpl.hpp
-  template<typename T0>
-  Program operator()(const Channel<T0>& t0) const;
+  Program operator()(const BaseTexture& t0) const;
   Program operator()(const Stream& s0) const;
-  template<typename T0, typename T1>
-  Program operator()(const Channel<T0>& t0,
-                        const Channel<T1>& t1) const;
+  Program operator()(const BaseTexture& t0,
+                        const BaseTexture& t1) const;
   Program operator()(const Stream& s0,
                         const Stream& s1) const;
-  template<typename T0, typename T1, typename T2>
-  Program operator()(const Channel<T0>& t0,
-                        const Channel<T1>& t1,
-                        const Channel<T2>& t2) const;
+  Program operator()(const BaseTexture& t0,
+                        const BaseTexture& t1,
+                        const BaseTexture& t2) const;
   Program operator()(const Stream& s0,
                         const Stream& s1,
                         const Stream& s2) const;
-  template<typename T0, typename T1, typename T2, typename T3>
-  Program operator()(const Channel<T0>& t0,
-                        const Channel<T1>& t1,
-                        const Channel<T2>& t2,
-                        const Channel<T3>& t3) const;
+  Program operator()(const BaseTexture& t0,
+                        const BaseTexture& t1,
+                        const BaseTexture& t2,
+                        const BaseTexture& t3) const;
   Program operator()(const Stream& s0,
                         const Stream& s1,
                         const Stream& s2,
                         const Stream& s3) const;
-  template<typename T0, typename T1, typename T2, typename T3,
-           typename T4>
-  Program operator()(const Channel<T0>& t0,
-                        const Channel<T1>& t1,
-                        const Channel<T2>& t2,
-                        const Channel<T3>& t3,
-                        const Channel<T4>& t4) const;
+  Program operator()(const BaseTexture& t0,
+                        const BaseTexture& t1,
+                        const BaseTexture& t2,
+                        const BaseTexture& t3,
+                        const BaseTexture& t4) const;
   Program operator()(const Stream& s0,
                         const Stream& s1,
                         const Stream& s2,
@@ -204,7 +197,7 @@ public:
                        const Variable &v3) const;
   
 private:
-
+  Stream m_stream_inputs;
   ProgramNodePtr m_node;
 };
 

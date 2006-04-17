@@ -20,88 +20,52 @@
 #ifndef SHCHANNEL_HPP
 #define SHCHANNEL_HPP
 
-#include "ChannelNode.hpp"
-#include "Program.hpp"
-#include "Generic.hpp"
+#include "BaseTexture.hpp"
 
 namespace SH {
 
-/** The client interface to a single-channel typed data stream.
- * Really this hides an ChannelNode which is the true representation
- * of the channel.   The template argument is the element type stored.
- * @todo copy constructor, operator=(), etc.
- */
 template<typename T>
-class Channel : public MetaForwarder {
+class Channel
+  : public BaseTexture1D<T> {
 public:
-  /// Construct a channel without any associated memory.
-  Channel();
-  /// Construct a channel with a memory containing \a count elements
+  /// Construct a channel without any associated memory
+  Channel()
+    : BaseTexture1D<T>(ArrayTraits())
+  {}
+  /// Construct a channel with a mamory containing \a count elements
   Channel(int count);
   /// Construct a channel with \a count elements in \a memory
   Channel(const MemoryPtr& memory, int count);
 
-  /// Set this channel to use \a count elements in \a memory
-  void memory(const MemoryPtr& memory, int count);
+  Channel<T>& operator=(const Program& program);
 
-  /// Return the number of elements in this channel
+  /// Get the offset for this stream  
+  int offset() const;
+  /// Get the stride for this stream
+  int stride() const;
+  /// Get the number of elements in this stream
   int count() const;
-  /// Set the number of elements in this channel
-  void count(int c);
+  /// Set the offset for this stream
+  void offset(int offset);
+  /// Set the stride for this stream
+  void stride(int stride);
+  /// Set the number of elements in this stream
+  void count(int count);
+
   /// Return this channel's memory
-  Pointer<const Memory> memory() const;
+  MemoryCPtr memory() const;
   /// Return this channel's memory
   MemoryPtr memory();
-
-  /// Set the stride on the elements of this channel
-  void stride(int stride);
-  /// Set the offset on the elements of this channel
-  void offset(int offset);
-  
-  /// Fetch the stride for this stream
-  int stride();
-  /// Fetch the offset for this stream
-  int offset();
   
   /// Sync and return a pointer to the channel's host storage
-  typename T::mem_type* read_data();
-  /// Dirty and return a pointer to the channel's host storage
-  typename T::mem_type* write_data();
-
-  /// Fetch the current element from this stream.
-  /// This is only useful in stream programs
-  T operator()() const;
-
-  /// Indexed lookup from the stream
-  template<typename T2>
-  T operator[](const Generic<1, T2>& index) const;
-
-  /// Return the node internally wrapped by this channel object
-  ChannelNodePtr node();
-  /// Return the node internally wrapped by this channel object
-  const ChannelNodePtr node() const;
-
-  /// Execute fully bound single-output stream program and place result in channel.
-  Channel& operator=(const Program& program);
+  typename T::mem_type* read_data()
+  { return static_cast<typename T::mem_type*>(BaseTexture::read_data(0)); }
   
-private:
-  /// The node this object is a thin wrapper for
-  ChannelNodePtr m_node;
+  /// Dirty and return a pointer to the channel's host storage
+  typename T::mem_type* write_data()
+  { return static_cast<typename T::mem_type*>(BaseTexture::write_data(0)); }
 };
 
-/** Apply a programs to a single channel.
- * Bind a channel as an input to a program.   The implementation
- * supports currying, and returns a program with one less input.
- */
-template<typename T>
-Program connect(const Channel<T>& channel, const Program& program);
-
-/** Equivalent to connect(p,c). 
- * Bind a channel as an input to a program.   The implementation
- * supports currying, and returns a program with one less input.
- */
-template<typename T>
-Program operator<<(const Program& program, const Channel<T>& channel);
 
 }
 

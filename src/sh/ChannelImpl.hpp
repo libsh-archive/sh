@@ -17,185 +17,82 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHSTREAMIMPL_HPP
-#define SHSTREAMIMPL_HPP
-
-#include "Stream.hpp"
-#include "Debug.hpp"
-#include "Variable.hpp"
-#include "Context.hpp"
-#include "Program.hpp"
-#include "Syntax.hpp"
-#include "Statement.hpp"
-#include "Algebra.hpp"
-#include "Error.hpp"
-#include "Exception.hpp"
+#ifndef SHCHANNELIMPL_HPP
+#define SHCHANNELIMPL_HPP
 
 namespace SH {
 
-template<typename T>
-Channel<T>::Channel()
-  : MetaForwarder(0),
-    m_node(new ChannelNode(T::semantic_type, T::typesize, T::value_type))
+template <typename T>
+Channel<T>::Channel(int width)
+  : BaseTexture1D<T>(width, ArrayTraits())
 {
-  real_meta(m_node.object());
+  int size = width * T::typesize * sizeof(typename T::mem_type);
+  HostMemoryPtr mem = new HostMemory(size, T::value_type);
+  BaseTexture1D<T>::memory(mem);
 }
 
-template<typename T>
-Channel<T>::Channel(int count)
-  : MetaForwarder(0),
-    m_node(new ChannelNode(T::semantic_type, T::typesize, T::value_type))
+template <typename T>
+Channel<T>::Channel(const MemoryPtr& mem, int width)
+  : BaseTexture1D<T>(width, ArrayTraits())
 {
-  real_meta(m_node.object());
-  HostMemoryPtr mem = new HostMemory(count * T::typesize * sizeof(typename T::mem_type), T::value_type);
-  m_node->memory(mem, count);
+  BaseTexture1D<T>::memory(mem, 0);
 }
 
-template<typename T>
-Channel<T>::Channel(const MemoryPtr& memory, int count)
-  : MetaForwarder(0),
-    m_node(new ChannelNode(T::semantic_type, T::typesize, T::value_type, memory, count))
+template <typename T>
+int Channel<T>::offset() const
 {
-  real_meta(m_node.object());
+  int result;
+  BaseTexture1D<T>::m_node->get_offset(&result, 1);
+  return result;
 }
 
-template<typename T>
-void Channel<T>::memory(const MemoryPtr& memory, int count)
+template <typename T>
+int Channel<T>::stride() const
 {
-  m_node->memory(memory, count);
+  int result;
+  BaseTexture1D<T>::m_node->get_stride(&result, 1);
+  return result;
 }
 
-template<typename T>
+template <typename T>
 int Channel<T>::count() const
 {
-  return m_node->count();
+  int result;
+  BaseTexture1D<T>::m_node->get_count(&result, 1);
+  return result;
 }
 
-template<typename T>
-void Channel<T>::count(int count)
+template <typename T>
+void Channel<T>::offset(int o)
 {
-  m_node->count(count);
+  BaseTexture1D<T>::m_node->set_offset(&o, 1);
 }
 
-template<typename T>
-void Channel<T>::stride(int stride)
+template <typename T>
+void Channel<T>::stride(int s)
 {
-  m_node->stride(stride);
+  BaseTexture1D<T>::m_node->set_stride(&s, 1);
 }
 
-template<typename T>
-void Channel<T>::offset(int offset)
+template <typename T>
+void Channel<T>::count(int c)
 {
-  m_node->offset(offset);
+  BaseTexture1D<T>::m_node->set_count(&c, 1);
 }
 
-template<typename T>
-int Channel<T>::stride()
+template <typename T>
+MemoryCPtr Channel<T>::memory() const
 {
-  return m_node->stride();
+  return BaseTexture1D<T>::m_node->memory(0);
 }
 
-template<typename T>
-int Channel<T>::offset()
-{
-  return m_node->offset();
-}
-
-template<typename T>
+template <typename T>
 MemoryPtr Channel<T>::memory()
 {
-  return m_node->memory();
+  return BaseTexture1D<T>::m_node->memory(0);
 }
 
-template<typename T>
-Pointer<const Memory> Channel<T>::memory() const
-{
-  return m_node->memory();
-}
-
-template<typename T>
-ChannelNodePtr Channel<T>::node()
-{
-  return m_node;
-}
-
-template<typename T>
-const ChannelNodePtr Channel<T>::node() const
-{
-  return m_node;
-}
-
-template<typename T>
-typename T::mem_type* Channel<T>::read_data()
-{
-  StoragePtr storage = memory()->findStorage("host");
-  if (!storage) error(Exception("No host storage found"));
-  HostStoragePtr host_storage = shref_dynamic_cast<HostStorage>(storage);
-  DEBUG_ASSERT(host_storage);
-  host_storage->sync();
-  return static_cast<typename T::mem_type*>(host_storage->data());
-}
-
-template<typename T>
-typename T::mem_type* Channel<T>::write_data()
-{
-  StoragePtr storage = memory()->findStorage("host");
-  if (!storage) error(Exception("No host storage found"));
-  HostStoragePtr host_storage = shref_dynamic_cast<HostStorage>(storage);
-  DEBUG_ASSERT(host_storage);
-  host_storage->dirty();
-  return static_cast<typename T::mem_type*>(host_storage->data());
-}
-
-template<typename T>
-T Channel<T>::operator()() const
-{
-  // TODO: error() maybe instead.
-  if (!Context::current()->parsing()) error(ScopeException("Stream fetch outside program"));
-  
-  T t;
-  Variable streamVar(m_node);
-  Statement stmt(t, OP_FETCH, streamVar);
-
-  Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
-  
-  return t;
-}
-
-template<typename T>
-template<typename T2>
-T Channel<T>::operator[](const Generic<1, T2>& index) const
-{
-  // TODO: error() maybe instead.
-  if (!Context::current()->parsing()) error(ScopeException("Indexed stream fetch outside program"));
-  
-  T t;
-  Variable streamVar(m_node);
-  Statement stmt(t, streamVar, OP_LOOKUP, index);
-
-  Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
-  
-  return t;
-}
-
-template<typename T>
-Program connect(const Channel<T>& stream,
-                  const Program& program)
-{
-  Program nibble = SH_BEGIN_PROGRAM() {
-    typename T::OutputType out = stream();
-  } SH_END_PROGRAM;
-  return connect(nibble, program);
-}
-
-template<typename T>
-Program operator<<(const Program& program,
-                     const Channel<T>& stream)
-{
-  return connect(stream, program);
-}
-
-template<typename T>
+template <typename T>
 Channel<T>& Channel<T>::operator=(const Program& program)
 {
   Stream stream(*this);
@@ -203,50 +100,6 @@ Channel<T>& Channel<T>::operator=(const Program& program)
   return *this;
 }
 
-// Put these here for dependency reasons, even though they are member
-// functions of Program
-template<typename T0>
-Program Program::operator()(const Channel<T0>& t0) const
-{
-  return (*this) << t0;
 }
-
-template<typename T0, typename T1>
-Program Program::operator()(const Channel<T0>& t0,
-                                 const Channel<T1>& t1) const
-{
-  return (*this) << t0 << t1;
-}
-
-template<typename T0, typename T1, typename T2>
-Program Program::operator()(const Channel<T0>& t0,
-                                 const Channel<T1>& t1,
-                                 const Channel<T2>& t2) const
-{
-  return (*this) << t0 << t1 << t2;
-}
-
-template<typename T0, typename T1, typename T2, typename T3>
-Program Program::operator()(const Channel<T0>& t0,
-                                 const Channel<T1>& t1,
-                                 const Channel<T2>& t2,
-                                 const Channel<T3>& t3) const
-{
-  return (*this) << t0 << t1 << t2 << t3;
-}
-
-template<typename T0, typename T1, typename T2, typename T3,
-         typename T4>
-Program Program::operator()(const Channel<T0>& t0,
-                                 const Channel<T1>& t1,
-                                 const Channel<T2>& t2,
-                                 const Channel<T3>& t3,
-                                 const Channel<T4>& t4) const
-{
-  return (*this) << t0 << t1 << t2 << t3 << t4;
-}
-
-}
-
 
 #endif

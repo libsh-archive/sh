@@ -47,7 +47,30 @@ public:
   /// Obtain access to the node that this texture refers to
   const TextureNodePtr & node() const { return m_node; }
 
+  /// Get the count for n dimensions
+  void get_count(int* count, int n) const;
+  /// Get the stride for n dimensions
+  void get_stride(int* stride, int n) const;
+  /// Get the offset for n dimensions
+  void get_offset(int* offset, int n) const;
+  /// Get the repeat for n dimensions
+  void get_repeat(int* repeat, int n) const;
+  /// Set the count for n dimensions
+  void set_count(const int* count, int n);
+  /// Set the stride for n dimensions
+  void set_stride(const int* count, int n);
+  /// Set the offset for n dimensions
+  void set_offset(const int* offset, int n);
+  /// Set the repeat for n dimensions
+  void set_repeat(const int* repeat, int n);
+  
+  /// Sync and return a pointer to memory \a n
+  void* read_data(int n);
+  /// Dirty and return a pointer to memory \a n
+  void* write_data(int n);
+
 protected:
+  int m_count[3], m_stride[3], m_offset[3], m_repeat[3];
   TextureNodePtr m_node;
 };
 

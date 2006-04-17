@@ -20,6 +20,7 @@
 #include "Context.hpp"
 #include "Debug.hpp"
 #include "TypeInfo.hpp"
+#include "BaseTexture.hpp"
 #include "binreloc.h"
 
 namespace SH {

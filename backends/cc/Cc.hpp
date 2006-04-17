@@ -80,7 +80,7 @@ public:
 protected:
   friend class CcBackend;
   bool generate(void);
-  bool execute(SH::Stream& dest);
+  bool execute(const SH::Stream& src, SH::Stream& dest);
 
 private:
 
@@ -102,7 +102,6 @@ private:
   void allocate_consts(void);
   void allocate_inputs(void);
   void allocate_outputs(void);
-  void allocate_channels(void);
   void allocate_textures(void);
   void allocate_uniforms(void);
   void allocate_temps(void);
@@ -188,7 +187,7 @@ public:
   SH::BackendCodePtr generate_code(const std::string& target,
 				     const SH::ProgramNodeCPtr& program);
   
-  void execute(const SH::ProgramNodeCPtr& program, SH::Stream& dest);
+  void execute(const SH::Program& program, SH::Stream& dest);
 };
 
 

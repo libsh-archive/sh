@@ -440,7 +440,7 @@ void GlBackend::unbind_all_programs()
   }
 }
 
-void GlBackend::execute(const SH::ProgramNodeCPtr& program, SH::Stream& dest)
+void GlBackend::execute(const SH::Program& program, SH::Stream& dest)
 {
   m_stream->execute(program, dest, m_texture);
 }

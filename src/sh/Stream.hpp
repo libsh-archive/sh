@@ -22,10 +22,10 @@
 
 #include <list>
 #include "DllExport.hpp"
-#include "Channel.hpp"
-#include "ChannelNode.hpp"
 
 namespace SH {
+
+class BaseTexture;
 
 /** Dynamic list of channels.
  * The stream keep track (by reference) of an ordered lists of 
@@ -35,29 +35,23 @@ namespace SH {
 class
 SH_DLLEXPORT Stream {
 public:
-  typedef std::list<ChannelNodePtr> NodeList;
+  typedef std::list<BaseTexture> NodeList;
   typedef NodeList::iterator iterator;
   typedef NodeList::const_iterator const_iterator;
+  typedef NodeList::size_type size_type;
 
   Stream();
-  Stream(const ChannelNodePtr& node);
-  
-  template<typename T>
-  Stream(const Channel<T>& channel);
+  Stream(const BaseTexture& array);
 
   const_iterator begin() const;
   const_iterator end() const;
   iterator begin();
   iterator end();
-  int size() const;
+  size_type size() const;
 
-  template<typename T>
-  void append(const Channel<T>& channel);
-  template<typename T>
-  void prepend(const Channel<T>& channel);
+  void append(const BaseTexture& array);
+  void prepend(const BaseTexture& array);
 
-  void append(const ChannelNodePtr& node);
-  void prepend(const ChannelNodePtr& node);
   // Execute fully bound stream program and place results in stream.
   Stream& operator=(const Program& program);
   
@@ -68,40 +62,40 @@ private:
 /** Combine two streams.
  * This concatenates the list of channels in the component streams.
  */
-template<typename T1, typename T2>
-Stream combine(const Channel<T1>& left, const Channel<T2>& right);
+SH_DLLEXPORT
+Stream combine(const BaseTexture& left, const BaseTexture& right);
 
 /** Combine a stream and a channel.
  * This concatenates the given channel to the end of the list of
  * channels in the stream.
  */
-template<typename T2>
-Stream combine(const Stream& left, const Channel<T2>& right);
+SH_DLLEXPORT
+Stream combine(const Stream& left, const BaseTexture& right);
 
 /** Combine a channel and a stream.
  * This concatenates the given channel to the start of the list of
  * channels in the stream.
  */
-template<typename T1>
-Stream combine(const Channel<T1>& left, const Stream& right);
+SH_DLLEXPORT
+Stream combine(const BaseTexture& left, const Stream& right);
 
 SH_DLLEXPORT
 Stream combine(const Stream& left, const Stream& right);
 
 /** An operator alias for combine between channels.
  */
-template<typename T1, typename T2>
-Stream operator&(const Channel<T1>& left, const Channel<T2>& right);
+SH_DLLEXPORT
+Stream operator&(const BaseTexture& left, const BaseTexture& right);
 
 /** An operator alias for combine between a stream and a channel.
  */
-template<typename T2>
-Stream operator&(const Stream& left, const Channel<T2>& right);
+SH_DLLEXPORT
+Stream operator&(const Stream& left, const BaseTexture& right);
 
 /** An operator alias for combine between a channel and a stream.
  */
-template<typename T1>
-Stream operator&(const Channel<T1>& left, const Stream& right);
+SH_DLLEXPORT
+Stream operator&(const BaseTexture& left, const Stream& right);
 
 /** An operator alias for combine between two streams.
  */
@@ -120,9 +114,12 @@ Program connect(const Stream& stream, const Program& program);
 SH_DLLEXPORT
 Program operator<<(const Program& program, const Stream& stream);
 
+SH_DLLEXPORT
+Program connect(const BaseTexture& array, const Program& program);
+
+SH_DLLEXPORT
+Program operator<<(const Program& program, const BaseTexture& array);
 
 }
-
-#include "StreamImpl.hpp"
 
 #endif

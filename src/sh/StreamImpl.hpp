@@ -20,71 +20,24 @@
 #ifndef SHSTREAMLISTIMPL_HPP
 #define SHSTREAMLISTIMPL_HPP
 
-#include "Stream.hpp"
-#include "Channel.hpp"
-
 namespace SH {
 
-template<typename T>
-Stream::Stream(const Channel<T>& channel)
+template <typename T>
+Stream::Stream(const Array1D<T>& array)
 {
-  m_nodes.push_back(channel.node());
+  append(array.node());
 }
 
-template<typename T>
-void Stream::append(const Channel<T>& channel)
+template <typename T>
+Stream::Stream(const Array2D<T>& array)
 {
-  m_nodes.push_back(channel.node());
+  append(array.node());
 }
 
-template<typename T>
-void Stream::prepend(const Channel<T>& channel)
+template <typename T>
+Stream::Stream(const Array3D<T>& array)
 {
-  m_nodes.push_front(channel.node());
-}
-
-// Ways to form a combined stream
-template<typename T1, typename T2>
-Stream combine(const Channel<T1>& left, const Channel<T2>& right)
-{
-  Stream stream(left);
-  stream.append(right);
-  return stream;
-}
-
-template<typename T2>
-Stream combine(const Stream& left, const Channel<T2>& right)
-{
-  Stream stream = left;
-  stream.append(right);
-  return stream;
-}
-
-template<typename T1>
-Stream combine(const Channel<T1>& left, const Stream& right)
-{
-  Stream stream = right;
-  stream.prepend(left);
-  return stream;
-}
-
-// Aliases for combine
-template<typename T1, typename T2>
-Stream operator&(const Channel<T1>& left, const Channel<T2>& right)
-{
-  return combine(left, right);
-}
-
-template<typename T2>
-Stream operator&(const Stream& left, const Channel<T2>& right)
-{
-  return combine(left, right);
-}
-
-template<typename T1>
-Stream operator&(const Channel<T1>& left, const Stream& right)
-{
-  return combine(left, right);
+  append(array.node());
 }
 
 }

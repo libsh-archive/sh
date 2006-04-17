@@ -22,6 +22,7 @@
 #include "Stream.hpp"
 #include "Record.hpp"
 #include "Algebra.hpp"
+#include "BaseTexture.hpp"
 
 namespace SH {
 
@@ -40,6 +41,7 @@ Program::Program(const std::string& target)
 
 Program::Program(const Program& other)
   : MetaForwarder(other.m_node.object()),
+    m_stream_inputs(other.m_stream_inputs),
     m_node(other.m_node)
 {
 }
@@ -53,6 +55,7 @@ Program::Program(const ProgramNodePtr& node)
 Program& Program::operator=(const Program& other)
 {
   m_node = other.m_node;
+  m_stream_inputs = other.m_stream_inputs;
   real_meta(m_node.object());
   return *this;
 }
@@ -93,6 +96,43 @@ Program Program::operator()(const Stream& s0,
 {
   return (*this) << s0 << s1 << s2 << s3 << s4;
 }
+
+
+Program Program::operator()(const BaseTexture& s0) const
+{
+  return (*this) << s0;
+}
+
+Program Program::operator()(const BaseTexture& s0,
+                                 const BaseTexture& s1) const
+{
+  return (*this) << s0 << s1;
+}
+
+Program Program::operator()(const BaseTexture& s0,
+                                 const BaseTexture& s1,
+                                 const BaseTexture& s2) const
+{
+  return (*this) << s0 << s1 << s2;
+}
+
+Program Program::operator()(const BaseTexture& s0,
+                                 const BaseTexture& s1,
+                                 const BaseTexture& s2,
+                                 const BaseTexture& s3) const
+{
+  return (*this) << s0 << s1 << s2 << s3;
+}
+
+Program Program::operator()(const BaseTexture& s0,
+                                 const BaseTexture& s1,
+                                 const BaseTexture& s2,
+                                 const BaseTexture& s3,
+                                 const BaseTexture& s4) const
+{
+  return (*this) << s0 << s1 << s2 << s3 << s4;
+}
+
 
 Program Program::operator()(const Record &rec) const 
 {

@@ -29,6 +29,7 @@
 #include "Instructions.hpp"
 #include "Eval.hpp"
 #include "Transformer.hpp"
+#include "BaseTexture.hpp"
 
 // #define DEBUG_TYPECONVERT
 

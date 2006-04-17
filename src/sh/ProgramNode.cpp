@@ -27,7 +27,6 @@
 #include "Debug.hpp"
 #include "TextureNode.hpp"
 #include "PaletteNode.hpp"
-#include "ChannelNode.hpp"
 #include "CtrlGraph.hpp"
 #include "Error.hpp"
 
@@ -48,15 +47,6 @@ std::string describe(const ProgramNode::TexList &texlist)
 {
   std::ostringstream os;
   for (ProgramNode::TexList::const_iterator I = texlist.begin(); I != texlist.end(); ++I) {
-    os << "  " << (*I)->nameOfType() << " " << (*I)->name() << std::endl;
-  }
-  return os.str();
-}
-
-std::string describe(const ProgramNode::ChannelList& chanlist)
-{
-  std::ostringstream os;
-  for (ProgramNode::ChannelList::const_iterator I = chanlist.begin(); I != chanlist.end(); ++I) {
     os << "  " << (*I)->nameOfType() << " " << (*I)->name() << std::endl;
   }
   return os.str();
@@ -172,8 +162,6 @@ std::string ProgramNode::describe_interface() const
   os << describe(inputs) << std::endl;
   os << "Outputs:" << std::endl;
   os << describe(outputs) << std::endl;
-  os << "Channels:" << std::endl;
-  os << describe(channels) << std::endl;
   os << "Uniforms:" << std::endl;
   os << describe(all_uniforms) << std::endl;
   os << "Arrays:" << std::endl;
@@ -265,7 +253,6 @@ void ProgramNode::collectVariables()
   all_uniforms.clear();
   constants.clear();
   textures.clear();
-  channels.clear();
   palettes.clear();
   if (ctrlGraph->entry()) {
     ctrlGraph->entry()->clearMarked();
@@ -394,11 +381,6 @@ void ProgramNode::collect_var(const VariableNodePtr& var)
       textures.push_back(shref_dynamic_cast<TextureNode>(var));
     }    
     break;
-  case SH_STREAM:
-    if (std::find(channels.begin(), channels.end(),
-                  shref_dynamic_cast<ChannelNode>(var)) == channels.end()) {
-      channels.push_back(shref_dynamic_cast<ChannelNode>(var));
-    }
   case SH_PALETTE:
     if (std::find(palettes.begin(), palettes.end(),
                   shref_dynamic_cast<PaletteNode>(var)) == palettes.end()) {

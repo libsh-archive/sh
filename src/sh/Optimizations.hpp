@@ -27,6 +27,7 @@
 #include "Program.hpp"
 #include "Info.hpp"
 #include "Statement.hpp"
+#include "BaseTexture.hpp"
 
 // Uncomment this to turn on optimizer debugging using dot.
 // Warning: This is very verbose!

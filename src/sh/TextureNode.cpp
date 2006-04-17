@@ -30,9 +30,9 @@ using namespace std;
 TextureNode::TextureNode(TextureDims dims, int size,
                              ValueType valueType,
                              const TextureTraits& traits,
-                             int width, int height, int depth, int max_nb_elements)
-  : VariableNode(SH_TEXTURE, size, valueType), m_count(max_nb_elements),
-    m_dims(dims), m_nb_memories(SH_TEXTURE_CUBE == dims ? 6 : 1), m_mipmap_levels(1), m_traits(traits),
+                             int width, int height, int depth)
+  : VariableNode(SH_TEXTURE, size, valueType), m_dims(dims),
+    m_nb_memories(SH_TEXTURE_CUBE == dims ? 6 : 1), m_mipmap_levels(1), m_traits(traits),
     m_width(width), m_height(height), m_depth(depth), m_old_filtering(traits.filtering())
 {
   Context::current()->enter(0); // need m_texSizeVar to be uniform
@@ -239,16 +239,6 @@ int TextureNode::height() const
 int TextureNode::depth() const
 {
   return m_depth;
-}
-
-int TextureNode::count() const
-{
-  return (m_count != -1) ? m_count : m_width * m_height * m_depth;
-}
-
-void TextureNode::count(int n)
-{
-  m_count = n;
 }
 
 const Variable& TextureNode::texSizeVar() const
