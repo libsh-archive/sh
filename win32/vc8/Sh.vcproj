@@ -228,10 +228,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\sh\ChannelNode.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\sh\ConcreteCTypeOp.cpp"
 				>
 			</File>
@@ -428,6 +424,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\sh\ArrayImpl.hpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\sh\Attrib.hpp"
 				>
 			</File>
@@ -444,7 +444,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\sh\BaseTextureImpl.hpp"
+				RelativePath="..\..\src\sh\BaseTextureND.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\sh\BaseTextureNDImpl.hpp"
 				>
 			</File>
 			<File
@@ -477,10 +481,6 @@
 			</File>
 			<File
 				RelativePath="..\..\src\sh\ChannelImpl.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\sh\ChannelNode.hpp"
 				>
 			</File>
 			<File
@@ -709,6 +709,14 @@
 			</File>
 			<File
 				RelativePath="..\..\src\sh\LibSplinesImpl.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\sh\LibStream.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\sh\LibStreamImpl.hpp"
 				>
 			</File>
 			<File
