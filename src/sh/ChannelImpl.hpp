@@ -42,7 +42,7 @@ template <typename T>
 int Channel<T>::offset() const
 {
   int result;
-  BaseTexture1D<T>::m_node->get_offset(&result, 1);
+  BaseTexture::get_offset(&result, 1);
   return result;
 }
 
@@ -50,7 +50,7 @@ template <typename T>
 int Channel<T>::stride() const
 {
   int result;
-  BaseTexture1D<T>::m_node->get_stride(&result, 1);
+  BaseTexture::get_stride(&result, 1);
   return result;
 }
 
@@ -58,26 +58,26 @@ template <typename T>
 int Channel<T>::count() const
 {
   int result;
-  BaseTexture1D<T>::m_node->get_count(&result, 1);
+  BaseTexture::get_count(&result, 1);
   return result;
 }
 
 template <typename T>
 void Channel<T>::offset(int o)
 {
-  BaseTexture1D<T>::m_node->set_offset(&o, 1);
+  BaseTexture::set_offset(&o, 1);
 }
 
 template <typename T>
 void Channel<T>::stride(int s)
 {
-  BaseTexture1D<T>::m_node->set_stride(&s, 1);
+  BaseTexture::set_stride(&s, 1);
 }
 
 template <typename T>
 void Channel<T>::count(int c)
 {
-  BaseTexture1D<T>::m_node->set_count(&c, 1);
+  BaseTexture::set_count(&c, 1);
 }
 
 template <typename T>
@@ -90,6 +90,13 @@ template <typename T>
 MemoryPtr Channel<T>::memory()
 {
   return BaseTexture1D<T>::m_node->memory(0);
+}
+
+template <typename T>
+void Channel<T>::memory(const MemoryPtr& memory, int c)
+{
+  BaseTexture1D<T>::memory(memory);
+  count(c);
 }
 
 template <typename T>

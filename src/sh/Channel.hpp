@@ -56,6 +56,8 @@ public:
   MemoryCPtr memory() const;
   /// Return this channel's memory
   MemoryPtr memory();
+  /// Set this channel to use \a count elements in \a memory
+  void memory(const MemoryPtr& memory, int count);
   
   /// Sync and return a pointer to the channel's host storage
   typename T::mem_type* read_data()
