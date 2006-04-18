@@ -54,6 +54,9 @@ StreamCache::StreamCache(ProgramNode* stream_program,
 
 void StreamCache::generate_programs(ProgramVersion version)
 {
+  if (!m_program_sets[version].empty())
+    return;
+
   TextureDims dims = SH_TEXTURE_2D;
   
   switch (version & ~SINGLE_OUTPUT) {
@@ -131,13 +134,15 @@ void StreamCache::generate_programs(ProgramVersion version)
         Attrib4f DECL(index);
         // index = (x - bias, y - bias, -bias, 1-bias)
         index = streamcoord - m_output_offset(3,3,3,3);
-        // z = (x + y*width + z*dest_offset/bias)/dest_stride
+        // z = (x + y*width + z*dest_offset/bias)/dest_stride/height
         index(2) = index(0,1,2) | m_output_offset(0,1,2);
 
         Attrib1f DECL(stride);
-        // stride = z*width
-        stride = index(2) * m_output_stride(0);
-        discard(frac(stride) - m_output_stride(1));
+        // bias = 1/2 * 1/stride
+        // stride = z*width*height + bias
+        stride = mad(index(2), m_output_stride(0), m_output_stride(1));
+        // if (stride - 2*bias < 0) discard
+        discard(frac(stride) - m_output_stride(2));
 
         InputList::iterator input_data = m_inputs[version].begin();
         for (ProgramNode::VarList::const_iterator input = (*I)->begin_inputs();
@@ -162,7 +167,7 @@ void StreamCache::generate_programs(ProgramVersion version)
           coord(1) = coord | input_data->os2;
           
           if (m_float_extension == ARB_NV_FLOAT_BUFFER) {
-            coord(0,1) *= m_output_stride(2,2);
+            coord(0,1) *= m_output_stride(3, 3);
             Statement stmt(out, tex, OP_TEXI, coord(0,1));
             Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
           }
@@ -235,56 +240,17 @@ Info* StreamCache::clone() const
 //  return new FBOStreamCache(m_stream_program, m_vertex_program, m_max_outputs);
 }
 
-void StreamCache::update_destination(ProgramVersion version, const BaseTexture& tex,
-                                     int width, int height, int depth)
-{
-  if ((version & ~SINGLE_OUTPUT) == OS_1D) {
-    int stride, offset;
-    tex.get_stride(&stride, 1);
-    tex.get_offset(&offset, 1);
-    if (m_float_extension == ARB_NV_FLOAT_BUFFER) {
-      float bias = 0.5;
-      float z = (float)offset/width/stride/bias;
-      m_output_offset = Attrib4f(1.0/width/stride, 1.0/stride, z, bias);
-      m_output_stride = Attrib4f((float)width, 0.5/stride, width, 0);
-    }
-    else {
-      float bias = 1.0/(2*width);
-      float z = (float)offset/width/stride/bias;
-      m_output_offset = Attrib4f(1.0/stride, (float)width/stride, z, bias);
-      m_output_stride = Attrib4f((float)width, 0.5/stride, width, 0);
-    }
-  }
-  
-  if ((version & ~SINGLE_OUTPUT) == OS_2D) {
-    int stride[2], offset[2];
-    tex.get_stride(stride, 2);
-    tex.get_offset(offset, 2);
-    if (m_float_extension == ARB_NV_FLOAT_BUFFER) {
-      m_output_offset = Attrib4f(1/(float)stride[0], 1/(float)stride[1],
-                                   -(offset[0] + 0.5)/stride[0],
-                                   -(offset[1] + 0.5)/stride[1]);
-      m_output_stride = Attrib4f(width, height, 
-                                   0.5/stride[0], 0.5/stride[1]);
-    }
-    else {
-      m_output_offset = Attrib4f(1/(float)stride[0], 1/(float)stride[1],
-                                   -(offset[0] + 0.5)/width/stride[0],
-                                   -(offset[1] + 0.5)/height/stride[1]);
-      m_output_stride = Attrib4f(width, height,
-                                   0.5/stride[0], 0.5/stride[1]);
-    }
-  }
-}
-
-void StreamCache::update_channels(ProgramVersion version, const Stream& stream)
+void StreamCache::update_channels(ProgramVersion version, 
+                                  const Stream& input_stream,
+                                  const BaseTexture& dest_tex,
+                                  int width, int height, int depth)
 {
   if (m_program_sets[version].empty())
     generate_programs(version);
 
   DEBUG_ASSERT(stream.size() == m_inputs[version].size());
   InputList::iterator I = m_inputs[version].begin();
-  Stream::const_iterator J = stream.begin();
+  Stream::const_iterator J = input_stream.begin();
   for (; I != m_inputs[version].end(); ++I, ++J) {
     I->tex->memory(J->node()->memory(0), 0);
     
@@ -308,7 +274,7 @@ void StreamCache::update_channels(ProgramVersion version, const Stream& stream)
       J->get_offset(&offset, 1);
       float os1_val[4];
       float one_over_w = 1/(float)I->tex->width();
-      os1_val[0] = stride;
+      os1_val[0] = stride*(width * height)*one_over_w;
       os1_val[1] = offset * one_over_w + one_over_w/2;
       os1_val[2] = 0;
       os1_val[3] = 1;
@@ -339,15 +305,43 @@ void StreamCache::update_channels(ProgramVersion version, const Stream& stream)
       I->os1.setValues(os_val);
     } 
   }
-}
 
-void StreamCache::freeze_inputs(ProgramVersion version, bool state)
-{
-  if (m_program_sets[version].empty())
-    generate_programs(version);
-
-  for (InputList::iterator I = m_inputs[version].begin(); I != m_inputs[version].end(); ++I) {
-    I->tex->memory(0)->freeze(state);
+  if ((version & ~SINGLE_OUTPUT) == OS_1D) {
+    int stride, offset;
+    dest_tex.get_stride(&stride, 1);
+    dest_tex.get_offset(&offset, 1);
+    if (m_float_extension == ARB_NV_FLOAT_BUFFER) {
+      float bias = 0.5;
+      float z = (float)offset/width/height/stride/bias;
+      m_output_offset = Attrib4f(1.0/width/height/stride, 1.0/height/stride, z, bias);
+      m_output_stride = Attrib4f((float)width*height, 0.5/stride, 1.0/stride, width);
+    }
+    else {
+      float bias = 1.0/(2*width);
+      float z = (float)offset/width/height/stride/bias;
+      m_output_offset = Attrib4f(1.0/height/stride, (float)width/height/stride, z, bias);
+      m_output_stride = Attrib4f((float)width*height, 0.5/stride, 1.0/stride, width);
+    }
+  }
+  
+  if ((version & ~SINGLE_OUTPUT) == OS_2D) {
+    int stride[2], offset[2];
+    dest_tex.get_stride(stride, 2);
+    dest_tex.get_offset(offset, 2);
+    if (m_float_extension == ARB_NV_FLOAT_BUFFER) {
+      m_output_offset = Attrib4f(1/(float)stride[0], 1/(float)stride[1],
+                                   -(offset[0] + 0.5)/stride[0],
+                                   -(offset[1] + 0.5)/stride[1]);
+      m_output_stride = Attrib4f(width, height, 
+                                   0.5/stride[0], 0.5/stride[1]);
+    }
+    else {
+      m_output_offset = Attrib4f(1/(float)stride[0], 1/(float)stride[1],
+                                   -(offset[0] + 0.5)/width/stride[0],
+                                   -(offset[1] + 0.5)/height/stride[1]);
+      m_output_stride = Attrib4f(width, height,
+                                   0.5/stride[0], 0.5/stride[1]);
+    }
   }
 }
 

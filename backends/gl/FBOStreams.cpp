@@ -172,7 +172,7 @@ static void draw_1d_stream(int size, const BaseTexture& tex, bool indexed)
     int full_lines_end = (offset+count*stride) / size;
     int last_line_count = (offset+count*stride) % size;
     int first_line_start = offset % size;
-
+    
     if (first_line_start) {
       draw_rectangle(first_line_start, full_lines_start, 
                      size - first_line_start, 1, size, coords);
@@ -403,15 +403,19 @@ void FBOStreams::execute(const Program& program,
   if (program_version & StreamCache::SINGLE_OUTPUT)
     max_outputs = 1;
 
-  cache->update_channels(program_version, program.stream_inputs());
-  cache->freeze_inputs(program_version, true);
+  cache->generate_programs(program_version);
+
+  for (Stream::const_iterator I = program.stream_inputs().begin();
+       I != program.stream_inputs().end(); ++I) {
+    I->node()->memory(0)->freeze(true);
+  }
 
 #ifdef DEBUG_FBOS_PRINTTEX
   int num = 0;
   for (Stream::iterator I = dest.begin(); I != dest.end(); ++I, ++num) {
     std::cerr << "output " << num << " memory time " 
-              << (*I)->memory()->timestamp() << std::endl;
-    (*I)->memory()->findStorage("opengl:texture", PrintStorages());
+              << I->node()->memory(0)->timestamp() << std::endl;
+    I->node()->memory(0)->findStorage("opengl:texture", PrintStorages());
   }
   num = 0;
   for (ProgramNode::ChannelList::const_iterator I = program->begin_channels();
@@ -483,8 +487,8 @@ void FBOStreams::execute(const Program& program,
 
     FBOCache::instance()->check();
     
-    cache->update_destination(program_version, *dest_tex, 
-                              dest_width, dest_height, dest_depth);
+    cache->update_channels(program_version, program.stream_inputs(),
+                           *dest_tex, dest_width, dest_height, dest_depth);
 
 #ifdef DEBUG_FBOS_PRINTFP
     {
@@ -535,7 +539,10 @@ void FBOStreams::execute(const Program& program,
     } 
   }
   
-  cache->freeze_inputs(program_version, false);
+  for (Stream::const_iterator I = program.stream_inputs().begin();
+       I != program.stream_inputs().end(); ++I) {
+    I->node()->memory(0)->freeze(false);
+  }
 
   // Resetting the write flags needs to be done after all the passes
   for (Stream::iterator I = dest.begin(); I != dest.end(); ++I) {

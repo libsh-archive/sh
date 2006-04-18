@@ -54,10 +54,10 @@ public:
   static const int SINGLE_OUTPUT        = 0x08;
   static const int NUM_PROGRAM_VERSIONS = 16;
 
-  void freeze_inputs(ProgramVersion version, bool state);
-  void update_channels(ProgramVersion version, const SH::Stream& stream);
-  void update_destination(ProgramVersion version, const SH::BaseTexture& tex,
-                          int width, int height, int depth);
+  void generate_programs(ProgramVersion version);
+  void update_channels(ProgramVersion version, 
+                       const SH::Stream& stream, const SH::BaseTexture& tex,
+                       int width, int height, int depth);
 
   typedef std::list<SH::ProgramSetPtr>::iterator set_iterator;
   typedef std::list<SH::ProgramSetPtr>::const_iterator set_const_iterator;
@@ -70,7 +70,6 @@ public:
   set_const_iterator sets_end(ProgramVersion version) const;
 
 private:
-  void generate_programs(ProgramVersion version);
   
   struct InputData {
     SH::TextureNodePtr tex;

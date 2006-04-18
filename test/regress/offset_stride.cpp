@@ -2,12 +2,61 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <sstream>
 #include "test.hpp"
 
 #define ELEMENTS 16
 
 using namespace std;
 using namespace SH;
+
+void mismatch_test(int& total, int& errors)
+{
+  Program prg = SH_BEGIN_PROGRAM("stream") {
+    InputAttrib1f a;
+    OutputAttrib1f b;
+    b = a;
+  } SH_END;
+
+  vector<string> inputs;
+  inputs.push_back("in");
+  
+  const int big = 1024;
+  
+  Array1D<Attrib1f> in(big*big);
+  float* in_data = in.write_data();
+  for (int i = 0; i < big*big; ++i) {
+    in_data[i] = i;
+  }
+  
+  for (int i = 1; i <= big*big; i *= 3) {
+    Array1D<Attrib1f> out(i);
+    float* out_data = out.write_data();
+    for (int j = 0; j < i; ++j) {
+      out_data[j] = -1;
+    }
+    
+    out = prg << in;
+
+    float* result = out.read_data();
+    int first = -1, wrong = 0;
+    for (int j = 0; j < i; ++j) {
+      float diff = fabs(result[j] - j);
+      if (diff > 0.001) {
+        if (first == -1)
+          first = j;
+        ++wrong;
+      }
+    }
+    
+    if (wrong) {
+      cout << "Test \"mismatch " << i << " failed\"" << endl;
+      cout << "total errors " << wrong << " first at " << first << endl;
+      errors++;
+    }
+    total++;
+  }
+}
 
 void reset_memory(HostMemoryPtr mem)
 {
@@ -28,7 +77,7 @@ void reset_memories(HostMemoryPtr mem[], int n)
 int main(int argc, char* argv[])
 {
   int errors = 0;
-  int total_tests = 6;
+  int total_tests = 9;
 
   Test test(argc, argv);
   test.ignore_backend("host");
@@ -46,8 +95,8 @@ int main(int argc, char* argv[])
   }
 
   Array1D<Attrib1f> a(mem[0], ELEMENTS),
-                        b(mem[1], ELEMENTS),
-                        c(mem[2], ELEMENTS);
+                    b(mem[1], ELEMENTS),
+                    c(mem[2], ELEMENTS);
   vector<string> inputs;
   inputs.push_back("a"); inputs.push_back("b");
   
@@ -132,6 +181,8 @@ int main(int argc, char* argv[])
   if (test.output_result<float*>("2D stride", inputs, 
                      reinterpret_cast<float*>(mem[2]->hostStorage()->data()),
                      expected, 16, 0.001)) errors++;}
+
+  mismatch_test(total_tests, errors);
 
   if (errors !=0) {
     std::cout << "Total Errors: " << errors << "/" << total_tests << std::endl;
