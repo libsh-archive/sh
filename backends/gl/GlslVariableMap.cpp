@@ -89,10 +89,10 @@ GlslVariableMap::GlslVariableMap(ProgramNode* shader,
         GLint max_draw_buffers;
 #ifdef GL_ATI_draw_buffers
         if (extstr.find("ATI_draw_buffers") != string::npos) {
-          GL_CHECK_ERROR(glGetIntegerv(GL_MAX_DRAW_BUFFERS_ATI, &max_draw_buffers));
+          SH_GL_CHECK_ERROR(glGetIntegerv(GL_MAX_DRAW_BUFFERS_ATI, &max_draw_buffers));
         } else {
 #endif
-          GL_CHECK_ERROR(glGetIntegerv(GL_MAX_DRAW_BUFFERS_ARB, &max_draw_buffers));
+          SH_GL_CHECK_ERROR(glGetIntegerv(GL_MAX_DRAW_BUFFERS_ARB, &max_draw_buffers));
 #ifdef GL_ATI_draw_buffers
         }
 #endif

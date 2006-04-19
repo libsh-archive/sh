@@ -56,7 +56,7 @@ GlslCode::GlslCode(const ProgramNodeCPtr& shader, const std::string& unit,
 
   // Query the GL vendor string
   m_vendor = VENDOR_UNKNOWN;
-  const GLubyte* vendor = GL_CHECK_ERROR(glGetString(GL_VENDOR));
+  const GLubyte* vendor = SH_GL_CHECK_ERROR(glGetString(GL_VENDOR));
   if (vendor) {
     std::string s(reinterpret_cast<const char*>(vendor));
     if (s.find("NVIDIA") != s.npos) {
@@ -78,7 +78,7 @@ GlslCode::~GlslCode()
   if (m_arb_shader != 0) {
     // Shouldn't be bound, ever
     SH_DEBUG_ASSERT(!m_bound);
-    GL_CHECK_ERROR(glDeleteObjectARB(m_arb_shader));
+    SH_GL_CHECK_ERROR(glDeleteObjectARB(m_arb_shader));
   }
   delete m_varmap;
 }
@@ -173,8 +173,8 @@ void GlslCode::upload()
 
   const char* code_string = s.c_str();
   GLint code_len = s.size();
-  GL_CHECK_ERROR(glShaderSourceARB(m_arb_shader, 1, &code_string, &code_len));
-  GL_CHECK_ERROR(glCompileShaderARB(m_arb_shader));
+  SH_GL_CHECK_ERROR(glShaderSourceARB(m_arb_shader, 1, &code_string, &code_len));
+  SH_GL_CHECK_ERROR(glCompileShaderARB(m_arb_shader));
 
   // Check compilation
   GLint compiled;
@@ -213,7 +213,7 @@ void GlslCode::bind_generic_attributes(GLhandleARB glsl_program)
        i != m_shader->end_inputs(); i++) {
     const GlslVariable& var = m_varmap->variable(*i);
     if (var.attribute() >= 0) {
-      GL_CHECK_ERROR(glBindAttribLocationARB(glsl_program, var.attribute(), var.name().c_str()));
+      SH_GL_CHECK_ERROR(glBindAttribLocationARB(glsl_program, var.attribute(), var.name().c_str()));
     }
   }
 }
@@ -331,16 +331,16 @@ void GlslCode::update_float_uniform(const VariableNodePtr& node, const GLint loc
   // TODO: Create a GL_DEBUG_CHECK_ERROR that gets compiled out in release?
   switch (uniform_size) {
   case 1:    
-    GL_CHECK_ERROR(glUniform1fvARB(location, 1, values));
+    SH_GL_CHECK_ERROR(glUniform1fvARB(location, 1, values));
     break;
   case 2:
-    GL_CHECK_ERROR(glUniform2fvARB(location, 1, values));
+    SH_GL_CHECK_ERROR(glUniform2fvARB(location, 1, values));
     break;
   case 3:
-    GL_CHECK_ERROR(glUniform3fvARB(location, 1, values));
+    SH_GL_CHECK_ERROR(glUniform3fvARB(location, 1, values));
     break;
   case 4:
-    GL_CHECK_ERROR(glUniform4fvARB(location, 1, values));
+    SH_GL_CHECK_ERROR(glUniform4fvARB(location, 1, values));
     break;
   default:
     SH_DEBUG_ASSERT(0); // Unsupported size
@@ -371,16 +371,16 @@ void GlslCode::update_int_uniform(const VariableNodePtr& node, const GLint locat
   // TODO: Create a GL_DEBUG_CHECK_ERROR that gets compiled out in release?
   switch (uniform_size) {
   case 1:
-    GL_CHECK_ERROR(glUniform1ivARB(location, 1, values));
+    SH_GL_CHECK_ERROR(glUniform1ivARB(location, 1, values));
     break;
   case 2:
-    GL_CHECK_ERROR(glUniform2ivARB(location, 1, values));
+    SH_GL_CHECK_ERROR(glUniform2ivARB(location, 1, values));
     break;
   case 3:
-    GL_CHECK_ERROR(glUniform3ivARB(location, 1, values));
+    SH_GL_CHECK_ERROR(glUniform3ivARB(location, 1, values));
     break;
   case 4:
-    GL_CHECK_ERROR(glUniform4ivARB(location, 1, values));
+    SH_GL_CHECK_ERROR(glUniform4ivARB(location, 1, values));
     break;
   default:
     SH_DEBUG_ASSERT(0); // Unsupported size
@@ -795,7 +795,7 @@ void GlslCode::allocate_textures()
   
   // TODO: Cache this result? We may want something like ArbLimits here (GlslLimits perhaps)
   GLint max_texture_units;
-  GL_CHECK_ERROR(glGetIntegerv((GLSL_VP == m_unit ?
+  SH_GL_CHECK_ERROR(glGetIntegerv((GLSL_VP == m_unit ?
     GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS_ARB : GL_MAX_TEXTURE_IMAGE_UNITS_ARB),
     &max_texture_units));
 
@@ -844,7 +844,7 @@ void GlslCode::bind_textures()
     if (location != -1) {
       int index = m_texture_units[texture].index;
 
-      GL_CHECK_ERROR(glUniform1iARB(location, index));
+      SH_GL_CHECK_ERROR(glUniform1iARB(location, index));
       
       if (!m_texture_units[texture].preset) {
 	m_texture->bindTexture(texture, GL_TEXTURE0 + index, false);

@@ -273,17 +273,17 @@ GlTextures::ActiveTexture::ActiveTexture(GLenum texture_unit)
 {
   // Save old texture unit
   GLint temp;
-  GL_CHECK_ERROR(glGetIntegerv(GL_ACTIVE_TEXTURE_ARB, &temp));
+  SH_GL_CHECK_ERROR(glGetIntegerv(GL_ACTIVE_TEXTURE_ARB, &temp));
   last_unit = temp;
 
   // Set new one
-  GL_CHECK_ERROR(glActiveTextureARB(texture_unit));
+  SH_GL_CHECK_ERROR(glActiveTextureARB(texture_unit));
 }
 
 GlTextures::ActiveTexture::~ActiveTexture()
 {
   // Restore old texture unit
-  GL_CHECK_ERROR(glActiveTextureARB(last_unit));
+  SH_GL_CHECK_ERROR(glActiveTextureARB(last_unit));
 }
 
 
@@ -375,7 +375,7 @@ void GlTextures::bindTexture(const TextureNodePtr& node, GLenum target, bool wri
     GLuint name;
     std::istringstream is(node->meta("opengl:texid"));
     is >> name; // TODO: Check for errors
-    GL_CHECK_ERROR(glBindTexture(glTargets[node->dims()], name));
+    SH_GL_CHECK_ERROR(glBindTexture(glTargets[node->dims()], name));
     return;
   } 
 
@@ -484,7 +484,7 @@ void GlTextures::bindTexture(const TextureNodePtr& node, GLenum target, bool wri
       }
 
       ActiveTexture active_texture(target);
-      GL_CHECK_ERROR(glBindTexture(GL_TEXTURE_CUBE_MAP, texname->value()));      
+      SH_GL_CHECK_ERROR(glBindTexture(GL_TEXTURE_CUBE_MAP, texname->value()));      
     } else {
       // Just synchronize the storages
       GlTextureName::StorageList::const_iterator S;
@@ -494,7 +494,7 @@ void GlTextures::bindTexture(const TextureNodePtr& node, GLenum target, bool wri
         s->sync();
       }
       ActiveTexture active_texture(target);
-      GL_CHECK_ERROR(glBindTexture(GL_TEXTURE_CUBE_MAP, (*I)->value()));
+      SH_GL_CHECK_ERROR(glBindTexture(GL_TEXTURE_CUBE_MAP, (*I)->value()));
       std::ostringstream os;
       os << (*I)->value();
       node->meta("opengl:alloc_texid", os.str());
@@ -588,7 +588,7 @@ void GlTextures::bindTexture(const TextureNodePtr& node, GLenum target, bool wri
     }
     else {
       ActiveTexture active_texture(target);
-      GL_CHECK_ERROR(glBindTexture(glTargets[node->dims()], name->value()));
+      SH_GL_CHECK_ERROR(glBindTexture(glTargets[node->dims()], name->value()));
     }    
   }
 }

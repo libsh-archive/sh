@@ -199,7 +199,7 @@ GLenum glType(SH::ValueType valueType, SH::ValueType &convertedType);
 
 }
 
-#define GL_CHECK_ERROR(op) \
+#define SH_GL_CHECK_ERROR(op) \
   op;glCheckError( # op, (char*) __FILE__, (int) __LINE__);
 
 

@@ -351,11 +351,11 @@ void FBOStreams::execute(const Program& program,
           (extstr.find("ARB_draw_buffers") != string::npos)) {
 #ifdef ATI_draw_buffers
         if (extstr.find("ATI_draw_buffers") != string::npos) {
-          GL_CHECK_ERROR(glGetIntegerv(GL_MAX_DRAW_BUFFERS_ATI, &m_max_draw_buffers));
+          SH_GL_CHECK_ERROR(glGetIntegerv(GL_MAX_DRAW_BUFFERS_ATI, &m_max_draw_buffers));
           m_draw_buffers_ext = ATI;
         } else {
 #endif
-          GL_CHECK_ERROR(glGetIntegerv(GL_MAX_DRAW_BUFFERS_ARB, &m_max_draw_buffers));
+          SH_GL_CHECK_ERROR(glGetIntegerv(GL_MAX_DRAW_BUFFERS_ARB, &m_max_draw_buffers));
           m_draw_buffers_ext = ARB;
 #ifdef ATI_draw_buffers
         }
@@ -371,7 +371,7 @@ void FBOStreams::execute(const Program& program,
         m_float_extension = ARB_NO_FLOAT_EXT;
       }
     }
-    GL_CHECK_ERROR(glGenFramebuffersEXT(1, &m_framebuffer));
+    SH_GL_CHECK_ERROR(glGenFramebuffersEXT(1, &m_framebuffer));
 
     // The (trivial) vertex program
     m_vp = keep<Position4f>() & keep<TexCoord4f>();
@@ -388,7 +388,7 @@ void FBOStreams::execute(const Program& program,
   TIMING_RESULT(vpsetup);
 
   GLint max_outputs;
-  GL_CHECK_ERROR(glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS_EXT, &max_outputs));
+  SH_GL_CHECK_ERROR(glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS_EXT, &max_outputs));
 
   // --- Set up the fragment programs and such
   StreamCache* cache = program_node->get_info<StreamCache>();
@@ -426,7 +426,7 @@ void FBOStreams::execute(const Program& program,
   }  
 #endif
 
-  GL_CHECK_ERROR(glPushAttrib(GL_VIEWPORT_BIT));
+  SH_GL_CHECK_ERROR(glPushAttrib(GL_VIEWPORT_BIT));
   FBOCache::instance()->bindFramebuffer();
 
   Stream::iterator dest_iter = dest.begin();
@@ -549,7 +549,7 @@ void FBOStreams::execute(const Program& program,
     I->node()->memory(0)->findStorage("opengl:texture", UnflagWrite());
   }
     
-  GL_CHECK_ERROR(glPopAttrib());
+  SH_GL_CHECK_ERROR(glPopAttrib());
   FBOCache::instance()->unbindFramebuffer();
   
   if (old_handle) {

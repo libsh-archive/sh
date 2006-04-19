@@ -143,9 +143,9 @@ ArbCode::ArbCode(const ProgramNodeCPtr& shader, const string& unit,
 
         GLint max_draw_buffers;
 #ifdef ATI_draw_buffers
-        GL_CHECK_ERROR(glGetIntegerv(GL_MAX_DRAW_BUFFERS_ATI, &max_draw_buffers));
+        SH_GL_CHECK_ERROR(glGetIntegerv(GL_MAX_DRAW_BUFFERS_ATI, &max_draw_buffers));
 #else 
-        GL_CHECK_ERROR(glGetIntegerv(GL_MAX_DRAW_BUFFERS_ARB, &max_draw_buffers));
+        SH_GL_CHECK_ERROR(glGetIntegerv(GL_MAX_DRAW_BUFFERS_ARB, &max_draw_buffers));
 #endif
         arbFragmentOutputBindingSpecs[0].maxBindings = max_draw_buffers;
       } 
@@ -154,7 +154,7 @@ ArbCode::ArbCode(const ProgramNodeCPtr& shader, const string& unit,
 	arbFragmentOutputBindingSpecs[0].binding = ARB_REG_RESULTCOL_ATI;
 
         GLint max_draw_buffers;
-        GL_CHECK_ERROR(glGetIntegerv(GL_MAX_DRAW_BUFFERS_ARB, &max_draw_buffers));
+        SH_GL_CHECK_ERROR(glGetIntegerv(GL_MAX_DRAW_BUFFERS_ARB, &max_draw_buffers));
         arbFragmentOutputBindingSpecs[0].maxBindings = max_draw_buffers;
       }
     }
@@ -306,10 +306,10 @@ void ArbCode::freeRegister(const VariableNodePtr& var)
 void ArbCode::upload()
 {
   if (!m_programId) {
-    GL_CHECK_ERROR(glGenProgramsARB(1, &m_programId));
+    SH_GL_CHECK_ERROR(glGenProgramsARB(1, &m_programId));
   }
 
-  GL_CHECK_ERROR(glBindProgramARB(arbTarget(m_unit), m_programId));
+  SH_GL_CHECK_ERROR(glBindProgramARB(arbTarget(m_unit), m_programId));
   
   ostringstream out;
   print(out);
@@ -329,7 +329,7 @@ void ArbCode::upload()
   if (error_nb == GL_INVALID_OPERATION) {
     error_os << "Program error:" << endl;
     GLint pos = -1;
-    GL_CHECK_ERROR(glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &pos));
+    SH_GL_CHECK_ERROR(glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &pos));
     if (pos >= 0){
       const unsigned char* message = glGetString(GL_PROGRAM_ERROR_STRING_ARB);
       error_os << "Error at character " << pos << endl;
@@ -350,7 +350,7 @@ void ArbCode::bind()
     upload();
   }
   
-  GL_CHECK_ERROR(glBindProgramARB(arbTarget(m_unit), m_programId));
+  SH_GL_CHECK_ERROR(glBindProgramARB(arbTarget(m_unit), m_programId));
   
   Context::current()->set_binding(string("arb:") + m_unit, Program(m_originalShader));
 
@@ -367,9 +367,9 @@ void ArbCode::bind()
   bindTextures();
   
   if (m_unit == "vertex") {
-    GL_CHECK_ERROR(glEnable(GL_VERTEX_PROGRAM_ARB));
+    SH_GL_CHECK_ERROR(glEnable(GL_VERTEX_PROGRAM_ARB));
   } else if (m_unit == "fragment") {
-    GL_CHECK_ERROR(glEnable(GL_FRAGMENT_PROGRAM_ARB));
+    SH_GL_CHECK_ERROR(glEnable(GL_FRAGMENT_PROGRAM_ARB));
   }
 }
 
@@ -378,9 +378,9 @@ void ArbCode::unbind()
   Context::current()->unset_binding(string("arb:") + m_unit);
 
   if (m_unit == "vertex") {
-    GL_CHECK_ERROR(glDisable(GL_VERTEX_PROGRAM_ARB));
+    SH_GL_CHECK_ERROR(glDisable(GL_VERTEX_PROGRAM_ARB));
   } else if (m_unit == "fragment") {
-    GL_CHECK_ERROR(glDisable(GL_FRAGMENT_PROGRAM_ARB));
+    SH_GL_CHECK_ERROR(glDisable(GL_FRAGMENT_PROGRAM_ARB));
   }
 }
 
@@ -454,10 +454,10 @@ void ArbCode::updateUniform(const VariableNodePtr& uniform)
   if (reg.type != ARB_REG_PARAM) return;
   switch(reg.binding.type) {
   case ARB_REG_PROGRAMLOC:
-    GL_CHECK_ERROR(glProgramLocalParameter4fvARB(arbTarget(m_unit), reg.binding.index, values));
+    SH_GL_CHECK_ERROR(glProgramLocalParameter4fvARB(arbTarget(m_unit), reg.binding.index, values));
     break;
   case ARB_REG_PROGRAMENV:
-    GL_CHECK_ERROR(glProgramEnvParameter4fvARB(arbTarget(m_unit), reg.binding.index, values));
+    SH_GL_CHECK_ERROR(glProgramEnvParameter4fvARB(arbTarget(m_unit), reg.binding.index, values));
     break;
   case ARB_REG_STATE:
     {

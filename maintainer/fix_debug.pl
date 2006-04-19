@@ -29,6 +29,7 @@ sub process_file
         s/DEBUG_WARN/SH_DEBUG_WARN/g;
         s/DEBUG_ERROR/SH_DEBUG_ERROR/g;
         s/DEBUG_ASSERT/SH_DEBUG_ASSERT/g;
+        s/GL_CHECK_ERROR/SH_GL_CHECK_ERROR/g;
         push @lines, $_;
     }
     close INPUT;

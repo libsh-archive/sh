@@ -288,7 +288,7 @@ void GlslCode::emit_cond(const Statement& stmt)
   SH_DEBUG_ASSERT(OP_COND == stmt.op);
 
   bool on_nvidia = false;
-  const GLubyte* vendor = GL_CHECK_ERROR(glGetString(GL_VENDOR));
+  const GLubyte* vendor = SH_GL_CHECK_ERROR(glGetString(GL_VENDOR));
   if (vendor) {
     string s(reinterpret_cast<const char*>(vendor));
     on_nvidia = s.find("NVIDIA") != s.npos;
@@ -415,7 +415,7 @@ void GlslCode::emit_log(const Statement& stmt)
 {
   SH_DEBUG_ASSERT(OP_LOG == stmt.op);
   bool on_ati = false;
-  const GLubyte* vendor = GL_CHECK_ERROR(glGetString(GL_VENDOR));
+  const GLubyte* vendor = SH_GL_CHECK_ERROR(glGetString(GL_VENDOR));
   if (vendor) {
     std::string s(reinterpret_cast<const char*>(vendor));
     on_ati = s.find("ATI") != s.npos;

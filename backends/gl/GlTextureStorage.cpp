@@ -122,17 +122,17 @@ bool HostGlTextureTransfer::transfer(const Storage* from, Storage* to)
   switch(texture->target()) {
   case GL_TEXTURE_1D:
     if (full_copy) {
-      GL_CHECK_ERROR(glTexImage1D(texture->target(), texture->mipmap_level(),
+      SH_GL_CHECK_ERROR(glTexImage1D(texture->target(), texture->mipmap_level(),
                                      texture->internalFormat(),
                                      width, 0, texture->format(), type,
                                      data_variant->array()));
     } else {
-      GL_CHECK_ERROR(glTexImage1D(texture->target(), texture->mipmap_level(),
+      SH_GL_CHECK_ERROR(glTexImage1D(texture->target(), texture->mipmap_level(),
                                      texture->internalFormat(),
                                      width, 0, texture->format(), type,
                                      NULL));
       if (host) {
-        GL_CHECK_ERROR(glTexSubImage1D(texture->target(), texture->mipmap_level(), 0,
+        SH_GL_CHECK_ERROR(glTexSubImage1D(texture->target(), texture->mipmap_level(), 0,
                                           count, texture->format(), type,
                                           data_variant->array()));
       }
@@ -151,12 +151,12 @@ bool HostGlTextureTransfer::transfer(const Storage* from, Storage* to)
   case GL_TEXTURE_RECTANGLE_NV:
 #endif
     if (full_copy) {
-      GL_CHECK_ERROR(glTexImage2D(texture->target(), texture->mipmap_level(),
+      SH_GL_CHECK_ERROR(glTexImage2D(texture->target(), texture->mipmap_level(),
                                      texture->internalFormat(),
                                      width, height, 0, texture->format(),
                                      type, data_variant->array()));
     } else {
-      GL_CHECK_ERROR(glTexImage2D(texture->target(), texture->mipmap_level(),
+      SH_GL_CHECK_ERROR(glTexImage2D(texture->target(), texture->mipmap_level(),
                                      texture->internalFormat(),
                                      width, height, 0, texture->format(),
                                      type, NULL));
@@ -164,11 +164,11 @@ bool HostGlTextureTransfer::transfer(const Storage* from, Storage* to)
         int last_row_count = count % width;
         int full_rows_count = count - last_row_count;
         int full_rows_height = full_rows_count / width;
-        GL_CHECK_ERROR(glTexSubImage2D(texture->target(), texture->mipmap_level(), 0, 0,
+        SH_GL_CHECK_ERROR(glTexSubImage2D(texture->target(), texture->mipmap_level(), 0, 0,
                                           width, full_rows_height, texture->format(),
                                           type, data_variant->array()));
         int array_offset = full_rows_height * width * data_variant->datasize() * tuplesize;
-        GL_CHECK_ERROR(glTexSubImage2D(texture->target(), texture->mipmap_level(), 0, full_rows_height,
+        SH_GL_CHECK_ERROR(glTexSubImage2D(texture->target(), texture->mipmap_level(), 0, full_rows_height,
                                           last_row_count, 1, texture->format(),
                                           type, static_cast<const char*>(data_variant->array()) + array_offset));
       }
@@ -176,13 +176,13 @@ bool HostGlTextureTransfer::transfer(const Storage* from, Storage* to)
     break;
   case GL_TEXTURE_3D:
     if (full_copy) {
-      GL_CHECK_ERROR(glTexImage3D(texture->target(), texture->mipmap_level(),
+      SH_GL_CHECK_ERROR(glTexImage3D(texture->target(), texture->mipmap_level(),
                                      texture->internalFormat(),
                                      width, height,
                                      depth, 0, texture->format(),
                                      type, data_variant->array()));
     } else {
-      GL_CHECK_ERROR(glTexImage3D(texture->target(), texture->mipmap_level(),
+      SH_GL_CHECK_ERROR(glTexImage3D(texture->target(), texture->mipmap_level(),
                                      texture->internalFormat(),
                                      width, height,
                                      depth, 0, texture->format(),
@@ -194,17 +194,17 @@ bool HostGlTextureTransfer::transfer(const Storage* from, Storage* to)
         int full_rows_height = full_rows_count / width;
         int full_surfaces_count = count - last_surface_count;
         int full_surfaces_depth = full_surfaces_count / (width * height);
-        GL_CHECK_ERROR(glTexSubImage3D(texture->target(), texture->mipmap_level(), 0, 0,
+        SH_GL_CHECK_ERROR(glTexSubImage3D(texture->target(), texture->mipmap_level(), 0, 0,
                                           0, width, height,
                                           full_surfaces_depth, texture->format(),
                                           type, data_variant->array()));
         int array_offset = full_surfaces_depth * width * height * data_variant->datasize() * tuplesize;
-        GL_CHECK_ERROR(glTexSubImage3D(texture->target(), texture->mipmap_level(), 0, 0,
+        SH_GL_CHECK_ERROR(glTexSubImage3D(texture->target(), texture->mipmap_level(), 0, 0,
                                           full_surfaces_depth, width, full_rows_height,
                                           1, texture->format(),
                                           type, static_cast<const char*>(data_variant->array()) + array_offset));
         array_offset += full_rows_height * width * data_variant->datasize() * tuplesize;
-        GL_CHECK_ERROR(glTexSubImage3D(texture->target(), texture->mipmap_level(), 0, full_rows_height,
+        SH_GL_CHECK_ERROR(glTexSubImage3D(texture->target(), texture->mipmap_level(), 0, full_rows_height,
                                           full_surfaces_depth, last_row_count, 1,
                                           1, texture->format(),
                                           type, static_cast<const char*>(data_variant->array()) + array_offset));
@@ -282,17 +282,17 @@ bool GlTextureHostTransfer::transfer(const Storage* from, Storage* to)
   FBOCache::instance()->check();
     
   GLint prevRead;
-  GL_CHECK_ERROR(glGetIntegerv(GL_READ_BUFFER, &prevRead));
-  GL_CHECK_ERROR(glReadBuffer(buffer));
+  SH_GL_CHECK_ERROR(glGetIntegerv(GL_READ_BUFFER, &prevRead));
+  SH_GL_CHECK_ERROR(glReadBuffer(buffer));
 
-  GL_CHECK_ERROR(glPushAttrib(GL_VIEWPORT_BIT));
-  GL_CHECK_ERROR(glViewport(0, 0, width, height));
+  SH_GL_CHECK_ERROR(glPushAttrib(GL_VIEWPORT_BIT));
+  SH_GL_CHECK_ERROR(glViewport(0, 0, width, height));
 
-  GL_CHECK_ERROR(glReadPixels(0, 0, count > width ? width : count,
+  SH_GL_CHECK_ERROR(glReadPixels(0, 0, count > width ? width : count,
                                  count/width, format[tuplesize], type,
                                  dest_variant->array()));
   if (count % width) {
-    GL_CHECK_ERROR(glReadPixels(0, count/width, count % width, 1, 
+    SH_GL_CHECK_ERROR(glReadPixels(0, count/width, count % width, 1, 
                                    format[tuplesize], type,
                                    static_cast<char *>(dest_variant->array())
                                    + (count - (count % width)) * 
@@ -307,8 +307,8 @@ bool GlTextureHostTransfer::transfer(const Storage* from, Storage* to)
     host_variant->set(dest_variant);
   }
 
-  GL_CHECK_ERROR(glPopAttrib());
-  GL_CHECK_ERROR(glReadBuffer(prevRead));
+  SH_GL_CHECK_ERROR(glPopAttrib());
+  SH_GL_CHECK_ERROR(glReadBuffer(prevRead));
   FBOCache::instance()->unbindFramebuffer();
 
   return true;
@@ -351,11 +351,11 @@ bool GlTextureGlTextureTransfer::transfer(const Storage* from, Storage* to)
     FBOCache::instance()->check();
   
     GLint prevDraw;
-    GL_CHECK_ERROR(glGetIntegerv(GL_DRAW_BUFFER, &prevDraw));
-    GL_CHECK_ERROR(glDrawBuffer(buffer));
+    SH_GL_CHECK_ERROR(glGetIntegerv(GL_DRAW_BUFFER, &prevDraw));
+    SH_GL_CHECK_ERROR(glDrawBuffer(buffer));
 
-    GL_CHECK_ERROR(glPushAttrib(GL_VIEWPORT_BIT));
-    GL_CHECK_ERROR(glViewport(0, 0, dst_tex->width(), dst_tex->height()));
+    SH_GL_CHECK_ERROR(glPushAttrib(GL_VIEWPORT_BIT));
+    SH_GL_CHECK_ERROR(glViewport(0, 0, dst_tex->width(), dst_tex->height()));
 
     std::ostringstream os;
     os << src_tex->name();
@@ -374,8 +374,8 @@ bool GlTextureGlTextureTransfer::transfer(const Storage* from, Storage* to)
     } glEnd();
     unbind(*render_to_tex_prog);
     
-    GL_CHECK_ERROR(glPopAttrib());
-    GL_CHECK_ERROR(glDrawBuffer(prevDraw));
+    SH_GL_CHECK_ERROR(glPopAttrib());
+    SH_GL_CHECK_ERROR(glDrawBuffer(prevDraw));
     FBOCache::instance()->unbindFramebuffer();
   }
   else {

@@ -70,7 +70,7 @@ class PBufferGlTextureTransfer : public Transfer {
     SH_DEBUG_ASSERT(context->height() == texture->height());
 
     GlTextureName::Binding binding(texture->texName());
-    GL_CHECK_ERROR(glCopyTexSubImage2D(texture->target(), 0,
+    SH_GL_CHECK_ERROR(glCopyTexSubImage2D(texture->target(), 0,
                                           0, 0, 0, 0, context->width(), context->height()));
     
     if (handle) { handle->restore(); }
