@@ -26,13 +26,13 @@ namespace SH {
 
 Eval* Eval::m_instance = 0;
 
-//#define DEBUG_EVAL 
-#define EVALOP_CACHE
+//#define SH_DEBUG_EVAL 
+#define SH_EVALOP_CACHE
 
 void Eval::operator()(Operation op, Variant* dest, 
     const Variant* a, const Variant* b, const Variant* c) const
 {
-#ifdef DEBUG_EVAL
+#ifdef SH_DEBUG_EVAL
   SH_DEBUG_PRINT("PRE OP=" << opInfo[op].name << " "
       << (dest ? dest->encodeArray() : "NULL") << " = "
       << (a ? a->encodeArray() : "NULL") << ", "
@@ -88,7 +88,7 @@ void Eval::operator()(Operation op, Variant* dest,
   if(newb) delete const_cast<Variant*>(cb);
   if(newc) delete const_cast<Variant*>(cc);
 
-#ifdef DEBUG_EVAL
+#ifdef SH_DEBUG_EVAL
   SH_DEBUG_PRINT("   RES=" << opInfo[op].name << " "
       << (dest ? dest->encodeArray() : "NULL") << " = "
       << (a ? a->encodeArray() : "NULL") << ", "
@@ -113,7 +113,7 @@ void Eval::addOp(Operation op, const EvalOp* evalOp, ValueType dest,
 const EvalOpInfo* Eval::getEvalOpInfo(Operation op, ValueType dest,
     ValueType src0, ValueType src1, ValueType src2) const
 {
-#ifdef DEBUG_EVAL
+#ifdef SH_DEBUG_EVAL
   SH_DEBUG_PRINT("Eval mapping op=" << opInfo[op].name << " dest,src[0-2]= " 
       << valueTypeName(dest)
       << ", " << valueTypeName(src0)
@@ -121,10 +121,10 @@ const EvalOpInfo* Eval::getEvalOpInfo(Operation op, ValueType dest,
       << ", " << valueTypeName(src2)); 
 #endif
 
-#ifdef EVALOP_CACHE
+#ifdef SH_EVALOP_CACHE
   const EvalOpInfo*& result = m_evalOpCache(op, src0, src1, src2);
   if(result) {
-#ifdef DEBUG_EVAL
+#ifdef SH_DEBUG_EVAL
       SH_DEBUG_PRINT("    cached result=" << result->encode()); 
 #endif
     return result;
@@ -150,7 +150,7 @@ const EvalOpInfo* Eval::getEvalOpInfo(Operation op, ValueType dest,
     if(arity > 1) dist += castmgr->castDist(I->m_src[1], src1); 
     if(arity > 2) dist += castmgr->castDist(I->m_src[2], src2); 
 
-#ifdef DEBUG_EVAL
+#ifdef SH_DEBUG_EVAL
       SH_DEBUG_PRINT("    dist=" << mindist << " to " << I->encode()); 
 #endif
 
@@ -166,7 +166,7 @@ const EvalOpInfo* Eval::getEvalOpInfo(Operation op, ValueType dest,
     result = 0;
   }
 
-#ifdef DEBUG_EVAL
+#ifdef SH_DEBUG_EVAL
   if(result) {
       SH_DEBUG_PRINT("    result=" << result->encode()); 
   }

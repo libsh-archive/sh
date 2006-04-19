@@ -33,11 +33,11 @@
 #include "ProgramNode.hpp"
 
 // Uncomment to enable use-def chain debugging 
-// #define DEBUG_VALUETRACK
+// #define SH_DEBUG_VALUETRACK
 
-#ifdef DEBUG_OPTIMIZER
-#ifndef DEBUG_VALUETRACK
-#define DEBUG_VALUETRACK
+#ifdef SH_DEBUG_OPTIMIZER
+#ifndef SH_DEBUG_VALUETRACK
+#define SH_DEBUG_VALUETRACK
 #endif
 #endif
 namespace {
@@ -499,7 +499,7 @@ struct UdDuDumper {
   }
 
   void operator()(const ProgramNodePtr& p) {
-#ifdef DEBUG
+#ifdef SH_DEBUG
     InputValueTracking* ivt = p->get_info<InputValueTracking>();
     SH_DEBUG_ASSERT(ivt);
     SH_DEBUG_PRINT("Input Valuetracking:\n" << *ivt);
@@ -519,7 +519,7 @@ ValueTracking::ValueTracking(Statement* stmt)
   : uses(stmt->dest.node() ? stmt->dest.size() : 0),
     defs(stmt->src.size())
 {
-#ifdef DEBUG_VALUETRACK
+#ifdef SH_DEBUG_VALUETRACK
   SH_DEBUG_PRINT("Adding value tracking to " << *stmt);
 #endif
   for (int i = 0; i < opInfo[stmt->op].arity; i++) {
@@ -636,7 +636,7 @@ void add_value_tracking(Program& p)
     graph->dfs(iter);
   } while (changed);
 
-#ifdef DEBUG_VALUETRACK
+#ifdef SH_DEBUG_VALUETRACK
   SH_DEBUG_PRINT("Dumping Reaching Defs");
   SH_DEBUG_PRINT("defsize = " << r.defsize);
   SH_DEBUG_PRINT("defs.size() = " << r.defs.size());
@@ -660,7 +660,7 @@ void add_value_tracking(Program& p)
   UdDuBuilder builder(r, p.node());
   graph->dfs(builder);
 
-#ifdef DEBUG_VALUETRACK
+#ifdef SH_DEBUG_VALUETRACK
   SH_DEBUG_PRINT("Uddu Dump");
   UdDuDumper dumper;
   graph->dfs(dumper);

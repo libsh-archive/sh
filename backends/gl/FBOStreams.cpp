@@ -20,10 +20,10 @@
 #include "FBOStreams.hpp"
 
 /// Turn this on if you want timings on std::cerr
-//#define DO_FBO_TIMING
+//#define SH_DO_FBO_TIMING
 
 // Turn this on to debug the fragment programs.
-//#define DEBUG_PBS_PRINTFP
+//#define SH_DEBUG_PBS_PRINTFP
 
 #include <map>
 #include <fstream>
@@ -42,7 +42,7 @@
 #include "Utils.hpp"
 #include "FBOCache.hpp"
 
-#ifdef DO_FBO_TIMING
+#ifdef SH_DO_FBO_TIMING
 #include <sys/time.h>
 #include <time.h>
 #endif
@@ -52,7 +52,7 @@ namespace shgl {
 using namespace SH;
 using namespace std;
 
-#ifdef DO_FBO_TIMING
+#ifdef SH_DO_FBO_TIMING
 
 class Timer {
 public:
@@ -410,7 +410,7 @@ void FBOStreams::execute(const Program& program,
     I->node()->memory(0)->freeze(true);
   }
 
-#ifdef DEBUG_FBOS_PRINTTEX
+#ifdef SH_DEBUG_FBOS_PRINTTEX
   int num = 0;
   for (Stream::iterator I = dest.begin(); I != dest.end(); ++I, ++num) {
     std::cerr << "output " << num << " memory time " 
@@ -490,7 +490,7 @@ void FBOStreams::execute(const Program& program,
     cache->update_channels(program_version, program.stream_inputs(),
                            *dest_tex, dest_width, dest_height, dest_depth);
 
-#ifdef DEBUG_FBOS_PRINTFP
+#ifdef SH_DEBUG_FBOS_PRINTFP
     {
       ProgramSet::NodeList::const_iterator i = (*I)->begin();
       (*i)->code()->print(std::cerr);

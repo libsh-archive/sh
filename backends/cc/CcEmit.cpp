@@ -30,7 +30,7 @@
 #include "config.h"
 #endif
 
-#ifdef CC_DEBUG
+#ifdef SH_CC_DEBUG
 #  define SH_CC_DEBUG_PRINT(x) SH_DEBUG_PRINT(x)
 #else
 #  define SH_CC_DEBUG_PRINT(x) do { } while(0)

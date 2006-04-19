@@ -107,7 +107,7 @@ public:
   // Dump the life times to stderr
   void debugDump()
   {
-#ifdef DEBUG
+#ifdef SH_DEBUG
     for (LifetimeMap::const_iterator I = m_lifetimes.begin(); I != m_lifetimes.end(); ++I) {
       SH_DEBUG_PRINT(I->first << " = {" << I->second.first << ", " << I->second.last << "}");
     }

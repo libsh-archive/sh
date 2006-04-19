@@ -30,7 +30,7 @@
 #include <sstream>
 #include <fstream>
 
-//#define DEBUG_OPTIMIZER
+//#define SH_DEBUG_OPTIMIZER
 
 namespace {
 
@@ -255,7 +255,7 @@ struct InitLiveCode {
     if (!block) return;
 
     for (BasicBlock::StmtList::iterator I = block->begin(); I != block->end(); ++I) {
-#ifdef DEBUG_OPTIMIZER
+#ifdef SH_DEBUG_OPTIMIZER
       if(!I->dest.null() && I->dest.node()->kind() == SH_TEMP && !p->hasDecl(I->dest.node())) {
         std::cerr << "No decl for " << I->dest.name() << std::endl;
       }
@@ -570,12 +570,12 @@ void optimize(Program& p, int level)
   if (level <= 0) return;
 
   p.node()->collectDecls();
-#ifdef DEBUG_OPTIMIZER
+#ifdef SH_DEBUG_OPTIMIZER
   SH_DEBUG_PRINT("After collecting declarations");
   SH_DEBUG_PRINT(p.node()->describe_decls());
 #endif
 
-#ifdef DEBUG_OPTIMIZER
+#ifdef SH_DEBUG_OPTIMIZER
   int pass = 0;
   SH_DEBUG_PRINT("Begin optimization for program with target " << p.node()->target());
 #endif
@@ -583,7 +583,7 @@ void optimize(Program& p, int level)
   bool changed;
   do {
 
-#ifdef DEBUG_OPTIMIZER
+#ifdef SH_DEBUG_OPTIMIZER
     SH_DEBUG_PRINT("---Optimizer pass " << pass << " BEGIN---");
     std::ostringstream s;
     s << "opt_" << pass;
@@ -637,7 +637,7 @@ void optimize(Program& p, int level)
       forward_placement(p);
     }
 
-#ifdef DEBUG_OPTIMIZER
+#ifdef SH_DEBUG_OPTIMIZER
     SH_DEBUG_PRINT("---Optimizer pass " << pass << " END---");
     pass++;
 #endif

@@ -20,7 +20,7 @@
 #include "GlslCode.hpp"
 #include <iostream>
 
-#define DEBUG_GLSL_BACKEND
+#define SH_DEBUG_GLSL_BACKEND
 
 namespace shgl {
 
@@ -203,7 +203,7 @@ void GlslSet::bind()
   
   SH_GL_CHECK_ERROR(glUseProgramObjectARB(m_arb_program));
 
-#ifdef DEBUG_GLSL_BACKEND
+#ifdef SH_DEBUG_GLSL_BACKEND
   // This could be slow, it should not be enabled in release code
   glValidateProgramARB(m_arb_program);
   GLint validated;

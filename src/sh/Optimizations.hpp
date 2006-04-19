@@ -31,7 +31,7 @@
 
 // Uncomment this to turn on optimizer debugging using dot.
 // Warning: This is very verbose!
-//#define DEBUG_OPTIMIZER
+//#define SH_DEBUG_OPTIMIZER
 
 namespace SH {
 

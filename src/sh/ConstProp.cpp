@@ -34,11 +34,11 @@
 #include <fstream>
 
 // Uncomment to enable constant/uniform propagation debugging (verbose!)
-// #define DEBUG_CONSTPROP
+// #define SH_DEBUG_CONSTPROP
 
-#ifdef DEBUG_OPTIMIZER
-#ifndef DEBUG_CONSTPROP
-#define DEBUG_CONSTPROP
+#ifdef SH_DEBUG_OPTIMIZER
+#ifndef SH_DEBUG_CONSTPROP
+#define SH_DEBUG_CONSTPROP
 #endif
 #endif
 
@@ -654,7 +654,7 @@ struct FinishConstProp
             for(int i = 0; i < I->dest.size(); ++i) {
               newconst.setVariant(cp->dest[i].value, i);
             }
-#ifdef DEBUG_CONSTPROP
+#ifdef SH_DEBUG_CONSTPROP
             SH_DEBUG_PRINT("Replaced {" << *I << "} with " << newconst);
 #endif
             *I = Statement(I->dest, OP_ASN, newconst);
@@ -674,7 +674,7 @@ struct FinishConstProp
                 newconst.setVariant(cp->src[s][i].value, i);
               }
               if (allconst) {
-#ifdef DEBUG_CONSTPROP
+#ifdef SH_DEBUG_CONSTPROP
                 SH_DEBUG_PRINT("Replaced {" << *I << "}.src[" << s << "] with " << newconst);
 #endif
                 I->src[s] = newconst;
@@ -700,12 +700,12 @@ struct FinishConstProp
           }
           if (!alluniform || I->dest.node()->kind() == SH_OUTPUT
               || I->dest.node()->kind() == SH_INOUT) {
-#ifdef DEBUG_CONSTPROP
+#ifdef SH_DEBUG_CONSTPROP
             SH_DEBUG_PRINT("Considering " << *I << " for uniform lifting");
 #endif          
             for (int s = 0; s < opInfo[I->op].arity; s++) {
               if (I->src[s].uniform()) {
-#ifdef DEBUG_CONSTPROP
+#ifdef SH_DEBUG_CONSTPROP
                 SH_DEBUG_PRINT(*I << ".src[" << s << "] is already a uniform");
 #endif
                 continue;
@@ -737,13 +737,13 @@ struct FinishConstProp
               }
               
               if (uniform < 0) {
-#ifdef DEBUG_CONSTPROP
+#ifdef SH_DEBUG_CONSTPROP
                 SH_DEBUG_PRINT("{" << *I << "}.src[" << s << "] is not uniform");
 #endif
                 continue;
               }
               if (mixed) {
-#ifdef DEBUG_CONSTPROP
+#ifdef SH_DEBUG_CONSTPROP
                 SH_DEBUG_PRINT("{" << *I << "}.src[" << s << "] is mixed");
 #endif
                 continue;
@@ -751,7 +751,7 @@ struct FinishConstProp
               ConstProp::Value* value = ConstProp::Value::get(uniform);
 
 
-#ifdef DEBUG_CONSTPROP
+#ifdef SH_DEBUG_CONSTPROP
               SH_DEBUG_PRINT("Lifting {" << *I << "}.src[" << s << "]: " << uniform);
 #endif
               int srcsize;
@@ -766,7 +766,7 @@ struct FinishConstProp
               if (node) {
                 I->src[s] = Variable(node, swizzle, neg);
               } else {
-#ifdef DEBUG_CONSTPROP
+#ifdef SH_DEBUG_CONSTPROP
                 SH_DEBUG_PRINT("Could not lift " << *I << ".src[" << s << "] for some reason");
 #endif
               }
@@ -799,7 +799,7 @@ struct FinishConstProp
     }
     Context::current()->exit();
 
-#ifdef DEBUG_CONSTPROP
+#ifdef SH_DEBUG_CONSTPROP
     SH_DEBUG_PRINT("Lifting value #" << valuenum);
 #endif
 
@@ -816,7 +816,7 @@ struct FinishConstProp
       Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
     } SH_END;
 
-#ifdef DEBUG_CONSTPROP
+#ifdef SH_DEBUG_CONSTPROP
     {
       std::ostringstream s;
       s << "lifted_" << valuenum;
@@ -905,7 +905,7 @@ struct FinishConstProp
       return Variable(node, swizzle, neg);
     }
 
-#ifdef DEBUG_CONSTPROP
+#ifdef SH_DEBUG_CONSTPROP
     SH_DEBUG_PRINT("Reached invalid point");
 #endif
 
@@ -932,7 +932,7 @@ void propagate_constants(Program& p)
   InitConstProp init(p.node(), worklist);
   graph->dfs(init);
 
-#ifdef DEBUG_CONSTPROP
+#ifdef SH_DEBUG_CONSTPROP
   SH_DEBUG_PRINT("Const Prop Initial Values:");
   DumpConstProp dump_pre;
   graph->dfs(dump_pre);
@@ -943,7 +943,7 @@ void propagate_constants(Program& p)
     ValueTracking::Def def = worklist.front(); worklist.pop();
     ValueTracking* vt = def.stmt->get_info<ValueTracking>();
     if (!vt) {
-#ifdef DEBUG_CONSTPROP
+#ifdef SH_DEBUG_CONSTPROP
       SH_DEBUG_PRINT(*def.stmt << " on worklist does not have VT information?");
 #endif
       continue;
@@ -955,7 +955,7 @@ void propagate_constants(Program& p)
       if (use->kind != ValueTracking::Use::STMT) continue;
       ConstProp* cp = use->stmt->get_info<ConstProp>();
       if (!cp) {
-#ifdef DEBUG_CONSTPROP
+#ifdef SH_DEBUG_CONSTPROP
         SH_DEBUG_PRINT("Use " << *use->stmt << " does not have const prop information!");
 #endif
         continue;
@@ -966,13 +966,13 @@ void propagate_constants(Program& p)
       ValueTracking* ut = use->stmt->get_info<ValueTracking>();
       if (!ut) {
         // Should never happen...
-#ifdef DEBUG_CONSTPROP
+#ifdef SH_DEBUG_CONSTPROP
         SH_DEBUG_PRINT("Use " << *use->stmt << " on worklist does not have VT information?");
 #endif
         continue;
       }
 
-#ifdef DEBUG_CONSTPROP
+#ifdef SH_DEBUG_CONSTPROP
       SH_DEBUG_PRINT("Meeting cell for {" << *use->stmt
                      << "}.src" << use->source << "[" << use->index << "]");
 #endif
@@ -984,7 +984,7 @@ void propagate_constants(Program& p)
            possdef != ut->defs[use->source][use->index].end(); ++possdef) {
         ConstProp* dcp = possdef->stmt->get_info<ConstProp>();
         if (!dcp) {
-#ifdef DEBUG_CONSTPROP
+#ifdef SH_DEBUG_CONSTPROP
           SH_DEBUG_PRINT("Possible def " << *dcp->stmt << " on worklist does not have CP information?");
 #endif
           continue;
@@ -1001,7 +1001,7 @@ void propagate_constants(Program& p)
             destcell.uniform.neg = !destcell.uniform.neg;
           }
         }
-#ifdef DEBUG_CONSTPROP
+#ifdef SH_DEBUG_CONSTPROP
         SH_DEBUG_PRINT("  meet(" << new_cell << ", " << destcell << ") = " <<
                        meet(new_cell, destcell));
 #endif
@@ -1009,7 +1009,7 @@ void propagate_constants(Program& p)
       }
       
       if (cell != new_cell) {
-#ifdef DEBUG_CONSTPROP
+#ifdef SH_DEBUG_CONSTPROP
         SH_DEBUG_PRINT("  ...replacing cell");
 #endif
         cp->src[use->source][use->index] = new_cell;
@@ -1020,7 +1020,7 @@ void propagate_constants(Program& p)
   // Now do something with our glorious newfound information.
 
   
-#ifdef DEBUG_CONSTPROP
+#ifdef SH_DEBUG_CONSTPROP
   ConstProp::Value::dump(std::cerr);
 
   DumpConstProp dump;

@@ -24,7 +24,7 @@
 #include "StorageType.hpp"
 #include "Optimizations.hpp"
 
-//#define GLSL_DEBUG
+//#define SH_GLSL_DEBUG
 
 namespace shgl {
 
@@ -141,7 +141,7 @@ void GlslCode::generate()
     Structural structural(m_shader->ctrlGraph);
     m_shader->ctrlGraph->entry()->clearMarked();
     gen_structural_node(structural.head());
-#ifdef GLSL_DEBUG
+#ifdef SH_GLSL_DEBUG
     std::ofstream f("structural.dot");
     structural.dump(f);
     std::system("dot -Tps structural.dot -o structural.ps");
@@ -189,7 +189,7 @@ void GlslCode::upload()
     os << endl;
     error(GlslError(os.str()));
     return;
-#ifdef GLSL_DEBUG
+#ifdef SH_GLSL_DEBUG
   } else {
     std::ostringstream os;
     os << "Shader compile status (target = " << m_target << "): OK" << endl << endl;
@@ -328,7 +328,7 @@ void GlslCode::update_float_uniform(const VariableNodePtr& node, const GLint loc
     values = data;
   }
 
-  // TODO: Create a GL_DEBUG_CHECK_ERROR that gets compiled out in release?
+  // TODO: Create a SH_GL_CHECK_ERROR that gets compiled out in release?
   switch (uniform_size) {
   case 1:    
     SH_GL_CHECK_ERROR(glUniform1fvARB(location, 1, values));
@@ -368,7 +368,7 @@ void GlslCode::update_int_uniform(const VariableNodePtr& node, const GLint locat
     values = data;
   }
 
-  // TODO: Create a GL_DEBUG_CHECK_ERROR that gets compiled out in release?
+  // TODO: Create a SH_GL_CHECK_ERROR that gets compiled out in release?
   switch (uniform_size) {
   case 1:
     SH_GL_CHECK_ERROR(glUniform1ivARB(location, 1, values));

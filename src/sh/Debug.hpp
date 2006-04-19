@@ -24,7 +24,7 @@
 #include "config.h"
 #endif
 
-#ifdef DEBUG
+#ifdef SH_DEBUG
 #include <iostream>
 #include <cstdlib>
 
@@ -40,6 +40,6 @@
 #define SH_DEBUG_ERROR(x)
 #define SH_DEBUG_ASSERT(cond)
 
-#endif // DEBUG
+#endif // SH_DEBUG
 
 #endif

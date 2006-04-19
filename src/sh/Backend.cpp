@@ -174,7 +174,7 @@ string Backend::lookup_filename(const string& backend_name)
   string libname = "libsh" + backend_name;
 
 #if defined(_WIN32)
-# ifdef DEBUG
+# ifdef SH_DEBUG
     libname += "_DEBUG";
 # endif
   libname += ".DLL";
@@ -229,7 +229,7 @@ bool Backend::load_library(const string& filename)
   std::transform(filename.begin(), filename.end(), uc_filename.begin(), toupper);
   string::size_type extension_pos = uc_filename.rfind("_DEBUG.DLL");
   if (uc_filename.npos == extension_pos) {
-#ifdef DEBUG
+#ifdef SH_DEBUG
     // refuse to load non-debugging libraries
     return false;
 #else

@@ -81,7 +81,7 @@ namespace SH {
 
   void DomTree::debugDump()
   {
-#ifdef DEBUG
+#ifdef SH_DEBUG
     SH_DEBUG_PRINT("Debug Dump");
     DebugDumper d(*this);
     preorder(d);

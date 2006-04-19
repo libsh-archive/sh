@@ -54,7 +54,7 @@ using namespace std;
 #define glDeleteProgramsARB glDeleteProgramsARB
 #define glBindProgramARB glBindProgramARB
 
-// #define ARBCODE_DEBUG
+// #define SH_ARBCODE_DEBUG
 
 class ArbBindingSpecs {
 public:
@@ -198,7 +198,7 @@ ArbCode::~ArbCode()
 }
 
 void dump(const ProgramNodePtr& foo, string desc) {
-#ifdef ARBCODE_DEBUG
+#ifdef SH_ARBCODE_DEBUG
   optimize(foo);
   foo->dump(desc + "_" + foo->name() + "_" + foo->target());
 #endif
@@ -314,7 +314,7 @@ void ArbCode::upload()
   ostringstream out;
   print(out);
   string text = out.str();
-#ifdef ARBCODE_DEBUG
+#ifdef SH_ARBCODE_DEBUG
   ofstream fout((m_originalShader->name() + "_arb.asm").c_str());
   fout << text;
   fout.close();

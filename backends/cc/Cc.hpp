@@ -32,7 +32,7 @@
 #include "Backend.hpp"
 #include "Transformer.hpp"
 
-// #define CC_DEBUG 1
+// #define SH_CC_DEBUG 1
 
 // function representing a single kernel
 // Each of the parameters is an array of single storage-typed arrays

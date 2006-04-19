@@ -20,10 +20,10 @@
 #include "PBufferStreams.hpp"
 
 /// Turn this on if you want timings on std::cerr
-//#define DO_PBUFFER_TIMING
+//#define SH_DO_PBUFFER_TIMING
 
 // Turn this on to debug the fragment programs.
-//#define DEBUG_PBS_PRINTFP
+//#define SH_DEBUG_PBS_PRINTFP
 
 #include <map>
 #include <fstream>
@@ -40,7 +40,7 @@
 #include "PBufferContext.hpp"
 #include "Utils.hpp"
 
-#ifdef DO_PBUFFER_TIMING
+#ifdef SH_DO_PBUFFER_TIMING
 #include <sys/time.h>
 #include <time.h>
 #endif
@@ -50,7 +50,7 @@ namespace shgl {
 using namespace SH;
 using namespace std;
 
-#ifdef DO_PBUFFER_TIMING
+#ifdef SH_DO_PBUFFER_TIMING
 
 class Timer {
 public:
@@ -88,7 +88,7 @@ PBufferStreams::~PBufferStreams()
 {
 }
 
-#ifdef DO_PBUFFER_TIMING
+#ifdef SH_DO_PBUFFER_TIMING
 int indent = 0;
 Timer supertimer;
 
@@ -260,7 +260,7 @@ void PBufferStreams::execute(const ProgramNodeCPtr& program_const,
     bind(*program_set);
     TIMING_RESULT(binding);
 
-//#ifdef DEBUG_PBS_PRINTFP
+//#ifdef SH_DEBUG_PBS_PRINTFP
     {
       ProgramSet::NodeList::const_iterator i = program_set->begin();
       ++i;

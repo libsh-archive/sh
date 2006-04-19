@@ -637,8 +637,8 @@ Attrib<2, Binding, T, Semantic, Swizzled>::Attrib(const Generic<1, T2>& s0, cons
   : Generic<2, T>(new VariableNode(Binding, 2, StorageTypeInfo<T>::value_type, Semantic))
 {
   if (Binding == SH_CONST) {
-    DEBUG_ASSERT(s0.hasValues());
-    DEBUG_ASSERT(s1.hasValues());
+    SH_DEBUG_ASSERT(s0.hasValues());
+    SH_DEBUG_ASSERT(s1.hasValues());
     host_type data[2] = {s0.getValue(0), s1.getValue(0)};
     setValues(data);
   } else {
@@ -947,9 +947,9 @@ Attrib<3, Binding, T, Semantic, Swizzled>::Attrib(const Generic<1, T2>& s0, cons
   : Generic<3, T>(new VariableNode(Binding, 3, StorageTypeInfo<T>::value_type, Semantic))
 {
   if (Binding == SH_CONST) {
-    DEBUG_ASSERT(s0.hasValues());
-    DEBUG_ASSERT(s1.hasValues());
-    DEBUG_ASSERT(s2.hasValues());
+    SH_DEBUG_ASSERT(s0.hasValues());
+    SH_DEBUG_ASSERT(s1.hasValues());
+    SH_DEBUG_ASSERT(s2.hasValues());
     host_type data[3] = {s0.getValue(0), s1.getValue(0), s2.getValue(0)};
     setValues(data);
   } else {
@@ -1259,10 +1259,10 @@ Attrib<4, Binding, T, Semantic, Swizzled>::Attrib(const Generic<1, T2>& s0, cons
   : Generic<4, T>(new VariableNode(Binding, 4, StorageTypeInfo<T>::value_type, Semantic))
 {
   if (Binding == SH_CONST) {
-    DEBUG_ASSERT(s0.hasValues());
-    DEBUG_ASSERT(s1.hasValues());
-    DEBUG_ASSERT(s2.hasValues());
-    DEBUG_ASSERT(s3.hasValues());
+    SH_DEBUG_ASSERT(s0.hasValues());
+    SH_DEBUG_ASSERT(s1.hasValues());
+    SH_DEBUG_ASSERT(s2.hasValues());
+    SH_DEBUG_ASSERT(s3.hasValues());
     host_type data[4] = {s0.getValue(0), s1.getValue(0), s2.getValue(0), s3.getValue(0)};
     setValues(data);
   } else {

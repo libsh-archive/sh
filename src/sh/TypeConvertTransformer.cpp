@@ -31,7 +31,7 @@
 #include "Transformer.hpp"
 #include "BaseTexture.hpp"
 
-// #define DEBUG_TYPECONVERT
+// #define SH_DEBUG_TYPECONVERT
 
 // @file TypeConvertTransformer.cpp
 //
@@ -135,7 +135,7 @@ struct FloatConverter {
     
     BasicBlock::StmtList::iterator I;
 
-#ifdef DEBUG_TYPECONVERT
+#ifdef SH_DEBUG_TYPECONVERT
     for(I = block->begin(); I != block->end(); ++I) {
       std::cout << "FloatConv Before [" << *I << "]" << std::endl;
       if (! I->dest.null()) {
@@ -151,7 +151,7 @@ struct FloatConverter {
       fixStatement(block->m_statements, I);  
     }
 
-#ifdef DEBUG_TYPECONVERT
+#ifdef SH_DEBUG_TYPECONVERT
     for(I = block->begin(); I != block->end(); ++I) {
       std::cout << "FloatConv After [" << *I << "]" << std::endl;
       if (! I->dest.null()) {
@@ -262,7 +262,7 @@ struct FloatConverter {
       if(operations & APPLY_FLR) stmtList.insert(I, Statement(temp, OP_FLR, temp)); 
 
       if((operations & APPLY_FLR) && (operations - APPLY_FLR)) {
-#ifdef DEBUG_TYPECONVERT
+#ifdef SH_DEBUG_TYPECONVERT
         SH_DEBUG_PRINT("Unhandled conversion operations");
 #endif
       }
@@ -277,7 +277,7 @@ struct FloatConverter {
   void fixStatement(BasicBlock::StmtList &stmtList, const BasicBlock::StmtList::iterator &I) {
     Statement &stmt = *I;
     if(stmt.dest.null()) return;
-#ifdef DEBUG_TYPECONVERT
+#ifdef SH_DEBUG_TYPECONVERT
     SH_DEBUG_PRINT("Checking a statement op=" << opInfo[stmt.op].name);
 #endif
 
@@ -342,7 +342,7 @@ struct FloatConverter {
       if(srcValueType == opValueType) continue;
       if((m_valueTypeMap.count(srcValueType) == 0) && (m_valueTypeMap.count(opValueType) == 0)) continue;
 
-#ifdef DEBUG_TYPECONVERT
+#ifdef SH_DEBUG_TYPECONVERT
       SH_DEBUG_PRINT("  Converting src[" << i << "] from " << typeInfo(srcValueType)->name()
           << " to " << typeInfo(opValueType)->name());
 #endif
@@ -373,7 +373,7 @@ struct FloatConverter {
     if((destValueType != opDest) &&
        (m_valueTypeMap.count(destValueType) + m_valueTypeMap.count(opDest) > 0)) {
 
-#ifdef DEBUG_TYPECONVERT
+#ifdef SH_DEBUG_TYPECONVERT
       SH_DEBUG_PRINT("  Converting dest from " << typeInfo(opDest)->name() << " to " << typeInfo(destValueType)->name() );
 #endif
 
@@ -414,7 +414,7 @@ struct FloatConverter {
     if(p->hasValues()) {
       converted_p->setVariant(p->getVariant());
 
-#ifdef DEBUG_TYPECONVERT
+#ifdef SH_DEBUG_TYPECONVERT
       SH_DEBUG_PRINT("Setting values on replacement = " << converted_p->getVariant()->encode() << " original = " << p->getVariant()->encode());
 #endif
     }
@@ -428,7 +428,7 @@ struct FloatConverter {
       converted_p->attach(prg.node());
     }
 
-#ifdef DEBUG_TYPECONVERT
+#ifdef SH_DEBUG_TYPECONVERT
     SH_DEBUG_PRINT("Converting " << p->name() << " from " << typeInfo(p->valueType())->name()
       << " to " << typeInfo(m_valueTypeMap[p->valueType()])->name()); 
 #endif
