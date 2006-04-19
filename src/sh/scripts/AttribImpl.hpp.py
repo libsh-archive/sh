@@ -54,7 +54,7 @@ class Impl(semantic.Impl):
                 if args[0][0] == "const host_type":
                     values += "s" + str(i)
                 else:
-                    common.inprint("DEBUG_ASSERT(s" + str(i) + ".hasValues());")
+                    common.inprint("SH_DEBUG_ASSERT(s" + str(i) + ".hasValues());")
                     values += "s" + str(i) + ".getValue(0)"
             common.inprint("host_type data[" + str(size) + "] = {" + values + "};")
             common.inprint("setValues(data);")
@@ -62,7 +62,7 @@ class Impl(semantic.Impl):
             if args[0][0] == "const host_type":
                 common.inprint("setValue(0, s0);")
             else:
-                common.inprint("DEBUG_ASSERT(s0.hasValues());")
+                common.inprint("SH_DEBUG_ASSERT(s0.hasValues());")
                 common.inprint("setValue(0, s0.getValue(0));")
         common.deindent()
         common.inprint("} else {")

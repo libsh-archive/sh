@@ -571,20 +571,20 @@ void optimize(Program& p, int level)
 
   p.node()->collectDecls();
 #ifdef DEBUG_OPTIMIZER
-  DEBUG_PRINT("After collecting declarations");
-  DEBUG_PRINT(p.node()->describe_decls());
+  SH_DEBUG_PRINT("After collecting declarations");
+  SH_DEBUG_PRINT(p.node()->describe_decls());
 #endif
 
 #ifdef DEBUG_OPTIMIZER
   int pass = 0;
-  DEBUG_PRINT("Begin optimization for program with target " << p.node()->target());
+  SH_DEBUG_PRINT("Begin optimization for program with target " << p.node()->target());
 #endif
   
   bool changed;
   do {
 
 #ifdef DEBUG_OPTIMIZER
-    DEBUG_PRINT("---Optimizer pass " << pass << " BEGIN---");
+    SH_DEBUG_PRINT("---Optimizer pass " << pass << " BEGIN---");
     std::ostringstream s;
     s << "opt_" << pass;
     std::string filename = s.str() + ".dot";
@@ -638,7 +638,7 @@ void optimize(Program& p, int level)
     }
 
 #ifdef DEBUG_OPTIMIZER
-    DEBUG_PRINT("---Optimizer pass " << pass << " END---");
+    SH_DEBUG_PRINT("---Optimizer pass " << pass << " END---");
     pass++;
 #endif
   } while (changed);

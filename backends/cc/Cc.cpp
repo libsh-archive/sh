@@ -43,9 +43,9 @@
 #endif
 
 #ifdef CC_DEBUG
-#  define CC_DEBUG_PRINT(x) DEBUG_PRINT(x)
+#  define SH_CC_DEBUG_PRINT(x) SH_DEBUG_PRINT(x)
 #else
-#  define CC_DEBUG_PRINT(x) do { } while(0)
+#  define SH_CC_DEBUG_PRINT(x) do { } while(0)
 #endif
 
 
@@ -124,7 +124,7 @@ CcBackendCode::CcBackendCode(const ProgramNodeCPtr& program)
     m_cur_temp(0),
     m_params(NULL) 
 {
-  CC_DEBUG_PRINT(__FUNCTION__);
+  SH_CC_DEBUG_PRINT(__FUNCTION__);
 
   // convert half floats, fractionals to types we can use
   m_convertMap[SH_HALF] = SH_FLOAT;
@@ -138,60 +138,60 @@ CcBackendCode::CcBackendCode(const ProgramNodeCPtr& program)
 
 CcBackendCode::~CcBackendCode(void) 
 {
-  CC_DEBUG_PRINT(__FUNCTION__);
+  SH_CC_DEBUG_PRINT(__FUNCTION__);
 }
 
 bool CcBackendCode::allocateRegister(const VariableNodePtr& var) 
 {
-  CC_DEBUG_PRINT(__FUNCTION__);
+  SH_CC_DEBUG_PRINT(__FUNCTION__);
   return false;
 }
 
 void CcBackendCode::freeRegister(const VariableNodePtr& var) 
 {
-  CC_DEBUG_PRINT(__FUNCTION__);
+  SH_CC_DEBUG_PRINT(__FUNCTION__);
 }
 
 void CcBackendCode::upload(void) 
 {
-  CC_DEBUG_PRINT(__FUNCTION__);
+  SH_CC_DEBUG_PRINT(__FUNCTION__);
 }
 
 void CcBackendCode::bind(void) 
 {
-  CC_DEBUG_PRINT(__FUNCTION__);
+  SH_CC_DEBUG_PRINT(__FUNCTION__);
 }
 
 void CcBackendCode::unbind(void)
 {
-  CC_DEBUG_PRINT(__FUNCTION__);
+  SH_CC_DEBUG_PRINT(__FUNCTION__);
 }
 
 void CcBackendCode::update(void) 
 {
-  CC_DEBUG_PRINT(__FUNCTION__);
+  SH_CC_DEBUG_PRINT(__FUNCTION__);
 }
 
 void CcBackendCode::updateUniform(const VariableNodePtr& uniform) 
 {
-  CC_DEBUG_PRINT(__FUNCTION__);
+  SH_CC_DEBUG_PRINT(__FUNCTION__);
 }
 
 std::ostream& CcBackendCode::print(std::ostream& out) 
 {
-  CC_DEBUG_PRINT(__FUNCTION__);
+  SH_CC_DEBUG_PRINT(__FUNCTION__);
   return out;
 }
 
 std::ostream& CcBackendCode::describe_interface(std::ostream& out) 
 {
-  CC_DEBUG_PRINT(__FUNCTION__);
+  SH_CC_DEBUG_PRINT(__FUNCTION__);
   return out;
 }
 
 std::ostream& CcBackendCode::describe_bindings(std::ostream& out) 
 {
-  CC_DEBUG_PRINT(__FUNCTION__);
+  SH_CC_DEBUG_PRINT(__FUNCTION__);
   return out;
 }
 
@@ -215,7 +215,7 @@ void CcBackendCode::allocate_varlist(const std::list<T> &varList, const char* va
   }
   m_code << std::endl;
 
-  CC_DEBUG_PRINT("Found " << num << " " << arrayName << "...");
+  SH_CC_DEBUG_PRINT("Found " << num << " " << arrayName << "...");
 }
 
 void CcBackendCode::allocate_consts(void) 
@@ -235,7 +235,7 @@ void CcBackendCode::allocate_consts(void)
   }
   m_code << std::endl;
 
-  CC_DEBUG_PRINT("Found " << num << " consts...");
+  SH_CC_DEBUG_PRINT("Found " << num << " consts...");
 }
 
 void CcBackendCode::allocate_inputs(void) 
@@ -297,13 +297,13 @@ void CcBackendCode::allocate_temps()
     m_varmap[node] = CcVariable(m_cur_temp, name, node->size(), node->valueType()); 
   }
 
-  CC_DEBUG_PRINT("Found " << m_cur_temp << " temps...");
+  SH_CC_DEBUG_PRINT("Found " << m_cur_temp << " temps...");
 }
 
 std::string CcBackendCode::resolve(const Variable& v) 
 {
   CcVariable &var = m_varmap[v.node()];
-  DEBUG_ASSERT(var.m_num != -1);
+  SH_DEBUG_ASSERT(var.m_num != -1);
 
   std::stringstream buf;
   if (v.neg()) buf << "-";
@@ -314,7 +314,7 @@ std::string CcBackendCode::resolve(const Variable& v)
 std::string CcBackendCode::resolve(const Variable& v, int idx) 
 {
   CcVariable &var = m_varmap[v.node()];
-  DEBUG_ASSERT(var.m_num != -1);
+  SH_DEBUG_ASSERT(var.m_num != -1);
 
   std::stringstream buf;
   if (v.neg()) buf << "-";
@@ -343,8 +343,8 @@ const char* CcBackendCode::ctype(ValueType valueType)
   case SH_USHORT: return "unsigned short";
   case SH_UINT:   return "unsigned int";
   default:
-    DEBUG_PRINT("Invalid value type: " << valueTypeName(valueType));
-    DEBUG_ASSERT(0); 
+    SH_DEBUG_PRINT("Invalid value type: " << valueTypeName(valueType));
+    SH_DEBUG_ASSERT(0); 
   }
   return "unknown"; 
 }
@@ -427,7 +427,7 @@ bool CcBackendCode::generate(void)
   // b) convert input data array to a useable computation type
   // c) convert output data array to the memory storage type
 
-  CC_DEBUG_PRINT("Creating label map...");
+  SH_CC_DEBUG_PRINT("Creating label map...");
   LabelFunctor f(m_label_map);
   m_program->ctrlGraph->dfs(f);
 
@@ -439,7 +439,7 @@ bool CcBackendCode::generate(void)
   allocate_temps();
 
   // emit code
-  CC_DEBUG_PRINT("Emitting code...");
+  SH_CC_DEBUG_PRINT("Emitting code...");
   EmitFunctor fe(this);
   m_program->ctrlGraph->dfs(fe);
 
@@ -475,7 +475,7 @@ bool CcBackendCode::generate(void)
   epilogue << "}" << std::endl;
 
 #ifdef CC_DEBUG
-  CC_DEBUG_PRINT("Outputting generated C++ code to ccstream.cpp");
+  SH_CC_DEBUG_PRINT("Outputting generated C++ code to ccstream.cpp");
   std::ofstream dbgout("ccstream.cpp");
   dbgout << prologue.str();
   dbgout << m_code.str();
@@ -518,7 +518,7 @@ bool CcBackendCode::load_shader_func(const std::stringstream& prologue,
   char cmdline[1024];
   sprintf(cmdline, "cl /EHsc /LD /Fe\"%s\" \"%s\"", dllfile, cppfile);
 
-  CC_DEBUG_PRINT("cmdline: \"" << cmdline << "\"");
+  SH_CC_DEBUG_PRINT("cmdline: \"" << cmdline << "\"");
 
   STARTUPINFO si;
   PROCESS_INFORMATION pi;
@@ -528,7 +528,7 @@ bool CcBackendCode::load_shader_func(const std::stringstream& prologue,
 
   if (!CreateProcess(NULL, cmdline, NULL, NULL,
 		     TRUE, 0, NULL, NULL, &si, &pi)) {
-    CC_DEBUG_PRINT("CreateProcess failed!" << GetLastError());
+    SH_CC_DEBUG_PRINT("CreateProcess failed!" << GetLastError());
     return false;
   }
 
@@ -538,13 +538,13 @@ bool CcBackendCode::load_shader_func(const std::stringstream& prologue,
   // Attempt to load the dll and fetch our function
   m_hmodule = LoadLibrary(dllfile);
   if (m_hmodule == NULL) {
-    CC_DEBUG_PRINT("LoadLibrary failed: " << GetLastError());
+    SH_CC_DEBUG_PRINT("LoadLibrary failed: " << GetLastError());
     return false;
   } else {
     m_shader_func = (CcShaderFunc)GetProcAddress(m_hmodule, "cc_shader");
 
     if (m_shader_func == NULL) {
-      CC_DEBUG_PRINT("GetProcAddress failed: " << GetLastError());
+      SH_CC_DEBUG_PRINT("GetProcAddress failed: " << GetLastError());
       return false;
     }
   }
@@ -580,33 +580,33 @@ bool CcBackendCode::load_shader_func(const std::stringstream& prologue,
 #else
     execlp("cc", "cc", "-O2", "-fPIC", "-shared", "-o", sofile, ccfile, (void*)NULL);
 #endif // __APPLE__
-    CC_DEBUG_PRINT("exec failed (" << errno << ")");
+    SH_CC_DEBUG_PRINT("exec failed (" << errno << ")");
     exit(-1);
   } else if (pid > 0) {
     int status;
     pid_t ret = waitpid(pid, &status, 0);
     if (ret == -1) {
-      CC_DEBUG_PRINT("wait failed...");
+      SH_CC_DEBUG_PRINT("wait failed...");
       return false;
     } else {
-      CC_DEBUG_PRINT("status = " << status);
+      SH_CC_DEBUG_PRINT("status = " << status);
     }
 
     m_handle = dlopen(sofile, RTLD_NOW);
     if (m_handle == NULL) {
-      CC_DEBUG_PRINT("dlopen failed: " << dlerror());
+      SH_CC_DEBUG_PRINT("dlopen failed: " << dlerror());
       return false;
     } else {
       m_shader_func = (CcShaderFunc)dlsym(m_handle, "cc_shader");
       if (m_shader_func == NULL) {
-	CC_DEBUG_PRINT("dlsym failed: " << dlerror());
+	SH_CC_DEBUG_PRINT("dlsym failed: " << dlerror());
 	return false;
       }
     }
     return true;
   } else  {
     // fork failed
-    CC_DEBUG_PRINT("fork failed...");
+    SH_CC_DEBUG_PRINT("fork failed...");
     return false;
   }
 #endif /* _WIN32 */
@@ -629,7 +629,7 @@ bool CcBackendCode::execute(const Stream& src, Stream& dest)
 {
   if (!m_shader_func) {
     if (!generate()) {
-      CC_DEBUG_PRINT("failed to generate program..."); 
+      SH_CC_DEBUG_PRINT("failed to generate program..."); 
       return false;
     }
   }
@@ -648,7 +648,7 @@ bool CcBackendCode::execute(const Stream& src, Stream& dest)
     
   int iidx = 0;
     
-  CC_DEBUG_PRINT("Assigning input channels to arrays");
+  SH_CC_DEBUG_PRINT("Assigning input channels to arrays");
   for(Stream::const_iterator I = src.begin(); I != src.end(); ++I, ++iidx) {
     HostStoragePtr storage = shref_dynamic_cast<HostStorage>(I->node()->memory(0)->findStorage("host"));
 
@@ -687,7 +687,7 @@ bool CcBackendCode::execute(const Stream& src, Stream& dest)
   int dest_count = 0;
 
     
-  CC_DEBUG_PRINT("Assigning output channels to arrays");
+  SH_CC_DEBUG_PRINT("Assigning output channels to arrays");
   for(Stream::NodeList::iterator I = dest.begin()
         ;I != dest.end(); ++I, ++oidx) {
     HostStoragePtr storage = shref_dynamic_cast<HostStorage>(
@@ -703,19 +703,19 @@ bool CcBackendCode::execute(const Stream& src, Stream& dest)
     output_types[oidx] = I->node()->valueType();
 
     if (!storage) {
-      CC_DEBUG_PRINT("  Allocating new storage?");
+      SH_CC_DEBUG_PRINT("  Allocating new storage?");
       storage = new HostStorage(I->node()->memory(0).object(),
 				  datasize * I->node()->size() * count, I->node()->valueType());
     }
     storage->dirty();
     outputs[oidx] = reinterpret_cast<char*>(storage->data()) +
                     datasize * I->node()->size() * offset;
-    CC_DEBUG_PRINT("  outputs[" << oidx << "] = " << outputs[oidx]);
+    SH_CC_DEBUG_PRINT("  outputs[" << oidx << "] = " << outputs[oidx]);
 
     if (dest_count == 0) {
       dest_count = count;
     } else if (dest_count != count) {
-      CC_DEBUG_PRINT("channel count discrepancy...");
+      SH_CC_DEBUG_PRINT("channel count discrepancy...");
       return false;
     }
   }
@@ -725,7 +725,7 @@ bool CcBackendCode::execute(const Stream& src, Stream& dest)
     m_shader_func(inputs, m_params, streams, textures, outputs);
 
     for(int j = 0; j < num_inputs; j++) {
-      CC_DEBUG_PRINT("advancing input stream "
+      SH_CC_DEBUG_PRINT("advancing input stream "
 			<< j
 			<< " by "
 			<< input_sizes[j] 
@@ -735,7 +735,7 @@ bool CcBackendCode::execute(const Stream& src, Stream& dest)
       inputs[j] = reinterpret_cast<char*>(inputs[j]) + input_sizes[j]; 
     }
     for(int j = 0; j < num_outputs; j++) {
-      CC_DEBUG_PRINT("advancing output stream "
+      SH_CC_DEBUG_PRINT("advancing output stream "
 			<< j
 			<< " by "
 			<< output_sizes[j]
@@ -751,18 +751,18 @@ bool CcBackendCode::execute(const Stream& src, Stream& dest)
 CcBackend::CcBackend(void)
   : Backend("cc", "1.0")
 {
-  CC_DEBUG_PRINT(__FUNCTION__);
+  SH_CC_DEBUG_PRINT(__FUNCTION__);
 }
 
 CcBackend::~CcBackend(void) 
 {
-  CC_DEBUG_PRINT(__FUNCTION__);
+  SH_CC_DEBUG_PRINT(__FUNCTION__);
 }
 
 BackendCodePtr CcBackend::generate_code(const std::string& target,
 					  const ProgramNodeCPtr& program) 
 {
-  CC_DEBUG_PRINT(__FUNCTION__);
+  SH_CC_DEBUG_PRINT(__FUNCTION__);
   CcBackendCodePtr backendcode = new CcBackendCode(program);
   backendcode->generate();
   return backendcode;
@@ -770,7 +770,7 @@ BackendCodePtr CcBackend::generate_code(const std::string& target,
 
 void CcBackend::execute(const Program& program, Stream& dest) 
 {
-  CC_DEBUG_PRINT(__FUNCTION__);
+  SH_CC_DEBUG_PRINT(__FUNCTION__);
 
   ProgramNodePtr prg = shref_const_cast<ProgramNode>(program.node());
   Pointer<Backend> b(this);

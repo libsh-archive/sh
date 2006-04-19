@@ -105,7 +105,7 @@ VariableNodePtr VariableNode::clone(BindingType newKind,
       bool updateVarList, 
       bool keepUniform) const
 {
-  DEBUG_ASSERT(newValueType != 0);
+  SH_DEBUG_ASSERT(newValueType != 0);
   BindingType kind = (newKind == BINDINGTYPE_END ? m_kind : newKind);
   int size = (newSize == 0 ? m_size : newSize);
   ValueType valueType = (newValueType == VALUETYPE_END ? m_valueType : newValueType);
@@ -147,7 +147,7 @@ int VariableNode::size() const
 
 void VariableNode::size(int s)
 {
-  DEBUG_ASSERT(!m_variant);
+  SH_DEBUG_ASSERT(!m_variant);
   m_size = s;
 }
 
@@ -417,13 +417,13 @@ void VariableNode::programDeclInit()
 void VariableNode::addVariant()
 {
   if (m_variant) return;
-  DEBUG_ASSERT(m_valueType != VALUETYPE_END);
+  SH_DEBUG_ASSERT(m_valueType != VALUETYPE_END);
   m_variant = variantFactory(m_valueType)->generate(m_size);
 }
 
 void VariableNode::attach(const ProgramNodePtr& evaluator)
 {
-  DEBUG_ASSERT(uniform());
+  SH_DEBUG_ASSERT(uniform());
   if (!m_eval) m_eval = new VariableNodeEval;
   // TODO: Check that the program really evaluates this variable.
 

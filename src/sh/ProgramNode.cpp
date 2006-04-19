@@ -224,7 +224,7 @@ std::string ProgramNode::describe_bindings(const std::string& target)
 
 void ProgramNode::dump(std::string filename) const
 {
-  DEBUG_PRINT("Dumping " << filename);
+  SH_DEBUG_PRINT("Dumping " << filename);
   std::string varfile = filename + ".vars";
   std::ofstream varout(varfile.c_str());
   varout << "Program "; 
@@ -284,7 +284,7 @@ bool ProgramNode::hasDecl(const VariableNodePtr& node) const
 void ProgramNode::addDecl(const VariableNodePtr& node, const CtrlGraphNodePtr& cfgNode)
 {
   tempDecls.insert(node);
-  DEBUG_ASSERT(ctrlGraph->entry());
+  SH_DEBUG_ASSERT(ctrlGraph->entry());
   cfgNode->addDecl(node);
 }
 
@@ -300,7 +300,7 @@ void ProgramNode::collect_node_decls(const CtrlGraphNodePtr& node)
   tempDecls.insert(node->decl_begin(), node->decl_end());
   /* @todo range
   for(CtrlGraphNode::DeclIt I = node->decl_begin(); I != node->decl_end(); ++I) {
-    DEBUG_PRINT("  collectDecls - " << (*I)->name());
+    SH_DEBUG_PRINT("  collectDecls - " << (*I)->name());
   }
   */
 
@@ -388,7 +388,7 @@ void ProgramNode::collect_var(const VariableNodePtr& var)
     }
     break;
   default:
-    DEBUG_ASSERT(0);
+    SH_DEBUG_ASSERT(0);
   }
 }
 

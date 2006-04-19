@@ -139,21 +139,21 @@ Backend::Backend(const string& name, const string& version)
 
 Backend::~Backend()
 {
-  DEBUG_ASSERT(!m_name.empty());
-  DEBUG_ASSERT(m_loaded_libraries->find(m_name) != m_loaded_libraries->end());
+  SH_DEBUG_ASSERT(!m_name.empty());
+  SH_DEBUG_ASSERT(m_loaded_libraries->find(m_name) != m_loaded_libraries->end());
   LibraryHandle handle = (*m_loaded_libraries)[m_name]->handle();
   
   // handle may be null if library was loaded by app (i.e. statically linked)
   if (handle) {
 #if defined(_WIN32)
     if (!FreeLibrary((HMODULE)handle)) {
-      DEBUG_ERROR("Could not unload the " << m_name << " library.");
+      SH_DEBUG_ERROR("Could not unload the " << m_name << " library.");
     }
 #elif defined(__APPLE__) && !defined(AUTOTOOLS)
     CFRelease(handle);
 #else
     if (!lt_dlclose(handle)) {
-      DEBUG_ERROR("Could not unload the " << m_name << " library: " << lt_dlerror());
+      SH_DEBUG_ERROR("Could not unload the " << m_name << " library: " << lt_dlerror());
     }
 #endif
   }
@@ -272,7 +272,7 @@ bool Backend::load_library(const string& filename)
 #endif
 
   if (!module) {
-    DEBUG_WARN("Could not open " << filename);
+    SH_DEBUG_WARN("Could not open " << filename);
     return false;
   }
 
@@ -283,11 +283,11 @@ bool Backend::load_library(const string& filename)
   TargetCostEntryPoint* target_cost = load_function<TargetCostEntryPoint>(module, target_cost_function_name.c_str());
 
   if (!instantiate) {
-    DEBUG_ERROR("Could not find " << init_function_name);
+    SH_DEBUG_ERROR("Could not find " << init_function_name);
   }
 
   if (!target_cost) {
-    DEBUG_ERROR("Could not find " << target_cost_function_name);
+    SH_DEBUG_ERROR("Could not find " << target_cost_function_name);
   }
 
   (*m_loaded_libraries)[backend_name] = new LibraryInformation(module, instantiate, target_cost);
@@ -342,7 +342,7 @@ BackendPtr Backend::instantiate_backend(const string& backend_name)
     return (*m_instantiated_backends)[backend_name];
   }
 
-  DEBUG_ASSERT(m_loaded_libraries->find(backend_name) != m_loaded_libraries->end());
+  SH_DEBUG_ASSERT(m_loaded_libraries->find(backend_name) != m_loaded_libraries->end());
   InstantiateEntryPoint* instantiate = (*m_loaded_libraries)[backend_name]->instantiate_function();
 
   if (instantiate) {
@@ -380,7 +380,7 @@ int Backend::target_cost(const string& backend_name, const string& target)
   init();
   int cost = 0;
 
-  DEBUG_ASSERT(m_loaded_libraries->find(backend_name) != m_loaded_libraries->end());
+  SH_DEBUG_ASSERT(m_loaded_libraries->find(backend_name) != m_loaded_libraries->end());
   TargetCostEntryPoint* func = (*m_loaded_libraries)[backend_name]->target_cost_function();
 
   if (func) {
@@ -503,14 +503,14 @@ void Backend::init()
 
 #if !defined(_WIN32) && (!defined(__APPLE__) || defined(AUTOTOOLS))
   if (lt_dlinit()) {
-    DEBUG_ERROR("Error initializing ltdl: " << lt_dlerror());
+    SH_DEBUG_ERROR("Error initializing ltdl: " << lt_dlerror());
   }
 
   string userpath(getenv("HOME"));
   userpath += "/";
   userpath += LOCAL_BACKEND_DIRNAME;
   if (lt_dladdsearchdir(userpath.c_str())) {
-    DEBUG_ERROR("Could not add " + userpath + " to search dir: " << lt_dlerror());
+    SH_DEBUG_ERROR("Could not add " + userpath + " to search dir: " << lt_dlerror());
   }
 
   char* install_prefix = br_find_prefix(SH_INSTALL_PREFIX);
@@ -518,7 +518,7 @@ void Backend::init()
   searchpath += "/lib/sh";
   free(install_prefix);
   if (lt_dladdsearchdir(searchpath.c_str())) {
-    DEBUG_ERROR("Could not add " + searchpath + " to search dir: " << lt_dlerror());
+    SH_DEBUG_ERROR("Could not add " + searchpath + " to search dir: " << lt_dlerror());
   }
 #endif /* _WIN32 */
 

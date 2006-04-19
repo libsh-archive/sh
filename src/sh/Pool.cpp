@@ -35,7 +35,7 @@ Pool::Pool(std::size_t element_size, std::size_t block_size)
 void* Pool::alloc()
 {
   if (!m_next) {
-    //DEBUG_PRINT("new pool");
+    //SH_DEBUG_PRINT("new pool");
     char* block = new char[m_block_size * m_element_size];
     void* next = 0;
     for (std::size_t i = 0; i < m_block_size; i++) {

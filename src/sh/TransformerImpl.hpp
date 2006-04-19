@@ -52,7 +52,7 @@ struct CastExtractorBase: public TransformerParent
       if(from == to) continue;
       if(!CanCast::checkSrc(stmt.op, from, to)) {
 #ifdef DBG_TRANSFORMER
-        DEBUG_PRINT("Turning src[" << i << "] into ASN for cast " 
+        SH_DEBUG_PRINT("Turning src[" << i << "] into ASN for cast " 
             << valueTypeName(from) << "->" 
             << valueTypeName(to) << " on stmt=" << stmt);
 #endif
@@ -68,7 +68,7 @@ struct CastExtractorBase: public TransformerParent
     ValueType to = evalInfo->m_dest;
     if(from != to && !CanCast::checkDest(stmt.op, from, to)) {
 #ifdef DBG_TRANSFORMER
-      DEBUG_PRINT("Turning dest into ASN for cast " 
+      SH_DEBUG_PRINT("Turning dest into ASN for cast " 
           << valueTypeName(from) << "->" 
           << valueTypeName(to) << " on stmt=" << stmt);
 #endif
@@ -120,7 +120,7 @@ struct ScalarVectorizerBase: public TransformerParent
     if(maxSize == 1) return false;
 
 #ifdef DBG_TRANSFORMER
-    DEBUG_PRINT("Vectorizing to size=" << maxSize << " on stmt=" << stmt);
+    SH_DEBUG_PRINT("Vectorizing to size=" << maxSize << " on stmt=" << stmt);
 #endif
     for(int i = 0; i < opInfo[stmt.op].arity; ++i) {
       if(stmt.src[i].size() == 1) {

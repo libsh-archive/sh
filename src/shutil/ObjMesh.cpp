@@ -203,13 +203,13 @@ std::istream& ObjMesh::readObj(std::istream &in) {
   generateFaceNormals();
 
   int badNorms = generateVertexNormals();
-  if(badNorms > 0) DEBUG_WARN("OBJ file has " << badNorms << " vertices without normals"); 
+  if(badNorms > 0) SH_DEBUG_WARN("OBJ file has " << badNorms << " vertices without normals"); 
 
   int badTangents = generateTangents();
-  if(badTangents > 0) DEBUG_WARN("OBJ file has " << badTangents << " vertices without tangents"); 
+  if(badTangents > 0) SH_DEBUG_WARN("OBJ file has " << badTangents << " vertices without tangents"); 
 
   int badTexCoords = generateSphericalTexCoords();
-  if(badTexCoords > 0) DEBUG_WARN("OBJ file has " << badTexCoords << " vertices without texture coordinates.");
+  if(badTexCoords > 0) SH_DEBUG_WARN("OBJ file has " << badTexCoords << " vertices without texture coordinates.");
 
   // TODO flip faces that have vert normals not matching the face normal
   return in;

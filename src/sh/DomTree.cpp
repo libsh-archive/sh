@@ -74,7 +74,7 @@ namespace SH {
     void operator()(CtrlGraphNodePtr node, int level) {
       //    node->print(std::cerr, 0);
       printIndent(std::cerr, level);
-      DEBUG_PRINT("Node with numbering " << tree.numbering(node));
+      SH_DEBUG_PRINT("Node with numbering " << tree.numbering(node));
     }
     const DomTree& tree;
   };
@@ -82,10 +82,10 @@ namespace SH {
   void DomTree::debugDump()
   {
 #ifdef DEBUG
-    DEBUG_PRINT("Debug Dump");
+    SH_DEBUG_PRINT("Debug Dump");
     DebugDumper d(*this);
     preorder(d);
-    DEBUG_PRINT("Debug Dump End");
+    SH_DEBUG_PRINT("Debug Dump End");
 #endif
   }
 

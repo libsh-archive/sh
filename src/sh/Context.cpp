@@ -41,7 +41,7 @@ Context* Context::current()
     BrInitError error;
     int init_passed = br_init_lib(&error);
     if (!init_passed && error != BR_INIT_ERROR_DISABLED) {
-      DEBUG_WARN("BinReloc failed to initialize (error code " 
+      SH_DEBUG_WARN("BinReloc failed to initialize (error code " 
         << error << "). Will fallback to hardcoded default paths.");
     }
 #endif
@@ -138,7 +138,7 @@ void Context::enter(const ProgramNodePtr& program)
 
 void Context::exit()
 {
-  DEBUG_ASSERT(!m_parsing.empty());
+  SH_DEBUG_ASSERT(!m_parsing.empty());
   m_parsing.pop();
 }
 

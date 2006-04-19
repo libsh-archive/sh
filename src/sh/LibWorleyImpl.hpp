@@ -194,7 +194,7 @@ void GridGenFactory<D, T>::operator()(const Generic<D, T> &p,
 
     Generator<D, T> gen;
     result[j].offset = offsets.template swiz<D>(offsetSwiz); 
-    DEBUG_PRINT("Offset:" << result[j].offset); 
+    SH_DEBUG_PRINT("Offset:" << result[j].offset); 
     result[j].cell = pCell + result[j].offset;
     makePos(result[j]);
     ++j;

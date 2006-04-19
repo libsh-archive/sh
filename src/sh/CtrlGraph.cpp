@@ -212,7 +212,7 @@ CtrlGraph::CtrlGraph(const BlockListPtr& blocks)
   if(!head && !tail) {
     m_entry->append(m_exit);
   } else {
-    DEBUG_ASSERT(head && tail);
+    SH_DEBUG_ASSERT(head && tail);
     m_entry->append(head);
     tail->append(m_exit);
   }
@@ -239,7 +239,7 @@ CtrlGraphNodePtr CtrlGraph::prependEntry() {
   newEntry->mark();
   
   if( oldEntry->block ) {
-    DEBUG_WARN( "Old entry to control graph did not have an empty block!");
+    SH_DEBUG_WARN( "Old entry to control graph did not have an empty block!");
   } else {
     oldEntry->block = new BasicBlock();
   }
@@ -253,7 +253,7 @@ CtrlGraphNodePtr CtrlGraph::appendExit() {
   oldExit->append(newExit);
   
   if( oldExit->block ) {
-    DEBUG_WARN( "Old exit to control graph did not have an empty block!");
+    SH_DEBUG_WARN( "Old exit to control graph did not have an empty block!");
   } else {
     oldExit->block = new BasicBlock();
   }
@@ -351,8 +351,8 @@ void CtrlGraph::copy(CtrlGraphNodePtr& newHead, CtrlGraphNodePtr& newTail) const
   copyMap[0] = 0;
   
   CtrlGraphCopier copier(copyMap);
-  DEBUG_ASSERT(m_entry);
-  DEBUG_ASSERT(m_exit); // catch empty tails
+  SH_DEBUG_ASSERT(m_entry);
+  SH_DEBUG_ASSERT(m_exit); // catch empty tails
   m_entry->clearMarked();
   m_entry->dfs(copier);
 
@@ -372,8 +372,8 @@ void CtrlGraph::copy(CtrlGraphNodePtr& newHead, CtrlGraphNodePtr& newTail) const
   }
   newHead = copyMap[m_entry];
   newTail = copyMap[m_exit];
-  DEBUG_ASSERT(newHead);
-  DEBUG_ASSERT(newTail);
+  SH_DEBUG_ASSERT(newHead);
+  SH_DEBUG_ASSERT(newTail);
 
   m_entry->clearMarked();
 }

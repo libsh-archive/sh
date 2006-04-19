@@ -305,7 +305,7 @@ void Parser::parseSection(CtrlGraphNodePtr& head,
 
   // @todo range this is a really stupid way of grabbing the name...
   BasicBlockPtr basic = shref_dynamic_cast<BasicBlock>(blocks->getFront());
-  DEBUG_ASSERT(basic && !basic->empty() && basic->begin()->op == OP_COMMENT);
+  SH_DEBUG_ASSERT(basic && !basic->empty() && basic->begin()->op == OP_COMMENT);
   std::string name = basic->begin()->get_info<InfoComment>()->comment;
   basic->erase(basic->begin());
 

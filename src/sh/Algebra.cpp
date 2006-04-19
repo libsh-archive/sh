@@ -38,7 +38,7 @@ Program connect(Program pa, Program pb)
   ProgramNodePtr a = pa.node();
   ProgramNodePtr b = pb.node();
   
-  if( !a || !b ) DEBUG_WARN( "Connecting with a null Program" );
+  if( !a || !b ) SH_DEBUG_WARN( "Connecting with a null Program" );
   if( !a ) return b;
   if( !b ) return a;
   
@@ -52,7 +52,7 @@ Program connect(Program pa, Program pb)
     if (b->target().empty() || a->target() == b->target()) {
       rtarget = a->target(); // A has a target, b doesn't
     } else {
-      DEBUG_WARN("Connecting two different targets. Using empty target for result.");
+      SH_DEBUG_WARN("Connecting two different targets. Using empty target for result.");
       rtarget = ""; // Connecting different targets.
     }
   }
@@ -168,7 +168,7 @@ Program combine(Program pa, Program pb)
   ProgramNodePtr b = pb.node();
   
   std::string rtarget;
-  if( !a || !b ) DEBUG_WARN( "Connecting with a null Program" );
+  if( !a || !b ) SH_DEBUG_WARN( "Connecting with a null Program" );
   if (!a) return b;
   if (!b) return a;
 
@@ -265,7 +265,7 @@ Program namedConnect(Program pa, Program pb, bool keepExtra)
       if(bMatch[j]) continue;
       if((*I)->name() != (*J)->name()) continue;
       if((*I)->size() != (*J)->size()) {
-        DEBUG_WARN("Named connect matched channel name " << (*I)->name() 
+        SH_DEBUG_WARN("Named connect matched channel name " << (*I)->name() 
             << " but output size " << (*I)->size() << " != " << " input size " << (*J)->size() );
         continue;
       }

@@ -149,7 +149,7 @@ Record& Record::operator=(const Record &other)
 
 Record& Record::operator=(const Program& program)
 {
-  //DEBUG_PRINT("Assigning program to record");
+  //SH_DEBUG_PRINT("Assigning program to record");
   if(!program.node()->inputs.empty()) {
     std::ostringstream out;
     out << "Insufficient arguments for calling an Program." << std::endl; 
@@ -166,7 +166,7 @@ Record& Record::operator=(const Program& program)
   } else { //immediate mode
     // @todo range immediate mode program calls should execute the 
     // Eval interpreter.
-    DEBUG_PRINT("Should call an interpreter here");
+    SH_DEBUG_PRINT("Should call an interpreter here");
   }
   return *this;
 }
@@ -177,7 +177,7 @@ Program connect(const Record& rec, const Program& program)
     for(Record::VarList::const_iterator I = rec.begin(); I != rec.end(); ++I) {
       Variable out(I->node()->clone(SH_OUTPUT, I->size(), VALUETYPE_END, SEMANTICTYPE_END, 
         true, false));
-      //DEBUG_PRINT("connect Record output size = " << I->size()); 
+      //SH_DEBUG_PRINT("connect Record output size = " << I->size()); 
       Context::current()->parsing()->tokenizer.blockList()->addStatement(
         Statement(out, OP_ASN, *I));  
     }
@@ -199,7 +199,7 @@ Program connect(const Program& program, const Record& rec)
     for(Record::VarList::const_iterator I = rec.begin(); I != rec.end(); ++I) {
       Variable in(I->node()->clone(SH_INPUT, I->size(), VALUETYPE_END, SEMANTICTYPE_END, 
             true, false));
-      //DEBUG_PRINT("connect Record input size = " << I->size()); 
+      //SH_DEBUG_PRINT("connect Record input size = " << I->size()); 
       Context::current()->parsing()->tokenizer.blockList()->addStatement(
          Statement(*I, OP_ASN, in));  
     }

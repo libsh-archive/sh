@@ -260,7 +260,7 @@ struct StatementSplitter {
     switch(oldStmt.op) {
       case OP_CSUM:
         {
-          DEBUG_ASSERT(destSwiz.size() == 1);
+          SH_DEBUG_ASSERT(destSwiz.size() == 1);
           Variable partialt = Variable(resizeCloneNode(dest.node(), 1));
           Variable sumt = Variable(resizeCloneNode(dest.node(), 1));
 
@@ -274,7 +274,7 @@ struct StatementSplitter {
         break;
       case OP_CMUL:
         {
-          DEBUG_ASSERT(destSwiz.size() == 1);
+          SH_DEBUG_ASSERT(destSwiz.size() == 1);
           Variable partialt = Variable(resizeCloneNode(dest.node(), 1));
           Variable prodt = Variable(resizeCloneNode(dest.node(), 1));
 
@@ -290,7 +290,7 @@ struct StatementSplitter {
         { 
           // TODO for large tuples, may want to use another dot to sum up results instead of 
           // OP_ADD. For now, do naive method
-          DEBUG_ASSERT(destSwiz.size() == 1);
+          SH_DEBUG_ASSERT(destSwiz.size() == 1);
 
           // TODO check that this works correctly for weird types
           // (temporaries should have same type as the Statement's operation type) 
@@ -307,7 +307,7 @@ struct StatementSplitter {
         break;
       case OP_XPD:
         {
-          DEBUG_ASSERT( srcVec[0].size() == 1 && srcVec[0][0].size() == 3 &&
+          SH_DEBUG_ASSERT( srcVec[0].size() == 1 && srcVec[0][0].size() == 3 &&
               srcVec[1].size() == 1 && srcVec[1][0].size() == 3); 
 
           // TODO check typing
@@ -370,7 +370,7 @@ struct StatementSplitter {
 };
 
 void Transformer::splitTuples(int maxTuple, Transformer::VarSplitMap &splits) {
-  DEBUG_ASSERT(maxTuple > 0); 
+  SH_DEBUG_ASSERT(maxTuple > 0); 
 #ifdef DBG_TRANSFORMER
   m_program->dump("splittupl_start");
 #endif
@@ -569,7 +569,7 @@ struct TextureLookupConverter {
 
     BasicBlock::StmtList newStmts;
     
-    if (!tn) { DEBUG_ERROR("TEX Instruction from non-texture"); return; }
+    if (!tn) { SH_DEBUG_ERROR("TEX Instruction from non-texture"); return; }
     if (stmt.op == OP_TEX && tn->dims() == SH_TEXTURE_RECT) {
       // TODO check typing
       //Variable tc(new VariableNode(SH_TEMP, tn->texSizeVar().size()));

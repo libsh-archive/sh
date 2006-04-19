@@ -62,7 +62,7 @@ void MeshEdge<M>::setLinks(Vertex *s, Vertex *e, Face *f,
   // TODO Figure out what to do here instead of shellacking
   // the user with a dumb error message.
   if(start || end) {
-    DEBUG_WARN("Changing start/end vertex of an edge.  "
+    SH_DEBUG_WARN("Changing start/end vertex of an edge.  "
       << "This is probably not a good idea.");
   }
 
@@ -117,7 +117,7 @@ Mesh<M>& Mesh<M>::operator=(const Mesh<M> &other) {
   EdgeMap emap;
   FaceMap fmap;
 
-  DEBUG_WARN("Assignment");
+  SH_DEBUG_WARN("Assignment");
   clear();
 
   // mappings for null pointers
@@ -197,7 +197,7 @@ Mesh<M>::addFace(const typename Mesh<M>::VertexList &vl) {
     Vertex *start = *(I++);
     Vertex *end = (I == vl.end() ? first : *I); 
 
-    DEBUG_ASSERT(start);
+    SH_DEBUG_ASSERT(start);
 
     newe = new Edge();
     newe->setLinks(start, end, newf, 0, olde, 0);
@@ -282,7 +282,7 @@ void Mesh<M>::mergeEdges() {
     if(match) match->setSym(e);
 
     if( edgeMatch[e->start][e->end] != 0 ) {
-      DEBUG_WARN("Duplicate edge found in mesh");
+      SH_DEBUG_WARN("Duplicate edge found in mesh");
     }
     edgeMatch[e->start][e->end] = e;
   }
@@ -358,7 +358,7 @@ void Mesh<M>::removeHalfEdge(Edge *e) {
 template<typename M>
 void Mesh<M>::insertHalfEdge(Edge *e) {
   edges.insert(e);
-  DEBUG_ASSERT(e->start);
+  SH_DEBUG_ASSERT(e->start);
   m_incidences.insert(Incidence(e->start, e));
 }
 

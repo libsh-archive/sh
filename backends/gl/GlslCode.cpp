@@ -77,7 +77,7 @@ GlslCode::~GlslCode()
 
   if (m_arb_shader != 0) {
     // Shouldn't be bound, ever
-    DEBUG_ASSERT(!m_bound);
+    SH_DEBUG_ASSERT(!m_bound);
     GL_CHECK_ERROR(glDeleteObjectARB(m_arb_shader));
   }
   delete m_varmap;
@@ -165,7 +165,7 @@ void GlslCode::upload()
   } else if (GLSL_FP == m_unit) {
     m_arb_shader = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
   }
-  DEBUG_ASSERT(m_arb_shader);
+  SH_DEBUG_ASSERT(m_arb_shader);
 
   stringstream code;
   print(code);
@@ -206,7 +206,7 @@ void GlslCode::upload()
 // This must be done before linking the glsl program
 void GlslCode::bind_generic_attributes(GLhandleARB glsl_program)
 {
-  DEBUG_ASSERT(m_arb_shader);
+  SH_DEBUG_ASSERT(m_arb_shader);
   if (m_unit != GLSL_VP) return; // generic attributes are only for vertex programs right now
 
   for (ProgramNode::VarList::const_iterator i = m_shader->begin_inputs(); 
@@ -245,7 +245,7 @@ void GlslCode::bind()
 void GlslCode::unbind()
 {
   if (!m_bound) return;
-  DEBUG_ASSERT(GlslSet::current());
+  SH_DEBUG_ASSERT(GlslSet::current());
   
   if (!m_fallback_set) m_fallback_set = new GlslSet;
 
@@ -282,7 +282,7 @@ void GlslCode::upload_uniforms()
 {
   if (!m_bound) return;
   
-  DEBUG_ASSERT(m_varmap);
+  SH_DEBUG_ASSERT(m_varmap);
 
   for (GlslVariableMap::NodeList::iterator i = m_varmap->node_begin();
        i != m_varmap->node_end(); i++) {
@@ -343,7 +343,7 @@ void GlslCode::update_float_uniform(const VariableNodePtr& node, const GLint loc
     GL_CHECK_ERROR(glUniform4fvARB(location, 1, values));
     break;
   default:
-    DEBUG_ASSERT(0); // Unsupported size
+    SH_DEBUG_ASSERT(0); // Unsupported size
   }
 }
 
@@ -383,7 +383,7 @@ void GlslCode::update_int_uniform(const VariableNodePtr& node, const GLint locat
     GL_CHECK_ERROR(glUniform4ivARB(location, 1, values));
     break;
   default:
-    DEBUG_ASSERT(0); // Unsupported size
+    SH_DEBUG_ASSERT(0); // Unsupported size
   }
 }
 
@@ -391,7 +391,7 @@ void GlslCode::updateUniform(const VariableNodePtr& uniform)
 {
   if (!m_bound) return;
 
-  DEBUG_ASSERT(uniform);
+  SH_DEBUG_ASSERT(uniform);
 
   // Variable is in the map?
   const GlslVariable *var;
@@ -448,7 +448,7 @@ string GlslCode::print_decl(const GlslVariableDeclaration& decl)
 
 ostream& GlslCode::print(ostream& out)
 {
-  DEBUG_ASSERT(m_varmap);
+  SH_DEBUG_ASSERT(m_varmap);
   const string BLOCK_INDENT("    ");
 
   out << "// OpenGL " << ((m_unit == GLSL_VP) ? "Vertex" : "Fragment") << " Program" << endl;
@@ -516,7 +516,7 @@ ostream& GlslCode::describe_interface(ostream& out)
 
 ostream& GlslCode::describe_bindings(ostream& out)
 {
-  DEBUG_ASSERT(m_varmap);
+  SH_DEBUG_ASSERT(m_varmap);
 
   out << "Inputs:" << endl;
   for (ProgramNode::VarList::const_iterator i = m_shader->begin_inputs(); 
@@ -728,13 +728,13 @@ void GlslCode::gen_structural_node(const StructuralNodePtr& node)
     append_line("} // infinite while loop", false);
   }
   else {
-    DEBUG_WARN("Unknown StructuralNode type encountered.  Generated code may be incomplete.");
+    SH_DEBUG_WARN("Unknown StructuralNode type encountered.  Generated code may be incomplete.");
   }
 }
 
 string GlslCode::resolve(const Variable& v, int index, int size) const
 {
-  DEBUG_ASSERT(m_varmap);
+  SH_DEBUG_ASSERT(m_varmap);
 
   if ((0 == size) || (v.size() == size)) {
     return m_varmap->resolve(v, index);
@@ -745,7 +745,7 @@ string GlslCode::resolve(const Variable& v, int index, int size) const
 
 string GlslCode::resolve(const Variable& v, const Variable& index) const
 {
-  DEBUG_ASSERT(m_varmap);
+  SH_DEBUG_ASSERT(m_varmap);
   return m_varmap->resolve(v, index);
 }
 

@@ -154,9 +154,9 @@ Program operator<<(const Program& program,
 
 Stream& Stream::operator=(const Program& program)
 {
-  DEBUG_ASSERT(program.node());
+  SH_DEBUG_ASSERT(program.node());
   BackendPtr backend = Backend::get_backend(program.target());
-  DEBUG_ASSERT(backend);
+  SH_DEBUG_ASSERT(backend);
   backend->execute(program, *this);
   return *this;
 }

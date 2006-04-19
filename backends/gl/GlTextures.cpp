@@ -102,7 +102,7 @@ GLenum glInternalFormat(const TextureNodePtr& node, bool forceRGB)
   if (exts_ptr) {
     exts = std::string(exts_ptr);
   } else {
-    DEBUG_WARN("Could not read GL_EXTENSIONS.  Something wrong with your driver installation?");
+    SH_DEBUG_WARN("Could not read GL_EXTENSIONS.  Something wrong with your driver installation?");
   }
 
   GLenum* float_formats = 0;
@@ -123,7 +123,7 @@ GLenum glInternalFormat(const TextureNodePtr& node, bool forceRGB)
     float_formats = fpformats_nv;
     half_formats = halfformats_nv;
   } else {
-    DEBUG_WARN("Float textures are not available for this texture size.  Using byte textures instead. ");
+    SH_DEBUG_WARN("Float textures are not available for this texture size.  Using byte textures instead. ");
     float_formats = byteformats;
     half_formats = byteformats;
   }
@@ -169,7 +169,7 @@ GLenum glInternalFormat(const TextureNodePtr& node, bool forceRGB)
     formats = byteformats;
     break;
   default:
-    DEBUG_ERROR("Could not find appropriate texture format \n"
+    SH_DEBUG_ERROR("Could not find appropriate texture format \n"
 		   "Using default instead!");
     return node->size();
     break;
@@ -206,7 +206,7 @@ GLenum glFormat(const TextureNodePtr& node)
   default:
     break;
   }
-  DEBUG_ERROR("Invalid GL format for the texture.");
+  SH_DEBUG_ERROR("Invalid GL format for the texture.");
   return 0;
 }
 
@@ -238,7 +238,7 @@ GLenum glType(ValueType valueType, ValueType &convertedType) {
     case SH_FUBYTE:   result = GL_UNSIGNED_BYTE; break;
 
     default:
-      DEBUG_ERROR("Unsupported value type to glReadPixel type conversion"); 
+      SH_DEBUG_ERROR("Unsupported value type to glReadPixel type conversion"); 
       break;
   }
 
@@ -247,7 +247,7 @@ GLenum glType(ValueType valueType, ValueType &convertedType) {
   if (exts_ptr) {
     exts = std::string(exts_ptr);
   } else {
-    DEBUG_WARN("Could not read GL_EXTENSIONS.  Something wrong with your driver installation?");
+    SH_DEBUG_WARN("Could not read GL_EXTENSIONS.  Something wrong with your driver installation?");
   }
 
   if(valueType == SH_HALF) {
@@ -263,7 +263,7 @@ GLenum glType(ValueType valueType, ValueType &convertedType) {
     }
 #endif
   }
-  DEBUG_ASSERT(result != GL_NONE);
+  SH_DEBUG_ASSERT(result != GL_NONE);
   return result;
 }
 
@@ -453,7 +453,7 @@ void GlTextures::bindTexture(const TextureNodePtr& node, GLenum target, bool wri
           if (node->build_mipmaps(dir)) {
             std::stringstream s;
             s << "Automatically generated the " << mipmap_levels << " mipmap levels (dir = " << dir << ").";
-            DEBUG_WARN(s.str());
+            SH_DEBUG_WARN(s.str());
           }
 
           int width = node->width();
@@ -508,7 +508,7 @@ void GlTextures::bindTexture(const TextureNodePtr& node, GLenum target, bool wri
     if (node->build_mipmaps()) {
       std::stringstream s;
       s << "Automatically generated the " << mipmap_levels << " mipmap levels.";
-      DEBUG_WARN(s.str());
+      SH_DEBUG_WARN(s.str());
     }
   
     int width = node->width();
@@ -568,7 +568,7 @@ void GlTextures::bindTexture(const TextureNodePtr& node, GLenum target, bool wri
         storage->sync();
       }
     }
-    DEBUG_ASSERT(name);
+    SH_DEBUG_ASSERT(name);
     
     if (write) {
       GlTextureStorage* storage = 0;
@@ -579,7 +579,7 @@ void GlTextures::bindTexture(const TextureNodePtr& node, GLenum target, bool wri
         if (storage && storage->mipmap_level() == 0)
           break;
       }
-      DEBUG_ASSERT(I != name->endStorages());
+      SH_DEBUG_ASSERT(I != name->endStorages());
 
       FBOCache::instance()->bindTexture(storage, target, 0);
       // TODO use dirtyall when the full texture is written to

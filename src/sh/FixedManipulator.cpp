@@ -63,7 +63,7 @@ LoseNode::LoseNode(int numChannels)
 }
 
 Program LoseNode::applyToInputs(ManipVarIterator &finger, ManipVarIterator end) const {
-  //DEBUG_PRINT( "Applying lose " << m_numChannels  );
+  //SH_DEBUG_PRINT( "Applying lose " << m_numChannels  );
   Program result = SH_BEGIN_PROGRAM() {
     for(int i = 0; i < m_numChannels; ++i, ++finger) {
       if(finger == end) {
@@ -156,8 +156,8 @@ Program ProgramManipNode::applyToOutputs(ManipVarIterator &finger, ManipVarItera
 
 TreeManipNode::TreeManipNode(const FixedManipulator &a, const FixedManipulator &b) 
   : a(a), b(b) {
-  DEBUG_ASSERT(a);
-  DEBUG_ASSERT(b);
+  SH_DEBUG_ASSERT(a);
+  SH_DEBUG_ASSERT(b);
 }
 
 Program TreeManipNode::applyToInputs(ManipVarIterator &finger, ManipVarIterator end) const {

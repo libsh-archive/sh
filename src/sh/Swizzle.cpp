@@ -28,7 +28,7 @@ Swizzle::Swizzle(const Swizzle& other, int n)
   : m_srcSize(other.m_srcSize),
     m_size(other.m_size * n)
 {
-  DEBUG_ASSERT(n >= 1);
+  SH_DEBUG_ASSERT(n >= 1);
   int i, j;
   if(alloc()) {
     for(j = 0; j < other.m_size; ++j) {
@@ -38,7 +38,7 @@ Swizzle::Swizzle(const Swizzle& other, int n)
       m_index.ptr[i * other.m_size + j] = m_index.ptr[j];
     }
   } else {
-    DEBUG_ASSERT(other.local());
+    SH_DEBUG_ASSERT(other.local());
     for(j = 0; j < other.m_size; ++j) {
       m_index.local[j] = other.m_index.local[j];
     }
@@ -47,7 +47,7 @@ Swizzle::Swizzle(const Swizzle& other, int n)
     } else if(other.m_size == 2) {
       for(j = 2; j < 4; ++j) m_index.local[j] = m_index.local[j-2];
     } else {
-      DEBUG_ASSERT(n == 1);
+      SH_DEBUG_ASSERT(n == 1);
     }
   }
 }

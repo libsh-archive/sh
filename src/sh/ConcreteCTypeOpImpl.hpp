@@ -73,7 +73,7 @@ struct ConcreteCTypeOp<op, T>\
 \
   static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) \
   {\
-    DEBUG_ASSERT(dest && a);\
+    SH_DEBUG_ASSERT(dest && a);\
     int ao = a->size() > 1;\
   \
     typename Variant::iterator D = dest->begin();\
@@ -95,7 +95,7 @@ struct ConcreteCTypeOp<op, T>\
 \
   static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) \
   {\
-    DEBUG_ASSERT(dest && a && b);\
+    SH_DEBUG_ASSERT(dest && a && b);\
     int ao = a->size() > 1;\
     int bo = b->size() > 1;\
   \
@@ -120,7 +120,7 @@ struct ConcreteCTypeOp<op, T>\
 \
   static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) \
   {\
-    DEBUG_ASSERT(dest && a && b && c);\
+    SH_DEBUG_ASSERT(dest && a && b && c);\
     int ao = a->size() > 1;\
     int bo = b->size() > 1;\
     int co = c->size() > 1;\
@@ -260,7 +260,7 @@ struct ConcreteCTypeOp<OP_HASH, T>
 
   static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) 
   {
-    DEBUG_ASSERT(dest && a);
+    SH_DEBUG_ASSERT(dest && a);
     typename Variant::iterator D = dest->begin();
     typename Variant::const_iterator A = a->begin();
     for(; D != dest->end(); ++A, ++D) (*D) = (*A);
@@ -277,7 +277,7 @@ struct ConcreteCTypeOp<OP_NOISE, T>
 
   static void doop(DataPtr dest, DataCPtr a, DataCPtr b = 0, DataCPtr c = 0) 
   {
-    DEBUG_ASSERT(dest && a);
+    SH_DEBUG_ASSERT(dest && a);
     typename Variant::iterator D = dest->begin();
     typename Variant::const_iterator A = a->begin();
     for(; D != dest->end(); ++A, ++D) (*D) = (*A);

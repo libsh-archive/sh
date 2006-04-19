@@ -124,12 +124,12 @@ void PBufferStreams::execute(const ProgramNodeCPtr& program_const,
   }
 
   if (dest.size() == 0) {
-    DEBUG_WARN("Stream program has no outputs?");
+    SH_DEBUG_WARN("Stream program has no outputs?");
     return;
   }
 
   if ((int)program->outputs.size() != dest.size()) {
-    DEBUG_ERROR("Number of stream program outputs ("
+    SH_DEBUG_ERROR("Number of stream program outputs ("
                    << program->outputs.size()
                    << ") does not match number of destinations ("
                    << dest.size()
@@ -215,7 +215,7 @@ void PBufferStreams::execute(const ProgramNodeCPtr& program_const,
       if (input_channels.find((*i)->memory().object()) != input_channels.end()) {
         static bool warning_seen = false;
         if (!warning_seen) {
-          DEBUG_WARN("Using an intermediate stream during execution since some of the channels are both being read from and written to.");
+          SH_DEBUG_WARN("Using an intermediate stream during execution since some of the channels are both being read from and written to.");
           warning_seen = true;
         }
         rw_channels = true;
@@ -339,7 +339,7 @@ void PBufferStreams::execute(const ProgramNodeCPtr& program_const,
     }
     TIMING_RESULT(findouthost);
     
-    DEBUG_ASSERT(outhost->value_type() == valueType);
+    SH_DEBUG_ASSERT(outhost->value_type() == valueType);
 
     DECLARE_TIMER(dirtyouthost);
     // Read back
@@ -377,7 +377,7 @@ void PBufferStreams::execute(const ProgramNodeCPtr& program_const,
     ValueType convertedType; 
     readpixelType = glType(valueType, convertedType);
     if (convertedType != VALUETYPE_END) {
-      DEBUG_WARN("GL backend does not handle stream output type " 
+      SH_DEBUG_WARN("GL backend does not handle stream output type " 
 		    << valueTypeName(valueType) << " natively."
                     << "  Using " << valueTypeName(convertedType) 
 		    << " temporary buffer.");

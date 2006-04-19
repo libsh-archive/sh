@@ -34,7 +34,7 @@ TexData<T, N, T2>::TexData(const TextureNodePtr& node, const Generic<N, T2>& coo
     Statement stmt(*this, tex_var, indexed ? OP_TEXI : OP_TEX, coords);
     Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
   } else {
-    DEBUG_WARN("Immediate mode texture lookup is not yet implemented.");
+    SH_DEBUG_WARN("Immediate mode texture lookup is not yet implemented.");
     // TODO
   }
 }
@@ -58,7 +58,7 @@ TexData<T, N, T2>& TexData<T, N, T2>::operator=(const T& a)
   if (Context::current()->parsing()) {
     error(ScopeException("Cannot assign to a texture in retained mode"));
   } else {
-    DEBUG_WARN("Immediate mode texture assignment is not yet implemented.");
+    SH_DEBUG_WARN("Immediate mode texture assignment is not yet implemented.");
     // TODO
   }
   return *this;

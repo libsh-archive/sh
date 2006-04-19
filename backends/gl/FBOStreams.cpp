@@ -309,12 +309,12 @@ void FBOStreams::execute(const Program& program,
   }
 
   if (dest.size() == 0) {
-    DEBUG_WARN("Stream program has no outputs?");
+    SH_DEBUG_WARN("Stream program has no outputs?");
     return;
   }
 
   if (program.node()->outputs.size() != dest.size()) {
-    DEBUG_ERROR("Number of stream program outputs ("
+    SH_DEBUG_ERROR("Number of stream program outputs ("
                    << program_node->outputs.size()
                    << ") does not match number of destinations ("
                    << dest.size()
@@ -455,7 +455,7 @@ void FBOStreams::execute(const Program& program,
         dims = SH_TEXTURE_3D;
         break;
       default:
-        DEBUG_ASSERT(false);
+        SH_DEBUG_ASSERT(false);
         break;
       }
       
@@ -506,7 +506,7 @@ void FBOStreams::execute(const Program& program,
 
     switch (dest_tex->node()->dims()) {
     case SH_TEXTURE_1D:
-      DEBUG_ASSERT(dest_width == dest_height);
+      SH_DEBUG_ASSERT(dest_width == dest_height);
       draw_1d_stream(dest_width, *dest_tex,
                      m_float_extension == ARB_NV_FLOAT_BUFFER);
       break;
@@ -520,7 +520,7 @@ void FBOStreams::execute(const Program& program,
       break;
 */
     default:
-      DEBUG_ASSERT(false);
+      SH_DEBUG_ASSERT(false);
       break;
     }
  

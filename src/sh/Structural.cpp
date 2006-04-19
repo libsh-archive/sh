@@ -29,9 +29,9 @@
 // #define STRUCTURAL_DEBUG
 
 #ifdef STRUCTURAL_DEBUG
-#  define STR_DEBUG_PRINT(x) DEBUG_PRINT(x)
+#  define SH_STR_DEBUG_PRINT(x) SH_DEBUG_PRINT(x)
 #else
-#  define STR_DEBUG_PRINT(x)
+#  define SH_STR_DEBUG_PRINT(x)
 #endif
 
 namespace {
@@ -143,7 +143,7 @@ StructuralNode::CfgMatch::CfgMatch() {}
 StructuralNode::CfgMatch::CfgMatch(const CtrlGraphNodePtr& from)
   : from(from), to(from->follower), S(from->successors.end())
 {
-  DEBUG_ASSERT(to);
+  SH_DEBUG_ASSERT(to);
 }
 
 StructuralNode::CfgMatch::CfgMatch(const CtrlGraphNodePtr& from, 
@@ -364,7 +364,7 @@ Structural::Structural(const CtrlGraphPtr& graph)
     build_postorder(m_head);
 
     while (!m_postorder.empty()) {
-      STR_DEBUG_PRINT("Considering a node");
+      SH_STR_DEBUG_PRINT("Considering a node");
       
       StructuralNode* node = m_postorder.front();
       m_postorder.pop_front();
@@ -406,8 +406,8 @@ Structural::Structural(const CtrlGraphPtr& graph)
           if((*S)->secStart) {
             for(E = S;; ++E) {
               if(E == nodeset.end()) {
-                STR_DEBUG_PRINT("Found STARTSEC with no ENDSEC!");
-                DEBUG_ASSERT(0);
+                SH_STR_DEBUG_PRINT("Found STARTSEC with no ENDSEC!");
+                SH_DEBUG_ASSERT(0);
                 break;
               }
 
@@ -419,9 +419,9 @@ Structural::Structural(const CtrlGraphPtr& graph)
                 ++E;
                 nodeset.erase(E, nodeset.end());
                 nodeset.erase(nodeset.begin(), S);
-                STR_DEBUG_PRINT("FOUND SECTION of size " << nodeset.size());
+                SH_STR_DEBUG_PRINT("FOUND SECTION of size " << nodeset.size());
                 for (NodeSet::iterator I = nodeset.begin(); I != nodeset.end(); ++I) {
-                  STR_DEBUG_PRINT("  node " << I->object());
+                  SH_STR_DEBUG_PRINT("  node " << I->object());
                 }
                 break;
               }
@@ -433,27 +433,27 @@ Structural::Structural(const CtrlGraphPtr& graph)
         // otherwise may be block
         if(!newnode) {
           if (nodeset.size() >= 2) {
-            STR_DEBUG_PRINT("FOUND BLOCK of size " << nodeset.size());
+            SH_STR_DEBUG_PRINT("FOUND BLOCK of size " << nodeset.size());
             for (NodeSet::iterator I = nodeset.begin(); I != nodeset.end(); ++I) {
-              STR_DEBUG_PRINT("  node " << I->object());
+              SH_STR_DEBUG_PRINT("  node " << I->object());
             }
             //node = n.object();
             newnode = new StructuralNode(StructuralNode::BLOCK);
             newnode->secStart = nodeset.front()->secStart;
             newnode->secEnd = nodeset.back()->secEnd;
-            DEBUG_ASSERT(!(newnode->secStart && newnode->secEnd));
+            SH_DEBUG_ASSERT(!(newnode->secStart && newnode->secEnd));
           } else {
             nodeset.clear();
           }
         }
       } else {
-        STR_DEBUG_PRINT("Not a block. |succs| = " << node->succs.size());
+        SH_STR_DEBUG_PRINT("Not a block. |succs| = " << node->succs.size());
         if (!node->succs.empty()) {
           StructuralNodePtr next = (node->succs.begin()->second);
-          STR_DEBUG_PRINT("|next->preds| = " << next->preds.size());
+          SH_STR_DEBUG_PRINT("|next->preds| = " << next->preds.size());
           for (StructuralNode::PredecessorList::iterator P = next->preds.begin();
                P != next->preds.end(); ++P) {
-            STR_DEBUG_PRINT("next pred = " << P->second);
+            SH_STR_DEBUG_PRINT("next pred = " << P->second);
           }
         }
       }
@@ -464,14 +464,14 @@ Structural::Structural(const CtrlGraphPtr& graph)
         StructuralNodePtr m = S->second;
         StructuralNodePtr n = (++S)->second;
         if (m->succs == n->succs && m->succs.size() == 1) {
-          STR_DEBUG_PRINT("FOUND IF-ELSE");
+          SH_STR_DEBUG_PRINT("FOUND IF-ELSE");
           nodeset.push_back(node);
           nodeset.push_back(m);
           nodeset.push_back(n);
           newnode = new StructuralNode(StructuralNode::IFELSE);
           newnode->secStart = node->secStart;
         } else if (m->succs.size() == 1 && m->succs.front().second == n) {
-          STR_DEBUG_PRINT("FOUND IF");
+          SH_STR_DEBUG_PRINT("FOUND IF");
           nodeset.push_back(node);
           nodeset.push_back(m);
           newnode = new StructuralNode(StructuralNode::IF);
@@ -485,22 +485,22 @@ Structural::Structural(const CtrlGraphPtr& graph)
         //        typedef NodeSet ReachUnder;
         ReachUnder ru;
         reach_under(node, ru);
-        STR_DEBUG_PRINT("Reach under set for " << node);
+        SH_STR_DEBUG_PRINT("Reach under set for " << node);
         for (ReachUnder::iterator I = ru.begin(); I != ru.end(); ++I) {
-          STR_DEBUG_PRINT("  " << *I);
+          SH_STR_DEBUG_PRINT("  " << *I);
         }
 
         if (ru.size() == 1) {
-          STR_DEBUG_PRINT("FOUND SELFLOOP");
-          DEBUG_ASSERT(ru.front() == node);
+          SH_STR_DEBUG_PRINT("FOUND SELFLOOP");
+          SH_DEBUG_ASSERT(ru.front() == node);
           newnode = new StructuralNode(StructuralNode::SELFLOOP);
         } else if (ru.size() == 2 && ru.back()->succs.size() == 1) {
-          STR_DEBUG_PRINT("FOUND WHILELOOP");
-          DEBUG_ASSERT(ru.front() == node);
-          DEBUG_ASSERT(ru.back() != node);
+          SH_STR_DEBUG_PRINT("FOUND WHILELOOP");
+          SH_DEBUG_ASSERT(ru.front() == node);
+          SH_DEBUG_ASSERT(ru.back() != node);
           newnode = new StructuralNode(StructuralNode::WHILELOOP);
         } else if (ru.size() > 0) {
-          STR_DEBUG_PRINT("FOUND PROPINT");
+          SH_STR_DEBUG_PRINT("FOUND PROPINT");
           newnode = new StructuralNode(StructuralNode::PROPINT);
         }
 
@@ -520,7 +520,7 @@ Structural::Structural(const CtrlGraphPtr& graph)
           (*N)->container = newnode.object();
         }
 
-        STR_DEBUG_PRINT("Parent, preds and succs");
+        SH_STR_DEBUG_PRINT("Parent, preds and succs");
         
         newnode->parent = nodeset.front()->parent;
 
@@ -563,7 +563,7 @@ Structural::Structural(const CtrlGraphPtr& graph)
 
           // Replace children of parent
           if (n->parent && !contains(nodeset, n->parent)) {
-            STR_DEBUG_PRINT("Replace children of parent");
+            SH_STR_DEBUG_PRINT("Replace children of parent");
             for (StructuralNode::ChildList::iterator I = n->parent->children.begin();
                  I != n->parent->children.end(); ++I) {
               if (*I == n) *I = newnode;
@@ -592,14 +592,14 @@ Structural::Structural(const CtrlGraphPtr& graph)
           }
         }
 
-        STR_DEBUG_PRINT("Replace parent of children");
+        SH_STR_DEBUG_PRINT("Replace parent of children");
         // Replace parent of children
         for (StructuralNode::ChildList::iterator I = newnode->children.begin();
              I != newnode->children.end(); ++I) {
           (*I)->parent = newnode.object();
         }
 
-        STR_DEBUG_PRINT("Replace preds of succs");
+        SH_STR_DEBUG_PRINT("Replace preds of succs");
         // Replace preds of succs
         for (StructuralNode::SuccessorList::iterator I = newnode->succs.begin();
              I != newnode->succs.end(); ++I) {
@@ -622,7 +622,7 @@ Structural::Structural(const CtrlGraphPtr& graph)
           }
         }
 
-        STR_DEBUG_PRINT("Replace succs of preds");
+        SH_STR_DEBUG_PRINT("Replace succs of preds");
         // Replace succs of preds
         for (StructuralNode::PredecessorList::iterator I = newnode->preds.begin();
              I != newnode->preds.end(); ++I) {
@@ -645,11 +645,11 @@ Structural::Structural(const CtrlGraphPtr& graph)
           }
         }
         
-        STR_DEBUG_PRINT("Add to postorder");
+        SH_STR_DEBUG_PRINT("Add to postorder");
         m_postorder.push_back(newnode.object());
 
         if (nodeset.front() == m_head) {
-          STR_DEBUG_PRINT("Replace head");
+          SH_STR_DEBUG_PRINT("Replace head");
           m_head = newnode;
         }
       }

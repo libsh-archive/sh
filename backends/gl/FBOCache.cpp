@@ -65,7 +65,7 @@ void FBOCache::unbindFramebuffer()
 void FBOCache::bindTexture(GlTextureStoragePtr storage, 
                            GLenum attachment, GLint zoffset)
 {
-  DEBUG_ASSERT(!m_fbo_stack.empty());
+  SH_DEBUG_ASSERT(!m_fbo_stack.empty());
   // If we aren't already working with an FBO, either find one with the
   // storage in the right place, or make a new one
   if (!m_fbo_stack.top()) {
@@ -124,7 +124,7 @@ void FBOCache::bindTexture(GlTextureStoragePtr storage,
 
 GLenum FBOCache::bindTexture(GlTextureStoragePtr storage, GLint zoffset)
 {
-  DEBUG_ASSERT(!m_fbo_stack.top());
+  SH_DEBUG_ASSERT(!m_fbo_stack.top());
   
   int attachment = 0;
   for (int i = 0; i < NUM_FBOS && !m_fbo_stack.top(); ++i) {
@@ -168,7 +168,7 @@ void FBOCache::updateLRU()
 void FBOCache::fbTexture(GlTextureStoragePtr storage,
                          GLenum attachment, GLint zoffset)
 {
-  DEBUG_ASSERT(m_fbo_stack.top());
+  SH_DEBUG_ASSERT(m_fbo_stack.top());
   if (m_fbo_stack.top()->m_attachment[attachment - GL_COLOR_ATTACHMENT0_EXT] != storage) {
   
     m_fbo_stack.top()->m_attachment[attachment - GL_COLOR_ATTACHMENT0_EXT] = storage;
@@ -208,7 +208,7 @@ void FBOCache::fbTexture(GlTextureStoragePtr storage,
       break;
       
     default:
-      DEBUG_WARN("Cannot attach texture target " << storage->target() << " to an FBO.");
+      SH_DEBUG_WARN("Cannot attach texture target " << storage->target() << " to an FBO.");
       break;
     }
   }
@@ -249,7 +249,7 @@ void FBOCache::check()
     error = "Unknown error";
     break;
   }
-  DEBUG_PRINT("GL Framebuffer error " << error);
+  SH_DEBUG_PRINT("GL Framebuffer error " << error);
 }
 
 }

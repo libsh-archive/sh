@@ -62,12 +62,12 @@ class PBufferGlTextureTransfer : public Transfer {
     PBufferHandlePtr handle = context->activate();
     GlTextureStorage* texture = dynamic_cast<GlTextureStorage*>(to);
 
-    DEBUG_ASSERT(from->value_type() == to->value_type());
+    SH_DEBUG_ASSERT(from->value_type() == to->value_type());
 
-    DEBUG_ASSERT(texture->target() == GL_TEXTURE_2D ||
+    SH_DEBUG_ASSERT(texture->target() == GL_TEXTURE_2D ||
                     texture->target() == GL_TEXTURE_RECTANGLE_NV);
-    DEBUG_ASSERT(context->width() == texture->width());
-    DEBUG_ASSERT(context->height() == texture->height());
+    SH_DEBUG_ASSERT(context->width() == texture->width());
+    SH_DEBUG_ASSERT(context->height() == texture->height());
 
     GlTextureName::Binding binding(texture->texName());
     GL_CHECK_ERROR(glCopyTexSubImage2D(texture->target(), 0,

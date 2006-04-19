@@ -31,9 +31,9 @@
 #endif
 
 #ifdef CC_DEBUG
-#  define CC_DEBUG_PRINT(x) DEBUG_PRINT(x)
+#  define SH_CC_DEBUG_PRINT(x) SH_DEBUG_PRINT(x)
 #else
-#  define CC_DEBUG_PRINT(x) do { } while(0)
+#  define SH_CC_DEBUG_PRINT(x) do { } while(0)
 #endif
 
 namespace Cc {
@@ -215,11 +215,11 @@ void CcBackendCode::emit(const Statement& stmt) {
   
   // fill in opcodeMap from the above table
   if(opcodeMap.empty()) {
-    CC_DEBUG_PRINT("Operation -> C++ code mappings");
+    SH_CC_DEBUG_PRINT("Operation -> C++ code mappings");
     for(int i = 0; opCodeTable[i].op != OPERATION_END; ++i) {
 
       opcodeMap[opCodeTable[i].op] = CcOpCodeVecs(opCodeTable[i]); 
-      CC_DEBUG_PRINT(opInfo[opCodeTable[i].op].name << " -> " 
+      SH_CC_DEBUG_PRINT(opInfo[opCodeTable[i].op].name << " -> " 
           << opcodeMap[opCodeTable[i].op].encode());
     }
   }
@@ -258,7 +258,7 @@ void CcBackendCode::emit(const Statement& stmt) {
   switch(stmt.op) {
     case OP_DOT:
       {
-        DEBUG_ASSERT(stmt.dest.size() == 1);
+        SH_DEBUG_ASSERT(stmt.dest.size() == 1);
         m_code << "  " << resolve(stmt.dest, 0) << " = " 
           << resolve(stmt.src[0], 0) 
           << " * "
@@ -282,7 +282,7 @@ void CcBackendCode::emit(const Statement& stmt) {
 
     case OP_CSUM:
       {
-        DEBUG_ASSERT(stmt.dest.size() == 1);
+        SH_DEBUG_ASSERT(stmt.dest.size() == 1);
         m_code << "  " << resolve(stmt.dest, 0) << " = " 
           << resolve(stmt.src[0], 0) 
           << ";" << std::endl;
@@ -298,7 +298,7 @@ void CcBackendCode::emit(const Statement& stmt) {
 
     case OP_CMUL:
       {
-        DEBUG_ASSERT(stmt.dest.size() == 1);
+        SH_DEBUG_ASSERT(stmt.dest.size() == 1);
         m_code << "  " << resolve(stmt.dest, 0) << " = " 
           << resolve(stmt.src[0], 0) 
           << ";" << std::endl;
@@ -416,7 +416,7 @@ void CcBackendCode::emit(const Statement& stmt) {
       }
     case OP_OPTBRA:
       {
-        DEBUG_ASSERT(false);
+        SH_DEBUG_ASSERT(false);
         break;
       }
     default:
@@ -445,9 +445,9 @@ void CcBackendCode::emitTexLookup(const Statement& stmt, const char* texfunc) {
     case SH_TEXTURE_RECT: dims = 2; break;
     case SH_TEXTURE_3D: dims = 3; break; 
     case SH_TEXTURE_CUBE: 
-      DEBUG_ERROR("Cube maps not handled"); 
+      SH_DEBUG_ERROR("Cube maps not handled"); 
     default:
-      DEBUG_ERROR("Unhandled texture dim");
+      SH_DEBUG_ERROR("Unhandled texture dim");
   }
 
   // names of the functors to use for different texture lookup types 
@@ -455,12 +455,12 @@ void CcBackendCode::emitTexLookup(const Statement& stmt, const char* texfunc) {
 
   if(node->traits().interpolation() != 0) {
       //error(BackendException("cc backend supports only nearest-neighbour texture lookup."));
-      //DEBUG_WARN("cc backend supports only nearest-neighbour texture lookup.");
+      //SH_DEBUG_WARN("cc backend supports only nearest-neighbour texture lookup.");
   }
 
   if (node->traits().filtering() != TextureTraits::FILTER_NONE) {
       //error(BackendException("cc backend does not support texture filtering."));
-      DEBUG_WARN("cc backend does not support texture filtering.");
+      SH_DEBUG_WARN("cc backend does not support texture filtering.");
   }
 
   switch(node->traits().wrapping()) {

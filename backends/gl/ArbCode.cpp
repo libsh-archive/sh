@@ -299,7 +299,7 @@ void ArbCode::freeRegister(const VariableNodePtr& var)
   if (var->kind() != SH_TEMP) return;
   if (var->uniform()) return;
 
-  DEBUG_ASSERT(m_registers.find(var) != m_registers.end());
+  SH_DEBUG_ASSERT(m_registers.find(var) != m_registers.end());
   m_tempRegs.push_front(m_registers[var]->index);
 }
 
@@ -427,7 +427,7 @@ void ArbCode::updateUniform(const VariableNodePtr& uniform)
   const ArbReg& reg = *I->second;
   
   const int uniform_size = uniform->size();
-  DEBUG_ASSERT(uniform_size <= 4);
+  SH_DEBUG_ASSERT(uniform_size <= 4);
 
   GLfloat values[4];
   int i;
@@ -463,7 +463,7 @@ void ArbCode::updateUniform(const VariableNodePtr& uniform)
     {
       static bool warning_seen=false;
       if (!warning_seen) {
-        DEBUG_WARN("Updating uniforms bound to OpenGL state is not currently supported.");
+        SH_DEBUG_WARN("Updating uniforms bound to OpenGL state is not currently supported.");
         warning_seen = true;
       }
     }
@@ -548,20 +548,20 @@ bool ArbCode::printSamplingInstruction(ostream& out, const ArbInst& instr) const
   TextureNodePtr texture = shref_dynamic_cast<TextureNode>(instr.src[1].node());
   RegMap::const_iterator texRegIt = m_registers.find(instr.src[1].node());
   if (texRegIt == m_registers.end()) {
-    DEBUG_PRINT("Unallocated texture found.");
-    DEBUG_PRINT("Operation = " << arbOpInfo[instr.op].name);
-    DEBUG_PRINT("Destination* = " << instr.dest.node().object());
+    SH_DEBUG_PRINT("Unallocated texture found.");
+    SH_DEBUG_PRINT("Operation = " << arbOpInfo[instr.op].name);
+    SH_DEBUG_PRINT("Destination* = " << instr.dest.node().object());
     if (instr.dest.node()) {
-      DEBUG_PRINT("Destination = " << instr.dest.name());
+      SH_DEBUG_PRINT("Destination = " << instr.dest.name());
     }
-    DEBUG_PRINT("Texture pointer = " << texture.object());
+    SH_DEBUG_PRINT("Texture pointer = " << texture.object());
     if (texture) {
-      DEBUG_PRINT("Texture = " << texture->name());
+      SH_DEBUG_PRINT("Texture = " << texture->name());
     }
     out << "  INVALID TEX INSTRUCTION;";
     return true;
   }
-  //DEBUG_ASSERT(texRegIt != m_registers.end());
+  //SH_DEBUG_ASSERT(texRegIt != m_registers.end());
 
   const ArbReg& texReg = *texRegIt->second;
   
@@ -645,7 +645,7 @@ ostream& ArbCode::print(ostream& out)
   }
 
   if (m_numHalfTemps > 0) { 
-    DEBUG_ASSERT(halfSupport); // assume half support...
+    SH_DEBUG_ASSERT(halfSupport); // assume half support...
     out << "  SHORT TEMP ";
     for (int i = 0; i < m_numHalfTemps; i++) {
       if (i > 0) out << ", ";
@@ -1022,7 +1022,7 @@ void ArbCode::genStructNode(const StructuralNodePtr& node)
     m_instructions.push_back(ArbInst(ARB_ENDREP, Variable()));
   } 
   else {
-    DEBUG_WARN("Unknown StructuralNode type encountered.  Generated code may be incomplete.");
+    SH_DEBUG_WARN("Unknown StructuralNode type encountered.  Generated code may be incomplete.");
   }
 }
 
@@ -1144,7 +1144,7 @@ void ArbCode::bindSpecial(const ProgramNode::VarList::const_iterator& begin,
     
       string semantic_index = node->meta("opengl:semantic_index");
       if (!semantic_index.empty()) {
-        DEBUG_WARN(string("Variable '") << node->name() 
+        SH_DEBUG_WARN(string("Variable '") << node->name() 
                       << "' was assigned a semantic_index of " << semantic_index
                       << " but that index has already been used.  "
                       << "Ignoring user-specified index.");
@@ -1338,7 +1338,7 @@ void ArbCode::allocPalette(const ArbLimits& limits, const PaletteNodePtr& palett
   
   for (size_t i = 0; i < palette->palette_length(); i++) {
     VariableNodePtr node = palette->get_node(i);
-    DEBUG_ASSERT(m_registers.find(node) == m_registers.end());
+    SH_DEBUG_ASSERT(m_registers.find(node) == m_registers.end());
     m_registers[node] = new ArbReg(ARB_REG_PARAM, m_numParams + i, node->name());
     m_registers[node]->binding.type = ARB_REG_PROGRAMLOC;
     m_registers[node]->binding.index = m_numParamBindings + i;

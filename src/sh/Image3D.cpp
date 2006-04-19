@@ -93,14 +93,14 @@ int Image3D::elements() const
 
 float Image3D::operator()(int x, int y, int z, int i) const
 {
-  DEBUG_ASSERT(m_memory);
+  SH_DEBUG_ASSERT(m_memory);
 
   return data()[m_elements * ((m_width * (m_height * z + y) + x)) + i];
 }
 
 float& Image3D::operator()(int x, int y, int z, int i)
 {
-  DEBUG_ASSERT(m_memory);
+  SH_DEBUG_ASSERT(m_memory);
   return data()[m_elements * ((m_width * (m_height * z + y) + x)) + i];
 }
 

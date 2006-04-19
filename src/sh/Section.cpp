@@ -60,13 +60,13 @@ Statement* SectionNode::getStart()
 {
   if(cfgNodes.empty() || !cfgNodes.front()->block 
       || cfgNodes.front()->block->empty()) {
-    DEBUG_PRINT("Could not find STARTSEC");
+    SH_DEBUG_PRINT("Could not find STARTSEC");
     return 0;
   }
 
   Statement* result = &*cfgNodes.front()->block->begin();
   if(result->op != OP_STARTSEC) {
-    DEBUG_PRINT("First stmt is not a STARTSEC");
+    SH_DEBUG_PRINT("First stmt is not a STARTSEC");
     return 0;
   }
   return result;
@@ -76,13 +76,13 @@ Statement* SectionNode::getEnd()
 {
   if(cfgNodes.empty() || !cfgNodes.back()->block 
       || cfgNodes.back()->block->empty()) {
-    DEBUG_PRINT("Could not find ENDSEC");
+    SH_DEBUG_PRINT("Could not find ENDSEC");
     return 0;
   }
 
   Statement* result = &*cfgNodes.back()->block->rbegin();
   if(result->op != OP_ENDSEC) {
-    DEBUG_PRINT("Last stmt is not a ENDSEC");
+    SH_DEBUG_PRINT("Last stmt is not a ENDSEC");
     return 0;
   }
   return result;
@@ -95,7 +95,7 @@ std::string SectionNode::name()
   Statement* start = getStart();
   if(!start) return "[null - error]";
   InfoComment* comment = start->get_info<InfoComment>();                          
-  DEBUG_ASSERT(comment);                                                           
+  SH_DEBUG_ASSERT(comment);                                                           
   return comment->comment;   
 }
 

@@ -36,56 +36,56 @@ BaseTexture::BaseTexture(const TextureNodePtr& node)
 
 void BaseTexture::get_offset(int* offset, int n) const
 {
-  DEBUG_ASSERT(n <= 3);
+  SH_DEBUG_ASSERT(n <= 3);
   for (int i = 0; i < n; ++i)
     offset[i] = m_offset[i];
 }
 
 void BaseTexture::get_stride(int* stride, int n) const
 {
-  DEBUG_ASSERT(n <= 3);
+  SH_DEBUG_ASSERT(n <= 3);
   for (int i = 0; i < n; ++i)
     stride[i] = m_stride[i];
 }
 
 void BaseTexture::get_count(int* count, int n) const
 {
-  DEBUG_ASSERT(n <= 3);
+  SH_DEBUG_ASSERT(n <= 3);
   for (int i = 0; i < n; ++i)
     count[i] = m_count[i];
 }
 
 void BaseTexture::get_repeat(int* repeat, int n) const
 {
-  DEBUG_ASSERT(n <= 3);
+  SH_DEBUG_ASSERT(n <= 3);
   for (int i = 0; i < n; ++i)
     repeat[i] = m_repeat[i];
 }
 
 void BaseTexture::set_offset(const int* offset, int n)
 {
-  DEBUG_ASSERT(n <= 3);
+  SH_DEBUG_ASSERT(n <= 3);
   for (int i = 0; i < n; ++i)
     m_offset[i] = offset[i];
 }
 
 void BaseTexture::set_stride(const int* stride, int n)
 {
-  DEBUG_ASSERT(n <= 3);
+  SH_DEBUG_ASSERT(n <= 3);
   for (int i = 0; i < n; ++i)
     m_stride[i] = stride[i];
 }
 
 void BaseTexture::set_count(const int* count, int n)
 {
-  DEBUG_ASSERT(n <= 3);
+  SH_DEBUG_ASSERT(n <= 3);
   for (int i = 0; i < n; ++i)
     m_count[i] = count[i];
 }
 
 void BaseTexture::set_repeat(const int* repeat, int n)
 {
-  DEBUG_ASSERT(n <= 3);
+  SH_DEBUG_ASSERT(n <= 3);
   for (int i = 0; i < n; ++i)
     m_repeat[i] = repeat[i];
 }
@@ -95,7 +95,7 @@ void* BaseTexture::read_data(int n)
   StoragePtr storage = m_node->memory(n)->findStorage("host");
   if (!storage) error(Exception("No host storage found"));
   HostStoragePtr host_storage = shref_dynamic_cast<HostStorage>(storage);
-  DEBUG_ASSERT(host_storage);
+  SH_DEBUG_ASSERT(host_storage);
   host_storage->sync();
   return host_storage->data();
 }
@@ -105,7 +105,7 @@ void* BaseTexture::write_data(int n)
   StoragePtr storage = m_node->memory(n)->findStorage("host");
   if (!storage) error(Exception("No host storage found"));
   HostStoragePtr host_storage = shref_dynamic_cast<HostStorage>(storage);
-  DEBUG_ASSERT(host_storage);
+  SH_DEBUG_ASSERT(host_storage);
   host_storage->dirty();
   return host_storage->data();
 }

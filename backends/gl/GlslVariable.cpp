@@ -216,7 +216,7 @@ void GlslVariable::name(int i, enum GlslProgramType unit)
       varname << "var_p";
       break;
     case BINDINGTYPE_END:
-      DEBUG_ASSERT(0); // Error
+      SH_DEBUG_ASSERT(0); // Error
       break;
     }
   }
@@ -228,7 +228,7 @@ void GlslVariable::name(int i, enum GlslProgramType unit)
 
 void GlslVariable::attribute(int index)
 {
-  DEBUG_ASSERT(SH_FLOAT == m_type); // only float inputs are allowed
+  SH_DEBUG_ASSERT(SH_FLOAT == m_type); // only float inputs are allowed
   stringstream name;
   name << "attrib" << index;
   m_name = name.str();
@@ -409,7 +409,7 @@ std::string GlslVariable::translate_state_arb_to_glsl
       // Translate the right hand portion using our new sub-table
       right_translated = translate_state_arb_to_glsl(right, entry->subtable);      
     } else {
-      DEBUG_WARN("No matching GLSL state found for ARB state '" << left << "'");
+      SH_DEBUG_WARN("No matching GLSL state found for ARB state '" << left << "'");
       // Translate the right hand portion using our current table
       right_translated = translate_state_arb_to_glsl(right, table);
     }

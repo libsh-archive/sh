@@ -290,14 +290,14 @@ struct IterateRch {
   void operator()(const CtrlGraphNodePtr& node)
   {
     if (!node) return;
-    DEBUG_ASSERT(r.rchin.find(node) != r.rchin.end());
+    SH_DEBUG_ASSERT(r.rchin.find(node) != r.rchin.end());
     BitSet newRchIn(r.defsize);
     
     for (CtrlGraphNode::PredList::iterator I = node->predecessors.begin();
          I != node->predecessors.end(); ++I) {
-      DEBUG_ASSERT(r.gen.find(*I) != r.gen.end());
-      DEBUG_ASSERT(r.prsv.find(*I) != r.prsv.end());
-      DEBUG_ASSERT(r.rchin.find(*I) != r.rchin.end());
+      SH_DEBUG_ASSERT(r.gen.find(*I) != r.gen.end());
+      SH_DEBUG_ASSERT(r.prsv.find(*I) != r.prsv.end());
+      SH_DEBUG_ASSERT(r.rchin.find(*I) != r.rchin.end());
       
       newRchIn |= (r.gen[*I] | (r.rchin[*I] & r.prsv[*I]));
     }
@@ -450,7 +450,7 @@ struct UdDuBuilder {
               vt = new ValueTracking(S->stmt);
               S->stmt->add_info(vt);
             }
-            DEBUG_ASSERT(vt); // must have added it above somewhere
+            SH_DEBUG_ASSERT(vt); // must have added it above somewhere
             ValueTracking::Use use(node, S->stmt->dest.swizzle()[S->index]);
             vt->uses[S->index].insert(use);
           }
@@ -487,26 +487,26 @@ struct UdDuDumper {
     for (BasicBlock::StmtList::iterator I = block->begin(); I != block->end(); ++I) {
       ValueTracking* vt = I->get_info<ValueTracking>();
       if (!vt) {
-        DEBUG_PRINT(*I << " HAS NO VALUE TRACKING");
+        SH_DEBUG_PRINT(*I << " HAS NO VALUE TRACKING");
         continue;
       }
-      DEBUG_PRINT("Valuetracking for " << *I);
+      SH_DEBUG_PRINT("Valuetracking for " << *I);
       for (int i = 0; i < opInfo[I->op].arity; i++) {
-        DEBUG_PRINT("  src ud" << i << "\n" << vt->defs[i]);
+        SH_DEBUG_PRINT("  src ud" << i << "\n" << vt->defs[i]);
       }
-      DEBUG_PRINT("  dest du" << vt->uses);
+      SH_DEBUG_PRINT("  dest du" << vt->uses);
     }
   }
 
   void operator()(const ProgramNodePtr& p) {
 #ifdef DEBUG
     InputValueTracking* ivt = p->get_info<InputValueTracking>();
-    DEBUG_ASSERT(ivt);
-    DEBUG_PRINT("Input Valuetracking:\n" << *ivt);
+    SH_DEBUG_ASSERT(ivt);
+    SH_DEBUG_PRINT("Input Valuetracking:\n" << *ivt);
 
     OutputValueTracking* ovt = p->get_info<OutputValueTracking>();
-    DEBUG_ASSERT(ovt);
-    DEBUG_PRINT("Output Valuetracking:\n" << *ovt);
+    SH_DEBUG_ASSERT(ovt);
+    SH_DEBUG_PRINT("Output Valuetracking:\n" << *ovt);
 #endif
   }
 };
@@ -520,7 +520,7 @@ ValueTracking::ValueTracking(Statement* stmt)
     defs(stmt->src.size())
 {
 #ifdef DEBUG_VALUETRACK
-  DEBUG_PRINT("Adding value tracking to " << *stmt);
+  SH_DEBUG_PRINT("Adding value tracking to " << *stmt);
 #endif
   for (int i = 0; i < opInfo[stmt->op].arity; i++) {
     for (int j = 0; j < (stmt->src[i].node() ? stmt->src[i].size() : 0); j++) {
@@ -637,19 +637,19 @@ void add_value_tracking(Program& p)
   } while (changed);
 
 #ifdef DEBUG_VALUETRACK
-  DEBUG_PRINT("Dumping Reaching Defs");
-  DEBUG_PRINT("defsize = " << r.defsize);
-  DEBUG_PRINT("defs.size() = " << r.defs.size());
+  SH_DEBUG_PRINT("Dumping Reaching Defs");
+  SH_DEBUG_PRINT("defsize = " << r.defsize);
+  SH_DEBUG_PRINT("defs.size() = " << r.defs.size());
   for(unsigned int i = 0; i < r.defs.size(); ++i) {
-    DEBUG_PRINT("  " << i << ": " << r.defs[i]);
+    SH_DEBUG_PRINT("  " << i << ": " << r.defs[i]);
   }
   std::cerr << std::endl;
 
   for (ReachingDefs::ReachingMap::const_iterator I = r.rchin.begin(); I != r.rchin.end(); ++I) {
     CtrlGraphNodePtr node = I->first;
-    DEBUG_PRINT(" rchin[" << node.object() << "]: " << I->second);
-    DEBUG_PRINT("   gen[" << node.object() << "]: " << r.gen[I->first]);
-    DEBUG_PRINT("  prsv[" << node.object() << "]: " << r.prsv[I->first]);
+    SH_DEBUG_PRINT(" rchin[" << node.object() << "]: " << I->second);
+    SH_DEBUG_PRINT("   gen[" << node.object() << "]: " << r.gen[I->first]);
+    SH_DEBUG_PRINT("  prsv[" << node.object() << "]: " << r.prsv[I->first]);
     std::cerr << std::endl;
   }
 #endif
@@ -661,7 +661,7 @@ void add_value_tracking(Program& p)
   graph->dfs(builder);
 
 #ifdef DEBUG_VALUETRACK
-  DEBUG_PRINT("Uddu Dump");
+  SH_DEBUG_PRINT("Uddu Dump");
   UdDuDumper dumper;
   graph->dfs(dumper);
   dumper(p.node());

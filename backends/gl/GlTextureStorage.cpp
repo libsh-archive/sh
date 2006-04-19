@@ -102,10 +102,10 @@ bool HostGlTextureTransfer::transfer(const Storage* from, Storage* to)
     // @todo a little hackish...but we promise host->data() will not change... 
     VariantPtr host_variant = variantFactory(host_type, MEM)->
       generate(count * tuplesize, const_cast<void*>(host->data()), false);
-    DEBUG_ASSERT(host_variant);
+    SH_DEBUG_ASSERT(host_variant);
 
     if(converted_type != VALUETYPE_END) {
-      DEBUG_WARN("GL backend does not handle " << valueTypeName(texture_type) 
+      SH_DEBUG_WARN("GL backend does not handle " << valueTypeName(texture_type) 
               	    << " natively.  Converting to " << valueTypeName(converted_type));
       texture->value_type(converted_type);
       data_variant = variantFactory(converted_type, MEM)->generate(count * tuplesize);
@@ -212,7 +212,7 @@ bool HostGlTextureTransfer::transfer(const Storage* from, Storage* to)
     }
     break;
   default:
-    DEBUG_WARN("Texture target " << texture->target() << " not handled by GL backend");
+    SH_DEBUG_WARN("Texture target " << texture->target() << " not handled by GL backend");
     break;
   }
   
@@ -262,9 +262,9 @@ bool GlTextureHostTransfer::transfer(const Storage* from, Storage* to)
   // @todo a little hackish...but we promise host->data() will not change... 
   VariantPtr host_variant = variantFactory(host_type, MEM)->
     generate(count * tuplesize, const_cast<void*>(host->data()), false);
-  DEBUG_ASSERT(host_variant);
+  SH_DEBUG_ASSERT(host_variant);
     
-  DEBUG_ASSERT(tuplesize > 0 && tuplesize < 5)
+  SH_DEBUG_ASSERT(tuplesize > 0 && tuplesize < 5)
   int glTuplesize[5] = { 0, 1, 3, 3, 4 };
   GLenum format[5] = { 0, GL_RED, GL_RGB, GL_RGB, GL_RGBA };
 
@@ -340,8 +340,8 @@ bool GlTextureGlTextureTransfer::transfer(const Storage* from, Storage* to)
     dynamic_cast<GlTextureStorage*>(const_cast<Storage*>(from));
   GlTextureStorage* dst_tex = dynamic_cast<GlTextureStorage*>(to);
         
-  DEBUG_ASSERT(src_tex->width() == dst_tex->width());
-  DEBUG_ASSERT(src_tex->height() == dst_tex->height());
+  SH_DEBUG_ASSERT(src_tex->width() == dst_tex->width());
+  SH_DEBUG_ASSERT(src_tex->height() == dst_tex->height());
 
   GlTextureName::Binding binding(dst_tex->texName());
 

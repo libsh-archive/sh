@@ -169,7 +169,7 @@ void GlslVariableMap::allocate_builtin(const VariableNodePtr& node,
         case GLSL_VAR_MULTITEXCOORD6: bind_variable = (index == 6); break;
         case GLSL_VAR_MULTITEXCOORD7: bind_variable = (index == 7); break;
         default:
-          DEBUG_WARN(string("Variable '") << node->name() 
+          SH_DEBUG_WARN(string("Variable '") << node->name() 
                         << "' was assigned a semantic_index of " 
                         << index << " but it is not of an indexed type.  "
                         << "Ignoring user-specified index.");
@@ -186,7 +186,7 @@ void GlslVariableMap::allocate_builtin(const VariableNodePtr& node,
 
         string semantic_index = node->meta("opengl:semantic_index");
         if (!semantic_index.empty()) {        
-          DEBUG_WARN(string("Variable '") << node->name() 
+          SH_DEBUG_WARN(string("Variable '") << node->name() 
                         << "' was assigned a semantic_index of " << semantic_index
                         << " but that index has already been used.  "
                         << "Ignoring user-specified index.");
@@ -451,7 +451,7 @@ string GlslVariableMap::swizzle(const Variable& v, int var_size, bool force) con
       ss << "w";
       break;
     default:
-      DEBUG_ASSERT(0); // Invalid swizzle
+      SH_DEBUG_ASSERT(0); // Invalid swizzle
       return "";
     }
   }

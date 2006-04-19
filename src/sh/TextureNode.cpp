@@ -332,7 +332,7 @@ bool TextureNode::build_mipmaps(CubeDirection dir)
   float* base_data = reinterpret_cast<float*>(base_memory->hostStorage()->data());
   HostStoragePtr base_storage = shref_dynamic_cast<HostStorage>(m_memory[direction * levels]->findStorage("host"));
   if (!Storage::transfer(base_storage.object(), base_memory->hostStorage().object())) {
-    DEBUG_ASSERT(0);
+    SH_DEBUG_ASSERT(0);
     return false;
   }
 

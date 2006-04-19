@@ -146,7 +146,7 @@ void CastManager::init()
 
 void CastManager::doCast(Variant* dest, const Variant* src)
 {
-  DEBUG_ASSERT(dest != src);
+  SH_DEBUG_ASSERT(dest != src);
 
   // should be the same size
   int size = dest->size();
@@ -157,14 +157,14 @@ void CastManager::doCast(Variant* dest, const Variant* src)
   ValueType srcVt = src->valueType();
   DataType srcDt = src->dataType();
 
-  DEBUG_ASSERT(!(destVt == srcVt && srcDt == destDt));
+  SH_DEBUG_ASSERT(!(destVt == srcVt && srcDt == destDt));
 
   for(bool first = true;;first = false) {
     const VariantCast* caster = m_castStep(destVt, destDt, srcVt, srcDt);
     if(!caster) {
-      DEBUG_ERROR("Unable to cast to " << valueTypeName(destVt) << " from " << valueTypeName(srcVt));
+      SH_DEBUG_ERROR("Unable to cast to " << valueTypeName(destVt) << " from " << valueTypeName(srcVt));
     }
-    DEBUG_ASSERT(caster);
+    SH_DEBUG_ASSERT(caster);
 
     caster->getDestTypes(srcVt, srcDt); // get results of next step in cast
     if((srcVt == destVt) && (srcDt == destDt)) {

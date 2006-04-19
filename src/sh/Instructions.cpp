@@ -37,41 +37,41 @@ inline bool immediate()
 
 inline void sizes_match(const Variable& a, const Variable& b)
 {
-  DEBUG_ASSERT(a.size() == b.size());
+  SH_DEBUG_ASSERT(a.size() == b.size());
 }
 
 inline void sizes_match(const Variable& a, const Variable& b,
                  const Variable& c, bool scalar_b = false, bool scalar_c = false)
 {
-  DEBUG_ASSERT(((scalar_b && b.size() == 1) || a.size() == b.size()) && 
+  SH_DEBUG_ASSERT(((scalar_b && b.size() == 1) || a.size() == b.size()) && 
                   ((scalar_c && c.size() == 1) || a.size() == c.size()));
 }
 
 inline void has_values(const Variable& a)
 {
-  DEBUG_ASSERT(a.hasValues());
+  SH_DEBUG_ASSERT(a.hasValues());
 }
 
 inline void has_values(const Variable& a, const Variable& b)
 {
-  DEBUG_ASSERT(a.hasValues());
-  DEBUG_ASSERT(b.hasValues());
+  SH_DEBUG_ASSERT(a.hasValues());
+  SH_DEBUG_ASSERT(b.hasValues());
 }
 
 inline void has_values(const Variable& a, const Variable& b, const Variable& c)
 {
-  DEBUG_ASSERT(a.hasValues());
-  DEBUG_ASSERT(b.hasValues());
-  DEBUG_ASSERT(c.hasValues());
+  SH_DEBUG_ASSERT(a.hasValues());
+  SH_DEBUG_ASSERT(b.hasValues());
+  SH_DEBUG_ASSERT(c.hasValues());
 }
 
 inline void has_values(const Variable& a, const Variable& b,
                 const Variable& c, const Variable& d)
 {
-  DEBUG_ASSERT(a.hasValues());
-  DEBUG_ASSERT(b.hasValues());
-  DEBUG_ASSERT(c.hasValues());
-  DEBUG_ASSERT(d.hasValues());
+  SH_DEBUG_ASSERT(a.hasValues());
+  SH_DEBUG_ASSERT(b.hasValues());
+  SH_DEBUG_ASSERT(c.hasValues());
+  SH_DEBUG_ASSERT(d.hasValues());
 }
 
 inline void addStatement(const Statement& stmt)
@@ -142,7 +142,7 @@ void sh ## op(Variable& dest, const Variable& a, const Variable &b)\
 #define INST_TERNARY_OP(op, condition)\
 void sh ## op(Variable& dest, const Variable& a, const Variable &b, const Variable &c)\
 {\
-  DEBUG_ASSERT(condition);\
+  SH_DEBUG_ASSERT(condition);\
   if(immediate()) {\
     has_values(dest, a, b, c);\
     Variant *dv, *av, *bv, *cv;\
@@ -199,19 +199,19 @@ INST_UNARY_OP(COSH);
 
 void shCMUL(Variable& dest, const Variable& src)
 {
-  DEBUG_ASSERT(dest.size() == 1);
+  SH_DEBUG_ASSERT(dest.size() == 1);
   INST_UNARY_OP_CORE(CMUL);
 }
 
 void shCSUM(Variable& dest, const Variable& src)
 {
-  DEBUG_ASSERT(dest.size() == 1);
+  SH_DEBUG_ASSERT(dest.size() == 1);
   INST_UNARY_OP_CORE(CSUM);
 }
 
 void shDOT(Variable& dest, const Variable& a, const Variable& b)
 {
-  DEBUG_ASSERT(dest.size() == 1);
+  SH_DEBUG_ASSERT(dest.size() == 1);
   sizes_match(a, b);
   INST_BINARY_OP_CORE(DOT);
 }
@@ -230,7 +230,7 @@ void shDY(Variable& dest, const Variable& a)
   if(immediate()) {
       error(ScopeException("Cannot take derivatives in immediate mode"));
   }
-  DEBUG_ASSERT(!immediate());
+  SH_DEBUG_ASSERT(!immediate());
   Statement stmt(dest, OP_DY, a);
   addStatement(stmt);
 }
@@ -316,7 +316,7 @@ INST_UNARY_OP(HASH);
 
 void shXPD(Variable& dest, const Variable& a, const Variable& b)
 {
-  DEBUG_ASSERT(dest.size() == 3 && a.size() == 3 && b.size() == 3);
+  SH_DEBUG_ASSERT(dest.size() == 3 && a.size() == 3 && b.size() == 3);
   INST_BINARY_OP_CORE(XPD);
 }
 
@@ -330,7 +330,7 @@ void shKIL(const Variable& a)
   if(immediate()) {
     error(ScopeException("Cannot kill in immediate mode"));
   }
-  DEBUG_ASSERT(!immediate());
+  SH_DEBUG_ASSERT(!immediate());
   Statement stmt(a, OP_KIL, a);
   addStatement(stmt);
 }
@@ -340,7 +340,7 @@ void shRET(const Variable& a)
   if(immediate()) {
     error(ScopeException("Cannot return in immediate mode"));
   }
-  DEBUG_ASSERT(!immediate());
+  SH_DEBUG_ASSERT(!immediate());
   Statement stmt(a, OP_RET, a);
   addStatement(stmt);
 }

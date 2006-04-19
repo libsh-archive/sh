@@ -320,7 +320,7 @@ void ArbCode::emit_eq(const Statement& stmt)
     op = ARB_SLT;
     combine = ARB_MAX;
   } else {
-    DEBUG_ASSERT(false);
+    SH_DEBUG_ASSERT(false);
     return;
   }
   
@@ -375,7 +375,7 @@ void ArbCode::emit_trig(const Statement& stmt)
   } else if (stmt.op == OP_COS) {
     m_instructions.push_back(ArbInst(ARB_MUL, rs, c1(3,3,3,3), stmt.src[0]));
   } else {
-    DEBUG_ASSERT(false);
+    SH_DEBUG_ASSERT(false);
   }
   m_instructions.push_back(ArbInst(ARB_FRC, rs, rs));
   for (int i = 0; i < stmt.src[0].size(); i++) {
@@ -507,7 +507,7 @@ void ArbCode::emit_hyperbolic(const Statement& stmt)
     emit(Statement(stmt.dest, temp_sinh, OP_DIV, temp_cosh));
     break;
   default:
-    DEBUG_ASSERT(0);
+    SH_DEBUG_ASSERT(0);
   }
 }
 
@@ -557,7 +557,7 @@ void ArbCode::emit_tex(const Statement& stmt)
     delay = true;
   }
 
-  DEBUG_ASSERT(tnode);
+  SH_DEBUG_ASSERT(tnode);
 
   if (tnode->size() == 2) {
     // Special case for LUMINANCE_ALPHA
@@ -567,7 +567,7 @@ void ArbCode::emit_tex(const Statement& stmt)
   }
 
   if (stmt.op == OP_TEXD) {
-    DEBUG_ASSERT(tnode->dims() == SH_TEXTURE_2D);
+    SH_DEBUG_ASSERT(tnode->dims() == SH_TEXTURE_2D);
     m_instructions.push_back(ArbInst(ARB_TXD,
                                      (delay ? tmpdest : stmt.dest), stmt.src[1], stmt.src[0],
                                      stmt.src[2](0,1), stmt.src[2](2,3)));

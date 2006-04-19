@@ -35,7 +35,7 @@ void RegularOp<OP, T>::operator()(
   DataVariant<T, HOST>* destVec;
   const DataVariant<T, HOST>  *aVec, *bVec, *cVec;
 
-  DEBUG_ASSERT(dest && a);
+  SH_DEBUG_ASSERT(dest && a);
   destVec = variant_cast<T, HOST>(dest);
   aVec = variant_cast<T, HOST>(a);
 

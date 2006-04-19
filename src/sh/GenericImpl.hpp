@@ -36,7 +36,7 @@ template<int N, typename T>
 Generic<N, T>::Generic(const VariableNodePtr& node)
   : Variable(node)
 {
-  DEBUG_ASSERT(node);
+  SH_DEBUG_ASSERT(node);
 }
 
 template<int N, typename T>
@@ -45,7 +45,7 @@ Generic<N, T>::Generic(const VariableNodePtr& node, Swizzle swizzle, bool neg)
 {
   m_swizzle = swizzle;
   m_neg = neg;
-  DEBUG_ASSERT(node);
+  SH_DEBUG_ASSERT(node);
 }
 
 template<int N, typename T>
@@ -59,8 +59,8 @@ Generic<N, T>::Generic(const Generic<N, T2>& other)
   : Variable(new VariableNode(SH_TEMP, N, value_type, 
         other.node()->specialType()))
 {
-  DEBUG_ASSERT(other.node());
-  DEBUG_ASSERT(m_node);
+  SH_DEBUG_ASSERT(other.node());
+  SH_DEBUG_ASSERT(m_node);
   shASN(*this, other);
 }
 
@@ -340,7 +340,7 @@ template<typename T>
 Generic<1, T>::Generic(const VariableNodePtr& node)
   : Variable(node)
 {
-  DEBUG_ASSERT(node);
+  SH_DEBUG_ASSERT(node);
 }
 
 template<typename T>
@@ -349,7 +349,7 @@ Generic<1, T>::Generic(const VariableNodePtr& node, Swizzle swizzle, bool neg)
 {
   m_swizzle = swizzle;
   m_neg = neg;
-  DEBUG_ASSERT(node);
+  SH_DEBUG_ASSERT(node);
 }
 
 template<typename T>
@@ -362,8 +362,8 @@ template<typename T2>
 Generic<1, T>::Generic(const Generic<1, T2>& other)
   : Variable(new VariableNode(SH_TEMP, 1, value_type, other.node()->specialType()))
 {
-  DEBUG_ASSERT(other.node());
-  DEBUG_ASSERT(m_node);
+  SH_DEBUG_ASSERT(other.node());
+  SH_DEBUG_ASSERT(m_node);
   shASN(*this, other);
 }
 

@@ -82,7 +82,7 @@ struct ConstProp : public Info {
           src[i].push_back(Cell(Cell::CONSTANT, stmt->src[i].getVariant(j)));
           break;
         default:
-          DEBUG_ASSERT(0 && "Invalid BindingType");
+          SH_DEBUG_ASSERT(0 && "Invalid BindingType");
           return;
         }
       }
@@ -196,7 +196,7 @@ struct ConstProp : public Info {
         Statement eval(*stmt);
         eval.dest = tmpdest;
         for (int i = 0; i < opInfo[stmt->op].arity; i++) {
-          DEBUG_ASSERT(src[i][0].value); // @todo type DEBUGGING
+          SH_DEBUG_ASSERT(src[i][0].value); // @todo type DEBUGGING
           ValueType srcValueType = src[i][0].value->valueType(); 
           Variable tmpsrc(new VariableNode(SH_CONST, stmt->src[i].size(), srcValueType));
           for (int j = 0; j < stmt->src[i].size(); j++) {
@@ -218,7 +218,7 @@ struct ConstProp : public Info {
         }
       }
     } else {
-      DEBUG_ASSERT(0 && "Invalid result source type");
+      SH_DEBUG_ASSERT(0 && "Invalid result source type");
     }
   }
 
@@ -254,7 +254,7 @@ struct ConstProp : public Info {
         // @todo type
         if(!constval) return false;
         // Check with Stefanus whether this modification is correct
-    //    DEBUG_ASSERT(constval); // @todo type debugging
+    //    SH_DEBUG_ASSERT(constval); // @todo type debugging
         return constval->equals(other.constval);
       } else {
         if (valuenum != other.valuenum) return false;
@@ -391,7 +391,7 @@ struct ConstProp : public Info {
           if (cp->src[i][j].state == Cell::UNIFORM) {
             src[i].push_back(cp->src[i][j].uniform);
           } else {
-            DEBUG_ASSERT(cp->src[i][j].state == Cell::CONSTANT); // @todo type should be fixed
+            SH_DEBUG_ASSERT(cp->src[i][j].state == Cell::CONSTANT); // @todo type should be fixed
             src[i].push_back(Uniform(cp->src[i][j].value));
           }
         }
@@ -417,7 +417,7 @@ struct ConstProp : public Info {
       : state(state)
     {
       if(value) this->value = value->get(); 
-      DEBUG_ASSERT(this->value || (state != CONSTANT));
+      SH_DEBUG_ASSERT(this->value || (state != CONSTANT));
     }
 
     // Construct a UNIFORM cell from a variable
@@ -440,7 +440,7 @@ struct ConstProp : public Info {
       if(state != other.state) return false;
       if(value) return value->equals(other.value);
       // @todo type remove debug
-      DEBUG_ASSERT(!value);
+      SH_DEBUG_ASSERT(!value);
       return value == other.value; // null
     }
 
@@ -487,7 +487,7 @@ ConstProp::Cell meet(const ConstProp::Cell& a, const ConstProp::Cell& b)
   // top.
   if (a.state == b.state) {
     if (a.state == ConstProp::Cell::CONSTANT) {
-      DEBUG_ASSERT(a.value); // @todo type debugging
+      SH_DEBUG_ASSERT(a.value); // @todo type debugging
       if (a.value->equals(b.value)) {
         return a;
       } else {
@@ -511,7 +511,7 @@ std::vector<ConstProp::Value*> ConstProp::Value::m_values = std::vector<ConstPro
 std::ostream& operator<<(std::ostream& out, const ConstProp::Uniform& uniform)
 {
   if (uniform.constant) {
-    DEBUG_ASSERT(uniform.constval); // @todo type DEBUGGING
+    SH_DEBUG_ASSERT(uniform.constval); // @todo type DEBUGGING
     out << uniform.constval->encode();
   } else {
     if (uniform.neg) out << '-';
@@ -648,14 +648,14 @@ struct FinishConstProp
             }
           }
           if (allconst) {
-            DEBUG_ASSERT(cp->dest[0].value); // @todo type debugging
+            SH_DEBUG_ASSERT(cp->dest[0].value); // @todo type debugging
             ValueType destValueType = cp->dest[0].value->valueType(); 
             Variable newconst(new VariableNode(SH_CONST, I->dest.size(), destValueType));
             for(int i = 0; i < I->dest.size(); ++i) {
               newconst.setVariant(cp->dest[i].value, i);
             }
 #ifdef DEBUG_CONSTPROP
-            DEBUG_PRINT("Replaced {" << *I << "} with " << newconst);
+            SH_DEBUG_PRINT("Replaced {" << *I << "} with " << newconst);
 #endif
             *I = Statement(I->dest, OP_ASN, newconst);
           } else {
@@ -675,7 +675,7 @@ struct FinishConstProp
               }
               if (allconst) {
 #ifdef DEBUG_CONSTPROP
-                DEBUG_PRINT("Replaced {" << *I << "}.src[" << s << "] with " << newconst);
+                SH_DEBUG_PRINT("Replaced {" << *I << "}.src[" << s << "] with " << newconst);
 #endif
                 I->src[s] = newconst;
               }
@@ -683,7 +683,7 @@ struct FinishConstProp
           }
 
           if (!lift_uniforms || allconst) {
-            //DEBUG_PRINT("Skipping uniform lifting");
+            //SH_DEBUG_PRINT("Skipping uniform lifting");
             continue;
           }
 
@@ -701,12 +701,12 @@ struct FinishConstProp
           if (!alluniform || I->dest.node()->kind() == SH_OUTPUT
               || I->dest.node()->kind() == SH_INOUT) {
 #ifdef DEBUG_CONSTPROP
-            DEBUG_PRINT("Considering " << *I << " for uniform lifting");
+            SH_DEBUG_PRINT("Considering " << *I << " for uniform lifting");
 #endif          
             for (int s = 0; s < opInfo[I->op].arity; s++) {
               if (I->src[s].uniform()) {
 #ifdef DEBUG_CONSTPROP
-                DEBUG_PRINT(*I << ".src[" << s << "] is already a uniform");
+                SH_DEBUG_PRINT(*I << ".src[" << s << "] is already a uniform");
 #endif
                 continue;
               }
@@ -738,13 +738,13 @@ struct FinishConstProp
               
               if (uniform < 0) {
 #ifdef DEBUG_CONSTPROP
-                DEBUG_PRINT("{" << *I << "}.src[" << s << "] is not uniform");
+                SH_DEBUG_PRINT("{" << *I << "}.src[" << s << "] is not uniform");
 #endif
                 continue;
               }
               if (mixed) {
 #ifdef DEBUG_CONSTPROP
-                DEBUG_PRINT("{" << *I << "}.src[" << s << "] is mixed");
+                SH_DEBUG_PRINT("{" << *I << "}.src[" << s << "] is mixed");
 #endif
                 continue;
               }
@@ -752,7 +752,7 @@ struct FinishConstProp
 
 
 #ifdef DEBUG_CONSTPROP
-              DEBUG_PRINT("Lifting {" << *I << "}.src[" << s << "]: " << uniform);
+              SH_DEBUG_PRINT("Lifting {" << *I << "}.src[" << s << "]: " << uniform);
 #endif
               int srcsize;
               if (value->type == ConstProp::Value::NODE) {
@@ -767,7 +767,7 @@ struct FinishConstProp
                 I->src[s] = Variable(node, swizzle, neg);
               } else {
 #ifdef DEBUG_CONSTPROP
-                DEBUG_PRINT("Could not lift " << *I << ".src[" << s << "] for some reason");
+                SH_DEBUG_PRINT("Could not lift " << *I << ".src[" << s << "] for some reason");
 #endif
               }
             }
@@ -800,7 +800,7 @@ struct FinishConstProp
     Context::current()->exit();
 
 #ifdef DEBUG_CONSTPROP
-    DEBUG_PRINT("Lifting value #" << valuenum);
+    SH_DEBUG_PRINT("Lifting value #" << valuenum);
 #endif
 
     bool broken = false;
@@ -906,7 +906,7 @@ struct FinishConstProp
     }
 
 #ifdef DEBUG_CONSTPROP
-    DEBUG_PRINT("Reached invalid point");
+    SH_DEBUG_PRINT("Reached invalid point");
 #endif
 
     // Should never reach here.
@@ -933,7 +933,7 @@ void propagate_constants(Program& p)
   graph->dfs(init);
 
 #ifdef DEBUG_CONSTPROP
-  DEBUG_PRINT("Const Prop Initial Values:");
+  SH_DEBUG_PRINT("Const Prop Initial Values:");
   DumpConstProp dump_pre;
   graph->dfs(dump_pre);
 #endif
@@ -944,7 +944,7 @@ void propagate_constants(Program& p)
     ValueTracking* vt = def.stmt->get_info<ValueTracking>();
     if (!vt) {
 #ifdef DEBUG_CONSTPROP
-      DEBUG_PRINT(*def.stmt << " on worklist does not have VT information?");
+      SH_DEBUG_PRINT(*def.stmt << " on worklist does not have VT information?");
 #endif
       continue;
     }
@@ -956,7 +956,7 @@ void propagate_constants(Program& p)
       ConstProp* cp = use->stmt->get_info<ConstProp>();
       if (!cp) {
 #ifdef DEBUG_CONSTPROP
-        DEBUG_PRINT("Use " << *use->stmt << " does not have const prop information!");
+        SH_DEBUG_PRINT("Use " << *use->stmt << " does not have const prop information!");
 #endif
         continue;
       }
@@ -967,13 +967,13 @@ void propagate_constants(Program& p)
       if (!ut) {
         // Should never happen...
 #ifdef DEBUG_CONSTPROP
-        DEBUG_PRINT("Use " << *use->stmt << " on worklist does not have VT information?");
+        SH_DEBUG_PRINT("Use " << *use->stmt << " on worklist does not have VT information?");
 #endif
         continue;
       }
 
 #ifdef DEBUG_CONSTPROP
-      DEBUG_PRINT("Meeting cell for {" << *use->stmt
+      SH_DEBUG_PRINT("Meeting cell for {" << *use->stmt
                      << "}.src" << use->source << "[" << use->index << "]");
 #endif
       
@@ -985,7 +985,7 @@ void propagate_constants(Program& p)
         ConstProp* dcp = possdef->stmt->get_info<ConstProp>();
         if (!dcp) {
 #ifdef DEBUG_CONSTPROP
-          DEBUG_PRINT("Possible def " << *dcp->stmt << " on worklist does not have CP information?");
+          SH_DEBUG_PRINT("Possible def " << *dcp->stmt << " on worklist does not have CP information?");
 #endif
           continue;
         }
@@ -995,14 +995,14 @@ void propagate_constants(Program& p)
         // If the use is negated, we need to change the cell
         if (use->stmt->src[use->source].neg()) {
           if (destcell.state == ConstProp::Cell::CONSTANT) {
-            DEBUG_ASSERT(destcell.value); // @todo type DEBUGGING
+            SH_DEBUG_ASSERT(destcell.value); // @todo type DEBUGGING
             destcell.value->negate();
           } else if (destcell.state == ConstProp::Cell::UNIFORM) {
             destcell.uniform.neg = !destcell.uniform.neg;
           }
         }
 #ifdef DEBUG_CONSTPROP
-        DEBUG_PRINT("  meet(" << new_cell << ", " << destcell << ") = " <<
+        SH_DEBUG_PRINT("  meet(" << new_cell << ", " << destcell << ") = " <<
                        meet(new_cell, destcell));
 #endif
         new_cell = meet(new_cell, destcell);
@@ -1010,7 +1010,7 @@ void propagate_constants(Program& p)
       
       if (cell != new_cell) {
 #ifdef DEBUG_CONSTPROP
-        DEBUG_PRINT("  ...replacing cell");
+        SH_DEBUG_PRINT("  ...replacing cell");
 #endif
         cp->src[use->source][use->index] = new_cell;
         cp->updateDest(worklist);

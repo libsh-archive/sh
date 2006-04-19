@@ -33,7 +33,7 @@ void Eval::operator()(Operation op, Variant* dest,
     const Variant* a, const Variant* b, const Variant* c) const
 {
 #ifdef DEBUG_EVAL
-  DEBUG_PRINT("PRE OP=" << opInfo[op].name << " "
+  SH_DEBUG_PRINT("PRE OP=" << opInfo[op].name << " "
       << (dest ? dest->encodeArray() : "NULL") << " = "
       << (a ? a->encodeArray() : "NULL") << ", "
       << (b ? b->encodeArray() : "NULL") << ", "
@@ -47,12 +47,12 @@ void Eval::operator()(Operation op, Variant* dest,
                       c ? c->valueType() : VALUETYPE_END);
   if(!evalOpInfo) {
     // @todo range proper error message
-    DEBUG_ERROR("Unable to find eval op for " << opInfo[op].name << 
+    SH_DEBUG_ERROR("Unable to find eval op for " << opInfo[op].name << 
         " " << (dest ? valueTypeName(dest->valueType()) : "") << " <- "
         << (a ? valueTypeName(a->valueType()) : "") << ", "
         << (b ? valueTypeName(b->valueType()) : "") << ", "
         << (c ? valueTypeName(c->valueType()) : "") << ")"); 
-    DEBUG_ASSERT(0); 
+    SH_DEBUG_ASSERT(0); 
   }
 
   const EvalOp* evalOp = evalOpInfo->m_evalOp; 
@@ -89,7 +89,7 @@ void Eval::operator()(Operation op, Variant* dest,
   if(newc) delete const_cast<Variant*>(cc);
 
 #ifdef DEBUG_EVAL
-  DEBUG_PRINT("   RES=" << opInfo[op].name << " "
+  SH_DEBUG_PRINT("   RES=" << opInfo[op].name << " "
       << (dest ? dest->encodeArray() : "NULL") << " = "
       << (a ? a->encodeArray() : "NULL") << ", "
       << (b ? b->encodeArray() : "NULL") << ", "
@@ -114,7 +114,7 @@ const EvalOpInfo* Eval::getEvalOpInfo(Operation op, ValueType dest,
     ValueType src0, ValueType src1, ValueType src2) const
 {
 #ifdef DEBUG_EVAL
-  DEBUG_PRINT("Eval mapping op=" << opInfo[op].name << " dest,src[0-2]= " 
+  SH_DEBUG_PRINT("Eval mapping op=" << opInfo[op].name << " dest,src[0-2]= " 
       << valueTypeName(dest)
       << ", " << valueTypeName(src0)
       << ", " << valueTypeName(src1) 
@@ -125,7 +125,7 @@ const EvalOpInfo* Eval::getEvalOpInfo(Operation op, ValueType dest,
   const EvalOpInfo*& result = m_evalOpCache(op, src0, src1, src2);
   if(result) {
 #ifdef DEBUG_EVAL
-      DEBUG_PRINT("    cached result=" << result->encode()); 
+      SH_DEBUG_PRINT("    cached result=" << result->encode()); 
 #endif
     return result;
   }
@@ -151,7 +151,7 @@ const EvalOpInfo* Eval::getEvalOpInfo(Operation op, ValueType dest,
     if(arity > 2) dist += castmgr->castDist(I->m_src[2], src2); 
 
 #ifdef DEBUG_EVAL
-      DEBUG_PRINT("    dist=" << mindist << " to " << I->encode()); 
+      SH_DEBUG_PRINT("    dist=" << mindist << " to " << I->encode()); 
 #endif
 
     if(dist < mindist) {
@@ -168,7 +168,7 @@ const EvalOpInfo* Eval::getEvalOpInfo(Operation op, ValueType dest,
 
 #ifdef DEBUG_EVAL
   if(result) {
-      DEBUG_PRINT("    result=" << result->encode()); 
+      SH_DEBUG_PRINT("    result=" << result->encode()); 
   }
 #endif
 

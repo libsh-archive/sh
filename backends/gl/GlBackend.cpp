@@ -156,8 +156,8 @@ void glCheckError(const char* desc, const char* file, int line)
     error = "Unknown error!";
     break;
   }
-  DEBUG_PRINT("GL ERROR on " << file << ": " <<line<<": "<< error);
-  DEBUG_PRINT("GL ERROR call: " << desc);
+  SH_DEBUG_PRINT("GL ERROR on " << file << ": " <<line<<": "<< error);
+  SH_DEBUG_PRINT("GL ERROR call: " << desc);
 }
 
 #ifdef _WIN32
@@ -172,8 +172,8 @@ if ((x = reinterpret_cast<PFN ## T ## PROC>(wglGetProcAddress(#x))) == NULL) \
 
 SH::BackendSetPtr CodeStrategy::generate_set(const SH::ProgramSet& s)
 {
-  DEBUG_ERROR("shgl::CodeStrategy::generate_set() called!");
-  DEBUG_ASSERT(false);
+  SH_DEBUG_ERROR("shgl::CodeStrategy::generate_set() called!");
+  SH_DEBUG_ASSERT(false);
   return 0;
 }
 
@@ -184,8 +184,8 @@ bool CodeStrategy::use_default_set() const
 
 void CodeStrategy::unbind_all_programs()
 {
-  DEBUG_ERROR("shgl::CodeStrategy::unbind_all_programs() called!");
-  DEBUG_ASSERT(false);
+  SH_DEBUG_ERROR("shgl::CodeStrategy::unbind_all_programs() called!");
+  SH_DEBUG_ASSERT(false);
 }
 
 bool CodeStrategy::use_default_unbind_all() const
@@ -414,7 +414,7 @@ SH::BackendCodePtr GlBackend::generate_code(const std::string& target,
                                               const SH::ProgramNodeCPtr& shader)
 {
   if (target.find("stream") != target.npos) {
-    DEBUG_WARN("Stream programs cannot be compiled on OpenGL backends."
+    SH_DEBUG_WARN("Stream programs cannot be compiled on OpenGL backends."
                   " Execute programs directly without compiling them.");
     return 0;
   }

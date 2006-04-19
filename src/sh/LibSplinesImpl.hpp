@@ -38,7 +38,7 @@ Generic<N, T> bernstein(const Generic<1, T>& a)
   }
   else {
     // TODO: implement the real thing for the general case
-    DEBUG_WARN("bernstein is not fully implemented yet");
+    SH_DEBUG_WARN("bernstein is not fully implemented yet");
     for (int i=0; i < N; i++) {
       result[i] = a[0];
     }
@@ -66,7 +66,7 @@ Generic<N, T> hermite(const Generic<1, T>& a, const Generic<N, T>& b,
   Attrib<N, SH_TEMP, T> result;
 
   // TODO: implement the real thing
-  DEBUG_WARN("hermite is not implemented yet");
+  SH_DEBUG_WARN("hermite is not implemented yet");
   for (int i=0; i < N; i++) {
     result[i] = a[0];
   }

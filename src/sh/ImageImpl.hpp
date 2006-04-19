@@ -107,7 +107,7 @@ T* TypedImage<T>::data()
 template<typename T>
 T TypedImage<T>::operator()(int x, int y, int i) const
 {
-  DEBUG_ASSERT(m_memory);
+  SH_DEBUG_ASSERT(m_memory);
   return data()[m_elements * (m_width * y + x) + i];
 }
 

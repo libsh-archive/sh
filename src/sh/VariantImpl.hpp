@@ -162,7 +162,7 @@ void DataVariant<T, DT>::negate()
 template<typename T, DataType DT>
 void DataVariant<T, DT>::set(const Variant* other)
 {
-  DEBUG_ASSERT(other->size() == size());
+  SH_DEBUG_ASSERT(other->size() == size());
 
   CPtrType cast_other = variant_cast<T, DT>(other);
   if(cast_other) {
@@ -181,7 +181,7 @@ void DataVariant<T, DT>::set(const VariantCPtr& other)
 template<typename T, DataType DT>
 void DataVariant<T, DT>::set(const Variant* other, int index)
 {
-  DEBUG_ASSERT(other->size() == 1); 
+  SH_DEBUG_ASSERT(other->size() == 1); 
   CPtrType cast_other = variant_cast<T, DT>(other);
   if(cast_other) {
     m_begin[index] = (*cast_other)[0];
@@ -203,7 +203,7 @@ template<typename T, DataType DT>
 void DataVariant<T, DT>::set(const Variant* other, bool neg, const Swizzle &writemask) 
 {
   int wmsize = writemask.size();
-  DEBUG_ASSERT(wmsize == other->size());
+  SH_DEBUG_ASSERT(wmsize == other->size());
 
   if(writemask.identity() && (wmsize == size())) {
     set(other);
@@ -376,7 +376,7 @@ std::string DataVariant<T, DT>::encodeArray() const {
 
 template<typename T, DataType DT>
 void DataVariant<T, DT>::alloc(int N) {
-  // DEBUG_PRINT("alloc " << valueTypeName[V] << " " << dataTypeName[DT]);
+  // SH_DEBUG_PRINT("alloc " << valueTypeName[V] << " " << dataTypeName[DT]);
   m_begin = new CppDataType[N];
   m_end = m_begin + N;
 }
@@ -396,7 +396,7 @@ template<typename T, DataType DT>
 void DataVariant<T, DT>::operator delete(void* ptr, std::size_t size)
 {
   if(size != sizeof(DataVariant)) {
-    DEBUG_PRINT("delete size does not match " << size << " " << sizeof(DataVariant));
+    SH_DEBUG_PRINT("delete size does not match " << size << " " << sizeof(DataVariant));
   }
   if(!m_pool) error( Exception( "Deleting from memory pool without an m_pool." ) );
   m_pool->free(ptr);

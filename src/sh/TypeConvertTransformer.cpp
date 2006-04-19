@@ -263,7 +263,7 @@ struct FloatConverter {
 
       if((operations & APPLY_FLR) && (operations - APPLY_FLR)) {
 #ifdef DEBUG_TYPECONVERT
-        DEBUG_PRINT("Unhandled conversion operations");
+        SH_DEBUG_PRINT("Unhandled conversion operations");
 #endif
       }
 
@@ -278,7 +278,7 @@ struct FloatConverter {
     Statement &stmt = *I;
     if(stmt.dest.null()) return;
 #ifdef DEBUG_TYPECONVERT
-    DEBUG_PRINT("Checking a statement op=" << opInfo[stmt.op].name);
+    SH_DEBUG_PRINT("Checking a statement op=" << opInfo[stmt.op].name);
 #endif
 
     const EvalOpInfo* evalOpInfo; 
@@ -330,7 +330,7 @@ struct FloatConverter {
 
         default:
           // It could also be that no operation matched the arguments
-          DEBUG_PRINT("Possible problem finding evaluator for op = " << opInfo[stmt.op].name); 
+          SH_DEBUG_PRINT("Possible problem finding evaluator for op = " << opInfo[stmt.op].name); 
           return;
       }
     }
@@ -343,7 +343,7 @@ struct FloatConverter {
       if((m_valueTypeMap.count(srcValueType) == 0) && (m_valueTypeMap.count(opValueType) == 0)) continue;
 
 #ifdef DEBUG_TYPECONVERT
-      DEBUG_PRINT("  Converting src[" << i << "] from " << typeInfo(srcValueType)->name()
+      SH_DEBUG_PRINT("  Converting src[" << i << "] from " << typeInfo(srcValueType)->name()
           << " to " << typeInfo(opValueType)->name());
 #endif
 
@@ -374,7 +374,7 @@ struct FloatConverter {
        (m_valueTypeMap.count(destValueType) + m_valueTypeMap.count(opDest) > 0)) {
 
 #ifdef DEBUG_TYPECONVERT
-      DEBUG_PRINT("  Converting dest from " << typeInfo(opDest)->name() << " to " << typeInfo(destValueType)->name() );
+      SH_DEBUG_PRINT("  Converting dest from " << typeInfo(opDest)->name() << " to " << typeInfo(destValueType)->name() );
 #endif
 
       BasicBlock::StmtList::iterator afterI = I;
@@ -415,7 +415,7 @@ struct FloatConverter {
       converted_p->setVariant(p->getVariant());
 
 #ifdef DEBUG_TYPECONVERT
-      DEBUG_PRINT("Setting values on replacement = " << converted_p->getVariant()->encode() << " original = " << p->getVariant()->encode());
+      SH_DEBUG_PRINT("Setting values on replacement = " << converted_p->getVariant()->encode() << " original = " << p->getVariant()->encode());
 #endif
     }
     
@@ -429,7 +429,7 @@ struct FloatConverter {
     }
 
 #ifdef DEBUG_TYPECONVERT
-    DEBUG_PRINT("Converting " << p->name() << " from " << typeInfo(p->valueType())->name()
+    SH_DEBUG_PRINT("Converting " << p->name() << " from " << typeInfo(p->valueType())->name()
       << " to " << typeInfo(m_valueTypeMap[p->valueType()])->name()); 
 #endif
   }

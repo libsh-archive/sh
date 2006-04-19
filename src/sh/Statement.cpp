@@ -36,9 +36,9 @@ Statement::Statement(Variable dest, Operation op, Variable src1)
   : dest(dest), src(3), op(op), marked(false)
 {
   if(op == OP_ASN && dest.size() != src1.size()) {
-    DEBUG_PRINT("OP_ASN dest.size() != src.size() (" << dest.size() << " != " << src1.size());
-    DEBUG_PRINT("  dest=" << dest.name() << " src=" << src1.name());
-    DEBUG_ASSERT(dest.size() == src1.size());
+    SH_DEBUG_PRINT("OP_ASN dest.size() != src.size() (" << dest.size() << " != " << src1.size());
+    SH_DEBUG_PRINT("  dest=" << dest.name() << " src=" << src1.name());
+    SH_DEBUG_ASSERT(dest.size() == src1.size());
   }
   src[0] = src1;
 }

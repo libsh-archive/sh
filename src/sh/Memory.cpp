@@ -142,7 +142,7 @@ int Storage::timestamp() const
 
 void Storage::setTimestamp(int timestamp)
 {
-  DEBUG_ASSERT(timestamp >= m_timestamp); // TODO: Assert this assertion :)
+  SH_DEBUG_ASSERT(timestamp >= m_timestamp); // TODO: Assert this assertion :)
   m_timestamp = timestamp;
 }
 
@@ -163,7 +163,7 @@ void Storage::orphan()
 
 void Storage::sync() const
 {
-  DEBUG_ASSERT(m_memory);
+  SH_DEBUG_ASSERT(m_memory);
   
   if (m_memory->timestamp() == timestamp()) return; // We are already in sync
 
@@ -184,7 +184,7 @@ void Storage::sync() const
   }
   
   // For now:
-  DEBUG_ASSERT(source);
+  SH_DEBUG_ASSERT(source);
   // TODO: In the future, traverse the graph of transfers to find a
   // cheap, working one.
 
@@ -192,7 +192,7 @@ void Storage::sync() const
   // Need to cast away the constness since we actually want to write TO this,
   // although all we're doing is "updating" it to the latest version.
   if (!transfer(source, const_cast<Storage*>(this))) {
-    DEBUG_WARN("Transfer from " << source << " to " << this << " failed!");
+    SH_DEBUG_WARN("Transfer from " << source << " to " << this << " failed!");
   }
 }
 

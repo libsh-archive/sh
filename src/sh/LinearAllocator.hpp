@@ -109,7 +109,7 @@ public:
   {
 #ifdef DEBUG
     for (LifetimeMap::const_iterator I = m_lifetimes.begin(); I != m_lifetimes.end(); ++I) {
-      DEBUG_PRINT(I->first << " = {" << I->second.first << ", " << I->second.last << "}");
+      SH_DEBUG_PRINT(I->first << " = {" << I->second.first << ", " << I->second.last << "}");
     }
 #endif
   }
@@ -128,7 +128,7 @@ public:
       if (!I->end) {
         if (!m_backendCode->allocateRegister(TPtr(reinterpret_cast<T *>(I->var)))) {
           // TODO: Error
-          DEBUG_WARN("Error allocating a register for " << I->var);
+          SH_DEBUG_WARN("Error allocating a register for " << I->var);
         }
       } else {
         m_backendCode->freeRegister(TPtr(reinterpret_cast<T *>(I->var)));

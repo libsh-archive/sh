@@ -65,7 +65,7 @@ void TypeInfo::init()
 
   addOps();
 
-  /* DEBUG */ //DEBUG_PRINT("Eval ops: \n" << Eval::instance()->availableOps());
+  /* DEBUG */ //SH_DEBUG_PRINT("Eval ops: \n" << Eval::instance()->availableOps());
 
   addCasts();
 }
@@ -74,7 +74,7 @@ const TypeInfo* TypeInfo::get(ValueType valueType, DataType dataType)
 {
   init();
   const TypeInfo* result = (*m_valueTypes)(valueType, dataType);
-  if(!result) DEBUG_PRINT("Null TypeInfo");
+  if(!result) SH_DEBUG_PRINT("Null TypeInfo");
   return result;
 }
 

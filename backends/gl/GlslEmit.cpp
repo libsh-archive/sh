@@ -272,7 +272,7 @@ void GlslCode::emit_ati_workaround(const Statement& stmt, double real_answer, co
 
 void GlslCode::emit_cbrt(const Statement& stmt)
 {
-  DEBUG_ASSERT(OP_CBRT == stmt.op);
+  SH_DEBUG_ASSERT(OP_CBRT == stmt.op);
 
   Variable temp(allocate_constant(stmt, 1.0 / 3.0));
   emit_pow(stmt.dest, stmt.src[0], temp);
@@ -285,7 +285,7 @@ void GlslCode::emit_comment(const Statement& stmt)
 
 void GlslCode::emit_cond(const Statement& stmt)
 {
-  DEBUG_ASSERT(OP_COND == stmt.op);
+  SH_DEBUG_ASSERT(OP_COND == stmt.op);
 
   bool on_nvidia = false;
   const GLubyte* vendor = GL_CHECK_ERROR(glGetString(GL_VENDOR));
@@ -317,7 +317,7 @@ void GlslCode::emit_cond(const Statement& stmt)
 
 void GlslCode::emit_discard(const Statement& stmt, const string& function)
 {
-  DEBUG_ASSERT((OP_KIL == stmt.op) || (OP_RET == stmt.op));
+  SH_DEBUG_ASSERT((OP_KIL == stmt.op) || (OP_RET == stmt.op));
 
   // Form a statement consistent with Sh's "discard" semantics
   ostringstream oss;
@@ -357,7 +357,7 @@ void GlslCode::emit_pow(const Variable& dest, const Variable& a, const Variable&
 
 void GlslCode::emit_exp10(const Statement& stmt)
 {
-  DEBUG_ASSERT(OP_EXP10 == stmt.op);
+  SH_DEBUG_ASSERT(OP_EXP10 == stmt.op);
   Variable c(allocate_constant(stmt, 1.0/std::log10(2.0)));
   append_line(resolve(stmt.dest) + " = exp2(" + resolve(c) + " * " + resolve(stmt.src[0]) + ")");
 }
@@ -387,13 +387,13 @@ void GlslCode::emit_hyperbolic(const Statement& stmt)
                                         "(" + resolve(e_plusX) + " + " + resolve(e_minusX) + ")");
     break;
   default:
-    DEBUG_ASSERT(0);
+    SH_DEBUG_ASSERT(0);
   }
 }
 
 void GlslCode::emit_lit(const Statement& stmt)
 {
-  DEBUG_ASSERT(OP_LIT == stmt.op);
+  SH_DEBUG_ASSERT(OP_LIT == stmt.op);
   
   // Result according to OpenGL spec
   append_line(resolve(stmt.dest, 0) + " = " + resolve_constant(1, stmt.dest, 1));
@@ -413,7 +413,7 @@ void GlslCode::emit_lit(const Statement& stmt)
 
 void GlslCode::emit_log(const Statement& stmt)
 {
-  DEBUG_ASSERT(OP_LOG == stmt.op);
+  SH_DEBUG_ASSERT(OP_LOG == stmt.op);
   bool on_ati = false;
   const GLubyte* vendor = GL_CHECK_ERROR(glGetString(GL_VENDOR));
   if (vendor) {
@@ -445,7 +445,7 @@ void GlslCode::emit_log(const Statement& stmt)
 
 void GlslCode::emit_log10(const Statement& stmt)
 {
-  DEBUG_ASSERT(OP_LOG10 == stmt.op);
+  SH_DEBUG_ASSERT(OP_LOG10 == stmt.op);
   Variable c(allocate_constant(stmt, std::log10(2.0))); 
   append_line(resolve(stmt.dest) + " = log2(" + resolve(stmt.src[0]) + ") * " + resolve(c) + "");
 }
@@ -474,7 +474,7 @@ void GlslCode::emit_logic(const Statement& stmt)
       code = "lessThanEqual($0, $1)";
       break;
     default:
-      DEBUG_ASSERT(0);
+      SH_DEBUG_ASSERT(0);
     }
   } else {
     switch (stmt.op) {
@@ -497,7 +497,7 @@ void GlslCode::emit_logic(const Statement& stmt)
       code = "$0 <= $1";
       break;
     default:
-      DEBUG_ASSERT(0);
+      SH_DEBUG_ASSERT(0);
     }
   }
 
@@ -509,10 +509,10 @@ void GlslCode::emit_logic(const Statement& stmt)
 
 void GlslCode::emit_noise(const Statement& stmt)
 {
-  DEBUG_ASSERT(OP_NOISE == stmt.op);
+  SH_DEBUG_ASSERT(OP_NOISE == stmt.op);
 
   int output_size = stmt.dest.size();
-  DEBUG_ASSERT((output_size <= 4) && (output_size >= 1));
+  SH_DEBUG_ASSERT((output_size <= 4) && (output_size >= 1));
   
   stringstream line;
   line << resolve(stmt.dest) << " = " << "noise" << output_size << "("
@@ -522,14 +522,14 @@ void GlslCode::emit_noise(const Statement& stmt)
 
 void GlslCode::emit_pal(const Statement& stmt)
 {
-  DEBUG_ASSERT(OP_PAL == stmt.op);
+  SH_DEBUG_ASSERT(OP_PAL == stmt.op);
 
   append_line(resolve(stmt.dest) + " = " + resolve(stmt.src[0], stmt.src[1]));
 }
 
 void GlslCode::emit_prod(const Statement& stmt)
 {
-  DEBUG_ASSERT(OP_CMUL == stmt.op);
+  SH_DEBUG_ASSERT(OP_CMUL == stmt.op);
 
   Variable temp(allocate_temp(stmt, 1));
   append_line(resolve(temp) + " = " + resolve(stmt.src[0], 0));
@@ -544,7 +544,7 @@ void GlslCode::emit_prod(const Statement& stmt)
 
 void GlslCode::emit_sum(const Statement& stmt)
 {
-  DEBUG_ASSERT(OP_CSUM == stmt.op);
+  SH_DEBUG_ASSERT(OP_CSUM == stmt.op);
 
   Variable temp(allocate_temp(stmt, 1));
   append_line(resolve(temp) + " = " + resolve(stmt.src[0], 0));
@@ -559,7 +559,7 @@ void GlslCode::emit_sum(const Statement& stmt)
 
 void GlslCode::emit_texture(const Statement& stmt)
 {
-  DEBUG_ASSERT((OP_TEX    == stmt.op) || (OP_TEXI == stmt.op) ||
+  SH_DEBUG_ASSERT((OP_TEX    == stmt.op) || (OP_TEXI == stmt.op) ||
                   (OP_TEXLOD == stmt.op) || (OP_TEXD == stmt.op));
 
   SH::Operation op = stmt.op; 
@@ -581,7 +581,7 @@ void GlslCode::emit_texture(const Statement& stmt)
       // On other hardware, we're sunk, so just ignore it
       default:
         op = OP_TEX;
-        DEBUG_WARN("TEXD is not supported on this hardware in the GLSL backend");
+        SH_DEBUG_WARN("TEXD is not supported on this hardware in the GLSL backend");
         break;
     }
   }

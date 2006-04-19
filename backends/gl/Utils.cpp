@@ -71,7 +71,7 @@ void StreamCache::generate_programs(ProgramVersion version)
       dims = SH_TEXTURE_2D;
       break;
     default:
-      DEBUG_ASSERT(false);
+      SH_DEBUG_ASSERT(false);
       break;
     }
     break;
@@ -124,7 +124,7 @@ void StreamCache::generate_programs(ProgramVersion version)
       break;
     
     case OS_NONE_3D:
-      DEBUG_ASSERT(false /* TODO */);
+      SH_DEBUG_ASSERT(false /* TODO */);
       break;
     
     case OS_1D:
@@ -218,7 +218,7 @@ void StreamCache::generate_programs(ProgramVersion version)
       break;
          
     default:
-      DEBUG_ASSERT(false);
+      SH_DEBUG_ASSERT(false);
       break;
       
     }
@@ -236,7 +236,7 @@ void StreamCache::generate_programs(ProgramVersion version)
 
 Info* StreamCache::clone() const
 {
-  DEBUG_ASSERT(false);
+  SH_DEBUG_ASSERT(false);
   return 0;
 //  return new FBOStreamCache(m_stream_program, m_vertex_program, m_max_outputs);
 }
@@ -249,7 +249,7 @@ void StreamCache::update_channels(ProgramVersion version,
   if (m_program_sets[version].empty())
     generate_programs(version);
 
-  DEBUG_ASSERT(stream.size() == m_inputs[version].size());
+  SH_DEBUG_ASSERT(stream.size() == m_inputs[version].size());
   InputList::iterator I = m_inputs[version].begin();
   Stream::const_iterator J = input_stream.begin();
   for (; I != m_inputs[version].end(); ++I, ++J) {
@@ -348,29 +348,29 @@ void StreamCache::update_channels(ProgramVersion version,
 
 StreamCache::set_iterator StreamCache::sets_begin(ProgramVersion version)
 {
-  DEBUG_ASSERT(version >= 0 && version < NUM_PROGRAM_VERSIONS);
-  DEBUG_ASSERT(!m_program_sets[version].empty());
+  SH_DEBUG_ASSERT(version >= 0 && version < NUM_PROGRAM_VERSIONS);
+  SH_DEBUG_ASSERT(!m_program_sets[version].empty());
   return m_program_sets[version].begin();
 }
 
 StreamCache::set_iterator StreamCache::sets_end(ProgramVersion version)
 {
-  DEBUG_ASSERT(version >= 0 && version < NUM_PROGRAM_VERSIONS);
-  DEBUG_ASSERT(!m_program_sets[version].empty());
+  SH_DEBUG_ASSERT(version >= 0 && version < NUM_PROGRAM_VERSIONS);
+  SH_DEBUG_ASSERT(!m_program_sets[version].empty());
   return m_program_sets[version].end();
 }
 
 StreamCache::set_const_iterator StreamCache::sets_begin(ProgramVersion version) const
 {
-  DEBUG_ASSERT(version >= 0 && version < NUM_PROGRAM_VERSIONS);
-  DEBUG_ASSERT(!m_program_sets[version].empty());
+  SH_DEBUG_ASSERT(version >= 0 && version < NUM_PROGRAM_VERSIONS);
+  SH_DEBUG_ASSERT(!m_program_sets[version].empty());
   return m_program_sets[version].begin();
 }
 
 StreamCache::set_const_iterator StreamCache::sets_end(ProgramVersion version) const
 {
-  DEBUG_ASSERT(version >= 0 && version < NUM_PROGRAM_VERSIONS);
-  DEBUG_ASSERT(!m_program_sets[version].empty());
+  SH_DEBUG_ASSERT(version >= 0 && version < NUM_PROGRAM_VERSIONS);
+  SH_DEBUG_ASSERT(!m_program_sets[version].empty());
   return m_program_sets[version].end();
 }
 
@@ -378,7 +378,7 @@ void split_program(ProgramNode* program,
                    std::list<ProgramNodePtr>& programs,
                    const std::string& target, int chunk_size)
 {
-  DEBUG_ASSERT(chunk_size > 0);
+  SH_DEBUG_ASSERT(chunk_size > 0);
   int var = 0;
   for (ProgramNode::VarList::const_iterator I = program->begin_outputs();
        I != program->end_outputs(); ) {

@@ -67,8 +67,8 @@ GlslSet::GlslSet(const SH::ProgramSet& s)
     GlslCodePtr code = shref_dynamic_cast<GlslCode>((*I)->code());
 
     // TODO: use error()
-    DEBUG_ASSERT(code);
-    DEBUG_ASSERT(!m_shaders[code->glsl_unit()]);
+    SH_DEBUG_ASSERT(code);
+    SH_DEBUG_ASSERT(!m_shaders[code->glsl_unit()]);
 
     attach(code);
   }
@@ -113,7 +113,7 @@ GlslSet::~GlslSet()
 
 void GlslSet::attach(const SH::Pointer<GlslCode>& code)
 {
-  DEBUG_ASSERT(m_arb_program);
+  SH_DEBUG_ASSERT(m_arb_program);
 
   if (!code) return;
   if (m_shaders[code->glsl_unit()] == code) return;
@@ -139,7 +139,7 @@ void GlslSet::detach(const SH::Pointer<GlslCode>& code)
 
   unbind();
 
-  DEBUG_ASSERT(m_arb_program);
+  SH_DEBUG_ASSERT(m_arb_program);
   GL_CHECK_ERROR(glDetachObjectARB(m_arb_program, code->glsl_shader()));
   m_shaders[code->glsl_unit()] = 0;
 
@@ -149,7 +149,7 @@ void GlslSet::detach(const SH::Pointer<GlslCode>& code)
 
 void GlslSet::replace(const SH::Pointer<GlslCode>& code)
 {
-  DEBUG_ASSERT(code);
+  SH_DEBUG_ASSERT(code);
   if (m_shaders[code->glsl_unit()] == code && !m_shaders[1 - code->glsl_unit()]) return;
 
   detach(m_shaders[0]);
@@ -160,7 +160,7 @@ void GlslSet::replace(const SH::Pointer<GlslCode>& code)
 
 void GlslSet::link()
 {
-  DEBUG_ASSERT(m_arb_program);
+  SH_DEBUG_ASSERT(m_arb_program);
 
   GL_CHECK_ERROR(glLinkProgramARB(m_arb_program));
 

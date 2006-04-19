@@ -130,7 +130,7 @@ GlTextureName::Binding::Binding(const Pointer<const GlTextureName>& name)
     GL_CHECK_ERROR(glGetIntegerv(GL_TEXTURE_BINDING_3D, &last));
     break;
   default:
-    DEBUG_WARN("Texture target not handled by GL backend");
+    SH_DEBUG_WARN("Texture target not handled by GL backend");
     break;
   }
     
