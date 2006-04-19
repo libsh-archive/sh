@@ -249,7 +249,7 @@ void StreamCache::update_channels(ProgramVersion version,
   if (m_program_sets[version].empty())
     generate_programs(version);
 
-  SH_DEBUG_ASSERT(stream.size() == m_inputs[version].size());
+  SH_DEBUG_ASSERT(input_stream.size() == m_inputs[version].size());
   InputList::iterator I = m_inputs[version].begin();
   Stream::const_iterator J = input_stream.begin();
   for (; I != m_inputs[version].end(); ++I, ++J) {
