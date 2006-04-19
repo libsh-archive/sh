@@ -152,18 +152,19 @@ void StreamCache::generate_programs(ProgramVersion version)
           Variable tex(input_data->tex);
           Variable out((*input)->clone(SH_OUTPUT));
           
-          // The calculation we are doing here is:
+          // index(2) * dest_width * dest_height is the integer index
+          // of the currently computed stream element
           //
-          // i = i*stride + offset + bias
-          // x = frac(i)
-          // y = i/width + (0.5 - x)*2*bias
-          //
-          // z = z*s + o + b
-          // w = 1
-          coord(2,3) = mad(index(2,3), input_data->os1(0,2), input_data->os1(1,3));
+          // compute the fractional index modulo count
+          // coord(2) = frac(index(2) * dw * dh / count)
+          coord(2) = mad(index(2), input_data->os1(0), input_data->os1(1));          
+          coord(2) = frac(coord(2));
+          
+          // coord(2) = coord(2) * stride + offset
+          coord(2) = mad(coord(2), input_data->os1(2), input_data->os1(3));
           // x = frac z
           coord(0) = frac(coord(2));
-          // y = x*-2*b + y*0 + z/wi + w*b
+          // y = x*-2*b + y*0 + z/wi + w*b/(1-b)
           coord(1) = coord | input_data->os2;
           
           if (m_float_extension == ARB_NV_FLOAT_BUFFER) {
@@ -269,22 +270,22 @@ void StreamCache::update_channels(ProgramVersion version,
       // See TexFetcher::operator() for explanation of the two
       // offset/stride parameters
       //
-      int stride, offset;
+      int stride, offset, count;
       J->get_stride(&stride, 1);
       J->get_offset(&offset, 1);
+      J->get_count(&count, 1);
       float os1_val[4];
-      float one_over_w = 1/(float)I->tex->width();
-      os1_val[0] = stride*(width * height)*one_over_w;
-      os1_val[1] = offset * one_over_w + one_over_w/2;
-      os1_val[2] = 0;
-      os1_val[3] = 1;
+      os1_val[0] = (width * height) / (float)count;
+      os1_val[1] = 1/(2.0*count*stride);
+      os1_val[2] = stride * count / (float)I->tex->width();
+      os1_val[3] = offset / (float)I->tex->width();
       I->os1.setValues(os1_val);
 
       float os2_val[4];
-      os2_val[0] = -one_over_w;
+      os2_val[0] = -1.0/I->tex->width();
       os2_val[1] = 0;
-      os2_val[2] = one_over_w;
-      os2_val[3] = one_over_w/2;
+      os2_val[2] = 1.0/I->tex->width();
+      os2_val[3] = 1.0/(2*I->tex->width() - 1);
       I->os2.setValues(os2_val);
     }
     
