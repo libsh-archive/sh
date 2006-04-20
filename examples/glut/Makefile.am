@@ -5,4 +5,4 @@ INCLUDES = -I$(includedir)
 EXTRA_DIST = README
 
 bin_PROGRAMS = shglutex
-shglutex_SOURCES = main.cpp ShTrackball.cpp ShTrackball.hpp Camera.cpp Camera.hpp
+shglutex_SOURCES = main.cpp Trackball.cpp Trackball.hpp Camera.cpp Camera.hpp

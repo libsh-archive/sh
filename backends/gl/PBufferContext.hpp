@@ -17,18 +17,18 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#ifndef PBUFFERCONTEXT_HPP
-#define PBUFFERCONTEXT_HPP
+#ifndef SHPBUFFERCONTEXT_HPP
+#define SHPBUFFERCONTEXT_HPP
 
-#include "ShProgram.hpp"
+#include "Program.hpp"
 #include "GlBackend.hpp"
-#include "ShMemory.hpp"
+#include "Memory.hpp"
 #include "Utils.hpp"
 
 namespace shgl {
 
 // A handle representing a previously active pbuffer.
-class PBufferHandle : public SH::ShRefCountable {
+class PBufferHandle : public SH::RefCountable {
 public:
   virtual ~PBufferHandle();
 
@@ -39,27 +39,27 @@ protected:
   PBufferHandle();
 };
 
-typedef SH::ShPointer<PBufferHandle> PBufferHandlePtr;
-typedef SH::ShPointer<const PBufferHandle> PBufferHandleCPtr;
+typedef SH::Pointer<PBufferHandle> PBufferHandlePtr;
+typedef SH::Pointer<const PBufferHandle> PBufferHandleCPtr;
 
 class PBufferContext;
 
-class PBufferStorage : public SH::ShStorage {
+class PBufferStorage : public SH::Storage {
 public:
   ~PBufferStorage();
 
-  SH::ShPointer<PBufferContext> context() const;
+  SH::Pointer<PBufferContext> context() const;
 
   std::string id() const { return "opengl:pbuffer"; }
   
 private:
-  SH::ShPointer<PBufferContext> m_context;
+  SH::Pointer<PBufferContext> m_context;
 };
 
-typedef SH::ShPointer<PBufferStorage> PBufferStoragePtr;
-typedef SH::ShPointer<const PBufferStorage> PBufferStorageCPtr;
+typedef SH::Pointer<PBufferStorage> PBufferStoragePtr;
+typedef SH::Pointer<const PBufferStorage> PBufferStorageCPtr;
 
-class PBufferContext : public SH::ShRefCountable {
+class PBufferContext : public SH::RefCountable {
 public:
   virtual ~PBufferContext();
 
@@ -76,8 +76,8 @@ protected:
   void* m_id;
 };
 
-typedef SH::ShPointer<PBufferContext> PBufferContextPtr;
-typedef SH::ShPointer<const PBufferContext> PBufferContextCPtr;
+typedef SH::Pointer<PBufferContext> PBufferContextPtr;
+typedef SH::Pointer<const PBufferContext> PBufferContextCPtr;
 
 class PBufferFactory {
 public:

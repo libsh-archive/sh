@@ -41,10 +41,10 @@ using namespace std;
 
 const int MIPMAP_LEVELS = 10;
 
-ShTexture2D<ShColor3fub> kd(512, 512);
+Texture2D<Color3fub> kd(512, 512);
 
-ShProgram vsh;
-ShProgram fsh;
+Program vsh;
+Program fsh;
 
 // Animation data
 float zoom = 1.0;
@@ -62,8 +62,8 @@ void display()
   
   // turn off vertex and fragment programs, this
   // effectively turns off Sh
-  shUnbind(vsh);
-  shUnbind(fsh);
+  unbind(vsh);
+  unbind(fsh);
 
   // push modelview matrix and load the rotation
   // for the point light
@@ -85,8 +85,8 @@ void display()
   
   // turn vertex and fragment programs back on 
   // bind programs
-  shBind(vsh);
-  shBind(fsh);
+  bind(vsh);
+  bind(fsh);
 
   // setup the modelview matrix with the rotation
   // for the dodecahedron and draw it
@@ -112,7 +112,7 @@ void display()
 
   glPopMatrix();
 
-  shUnbind();
+  unbind();
   
   glutSwapBuffers();
 }
@@ -165,19 +165,16 @@ void init_gl(void)
 
 void init_sh()
 {
-  // set OpenGL backend
-  shSetBackend("arb");
-
   // Sh data
-  ShMatrix4x4f mv;
-  ShMatrix4x4f mvp;
-  ShPoint3f lightp;
-  ShColor3f diffuse;
-  ShColor3f ambient;
+  Matrix4x4f mv;
+  Matrix4x4f mvp;
+  Point3f lightp;
+  Color3f diffuse;
+  Color3f ambient;
 
   for (int i=0; i < MIPMAP_LEVELS; i++) {
     int size = 512 >> i;
-    ShHostMemoryPtr memory = new ShHostMemory(3 * size * size * sizeof(unsigned char), SH_FUBYTE);
+    HostMemoryPtr memory = new HostMemory(3 * size * size * sizeof(unsigned char), SH_FUBYTE);
     
     unsigned char * data = reinterpret_cast<unsigned char*>(memory->hostStorage()->data());
 
@@ -206,30 +203,30 @@ void init_sh()
 
   // construct vertex program
   vsh = SH_BEGIN_VERTEX_PROGRAM {
-    ShInOutTexCoord2f u;
-    ShInOutPosition4f pos;
-    ShInOutNormal3f normal;
-    ShOutputVector3f lightv;
+    InOutTexCoord2f u;
+    InOutPosition4f pos;
+    InOutNormal3f normal;
+    OutputVector3f lightv;
 
-    ShOutputPoint3f posv = (mv | pos)(0,1,2); // Compute viewspace position
+    OutputPoint3f posv = (mv | pos)(0,1,2); // Compute viewspace position
     lightv = lightp - posv; // Compute light direction
     
     pos = mvp | pos; // Project position
     normal = mv | normal; // Project normal
   } SH_END;
 
-  ShColor3f SH_DECL(diffusecolor) = ShColor3f(0.2, 0.2, 0.2);
-  ShAttrib1f exponent(30.0);
+  Color3f DECL(diffusecolor) = Color3f(0.2, 0.2, 0.2);
+  Attrib1f exponent(30.0);
 
   // construct fragment program
   fsh = SH_BEGIN_FRAGMENT_PROGRAM {
-    ShInputTexCoord2f u;
-    ShInputPosition4f position;
-    ShInputNormal3f normal;
-    ShInputVector3f lightv;
-    ShInputPoint3f posv;
+    InputTexCoord2f u;
+    InputPosition4f position;
+    InputNormal3f normal;
+    InputVector3f lightv;
+    InputPoint3f posv;
 
-    ShOutputColor3f color;
+    OutputColor3f color;
 
     color = kd(u);
   } SH_END;
@@ -249,17 +246,20 @@ int main(int argc, char** argv)
     glutReshapeFunc(reshape);
     glutKeyboardFunc(keyboard);
 
-    ShContext::current()->throw_errors(false);
+    Context::current()->throw_errors(false);
   
     // initialize OpenGL
     init_gl();
 
     // initialize Sh
+    if (argc > 1) {
+      useBackend(argv[1]);
+    }
     init_sh();
   
     glutMainLoop();
 
-  } catch (const ShException& e) {
+  } catch (const Exception& e) {
     std::cerr << "Sh error: " << e.message() << std::endl;
     return 1;
   } catch (const std::exception& e) {

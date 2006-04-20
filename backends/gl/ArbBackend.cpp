@@ -40,7 +40,7 @@ struct ArbBackend : public GlBackend {
                 // For now...
                 0,
 #else
-                new FBOStreams(),
+                new FBOStreams("arb"),
 #endif
                 "arb", "1.0")
   {
@@ -67,7 +67,7 @@ extern "C" {
 #ifdef _WIN32
   __declspec(dllexport) 
 #endif
-  ArbBackend* shBackend_libsharb_instantiate() 
+  ArbBackend* backend_libsharb_instantiate() 
   {
     return new ArbBackend();
   }
@@ -75,7 +75,7 @@ extern "C" {
 #ifdef _WIN32
   __declspec(dllexport) 
 #endif
-  int shBackend_libsharb_target_cost(const std::string& target) 
+  int backend_libsharb_target_cost(const std::string& target) 
   {
     if ("arb:vertex" == target)   return 1;
     if ("arb:fragment" == target) return 1;

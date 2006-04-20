@@ -25,7 +25,7 @@ using namespace std;
 
 int main() 
 {
-  shInit();
+  init();
   return 0;
 }
 

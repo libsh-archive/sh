@@ -32,19 +32,19 @@ GlslSet::GlslSet()
 {
   SH_GL_CHECK_ERROR(m_arb_program = glCreateProgramObjectARB());
   if (!m_arb_program) {
-    shError(ShBackendException("Cannot create a glsl program object. Is glsl supported by your GPU/drivers ?"));
+    error(BackendException("Cannot create a glsl program object. Is glsl supported by your GPU/drivers ?"));
   }
 
   m_shaders[0] = 0;
   m_shaders[1] = 0;
 }
 
-GlslSet::GlslSet(const SH::ShPointer<GlslCode>& code)
+GlslSet::GlslSet(const SH::Pointer<GlslCode>& code)
   : m_linked(false)
 {
   SH_GL_CHECK_ERROR(m_arb_program = glCreateProgramObjectARB());
   if (!m_arb_program) {
-    shError(ShBackendException("Cannot create a glsl program object. Is glsl supported by your GPU/drivers ?"));
+    error(BackendException("Cannot create a glsl program object. Is glsl supported by your GPU/drivers ?"));
   }
 
   m_shaders[0] = 0;
@@ -52,21 +52,21 @@ GlslSet::GlslSet(const SH::ShPointer<GlslCode>& code)
   attach(code);
 }
 
-GlslSet::GlslSet(const SH::ShProgramSet& s)
+GlslSet::GlslSet(const SH::ProgramSet& s)
   : m_linked(false)
 {
   SH_GL_CHECK_ERROR(m_arb_program = glCreateProgramObjectARB());
   if (!m_arb_program) {
-    shError(ShBackendException("Cannot create a glsl program object. Is glsl supported by your GPU/drivers ?"));
+    error(BackendException("Cannot create a glsl program object. Is glsl supported by your GPU/drivers ?"));
   }
 
   m_shaders[0] = 0;
   m_shaders[1] = 0;
-  for (ShProgramSet::const_iterator I = s.begin(); I != s.end(); ++I) {
+  for (ProgramSet::const_iterator I = s.begin(); I != s.end(); ++I) {
     // TODO: use the glsl backend
     GlslCodePtr code = shref_dynamic_cast<GlslCode>((*I)->code());
 
-    // TODO: use shError()
+    // TODO: use error()
     SH_DEBUG_ASSERT(code);
     SH_DEBUG_ASSERT(!m_shaders[code->glsl_unit()]);
 
@@ -79,7 +79,7 @@ GlslSet::GlslSet(const GlslSet& other)
 {
   SH_GL_CHECK_ERROR(m_arb_program = glCreateProgramObjectARB());
   if (!m_arb_program) {
-    shError(ShBackendException("Cannot create a glsl program object. Is glsl supported by your GPU/drivers ?"));
+    error(BackendException("Cannot create a glsl program object. Is glsl supported by your GPU/drivers ?"));
   }
 
   m_shaders[0] = 0;
@@ -111,7 +111,7 @@ GlslSet::~GlslSet()
   m_arb_program = 0;
 }
 
-void GlslSet::attach(const SH::ShPointer<GlslCode>& code)
+void GlslSet::attach(const SH::Pointer<GlslCode>& code)
 {
   SH_DEBUG_ASSERT(m_arb_program);
 
@@ -132,7 +132,7 @@ void GlslSet::attach(const SH::ShPointer<GlslCode>& code)
   m_linked = false; // will need to relink
 }
 
-void GlslSet::detach(const SH::ShPointer<GlslCode>& code)
+void GlslSet::detach(const SH::Pointer<GlslCode>& code)
 {
   if (!code) return;
   if (m_shaders[code->glsl_unit()] != code) return;
@@ -147,7 +147,7 @@ void GlslSet::detach(const SH::ShPointer<GlslCode>& code)
   m_linked = false;
 }
 
-void GlslSet::replace(const SH::ShPointer<GlslCode>& code)
+void GlslSet::replace(const SH::Pointer<GlslCode>& code)
 {
   SH_DEBUG_ASSERT(code);
   if (m_shaders[code->glsl_unit()] == code && !m_shaders[1 - code->glsl_unit()]) return;

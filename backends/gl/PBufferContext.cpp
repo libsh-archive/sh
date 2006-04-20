@@ -43,18 +43,18 @@ PBufferStorage::~PBufferStorage()
 {
 }
 
-ShPointer<PBufferContext> PBufferStorage::context() const
+Pointer<PBufferContext> PBufferStorage::context() const
 {
   return m_context;
 }
 
-class PBufferGlTextureTransfer : public ShTransfer {
+class PBufferGlTextureTransfer : public Transfer {
   PBufferGlTextureTransfer()
-    : ShTransfer("opengl:pbuffer", "opengl:texture")
+    : Transfer("opengl:pbuffer", "opengl:texture")
   {
   }
 
-  bool transfer(const ShStorage* from, ShStorage* to)
+  bool transfer(const Storage* from, Storage* to)
   {
     const PBufferStorage* pbuffer = dynamic_cast<const PBufferStorage*>(from);
     PBufferContextPtr context = pbuffer->context();
@@ -78,7 +78,7 @@ class PBufferGlTextureTransfer : public ShTransfer {
     return true;
   }
 
-  int cost(const ShStorage* from, const ShStorage* to)
+  int cost(const Storage* from, const Storage* to)
   {
     return 20;
   }

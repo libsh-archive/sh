@@ -18,7 +18,7 @@
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 #include "GLXPBufferContext.hpp"
-#include "ShError.hpp"
+#include "Error.hpp"
 
 #ifndef GLX_RGBA_FLOAT_ATI_BIT
 #define GLX_RGBA_FLOAT_ATI_BIT          0x00000100
@@ -52,7 +52,7 @@ GLXPBufferHandle::~GLXPBufferHandle()
 void GLXPBufferHandle::restore()
 {
   if (!glXMakeCurrent(m_display, m_drawable, m_context)) {
-    shError(ShException("Restoring GLX Context failed"));
+    error(Exception("Restoring GLX Context failed"));
   }
 }
 
@@ -82,7 +82,7 @@ PBufferHandlePtr GLXPBufferContext::activate()
   GLXDrawable old_drawable = glXGetCurrentDrawable();
 
   if (!glXMakeCurrent(m_display, m_pbuffer, m_context)) {
-    shError(ShException("Activating GLXPBufferContext failed!"));
+    error(Exception("Activating GLXPBufferContext failed!"));
   }
 
   if (old_drawable && old_context) {
@@ -99,7 +99,7 @@ PBufferHandlePtr GLXPBufferContext::activate()
 GLXPBufferFactory::GLXPBufferFactory()
   : m_display(0),
     m_fb_config(0),
-    m_extension(SH_ARB_NO_FLOAT_EXT)
+    m_extension(ARB_NO_FLOAT_EXT)
 {
 }
 
@@ -123,7 +123,7 @@ void GLXPBufferFactory::init_display()
     m_display = XOpenDisplay(0);
   }
   if (!m_display) {
-    shError(ShException("Could not open X display"));
+    error(Exception("Could not open X display"));
   }
 }
 
@@ -151,7 +151,7 @@ void GLXPBufferFactory::init_config()
     int items = 0;
     m_fb_config = glXChooseFBConfig(m_display, scrnum, &fb_attribs.front(), &items);
     if (m_fb_config) {
-      m_extension = SH_ARB_NV_FLOAT_BUFFER;
+      m_extension = ARB_NV_FLOAT_BUFFER;
     }
   }
 
@@ -164,18 +164,18 @@ void GLXPBufferFactory::init_config()
     int items = 0;
     m_fb_config = glXChooseFBConfig(m_display, scrnum, &fb_attribs.front(), &items);
     if (m_fb_config) {
-      m_extension = SH_ARB_ATI_PIXEL_FORMAT_FLOAT;
+      m_extension = ARB_ATI_PIXEL_FORMAT_FLOAT;
     }
   }
 
   if (!m_fb_config) {
-    shError(ShException("Could not get GLX FB Config!\n"
+    error(Exception("Could not get GLX FB Config!\n"
                                       "Your card may not support the appropriate extensions."));
   }
 
-  if (m_extension == SH_ARB_NO_FLOAT_EXT) {
+  if (m_extension == ARB_NO_FLOAT_EXT) {
     m_fb_config = 0;
-    shError(ShException("Could not choose a floating-point extension!\n"
+    error(Exception("Could not choose a floating-point extension!\n"
                         "Your card may not support the appropriate extensions."));
   }
 }
@@ -214,7 +214,7 @@ GLXPBufferContextPtr GLXPBufferFactory::create_context(int width, int height,
 
   GLXPbuffer pbuffer = glXCreatePbuffer(m_display, m_fb_config[0], pbuffer_attribs);
   if (!pbuffer) {
-    shError(ShException("Could not make pbuffer!"));
+    error(Exception("Could not make pbuffer!"));
     return 0;
   }
 
@@ -223,7 +223,7 @@ GLXPBufferContextPtr GLXPBufferFactory::create_context(int width, int height,
   GLXContext context = glXCreateNewContext(m_display, m_fb_config[0], GLX_RGBA_TYPE, share, True);
   if (!context) {
     // TODO: delete pbuffer
-    shError(ShException("Could not create PBuffer context"));
+    error(Exception("Could not create PBuffer context"));
     return 0;
   }
   

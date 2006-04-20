@@ -48,11 +48,11 @@ GLint faces[6][4] = {  /* Vertex indices for the 6 faces of a cube. */
 GLfloat v[8][3];  /* Will be filled in with X,Y,Z vertexes. */
 
 
-ShMatrix4x4f mv, mvd;
-ShProgram vsh, fsh;
-ShProgramSet* shaders = NULL;
-ShPoint3f lightPos(light_position);
-ShColor3f diffusecolor(light_diffuse);
+Matrix4x4f mv, mvd;
+Program vsh, fsh;
+ProgramSet* shaders = NULL;
+Point3f lightPos(light_position);
+Color3f diffusecolor(light_diffuse);
 
 void print_matrix(const GLfloat* mat)
 {
@@ -75,7 +75,7 @@ void drawBox(void)
     glBegin(GL_QUADS);
     
     int index=0;
-    for (ShProgramNode::VarList::const_iterator it = vsh.begin_inputs();
+    for (ProgramNode::VarList::const_iterator it = vsh.begin_inputs();
          it != vsh.end_inputs(); it++) {
       stringstream ss;
       ss << (*it)->meta("opengl:attribindex");
@@ -126,9 +126,9 @@ void drawBox(void)
 void display(void)
 {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  shBind(*shaders);
+  bind(*shaders);
   drawBox();
-  shUnbind(*shaders);
+  unbind(*shaders);
   glutSwapBuffers();
 }
 
@@ -179,21 +179,21 @@ void initShaders()
   mvd = mvd * mv;
 
   vsh = SH_BEGIN_VERTEX_PROGRAM {
-    ShInOutNormal3f SH_DECL(normal);
-    ShInOutPosition4f SH_DECL(pos); // TODO swap the order of normal and pos
-    ShInOutColor3f SH_DECL(col1);
-    ShInputColor3f SH_DECL(col2);
-    ShInputColor3f SH_DECL(col3);
-    ShInputColor3f SH_DECL(col4);
-    ShInputColor3f SH_DECL(col5);
-    ShInputColor3f SH_DECL(col6);
-    ShInputColor3f SH_DECL(col7);
-    ShInputColor3f SH_DECL(col8);
-    ShInputColor3f SH_DECL(col9);
-    ShInputColor3f SH_DECL(col10);
-    ShInputColor3f SH_DECL(col11);
-    ShInputColor3f SH_DECL(col12);
-    ShInputColor3f SH_DECL(col13);
+    InOutNormal3f DECL(normal);
+    InOutPosition4f DECL(pos); // TODO swap the order of normal and pos
+    InOutColor3f DECL(col1);
+    InputColor3f DECL(col2);
+    InputColor3f DECL(col3);
+    InputColor3f DECL(col4);
+    InputColor3f DECL(col5);
+    InputColor3f DECL(col6);
+    InputColor3f DECL(col7);
+    InputColor3f DECL(col8);
+    InputColor3f DECL(col9);
+    InputColor3f DECL(col10);
+    InputColor3f DECL(col11);
+    InputColor3f DECL(col12);
+    InputColor3f DECL(col13);
 
     pos = mvd | pos; // Project position
     normal = mv | normal; // Project normal
@@ -202,14 +202,14 @@ void initShaders()
   } SH_END;
 
   fsh = SH_BEGIN_FRAGMENT_PROGRAM {
-    ShInputPosition4f pos;
-    ShInputNormal3f normal;
-    ShInputColor3f col1;
+    InputPosition4f pos;
+    InputNormal3f normal;
+    InputColor3f col1;
 
-    ShOutputColor3f color;
+    OutputColor3f color;
 
     normal = normalize(normal);
-    ShVector3f lightv = normalize(lightPos);
+    Vector3f lightv = normalize(lightPos);
     
     color = (normal | lightv) * col1;
     //color = normal * 0.5 + 0.5;
@@ -217,7 +217,7 @@ void initShaders()
 
   vsh.meta("opengl:matching", "generic");
 
-  shaders = new ShProgramSet(vsh, fsh);
+  shaders = new ProgramSet(vsh, fsh);
 }
 
 void keyboard(unsigned char k, int x, int y)
@@ -240,12 +240,12 @@ int main(int argc, char** argv)
   glutKeyboardFunc(keyboard);
 
   if (argc > 1) {
-    shUseBackend(argv[1]);
+    useBackend(argv[1]);
   }
 
-  init();
+  ::init();
   initShaders();
-  shBind(*shaders);
+  bind(*shaders);
 
 #if 1
   cout << "Vertex Unit:" << endl;

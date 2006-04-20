@@ -20,15 +20,15 @@
 #ifndef SHUTIL_HPP
 #define SHUTIL_HPP
 
-#include "ShFunc.hpp"
-#include "ShKernelLib.hpp"
-#include "ShKernelLight.hpp"
-#include "ShKernelSurfMap.hpp"
-#include "ShKernelSurface.hpp"
-#include "ShKernelPost.hpp"
-#include "ShMesh.hpp"
-#include "ShObjMesh.hpp"
-#include "ShPngImage.hpp"
+#include "Func.hpp"
+#include "KernelLib.hpp"
+#include "KernelLight.hpp"
+#include "KernelSurfMap.hpp"
+#include "KernelSurface.hpp"
+#include "KernelPost.hpp"
+#include "Mesh.hpp"
+#include "ObjMesh.hpp"
+#include "PngImage.hpp"
 #include <string>
 
 /** \namespace ShUtil

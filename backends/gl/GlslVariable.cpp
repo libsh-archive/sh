@@ -123,7 +123,7 @@ GlslVariable::GlslVariable(const GlslVariable& v)
 {
 }
 
-GlslVariable::GlslVariable(const ShVariableNodePtr& v)
+GlslVariable::GlslVariable(const VariableNodePtr& v)
   : m_attribute(-1), m_builtin(!v->meta("opengl:state").empty()), 
     m_texture(SH_TEXTURE == v->kind()), m_palette(SH_PALETTE == v->kind()),
     m_uniform(m_texture || m_palette || v->uniform()),
@@ -144,10 +144,10 @@ GlslVariable::GlslVariable(const ShVariableNodePtr& v)
     }
   }
   if (m_texture) {
-    ShTextureNodePtr texture = shref_dynamic_cast<ShTextureNode>(v);
+    TextureNodePtr texture = shref_dynamic_cast<TextureNode>(v);
     m_dims = texture->dims();
   } else if (m_palette) {
-    ShPaletteNodePtr palette = shref_dynamic_cast<ShPaletteNode>(v);
+    PaletteNodePtr palette = shref_dynamic_cast<PaletteNode>(v);
     m_length = palette->palette_length();
   }
 }
@@ -187,7 +187,7 @@ void GlslVariable::name(int i, enum GlslProgramType unit)
     } else {
       varname << "uni";
     }
-    varname << "_" << (unit == SH_GLSL_FP ? "fp" : "vp");
+    varname << "_" << (unit == GLSL_FP ? "fp" : "vp");
   } 
   else {
     switch (m_kind) {
@@ -215,7 +215,7 @@ void GlslVariable::name(int i, enum GlslProgramType unit)
     case SH_PALETTE:
       varname << "var_p";
       break;
-    case SH_BINDINGTYPE_END:
+    case BINDINGTYPE_END:
       SH_DEBUG_ASSERT(0); // Error
       break;
     }
@@ -308,7 +308,7 @@ std::string GlslVariable::parse_state_array
       }
       return array_value;
     } else {
-      throw SH::ShException("Unterminated array index in opengl:state metadata");
+      throw SH::Exception("Unterminated array index in opengl:state metadata");
     }
   } else {
     return std::string();

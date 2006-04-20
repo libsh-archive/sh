@@ -17,12 +17,12 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#ifndef GLSLVARIABLE_HPP
-#define GLSLVARIABLE_HPP
+#ifndef SHGLSLVARIABLE_HPP
+#define SHGLSLVARIABLE_HPP
 
 #include "Glsl.hpp"
-#include "ShVariableType.hpp"
-#include "ShVariableNode.hpp"
+#include "VariableType.hpp"
+#include "VariableNode.hpp"
 #include <string>
 
 namespace shgl {
@@ -30,38 +30,38 @@ namespace shgl {
 /// Possible bindings for an input/output variable
 enum GlslVarBinding {
   // Output for vertex, input for fragment
-  SH_GLSL_VAR_TEXCOORD,
+  GLSL_VAR_TEXCOORD,
 
   // Inputs to both units
-  SH_GLSL_VAR_COLOR,
-  SH_GLSL_VAR_SECONDARYCOLOR,
+  GLSL_VAR_COLOR,
+  GLSL_VAR_SECONDARYCOLOR,
 
   // Vertex inputs
-  SH_GLSL_VAR_VERTEX,
-  SH_GLSL_VAR_NORMAL,
-  SH_GLSL_VAR_MULTITEXCOORD0,
-  SH_GLSL_VAR_MULTITEXCOORD1,
-  SH_GLSL_VAR_MULTITEXCOORD2,
-  SH_GLSL_VAR_MULTITEXCOORD3,
-  SH_GLSL_VAR_MULTITEXCOORD4,
-  SH_GLSL_VAR_MULTITEXCOORD5,
-  SH_GLSL_VAR_MULTITEXCOORD6,
-  SH_GLSL_VAR_MULTITEXCOORD7,
+  GLSL_VAR_VERTEX,
+  GLSL_VAR_NORMAL,
+  GLSL_VAR_MULTITEXCOORD0,
+  GLSL_VAR_MULTITEXCOORD1,
+  GLSL_VAR_MULTITEXCOORD2,
+  GLSL_VAR_MULTITEXCOORD3,
+  GLSL_VAR_MULTITEXCOORD4,
+  GLSL_VAR_MULTITEXCOORD5,
+  GLSL_VAR_MULTITEXCOORD6,
+  GLSL_VAR_MULTITEXCOORD7,
   
   // Fragment inputs
-  SH_GLSL_VAR_FRAGCOORD,
+  GLSL_VAR_FRAGCOORD,
 
   // Vertex outputs
-  SH_GLSL_VAR_POSITION,
-  SH_GLSL_VAR_FRONTCOLOR,
-  SH_GLSL_VAR_FRONTSECONDARYCOLOR,
+  GLSL_VAR_POSITION,
+  GLSL_VAR_FRONTCOLOR,
+  GLSL_VAR_FRONTSECONDARYCOLOR,
 
   // Fragment outputs
-  SH_GLSL_VAR_FRAGDEPTH,
-  SH_GLSL_VAR_FRAGCOLOR,
-  SH_GLSL_VAR_FRAGDATA,
+  GLSL_VAR_FRAGDEPTH,
+  GLSL_VAR_FRAGCOLOR,
+  GLSL_VAR_FRAGDATA,
 
-  SH_GLSL_VAR_NONE
+  GLSL_VAR_NONE
 };
 
 struct GlslVarBindingInfo {
@@ -72,9 +72,9 @@ struct GlslVarBindingInfo {
 
 class GlslVariable {
 public:
-  static const GlslVarBindingInfo glslVarBindingInfo[SH_GLSL_VAR_NONE];
+  static const GlslVarBindingInfo glslVarBindingInfo[GLSL_VAR_NONE];
 
-  GlslVariable(const SH::ShVariableNodePtr& v); /// Usual constructor
+  GlslVariable(const SH::VariableNodePtr& v); /// Usual constructor
   GlslVariable(); /// Default constructor (for STL container initialization)
   GlslVariable(const GlslVariable& v); /// Copy constructor
   
@@ -82,7 +82,7 @@ public:
 
   const std::string& name() const { return m_name; }
   const int attribute() const { return m_attribute; }
-  const SH::ShSemanticType& semantic_type() const { return m_semantic_type; }
+  const SH::SemanticType& semantic_type() const { return m_semantic_type; }
   const int size() const { return m_size; }
   const bool builtin() const { return m_builtin; }
   const bool uniform() const { return m_uniform; }
@@ -111,12 +111,12 @@ private:
   std::string m_name;
 
   int m_size;
-  SH::ShTextureDims m_dims; // if m_texture == true
+  SH::TextureDims m_dims; // if m_texture == true
   std::size_t m_length; // if m_palette == true
 
-  SH::ShBindingType m_kind;
-  SH::ShValueType m_type;
-  SH::ShSemanticType m_semantic_type;
+  SH::BindingType m_kind;
+  SH::ValueType m_type;
+  SH::SemanticType m_semantic_type;
 
   std::string m_values;
   
@@ -139,4 +139,4 @@ private:
 
 }
 
-#endif /* GLSLVARIABLE_HPP */
+#endif /* SHGLSLVARIABLE_HPP */

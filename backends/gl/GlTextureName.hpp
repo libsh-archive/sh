@@ -17,16 +17,16 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SH_GLTEXTURENAME_HPP
-#define SH_GLTEXTURENAME_HPP
+#ifndef SHGLTEXTURENAME_HPP
+#define SHGLTEXTURENAME_HPP
 
 #include "GlBackend.hpp"
-#include "ShMemory.hpp"
+#include "Memory.hpp"
 
 
 namespace shgl {
 
-class GlTextureName : public SH::ShRefCountable {
+class GlTextureName : public SH::RefCountable {
 public:
   GlTextureName(GLenum target);
   // Create an unmanaged texture name, i.e. one that is not allocated
@@ -37,13 +37,13 @@ public:
 
   GLuint value() const { return m_name; }
   GLenum target() const { return m_target; }
-  const SH::ShTextureTraits& params() const { return m_params; }
-  void params(const SH::ShTextureTraits& params);
+  const SH::TextureTraits& params() const { return m_params; }
+  void params(const SH::TextureTraits& params);
 
-  void addStorage(SH::ShStorage* storage);
-  void removeStorage(SH::ShStorage* storage);
+  void addStorage(SH::Storage* storage);
+  void removeStorage(SH::Storage* storage);
 
-  typedef std::list<SH::ShStorage*> StorageList;
+  typedef std::list<SH::Storage*> StorageList;
   StorageList::const_iterator beginStorages() const { return m_storages.begin(); }
   StorageList::const_iterator endStorages() const { return m_storages.end(); }
 
@@ -53,7 +53,7 @@ public:
 
   // Utility class to bind texture temporarily
   struct Binding {
-    Binding(const SH::ShPointer<const GlTextureName>& name);
+    Binding(const SH::Pointer<const GlTextureName>& name);
     ~Binding();
   
     GLenum target;
@@ -65,12 +65,12 @@ private:
   GLuint m_name;
   StorageList m_storages;
   static NameList* m_names;
-  SH::ShTextureTraits m_params;
+  SH::TextureTraits m_params;
 
   bool m_managed; // True if we generated our own name
 };
 
-typedef SH::ShPointer<GlTextureName> GlTextureNamePtr;
+typedef SH::Pointer<GlTextureName> GlTextureNamePtr;
 
 }
 

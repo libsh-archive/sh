@@ -182,7 +182,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\examples\particle\ShTrackball.cpp"
+				RelativePath="..\..\examples\particle\Trackball.cpp"
 				>
 			</File>
 		</Filter>
@@ -196,7 +196,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\examples\particle\ShTrackball.hpp"
+				RelativePath="..\..\examples\particle\Trackball.hpp"
 				>
 			</File>
 		</Filter>

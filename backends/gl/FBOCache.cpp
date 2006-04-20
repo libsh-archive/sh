@@ -242,6 +242,9 @@ void FBOCache::check()
   case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER_EXT:
     error = "FRAMEBUFFER_INCOMPLETE_READ_BUFFER";
     break;
+  case GL_FRAMEBUFFER_UNSUPPORTED_EXT:
+    error = "FRAMEBUFFER_UNSUPPORTED";
+    break;
   default:
     error = "Unknown error";
     break;

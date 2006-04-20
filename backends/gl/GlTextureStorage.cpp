@@ -18,8 +18,8 @@
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 #include "GlTextureStorage.hpp"
-#include "ShTypeInfo.hpp"
-#include "ShVariantFactory.hpp"
+#include "TypeInfo.hpp"
+#include "VariantFactory.hpp"
 #include "FBOCache.hpp"
 #include <sh.hpp>
 
@@ -27,13 +27,13 @@ namespace shgl {
 
 using namespace SH;
 
-GlTextureStorage::GlTextureStorage(ShMemory* memory, GLenum target,
+GlTextureStorage::GlTextureStorage(Memory* memory, GLenum target,
                                    GLenum format, GLint internalFormat,
-                                   ShValueType valueType, 
+                                   ValueType valueType, 
                                    int width, int height, int depth, int tuplesize,
                                    GlTextureNamePtr name, 
                                    GLint mipmap_level, bool internalRGB)
-  : ShStorage(memory, valueType),
+  : Storage(memory, valueType),
     m_name(name), m_target(target), m_format(format),
     m_internalFormat(internalFormat),
     m_width(width), m_height(height), m_depth(depth), m_tuplesize(tuplesize),
@@ -69,50 +69,50 @@ std::ostream& operator<<(std::ostream& out, const GlTextureStorage& storage)
 }
 
 HostGlTextureTransfer::HostGlTextureTransfer()
-  : ShTransfer("host", "opengl:texture")
+  : Transfer("host", "opengl:texture")
 {
 }
   
-bool HostGlTextureTransfer::transfer(const ShStorage* from, ShStorage* to)
+bool HostGlTextureTransfer::transfer(const Storage* from, Storage* to)
 {
-  const ShHostStorage* host = dynamic_cast<const ShHostStorage*>(from);
+  const HostStorage* host = dynamic_cast<const HostStorage*>(from);
   GlTextureStorage* texture = dynamic_cast<GlTextureStorage*>(to);
 
   // Bind texture name for this scope.
   GlTextureName::Binding binding(texture->texName());
 
   GLenum type;
-  ShValueType texture_type = texture->value_type();
-  ShValueType converted_type;
-  type = shGlType(texture_type, converted_type);
+  ValueType texture_type = texture->value_type();
+  ValueType converted_type;
+  type = glType(texture_type, converted_type);
 
   int width = texture->width();
   int height = texture->height();
   int depth = texture->depth();
   int tuplesize = texture->tuplesize();
     
-  ShVariantPtr data_variant;
+  VariantPtr data_variant;
   int count = 0;
   bool full_copy = false;
   if (host) {
     count = host->length() / host->value_size() / tuplesize;
     full_copy = (count >= (width * height * depth));
 
-    ShValueType host_type = host->value_type();
+    ValueType host_type = host->value_type();
     // @todo a little hackish...but we promise host->data() will not change... 
-    ShVariantPtr host_variant = shVariantFactory(host_type, SH_MEM)->
+    VariantPtr host_variant = variantFactory(host_type, MEM)->
       generate(count * tuplesize, const_cast<void*>(host->data()), false);
     SH_DEBUG_ASSERT(host_variant);
 
-    if(converted_type != SH_VALUETYPE_END) {
-      SH_DEBUG_WARN("GL backend does not handle " << shValueTypeName(texture_type) 
-              	    << " natively.  Converting to " << shValueTypeName(converted_type));
+    if(converted_type != VALUETYPE_END) {
+      SH_DEBUG_WARN("GL backend does not handle " << valueTypeName(texture_type) 
+              	    << " natively.  Converting to " << valueTypeName(converted_type));
       texture->value_type(converted_type);
-      data_variant = shVariantFactory(converted_type, SH_MEM)->generate(count * tuplesize);
+      data_variant = variantFactory(converted_type, MEM)->generate(count * tuplesize);
       data_variant->set(host_variant);
     }
     else if (texture_type != host_type) {
-      data_variant = shVariantFactory(texture_type, SH_MEM)->generate(count * tuplesize);
+      data_variant = variantFactory(texture_type, MEM)->generate(count * tuplesize);
       data_variant->set(host_variant);
     } else {
       data_variant = host_variant;
@@ -219,31 +219,31 @@ bool HostGlTextureTransfer::transfer(const ShStorage* from, ShStorage* to)
   return true;
 }
   
-int HostGlTextureTransfer::cost(const ShStorage* from, const ShStorage* to)
+int HostGlTextureTransfer::cost(const Storage* from, const Storage* to)
 {
   // Texture downloads are expensive!
   return 100;
 }
 
 GlTextureHostTransfer::GlTextureHostTransfer()
-  : ShTransfer("opengl:texture", "host")
+  : Transfer("opengl:texture", "host")
 {
 }
   
-bool GlTextureHostTransfer::transfer(const ShStorage* from, ShStorage* to)
+bool GlTextureHostTransfer::transfer(const Storage* from, Storage* to)
 {
   // Get rid of const so that we can do conversions
   GlTextureStorage* texture = 
-    dynamic_cast<GlTextureStorage*>(const_cast<ShStorage*>(from));
-  ShHostStorage* host = dynamic_cast<ShHostStorage*>(to);
+    dynamic_cast<GlTextureStorage*>(const_cast<Storage*>(from));
+  HostStorage* host = dynamic_cast<HostStorage*>(to);
         
   GLenum type;
-  ShValueType texture_type = texture->value_type();
-  ShValueType converted_type;
-  type = shGlType(texture_type, converted_type);
+  ValueType texture_type = texture->value_type();
+  ValueType converted_type;
+  type = glType(texture_type, converted_type);
 
   // The conversion should have occured during download 
-  if (converted_type != SH_VALUETYPE_END) {
+  if (converted_type != VALUETYPE_END) {
     // convert the storage. Should we warn (again) ?
     texture->value_type(converted_type);
     texture_type = texture->value_type();
@@ -257,10 +257,10 @@ bool GlTextureHostTransfer::transfer(const ShStorage* from, ShStorage* to)
   if (count > width * height * depth)
     count = width * height * depth;
 
-  ShVariantPtr dest_variant;
-  ShValueType host_type = host->value_type();
+  VariantPtr dest_variant;
+  ValueType host_type = host->value_type();
   // @todo a little hackish...but we promise host->data() will not change... 
-  ShVariantPtr host_variant = shVariantFactory(host_type, SH_MEM)->
+  VariantPtr host_variant = variantFactory(host_type, MEM)->
     generate(count * tuplesize, const_cast<void*>(host->data()), false);
   SH_DEBUG_ASSERT(host_variant);
     
@@ -268,9 +268,9 @@ bool GlTextureHostTransfer::transfer(const ShStorage* from, ShStorage* to)
   int glTuplesize[5] = { 0, 1, 3, 3, 4 };
   GLenum format[5] = { 0, GL_RED, GL_RGB, GL_RGB, GL_RGBA };
 
-  if (converted_type != SH_VALUETYPE_END || 
+  if (converted_type != VALUETYPE_END || 
       texture_type != host_type || tuplesize == 2) {
-    dest_variant = shVariantFactory(texture_type, SH_MEM)->
+    dest_variant = variantFactory(texture_type, MEM)->
       generate(width * height * depth * glTuplesize[tuplesize]);
   } 
   else {
@@ -302,7 +302,7 @@ bool GlTextureHostTransfer::transfer(const ShStorage* from, ShStorage* to)
 
   if (dest_variant != host_variant) {
     if (tuplesize == 2) {
-      dest_variant = dest_variant->get(false, ShSwizzle(3, 0, 1), count);
+      dest_variant = dest_variant->get(false, Swizzle(3, 0, 1), count);
     }
     host_variant->set(dest_variant);
   }
@@ -314,30 +314,30 @@ bool GlTextureHostTransfer::transfer(const ShStorage* from, ShStorage* to)
   return true;
 }
   
-int GlTextureHostTransfer::cost(const ShStorage* from, const ShStorage* to)
+int GlTextureHostTransfer::cost(const Storage* from, const Storage* to)
 {
   // Reading data from GPU is waaay expensive
   return 1000;
 }
 
 GlTextureGlTextureTransfer::GlTextureGlTextureTransfer()
-  : ShTransfer("opengl:texture", "opengl:texture")
+  : Transfer("opengl:texture", "opengl:texture")
 {
-  ShProgram vsh = SH_BEGIN_VERTEX_PROGRAM {
-    ShInOutPosition4f pos;
-    ShInOutTexCoord2f tc;
+  Program vsh = SH_BEGIN_VERTEX_PROGRAM {
+    InOutPosition4f pos;
+    InOutTexCoord2f tc;
   } SH_END;
-  ShProgram fsh = SH_BEGIN_FRAGMENT_PROGRAM {
-    ShInputTexCoord2f tc;
-    ShOutputColor4f o = source_texture(tc);
+  Program fsh = SH_BEGIN_FRAGMENT_PROGRAM {
+    InputTexCoord2f tc;
+    OutputColor4f o = source_texture(tc);
   } SH_END;
-  render_to_tex_prog = new ShProgramSet(vsh, fsh);
+  render_to_tex_prog = new ProgramSet(vsh, fsh);
 }
   
-bool GlTextureGlTextureTransfer::transfer(const ShStorage* from, ShStorage* to)
+bool GlTextureGlTextureTransfer::transfer(const Storage* from, Storage* to)
 {
   GlTextureStorage* src_tex = 
-    dynamic_cast<GlTextureStorage*>(const_cast<ShStorage*>(from));
+    dynamic_cast<GlTextureStorage*>(const_cast<Storage*>(from));
   GlTextureStorage* dst_tex = dynamic_cast<GlTextureStorage*>(to);
         
   SH_DEBUG_ASSERT(src_tex->width() == dst_tex->width());
@@ -361,7 +361,7 @@ bool GlTextureGlTextureTransfer::transfer(const ShStorage* from, ShStorage* to)
     os << src_tex->name();
     source_texture.meta("opengl:texid", os.str());
 
-    shBind(*render_to_tex_prog);
+    bind(*render_to_tex_prog);
     glBegin(GL_QUADS); {
       glTexCoord2f(0,0);
       glVertex2f(-1, -1);
@@ -372,15 +372,15 @@ bool GlTextureGlTextureTransfer::transfer(const ShStorage* from, ShStorage* to)
       glTexCoord2f(0,1);
       glVertex2f(-1, 1);
     } glEnd();
-    shUnbind(*render_to_tex_prog);
+    unbind(*render_to_tex_prog);
     
     SH_GL_CHECK_ERROR(glPopAttrib());
     SH_GL_CHECK_ERROR(glDrawBuffer(prevDraw));
     FBOCache::instance()->unbindFramebuffer();
   }
   else {
-    ShHostStoragePtr host = 
-      shref_dynamic_cast<ShHostStorage>(src_tex->memory()->findStorage("host"));
+    HostStoragePtr host = 
+      shref_dynamic_cast<HostStorage>(src_tex->memory()->findStorage("host"));
     host->sync();
     to->sync();
   }
@@ -388,7 +388,7 @@ bool GlTextureGlTextureTransfer::transfer(const ShStorage* from, ShStorage* to)
   return true;
 }
   
-int GlTextureGlTextureTransfer::cost(const ShStorage* from, const ShStorage* to)
+int GlTextureGlTextureTransfer::cost(const Storage* from, const Storage* to)
 {
   const GlTextureStorage* dst_tex = dynamic_cast<const GlTextureStorage*>(to);
   

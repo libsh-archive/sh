@@ -23,8 +23,8 @@ using namespace SH;
 
 int main()
 {
-  shInit();
-  ShMatrix4x4f m;
+  init();
+  Matrix4x4f m;
   int i, j, k;
   for (i = 0; i < 100000; i++) // 1 hundred thousand
     for (j = 0; j < 4; j++)

@@ -17,14 +17,14 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#ifndef ARB_HPP
-#define ARB_HPP
+#ifndef SHARB_HPP
+#define SHARB_HPP
 
 #include <string>
 #include "GlBackend.hpp"
-#include "ShBackend.hpp"
-#include "ShProgram.hpp"
-#include "ShException.hpp"
+#include "Backend.hpp"
+#include "Program.hpp"
+#include "Exception.hpp"
 
 namespace shgl {
 
@@ -32,8 +32,8 @@ class ArbCodeStrategy : public CodeStrategy {
 public:
   ArbCodeStrategy(void);
   
-  SH::ShBackendCodePtr generate(const std::string& target,
-                                const SH::ShProgramNodeCPtr& shader,
+  SH::BackendCodePtr generate(const std::string& target,
+                                const SH::ProgramNodeCPtr& shader,
                                 TextureStrategy* textures);
 
   ArbCodeStrategy* create(void);
@@ -41,7 +41,7 @@ public:
 
 unsigned int arbTarget(const std::string& unit);
 
-class ArbException : public SH::ShBackendException {
+class ArbException : public SH::BackendException {
 public:
   ArbException(const std::string& message);
 };

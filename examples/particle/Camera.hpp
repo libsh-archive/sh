@@ -17,8 +17,8 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#ifndef CAMERA_HPP
-#define CAMERA_HPP
+#ifndef SHCAMERA_HPP
+#define SHCAMERA_HPP
 
 #include <iostream>
 
@@ -35,15 +35,15 @@ public:
   void glModelView();
   void glProjection(float aspect);
 
-  SH::ShMatrix4x4f shModelView();
-  SH::ShMatrix4x4f shModelViewProjection(SH::ShMatrix4x4f viewport);
+  SH::Matrix4x4f modelView();
+  SH::Matrix4x4f modelViewProjection(SH::Matrix4x4f viewport);
 
 private:
-  SH::ShMatrix4x4f perspective(float fov, float aspect, float znear, float zfar);
+  SH::Matrix4x4f perspective(float fov, float aspect, float znear, float zfar);
 
-  SH::ShMatrix4x4f proj;
-  SH::ShMatrix4x4f rots;
-  SH::ShMatrix4x4f trans;
+  SH::Matrix4x4f proj;
+  SH::Matrix4x4f rots;
+  SH::Matrix4x4f trans;
 
   friend std::ostream &operator<<(std::ostream &output, Camera &camera);
   friend std::istream &operator>>(std::istream &input, Camera &camera);

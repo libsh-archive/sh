@@ -26,15 +26,15 @@ using namespace std;
 int main() 
 {
   try {
-  ShSwizzle a;
-  ShSwizzle b(1);
-  ShSwizzle c(4);
-  ShSwizzle d(5);
-  ShSwizzle e(1, 0);
-  ShSwizzle f(2, 1, 0);
-  ShSwizzle g(2, 0, 1);
-  ShSwizzle h(3, 0, 2, 1);
-  ShSwizzle i(4, 0, 1, 3, 2);
+  Swizzle a;
+  Swizzle b(1);
+  Swizzle c(4);
+  Swizzle d(5);
+  Swizzle e(1, 0);
+  Swizzle f(2, 1, 0);
+  Swizzle g(2, 0, 1);
+  Swizzle h(3, 0, 2, 1);
+  Swizzle i(4, 0, 1, 3, 2);
 
   std::cout << a << std::endl;
   std::cout << b << std::endl;
@@ -50,7 +50,7 @@ int main()
   std::cout << h << std::endl;
   h *= h;
   std::cout << h << std::endl;
-  } catch(const ShException  &e) {
+  } catch(const Exception  &e) {
     std::cout << e.message() << std::endl;
   }
 

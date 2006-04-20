@@ -8,210 +8,212 @@ libsh_la_LIBADD = $(LIBLTDL)
 libsh_la_LDFLAGS = -export-dynamic -no-undefined
 
 incincdir = $(includedir)/sh
-incinc_HEADERS  = ShAttrib.hpp ShAttribImpl.hpp ShBackend.hpp ShBasicBlock.hpp
+incinc_HEADERS  = Attrib.hpp AttribImpl.hpp Backend.hpp BasicBlock.hpp
 
 # General/internals
-libsh_la_SOURCES  = ShBasicBlock.cpp ShBlock.cpp ShCtrlGraph.cpp
-libsh_la_SOURCES += ShException.cpp ShError.cpp
-libsh_la_SOURCES += ShParser.cpp 
-libsh_la_SOURCES += ShProgram.cpp ShProgram.hpp
-libsh_la_SOURCES += ShProgramNode.cpp ShProgramNode.hpp
-libsh_la_SOURCES += ShProgramSet.cpp ShProgramSet.hpp
-incinc_HEADERS   += ShProgramSet.hpp
-libsh_la_SOURCES += ShRecord.hpp ShRecord.cpp 
-incinc_HEADERS	 += ShRecord.hpp 
-libsh_la_SOURCES += ShInfo.hpp ShInfoImpl.hpp ShInfo.cpp
-incinc_HEADERS   += ShInfo.hpp ShInfoImpl.hpp
-libsh_la_SOURCES += ShStatement.cpp ShSwizzle.cpp ShSyntax.cpp ShToken.cpp
-libsh_la_SOURCES += ShTokenizer.cpp ShUtility.cpp ShVariable.cpp ShVariableNode.cpp
-libsh_la_SOURCES += ShOperation.hpp ShOperation.cpp 
-libsh_la_SOURCES += ShInternals.hpp ShInternals.cpp
-libsh_la_SOURCES += ShBasicBlock.hpp
-libsh_la_SOURCES += ShBlock.hpp ShCtrlGraph.hpp
-libsh_la_SOURCES += ShCfgBlock.hpp ShCfgBlock.cpp 
-incinc_HEADERS 	 += ShCfgBlock.hpp 
-libsh_la_SOURCES += ShDebug.hpp ShError.hpp
-libsh_la_SOURCES += ShException.hpp
-libsh_la_SOURCES += ShParser.hpp ShRefCount.hpp ShStatement.hpp
-libsh_la_SOURCES += ShSwizzle.hpp ShSwizzleImpl.hpp ShSyntax.hpp ShToken.hpp ShTokenizer.hpp
-libsh_la_SOURCES += ShUtility.hpp ShVariable.hpp ShVariableNode.hpp sh.hpp
-libsh_la_SOURCES += ShHashMap.hpp 
-libsh_la_SOURCES += ShGraph.hpp ShGraphImpl.hpp 
-libsh_la_SOURCES += ShInstructions.hpp ShInstructions.cpp
-libsh_la_SOURCES += ShMeta.hpp ShMetaImpl.hpp
-libsh_la_SOURCES += ShMetaForwarder.hpp ShMetaForwarder.cpp
-libsh_la_SOURCES += ShContext.hpp ShContext.cpp
-libsh_la_SOURCES += ShMath.hpp 
-incinc_HEADERS   += ShMath.hpp 
-libsh_la_SOURCES += ShDllExport.hpp
-incinc_HEADERS   += ShDllExport.hpp
-libsh_la_SOURCES += ShPool.hpp ShPool.cpp
-incinc_HEADERS   += ShPool.hpp
+libsh_la_SOURCES  = BasicBlock.cpp Block.cpp CtrlGraph.cpp
+libsh_la_SOURCES += Exception.cpp Error.cpp
+libsh_la_SOURCES += Parser.cpp 
+libsh_la_SOURCES += Program.cpp Program.hpp
+libsh_la_SOURCES += ProgramNode.cpp ProgramNode.hpp
+libsh_la_SOURCES += ProgramSet.cpp ProgramSet.hpp
+incinc_HEADERS   += ProgramSet.hpp
+libsh_la_SOURCES += Record.hpp Record.cpp 
+incinc_HEADERS	 += Record.hpp 
+libsh_la_SOURCES += Info.hpp InfoImpl.hpp Info.cpp
+incinc_HEADERS   += Info.hpp InfoImpl.hpp
+libsh_la_SOURCES += Statement.cpp Swizzle.cpp Syntax.cpp Token.cpp
+libsh_la_SOURCES += Tokenizer.cpp Utility.cpp Variable.cpp VariableNode.cpp
+libsh_la_SOURCES += Operation.hpp Operation.cpp 
+libsh_la_SOURCES += Internals.hpp Internals.cpp
+libsh_la_SOURCES += BasicBlock.hpp
+libsh_la_SOURCES += Block.hpp CtrlGraph.hpp
+libsh_la_SOURCES += CfgBlock.hpp CfgBlock.cpp 
+incinc_HEADERS 	 += CfgBlock.hpp 
+libsh_la_SOURCES += Debug.hpp Error.hpp
+libsh_la_SOURCES += Exception.hpp
+libsh_la_SOURCES += Parser.hpp RefCount.hpp Statement.hpp
+libsh_la_SOURCES += Swizzle.hpp SwizzleImpl.hpp Syntax.hpp Token.hpp Tokenizer.hpp
+libsh_la_SOURCES += Utility.hpp Variable.hpp VariableNode.hpp sh.hpp shmacros.hpp
+libsh_la_SOURCES += HashMap.hpp 
+libsh_la_SOURCES += Graph.hpp GraphImpl.hpp 
+libsh_la_SOURCES += Instructions.hpp Instructions.cpp
+libsh_la_SOURCES += Meta.hpp MetaImpl.hpp
+libsh_la_SOURCES += MetaForwarder.hpp MetaForwarder.cpp
+libsh_la_SOURCES += Context.hpp Context.cpp
+libsh_la_SOURCES += Math.hpp 
+incinc_HEADERS   += Math.hpp 
+libsh_la_SOURCES += DllExport.hpp
+incinc_HEADERS   += DllExport.hpp
+libsh_la_SOURCES += Pool.hpp Pool.cpp
+incinc_HEADERS   += Pool.hpp
 
 # Backend
-libsh_la_SOURCES += ShBackend.cpp ShBackend.hpp 
-libsh_la_SOURCES += ShLinearAllocator.hpp
+libsh_la_SOURCES += Backend.cpp Backend.hpp 
+libsh_la_SOURCES += LinearAllocator.hpp
 
 # Optimizer and compiler internals
-libsh_la_SOURCES += ShTransformer.hpp ShBitSet.hpp
-libsh_la_SOURCES += ShTransformer.cpp ShBitSet.cpp
-incinc_HEADERS   += ShTransformer.hpp ShBitSet.hpp
-libsh_la_SOURCES += ShTypeConvertTransformer.cpp 
-libsh_la_SOURCES += ShTransformerImpl.hpp 
-incinc_HEADERS	 += ShTransformerImpl.hpp 
-libsh_la_SOURCES += ShOptimizations.cpp ShOptimizations.hpp
-incinc_HEADERS   += ShOptimizations.hpp
-libsh_la_SOURCES += ShValueTracking.cpp ShConstProp.cpp
-libsh_la_SOURCES += ShEvaluate.cpp ShEvaluate.hpp
-incinc_HEADERS   += ShEvaluate.hpp
-libsh_la_SOURCES += ShStructural.hpp ShStructural.cpp
-incinc_HEADERS   += ShStructural.hpp
-libsh_la_SOURCES += ShSection.hpp ShSectionImpl.hpp ShSection.cpp 
-incinc_HEADERS   += ShSection.hpp ShSectionImpl.hpp
+libsh_la_SOURCES += Transformer.hpp BitSet.hpp
+libsh_la_SOURCES += Transformer.cpp BitSet.cpp
+incinc_HEADERS   += Transformer.hpp BitSet.hpp
+libsh_la_SOURCES += TypeConvertTransformer.cpp 
+libsh_la_SOURCES += TransformerImpl.hpp 
+incinc_HEADERS	 += TransformerImpl.hpp 
+libsh_la_SOURCES += Optimizations.cpp Optimizations.hpp
+incinc_HEADERS   += Optimizations.hpp
+libsh_la_SOURCES += ValueTracking.cpp ConstProp.cpp
+libsh_la_SOURCES += Evaluate.cpp Evaluate.hpp
+incinc_HEADERS   += Evaluate.hpp
+libsh_la_SOURCES += Structural.hpp Structural.cpp
+incinc_HEADERS   += Structural.hpp
+libsh_la_SOURCES += Section.hpp SectionImpl.hpp Section.cpp 
+incinc_HEADERS   += Section.hpp SectionImpl.hpp
 
 # Library functions
-libsh_la_SOURCES += ShLib.hpp
-libsh_la_SOURCES += ShLibArith.hpp ShLibArithImpl.hpp
-libsh_la_SOURCES += ShLibBoolean.hpp ShLibBooleanImpl.hpp
-libsh_la_SOURCES += ShLibClamp.hpp ShLibClampImpl.hpp
-libsh_la_SOURCES += ShLibGeometry.hpp ShLibGeometryImpl.hpp
-libsh_la_SOURCES += ShLibMatrix.hpp ShLibMatrixImpl.hpp
-libsh_la_SOURCES += ShLibMisc.hpp ShLibMiscImpl.hpp
-libsh_la_SOURCES += ShLibSplines.hpp ShLibSplinesImpl.hpp
-libsh_la_SOURCES += ShLibTrig.hpp ShLibTrigImpl.hpp
-libsh_la_SOURCES += ShLibDeriv.hpp ShLibDerivImpl.hpp
-libsh_la_SOURCES += ShLibNoise.hpp ShLibNoiseImpl.hpp
-libsh_la_SOURCES += ShLibWorley.hpp ShLibWorleyImpl.hpp
+libsh_la_SOURCES += Lib.hpp
+libsh_la_SOURCES += LibArith.hpp LibArithImpl.hpp
+libsh_la_SOURCES += LibBoolean.hpp LibBooleanImpl.hpp
+libsh_la_SOURCES += LibClamp.hpp LibClampImpl.hpp
+libsh_la_SOURCES += LibGeometry.hpp LibGeometryImpl.hpp
+libsh_la_SOURCES += LibMatrix.hpp LibMatrixImpl.hpp
+libsh_la_SOURCES += LibMisc.hpp LibMiscImpl.hpp
+libsh_la_SOURCES += LibSplines.hpp LibSplinesImpl.hpp
+libsh_la_SOURCES += LibTrig.hpp LibTrigImpl.hpp
+libsh_la_SOURCES += LibDeriv.hpp LibDerivImpl.hpp
+libsh_la_SOURCES += LibNoise.hpp LibNoiseImpl.hpp
+libsh_la_SOURCES += LibWorley.hpp LibWorleyImpl.hpp
 
 # Textures and arrays
-libsh_la_SOURCES += ShBaseTexture.hpp ShBaseTextureImpl.hpp ShBaseTexture.cpp
-libsh_la_SOURCES += ShArray.hpp ShTable.hpp ShTexture.hpp
-libsh_la_SOURCES += ShWrap.hpp ShInterp.hpp ShMIPFilter.hpp
-libsh_la_SOURCES += ShTextureNode.hpp ShImage.hpp ShImageImpl.hpp ShImage3D.hpp
-libsh_la_SOURCES += ShMemory.hpp ShMemory.cpp ShMemoryDep.hpp
-libsh_la_SOURCES += ShTextureNode.cpp ShImage3D.cpp
-libsh_la_SOURCES += ShTexData.hpp ShTexDataImpl.hpp
+libsh_la_SOURCES += BaseTexture.hpp BaseTexture.cpp
+libsh_la_SOURCES += BaseTextureND.hpp BaseTextureNDImpl.hpp
+libsh_la_SOURCES += Array.hpp Table.hpp Texture.hpp
+libsh_la_SOURCES += Wrap.hpp Interp.hpp MIPFilter.hpp
+libsh_la_SOURCES += TextureNode.hpp Image.hpp ImageImpl.hpp Image3D.hpp
+libsh_la_SOURCES += Memory.hpp Memory.cpp MemoryDep.hpp
+libsh_la_SOURCES += TextureNode.cpp Image3D.cpp
+libsh_la_SOURCES += TexData.hpp TexDataImpl.hpp
 
 # Types
-libsh_la_SOURCES += ShVariableType.hpp ShVariableType.cpp
-libsh_la_SOURCES += ShTypeInfo.hpp ShTypeInfoImpl.hpp ShTypeInfo.cpp
-libsh_la_SOURCES += ShTypeInfoCasts.cpp ShTypeInfoOps.cpp 
-libsh_la_SOURCES += ShStorageType.hpp ShStorageTypeImpl.hpp ShStorageType.cpp 
-incinc_HEADERS   += ShStorageType.hpp ShStorageTypeImpl.hpp 
-libsh_la_SOURCES += ShDataType.hpp ShDataTypeImpl.hpp ShDataType.cpp
-incinc_HEADERS   += ShDataType.hpp ShDataTypeImpl.hpp 
-libsh_la_SOURCES += ShGeneric.hpp ShGenericImpl.hpp
-libsh_la_SOURCES += ShAttrib.hpp ShAttribImpl.hpp
-libsh_la_SOURCES += ShLibAttrib.hpp
-libsh_la_SOURCES += ShVector.hpp ShLibVector.hpp
-libsh_la_SOURCES += ShPoint.hpp ShLibPoint.hpp
-libsh_la_SOURCES += ShPosition.hpp ShLibPosition.hpp
-libsh_la_SOURCES += ShPlane.hpp ShLibPlane.hpp
-libsh_la_SOURCES += ShColor.hpp ShLibColor.hpp
-libsh_la_SOURCES += ShNormal.hpp ShLibNormal.hpp
-libsh_la_SOURCES += ShTexCoord.hpp ShLibTexCoord.hpp
-libsh_la_SOURCES += ShMatrix.hpp ShMatrixImpl.hpp
-libsh_la_SOURCES += ShQuaternion.hpp ShQuaternionImpl.hpp
-libsh_la_SOURCES += ShVariant.hpp ShVariantImpl.hpp ShVariant.cpp
-libsh_la_SOURCES += ShVariantFactory.hpp ShVariantFactoryImpl.hpp 
-libsh_la_SOURCES += ShVariantCast.hpp ShVariantCastImpl.hpp 
-libsh_la_SOURCES += ShCastManager.hpp ShCastManager.cpp 
-libsh_la_SOURCES += ShEval.hpp ShEvalImpl.hpp ShEval.cpp
-libsh_la_SOURCES += ShConcreteRegularOpImpl.hpp 
-libsh_la_SOURCES += ShConcreteCTypeOpImpl.hpp  ShConcreteCTypeOp.cpp
-libsh_la_SOURCES += ShHalf.hpp ShHalfImpl.hpp 
-libsh_la_SOURCES += ShFraction.hpp ShFractionImpl.hpp 
+libsh_la_SOURCES += VariableType.hpp VariableType.cpp
+libsh_la_SOURCES += TypeInfo.hpp TypeInfoImpl.hpp TypeInfo.cpp
+libsh_la_SOURCES += TypeInfoCasts.cpp TypeInfoOps.cpp 
+libsh_la_SOURCES += StorageType.hpp StorageTypeImpl.hpp StorageType.cpp 
+incinc_HEADERS   += StorageType.hpp StorageTypeImpl.hpp 
+libsh_la_SOURCES += DataType.hpp DataTypeImpl.hpp DataType.cpp
+incinc_HEADERS   += DataType.hpp DataTypeImpl.hpp 
+libsh_la_SOURCES += Generic.hpp GenericImpl.hpp
+libsh_la_SOURCES += Attrib.hpp AttribImpl.hpp
+libsh_la_SOURCES += LibAttrib.hpp
+libsh_la_SOURCES += Vector.hpp LibVector.hpp
+libsh_la_SOURCES += Point.hpp LibPoint.hpp
+libsh_la_SOURCES += Position.hpp LibPosition.hpp
+libsh_la_SOURCES += Plane.hpp LibPlane.hpp
+libsh_la_SOURCES += Color.hpp LibColor.hpp
+libsh_la_SOURCES += Normal.hpp LibNormal.hpp
+libsh_la_SOURCES += TexCoord.hpp LibTexCoord.hpp
+libsh_la_SOURCES += Matrix.hpp MatrixImpl.hpp
+libsh_la_SOURCES += Quaternion.hpp QuaternionImpl.hpp
+libsh_la_SOURCES += Variant.hpp VariantImpl.hpp Variant.cpp
+libsh_la_SOURCES += VariantFactory.hpp VariantFactoryImpl.hpp 
+libsh_la_SOURCES += VariantCast.hpp VariantCastImpl.hpp 
+libsh_la_SOURCES += CastManager.hpp CastManager.cpp 
+libsh_la_SOURCES += Eval.hpp EvalImpl.hpp Eval.cpp
+libsh_la_SOURCES += ConcreteRegularOpImpl.hpp 
+libsh_la_SOURCES += ConcreteCTypeOpImpl.hpp  ConcreteCTypeOp.cpp
+libsh_la_SOURCES += Half.hpp HalfImpl.hpp 
+libsh_la_SOURCES += Fraction.hpp FractionImpl.hpp 
 
 
 # Shader Algebra
-libsh_la_SOURCES += ShAlgebra.hpp ShAlgebra.cpp
-libsh_la_SOURCES += ShManipulator.hpp ShManipulatorImpl.hpp ShManipulator.cpp
-libsh_la_SOURCES += ShNibbles.hpp ShNibblesImpl.hpp
-libsh_la_SOURCES += ShFixedManipulator.hpp ShFixedManipulator.cpp
+libsh_la_SOURCES += Algebra.hpp Algebra.cpp
+libsh_la_SOURCES += Manipulator.hpp ManipulatorImpl.hpp Manipulator.cpp
+libsh_la_SOURCES += Nibbles.hpp NibblesImpl.hpp
+libsh_la_SOURCES += FixedManipulator.hpp FixedManipulator.cpp
 
 # Streams
-libsh_la_SOURCES += ShChannelNode.hpp ShChannelNode.cpp
-libsh_la_SOURCES += ShChannel.hpp ShChannelImpl.hpp
-libsh_la_SOURCES += ShStream.hpp ShStreamImpl.hpp ShStream.cpp
+libsh_la_SOURCES += Channel.hpp ChannelImpl.hpp
+libsh_la_SOURCES += Stream.hpp StreamImpl.hpp Stream.cpp
+libsh_la_SOURCES += LibStream.hpp LibStreamImpl.hpp
 
 # Palettes
-libsh_la_SOURCES += ShPalette.hpp ShPaletteImpl.hpp
-libsh_la_SOURCES += ShPaletteNode.hpp ShPaletteNode.cpp
-incinc_HEADERS   += ShPalette.hpp ShPaletteImpl.hpp ShPaletteNode.hpp
+libsh_la_SOURCES += Palette.hpp PaletteImpl.hpp
+libsh_la_SOURCES += PaletteNode.hpp PaletteNode.cpp
+incinc_HEADERS   += Palette.hpp PaletteImpl.hpp PaletteNode.hpp
 
 # These should really be moved up top
-incinc_HEADERS += ShBlock.hpp ShCtrlGraph.hpp
-incinc_HEADERS += ShDebug.hpp ShError.hpp
-incinc_HEADERS += ShException.hpp ShLib.hpp
-incinc_HEADERS += ShLibArith.hpp ShLibArithImpl.hpp
-incinc_HEADERS += ShLibBoolean.hpp ShLibBooleanImpl.hpp
-incinc_HEADERS += ShLibClamp.hpp ShLibClampImpl.hpp
-incinc_HEADERS += ShLibGeometry.hpp ShLibGeometryImpl.hpp
-incinc_HEADERS += ShLibMatrix.hpp ShLibMatrixImpl.hpp
-incinc_HEADERS += ShLibMisc.hpp ShLibMiscImpl.hpp
-incinc_HEADERS += ShLibSplines.hpp ShLibSplinesImpl.hpp
-incinc_HEADERS += ShLibTrig.hpp ShLibTrigImpl.hpp
-incinc_HEADERS += ShLibDeriv.hpp ShLibDerivImpl.hpp
-incinc_HEADERS += ShLibNoise.hpp ShLibNoiseImpl.hpp
-incinc_HEADERS += ShLibWorley.hpp ShLibWorleyImpl.hpp
-incinc_HEADERS += ShParser.hpp ShRefCount.hpp ShRefCountImpl.hpp 
-incinc_HEADERS += ShProgram.hpp ShProgramNode.hpp ShStatement.hpp 
-incinc_HEADERS += ShSwizzle.hpp ShSwizzleImpl.hpp ShSyntax.hpp ShToken.hpp ShTokenizer.hpp
-incinc_HEADERS += ShUtility.hpp
-incinc_HEADERS += ShHashMap.hpp
-incinc_HEADERS += ShGraph.hpp ShGraphImpl.hpp 
-incinc_HEADERS += ShVariable.hpp ShVariableNode.hpp
-incinc_HEADERS += ShOperation.hpp ShVariableType.hpp 
-incinc_HEADERS += ShGeneric.hpp ShGenericImpl.hpp
-incinc_HEADERS += sh.hpp
-incinc_HEADERS += ShMatrix.hpp ShMatrixImpl.hpp
-incinc_HEADERS += ShArray.hpp ShTable.hpp ShTexture.hpp
-incinc_HEADERS += ShWrap.hpp
-incinc_HEADERS += ShBaseTexture.hpp ShBaseTextureImpl.hpp
-incinc_HEADERS += ShTextureNode.hpp ShImage.hpp ShImageImpl.hpp ShImage3D.hpp
-incinc_HEADERS += ShTexData.hpp ShTexDataImpl.hpp
-incinc_HEADERS += ShLinearAllocator.hpp
-incinc_HEADERS += ShLibAttrib.hpp
-incinc_HEADERS += ShVector.hpp ShLibVector.hpp
-incinc_HEADERS += ShPoint.hpp ShLibPoint.hpp
-incinc_HEADERS += ShColor.hpp ShLibColor.hpp
-incinc_HEADERS += ShPlane.hpp ShLibPlane.hpp
-incinc_HEADERS += ShPosition.hpp ShLibPosition.hpp
-incinc_HEADERS += ShNormal.hpp ShLibNormal.hpp
-incinc_HEADERS += ShTexCoord.hpp ShLibTexCoord.hpp
-incinc_HEADERS += ShAlgebra.hpp ShInternals.hpp
-incinc_HEADERS += ShFixedManipulator.hpp
-incinc_HEADERS += ShManipulator.hpp ShManipulatorImpl.hpp
-incinc_HEADERS += ShNibbles.hpp ShNibblesImpl.hpp
-incinc_HEADERS += ShChannelNode.hpp ShChannel.hpp ShChannelImpl.hpp
-incinc_HEADERS += ShStream.hpp ShStreamImpl.hpp
-incinc_HEADERS += ShQuaternion.hpp ShQuaternionImpl.hpp
-incinc_HEADERS += ShTypeInfo.hpp ShTypeInfoImpl.hpp 
-incinc_HEADERS += ShVariant.hpp ShVariantImpl.hpp ShEval.hpp ShEvalImpl.hpp
-incinc_HEADERS += ShVariantFactory.hpp ShVariantFactoryImpl.hpp 
-incinc_HEADERS += ShVariantCast.hpp ShVariantCastImpl.hpp 
-incinc_HEADERS += ShCastManager.hpp 
-incinc_HEADERS += ShConcreteRegularOpImpl.hpp ShConcreteCTypeOpImpl.hpp 
-incinc_HEADERS += ShHalf.hpp ShHalfImpl.hpp 
-incinc_HEADERS += ShFraction.hpp ShFractionImpl.hpp 
-incinc_HEADERS += ShMemory.hpp ShInterp.hpp ShMemoryDep.hpp ShMIPFilter.hpp
-incinc_HEADERS += ShInstructions.hpp
-incinc_HEADERS += ShMeta.hpp ShMetaImpl.hpp ShMetaForwarder.hpp 
-incinc_HEADERS += ShContext.hpp 
+incinc_HEADERS += Block.hpp CtrlGraph.hpp
+incinc_HEADERS += Debug.hpp Error.hpp
+incinc_HEADERS += Exception.hpp Lib.hpp
+incinc_HEADERS += LibArith.hpp LibArithImpl.hpp
+incinc_HEADERS += LibBoolean.hpp LibBooleanImpl.hpp
+incinc_HEADERS += LibClamp.hpp LibClampImpl.hpp
+incinc_HEADERS += LibGeometry.hpp LibGeometryImpl.hpp
+incinc_HEADERS += LibMatrix.hpp LibMatrixImpl.hpp
+incinc_HEADERS += LibMisc.hpp LibMiscImpl.hpp
+incinc_HEADERS += LibStream.hpp LibStreamImpl.hpp
+incinc_HEADERS += LibSplines.hpp LibSplinesImpl.hpp
+incinc_HEADERS += LibTrig.hpp LibTrigImpl.hpp
+incinc_HEADERS += LibDeriv.hpp LibDerivImpl.hpp
+incinc_HEADERS += LibNoise.hpp LibNoiseImpl.hpp
+incinc_HEADERS += LibWorley.hpp LibWorleyImpl.hpp
+incinc_HEADERS += Parser.hpp RefCount.hpp RefCountImpl.hpp 
+incinc_HEADERS += Program.hpp ProgramNode.hpp Statement.hpp 
+incinc_HEADERS += Swizzle.hpp SwizzleImpl.hpp Syntax.hpp Token.hpp Tokenizer.hpp
+incinc_HEADERS += Utility.hpp
+incinc_HEADERS += HashMap.hpp
+incinc_HEADERS += Graph.hpp GraphImpl.hpp 
+incinc_HEADERS += Variable.hpp VariableNode.hpp
+incinc_HEADERS += Operation.hpp VariableType.hpp 
+incinc_HEADERS += Generic.hpp GenericImpl.hpp
+incinc_HEADERS += sh.hpp shmacros.hpp
+incinc_HEADERS += Matrix.hpp MatrixImpl.hpp
+incinc_HEADERS += Array.hpp ArrayImpl.hpp Table.hpp Texture.hpp
+incinc_HEADERS += Wrap.hpp
+incinc_HEADERS += BaseTexture.hpp BaseTextureND.hpp BaseTextureNDImpl.hpp
+incinc_HEADERS += TextureNode.hpp Image.hpp ImageImpl.hpp Image3D.hpp
+incinc_HEADERS += TexData.hpp TexDataImpl.hpp
+incinc_HEADERS += LinearAllocator.hpp
+incinc_HEADERS += LibAttrib.hpp
+incinc_HEADERS += Vector.hpp LibVector.hpp
+incinc_HEADERS += Point.hpp LibPoint.hpp
+incinc_HEADERS += Color.hpp LibColor.hpp
+incinc_HEADERS += Plane.hpp LibPlane.hpp
+incinc_HEADERS += Position.hpp LibPosition.hpp
+incinc_HEADERS += Normal.hpp LibNormal.hpp
+incinc_HEADERS += TexCoord.hpp LibTexCoord.hpp
+incinc_HEADERS += Algebra.hpp Internals.hpp
+incinc_HEADERS += FixedManipulator.hpp
+incinc_HEADERS += Manipulator.hpp ManipulatorImpl.hpp
+incinc_HEADERS += Nibbles.hpp NibblesImpl.hpp
+incinc_HEADERS += Channel.hpp ChannelImpl.hpp
+incinc_HEADERS += Stream.hpp StreamImpl.hpp
+incinc_HEADERS += Quaternion.hpp QuaternionImpl.hpp
+incinc_HEADERS += TypeInfo.hpp TypeInfoImpl.hpp 
+incinc_HEADERS += Variant.hpp VariantImpl.hpp Eval.hpp EvalImpl.hpp
+incinc_HEADERS += VariantFactory.hpp VariantFactoryImpl.hpp 
+incinc_HEADERS += VariantCast.hpp VariantCastImpl.hpp 
+incinc_HEADERS += CastManager.hpp 
+incinc_HEADERS += ConcreteRegularOpImpl.hpp ConcreteCTypeOpImpl.hpp 
+incinc_HEADERS += Half.hpp HalfImpl.hpp 
+incinc_HEADERS += Fraction.hpp FractionImpl.hpp 
+incinc_HEADERS += Memory.hpp Interp.hpp MemoryDep.hpp MIPFilter.hpp
+incinc_HEADERS += Instructions.hpp
+incinc_HEADERS += Meta.hpp MetaImpl.hpp MetaForwarder.hpp 
+incinc_HEADERS += Context.hpp 
 
 # BinReloc
 libsh_la_SOURCES += binreloc.h binreloc.c
 incinc_HEADERS   += binreloc.h
 
 # Generated by python programs in scripts/
-GENERATED  = ShAttrib.hpp ShAttribImpl.hpp \
-	     ShVector.hpp \
-	     ShPoint.hpp \
-	     ShColor.hpp \
-	     ShPosition.hpp \
-	     ShNormal.hpp \
-	     ShTexCoord.hpp \
-	     ShPlane.hpp
+GENERATED  = Attrib.hpp AttribImpl.hpp \
+	     Vector.hpp \
+	     Point.hpp \
+	     Color.hpp \
+	     Position.hpp \
+	     Normal.hpp \
+	     TexCoord.hpp \
+	     Plane.hpp
 
 %.hpp: scripts/%.hpp.py scripts/common.py scripts/semantic.py
 	@rm -f $@

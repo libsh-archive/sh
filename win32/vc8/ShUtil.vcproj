@@ -165,19 +165,19 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\src\shutil\ShKernelLib.cpp"
+				RelativePath="..\..\src\shutil\KernelLib.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\shutil\ShKernelSurfMap.cpp"
+				RelativePath="..\..\src\shutil\KernelSurfMap.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\shutil\ShObjMesh.cpp"
+				RelativePath="..\..\src\shutil\ObjMesh.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\shutil\ShPngImage.cpp"
+				RelativePath="..\..\src\shutil\PngImage.cpp"
 				>
 			</File>
 			<File
@@ -191,67 +191,67 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\src\shutil\ShFunc.hpp"
+				RelativePath="..\..\src\shutil\Func.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\shutil\ShFuncImpl.hpp"
+				RelativePath="..\..\src\shutil\FuncImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\shutil\ShKernelLib.hpp"
+				RelativePath="..\..\src\shutil\KernelLib.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\shutil\ShKernelLibImpl.hpp"
+				RelativePath="..\..\src\shutil\KernelLibImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\shutil\ShKernelLight.hpp"
+				RelativePath="..\..\src\shutil\KernelLight.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\shutil\ShKernelLightImpl.hpp"
+				RelativePath="..\..\src\shutil\KernelLightImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\shutil\ShKernelPost.hpp"
+				RelativePath="..\..\src\shutil\KernelPost.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\shutil\ShKernelPostImpl.hpp"
+				RelativePath="..\..\src\shutil\KernelPostImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\shutil\ShKernelSurface.hpp"
+				RelativePath="..\..\src\shutil\KernelSurface.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\shutil\ShKernelSurfaceImpl.hpp"
+				RelativePath="..\..\src\shutil\KernelSurfaceImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\shutil\ShKernelSurfMap.hpp"
+				RelativePath="..\..\src\shutil\KernelSurfMap.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\shutil\ShMesh.hpp"
+				RelativePath="..\..\src\shutil\Mesh.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\shutil\ShMeshImpl.hpp"
+				RelativePath="..\..\src\shutil\MeshImpl.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\shutil\ShObjMesh.hpp"
+				RelativePath="..\..\src\shutil\ObjMesh.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\shutil\ShPngImage.hpp"
+				RelativePath="..\..\src\shutil\PngImage.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\shutil\ShPngImageImpl.hpp"
+				RelativePath="..\..\src\shutil\PngImageImpl.hpp"
 				>
 			</File>
 			<File

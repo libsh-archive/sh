@@ -38,7 +38,7 @@ Test::Test(int argc, char** argv)
          << "will run the addition unit test on the glsl backend." << endl;
     exit(1);
   }
-  if (m_backend != "host") SH::shSetBackend(m_backend); 
+  if (m_backend != "host") SH::setBackend(m_backend); 
 }
 
 void Test::ignore_backend(string backend)
@@ -55,11 +55,11 @@ void Test::print_values(const char* varname, const std::string& values)
 
 void Test::print_fail(std::string name)
 {
-    std::cout << COLOR_YELLOW << "Test: " << COLOR_NORMAL
+    std::cout << SH_COLOR_YELLOW << "Test: " << SH_COLOR_NORMAL
               << std::setiosflags(std::ios::left) << std::setw(50) << name 
-              << COLOR_RED
+              << SH_COLOR_RED
               << " FAILED"
-              << COLOR_NORMAL
+              << SH_COLOR_NORMAL
               << " [" << m_backend << "]"
               << std::endl;
   
@@ -67,11 +67,11 @@ void Test::print_fail(std::string name)
 
 void Test::print_pass(std::string name)
 {
-    std::cout << COLOR_YELLOW << "Test: " << COLOR_NORMAL
+    std::cout << SH_COLOR_YELLOW << "Test: " << SH_COLOR_NORMAL
               << std::setiosflags(std::ios::left) << std::setw(50) << name 
-              << COLOR_GREEN
+              << SH_COLOR_GREEN
               << " PASSED"
-              << COLOR_NORMAL
+              << SH_COLOR_NORMAL
               << " [" << m_backend << "]"
-              << COLOR_NORMAL << std::endl;
+              << SH_COLOR_NORMAL << std::endl;
 }

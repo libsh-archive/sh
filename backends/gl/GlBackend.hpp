@@ -17,13 +17,13 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#ifndef GLBACKEND_HPP
-#define GLBACKEND_HPP
+#ifndef SHGLBACKEND_HPP
+#define SHGLBACKEND_HPP
 
-#include "ShVariableType.hpp"
-#include "ShProgram.hpp"
-#include "ShStream.hpp"
-#include "ShTextureNode.hpp"
+#include "VariableType.hpp"
+#include "Program.hpp"
+#include "Stream.hpp"
+#include "TextureNode.hpp"
 
 #ifdef _WIN32
 
@@ -137,43 +137,50 @@ namespace shgl {
 struct TextureStrategy {
   virtual ~TextureStrategy() {}
   virtual TextureStrategy* create() = 0;
-  virtual void bindTexture(const SH::ShTextureNodePtr& texture,
+  virtual void bindTexture(const SH::TextureNodePtr& texture,
                            GLenum target, bool write) = 0;
 };
 
 struct StreamStrategy {
   virtual ~StreamStrategy() {}
   virtual StreamStrategy* create() = 0;
-  virtual void execute(const SH::ShProgramNodeCPtr& program, 
-                       SH::ShStream& dest,
+  virtual void execute(const SH::Program& program, 
+                       SH::Stream& dest,
                        TextureStrategy* texture) = 0;
+  virtual SH::BaseTexture gather(const SH::BaseTexture& src,
+                                 const SH::BaseTexture& index,
+                                 TextureStrategy* texture_strategy) = 0;
 };
 
 struct CodeStrategy {
   virtual ~CodeStrategy() {}
   virtual CodeStrategy* create() = 0;
-  virtual SH::ShBackendCodePtr generate(const std::string& target,
-                                        const SH::ShProgramNodeCPtr& shader,
+  virtual SH::BackendCodePtr generate(const std::string& target,
+                                        const SH::ProgramNodeCPtr& shader,
                                         TextureStrategy* texture) = 0;
 
   // If you want to use a special set generation function, override
   // generate_set, and override use_default_set() to return false.
-  virtual SH::ShBackendSetPtr generate_set(const SH::ShProgramSet& s);
+  virtual SH::BackendSetPtr generate_set(const SH::ProgramSet& s);
   virtual bool use_default_set() const;
 
   virtual void unbind_all_programs();
   virtual bool use_default_unbind_all() const;
 };
 
-class GlBackend : public SH::ShBackend {
+class GlBackend : public SH::Backend {
 public:
-  virtual SH::ShBackendCodePtr generate_code(const std::string& target,
-                                             const SH::ShProgramNodeCPtr& shader);
-  virtual SH::ShBackendSetPtr generate_set(const SH::ShProgramSet& s);
+  virtual SH::BackendCodePtr generate_code(const std::string& target,
+                                             const SH::ProgramNodeCPtr& shader);
+  virtual SH::BackendSetPtr generate_set(const SH::ProgramSet& s);
   virtual void unbind_all_programs();
 
   // execute a stream program, if supported
-  virtual void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);
+  virtual void execute(const SH::Program& program, SH::Stream& dest);
+
+  // gather elements of src indexed by index  
+  virtual SH::BaseTexture gather(const SH::BaseTexture& src,
+                                 const SH::BaseTexture& index);
 
 protected:
   GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrategy* stream,
@@ -189,18 +196,18 @@ private:
   GlBackend& operator=(const GlBackend& other);
 };
 
-void shGlCheckError(const char* desc, const char* file, int line);
+void glCheckError(const char* desc, const char* file, int line);
 
 /* Returns glReadPixels/glTexImage type for a given value type 
  * and returns a value type for the temporary buffer
- * (or SH_VALUETYPE_END if we can use the original buffer directly) 
+ * (or VALUETYPE_END if we can use the original buffer directly) 
  */
-GLenum shGlType(SH::ShValueType valueType, SH::ShValueType &convertedType); 
+GLenum glType(SH::ValueType valueType, SH::ValueType &convertedType); 
 
 }
 
 #define SH_GL_CHECK_ERROR(op) \
-  op;shGlCheckError( # op, (char*) __FILE__, (int) __LINE__);
+  op;glCheckError( # op, (char*) __FILE__, (int) __LINE__);
 
 
 

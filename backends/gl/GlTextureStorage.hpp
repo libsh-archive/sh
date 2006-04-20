@@ -17,22 +17,22 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SH_GLTEXTURESTORAGE_HPP
-#define SH_GLTEXTURESTORAGE_HPP
+#ifndef SHGLTEXTURESTORAGE_HPP
+#define SHGLTEXTURESTORAGE_HPP
 
-#include "ShVariableType.hpp"
-#include "ShMemory.hpp"
+#include "VariableType.hpp"
+#include "Memory.hpp"
 #include "GlBackend.hpp"
 #include "GlTextureName.hpp"
 #include <sh.hpp>
 
 namespace shgl {
 
-class GlTextureStorage : public SH::ShStorage {
+class GlTextureStorage : public SH::Storage {
 public:
-  GlTextureStorage(SH::ShMemory* memory, GLenum target,
+  GlTextureStorage(SH::Memory* memory, GLenum target,
                    GLenum format, GLint internalFormat,
-                   SH::ShValueType valueType, 
+                   SH::ValueType valueType, 
                    int width, int height, int depth, int tuplesize,
                    GlTextureNamePtr name, 
                    GLint mipmap_level, bool internalRGB);
@@ -81,37 +81,37 @@ private:
 };
 
 
-typedef SH::ShPointer<GlTextureStorage> GlTextureStoragePtr;
-typedef SH::ShPointer<const GlTextureStorage> GlTextureStorageCPtr;
+typedef SH::Pointer<GlTextureStorage> GlTextureStoragePtr;
+typedef SH::Pointer<const GlTextureStorage> GlTextureStorageCPtr;
 
 std::ostream& operator<<(std::ostream &out, const GlTextureStorage& storage);
 
-class HostGlTextureTransfer : public SH::ShTransfer {
+class HostGlTextureTransfer : public SH::Transfer {
 public:
   HostGlTextureTransfer();
-  bool transfer(const SH::ShStorage* from, SH::ShStorage* to);
-  int cost(const SH::ShStorage* from, const SH::ShStorage* to);
+  bool transfer(const SH::Storage* from, SH::Storage* to);
+  int cost(const SH::Storage* from, const SH::Storage* to);
   static HostGlTextureTransfer* instance;
 };
 
-class GlTextureHostTransfer : public SH::ShTransfer {
+class GlTextureHostTransfer : public SH::Transfer {
 public:
   GlTextureHostTransfer();
-  bool transfer(const SH::ShStorage* from, SH::ShStorage* to);
-  int cost(const SH::ShStorage* from, const SH::ShStorage* to);
+  bool transfer(const SH::Storage* from, SH::Storage* to);
+  int cost(const SH::Storage* from, const SH::Storage* to);
   static GlTextureHostTransfer* instance;
 };
 
-class GlTextureGlTextureTransfer : public SH::ShTransfer {
+class GlTextureGlTextureTransfer : public SH::Transfer {
 public:
   GlTextureGlTextureTransfer();
-  bool transfer(const SH::ShStorage* from, SH::ShStorage* to);
-  int cost(const SH::ShStorage* from, const SH::ShStorage* to);
+  bool transfer(const SH::Storage* from, SH::Storage* to);
+  int cost(const SH::Storage* from, const SH::Storage* to);
   static GlTextureGlTextureTransfer* instance;
 
 private:
-  SH::ShArray2D<SH::ShAttrib4f> source_texture;
-  SH::ShProgramSetPtr render_to_tex_prog;
+  SH::Array2D<SH::Attrib4f> source_texture;
+  SH::ProgramSetPtr render_to_tex_prog;
 };
 
 }

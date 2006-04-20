@@ -20,7 +20,7 @@
 #include "PBufferStreams.hpp"
 
 /// Turn this on if you want timings on std::cerr
-//#define DO_PBUFFER_TIMING
+//#define SH_DO_PBUFFER_TIMING
 
 // Turn this on to debug the fragment programs.
 //#define SH_DEBUG_PBS_PRINTFP
@@ -32,15 +32,15 @@
 #include <set>
 
 #include "sh.hpp"
-#include "ShOptimizations.hpp"
-#include "ShException.hpp"
-#include "ShError.hpp"
-#include "ShTypeInfo.hpp"
-#include "ShVariant.hpp"
+#include "Optimizations.hpp"
+#include "Exception.hpp"
+#include "Error.hpp"
+#include "TypeInfo.hpp"
+#include "Variant.hpp"
 #include "PBufferContext.hpp"
 #include "Utils.hpp"
 
-#ifdef DO_PBUFFER_TIMING
+#ifdef SH_DO_PBUFFER_TIMING
 #include <sys/time.h>
 #include <time.h>
 #endif
@@ -50,7 +50,7 @@ namespace shgl {
 using namespace SH;
 using namespace std;
 
-#ifdef DO_PBUFFER_TIMING
+#ifdef SH_DO_PBUFFER_TIMING
 
 class Timer {
 public:
@@ -71,10 +71,10 @@ private:
 
 #endif
 
-class PBufferStreamException : public ShException {
+class PBufferStreamException : public Exception {
 public:
   PBufferStreamException(const std::string& message)
-    : ShException("PBuffer Stream Execution: " + message)
+    : Exception("PBuffer Stream Execution: " + message)
   {
   }
 };
@@ -88,7 +88,7 @@ PBufferStreams::~PBufferStreams()
 {
 }
 
-#ifdef DO_PBUFFER_TIMING
+#ifdef SH_DO_PBUFFER_TIMING
 int indent = 0;
 Timer supertimer;
 
@@ -109,17 +109,17 @@ void fillin()
 #define TIMING_RESULT(t) 
 #endif
 
-void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
-                             ShStream& dest, TextureStrategy* texture)
+void PBufferStreams::execute(const ProgramNodeCPtr& program_const,
+                             Stream& dest, TextureStrategy* texture)
 {
   // Let's get rid of that constness... Yes, yes, I know...
-  ShProgramNodePtr program = shref_const_cast<ShProgramNode>(program_const);
+  ProgramNodePtr program = shref_const_cast<ProgramNode>(program_const);
   
   DECLARE_TIMER(overhead);
 
   // Make sure program has no inputs
   if (!program->inputs.empty()) {
-    shError(PBufferStreamException("Stream program has unbound inputs, and can hence not be executed."));
+    error(PBufferStreamException("Stream program has unbound inputs, and can hence not be executed."));
     return;
   }
 
@@ -142,9 +142,9 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
 
   int count = (*dest.begin())->count();
 
-  for (ShStream::iterator I = dest.begin(); I != dest.end(); ++I) {
+  for (Stream::iterator I = dest.begin(); I != dest.end(); ++I) {
     if (count != (*I)->count()) {
-      shError(PBufferStreamException("All stream outputs must be of the same size"));
+      error(PBufferStreamException("All stream outputs must be of the same size"));
     }
   }
   
@@ -179,9 +179,9 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
   // --- Set up the vertex program
   if (!m_setup_vp) {
     // The (trivial) vertex program
-    m_vp = keep<ShPosition4f>() & keep<ShTexCoord2f>();
+    m_vp = keep<Position4f>() & keep<TexCoord2f>();
     m_vp.node()->target() = get_target_backend(program_const) + "vertex";
-    shCompile(m_vp);
+    compile(m_vp);
     m_setup_vp = true;
   }
   
@@ -205,13 +205,13 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
   // Check whether some channels are both being read and written to
   bool rw_channels = false;
   if (dest.size() > 1) {
-    std::set<ShMemory*> input_channels;
-    for (ShProgramNode::ChannelList::const_iterator i = program->begin_channels();
+    std::set<Memory*> input_channels;
+    for (ProgramNode::ChannelList::const_iterator i = program->begin_channels();
          i != program->end_channels(); i++) {
       input_channels.insert((*i)->memory().object());
     }
 
-    for (ShStream::const_iterator i = dest.begin(); i != dest.end(); i++) {
+    for (Stream::const_iterator i = dest.begin(); i != dest.end(); i++) {
       if (input_channels.find((*i)->memory().object()) != input_channels.end()) {
         static bool warning_seen = false;
         if (!warning_seen) {
@@ -224,21 +224,21 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
     }
   }
 
-  ShStream::iterator dest_iter;
-  ShStream* intermediate_stream = NULL;
+  Stream::iterator dest_iter;
+  Stream* intermediate_stream = NULL;
   if (rw_channels) {
     // Make an intermediate stream so that updates take effect only
     // once all of the programs have been executed.
-    intermediate_stream = new ShStream();
-    for (ShStream::const_iterator i = dest.begin(); i != dest.end(); i++) {
-      ShChannelNode* node = i->object();
+    intermediate_stream = new Stream();
+    for (Stream::const_iterator i = dest.begin(); i != dest.end(); i++) {
+      ChannelNode* node = i->object();
       int count = (*i)->count();
       int tuplesize = node->size();
-      int valuesize = shTypeInfo(node->valueType())->datasize();
+      int valuesize = typeInfo(node->valueType())->datasize();
       int length = count * tuplesize * valuesize;
 
-      ShHostMemoryPtr channel_mem = new ShHostMemory(length, node->valueType());
-      ShChannelNodePtr channel_copy = new ShChannelNode(node->specialType(), tuplesize, 
+      HostMemoryPtr channel_mem = new HostMemory(length, node->valueType());
+      ChannelNodePtr channel_copy = new ChannelNode(node->specialType(), tuplesize, 
 							node->valueType(), channel_mem, count);
       intermediate_stream->append(channel_copy);
     }
@@ -252,19 +252,19 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
   for (StreamCache::set_iterator I = cache->sets_begin();
        I != cache->sets_end(); ++I, ++dest_iter) {
 
-    ShChannelNode* output = dest_iter->object();
+    ChannelNode* output = dest_iter->object();
     
     DECLARE_TIMER(binding);
     // Then, bind vertex (pass-through) and fragment program
-    ShProgramSetPtr program_set = *I;
-    shBind(*program_set);
+    ProgramSetPtr program_set = *I;
+    bind(*program_set);
     TIMING_RESULT(binding);
 
 //#ifdef SH_DEBUG_PBS_PRINTFP
     {
-      ShProgramSet::NodeList::const_iterator i = program_set->begin();
+      ProgramSet::NodeList::const_iterator i = program_set->begin();
       ++i;
-      ShProgramNodePtr program_node = *i;
+      ProgramNodePtr program_node = *i;
       std::cerr << program_node->describe_interface() << std::endl;
       program_node->code()->print(std::cerr);
     }
@@ -286,7 +286,7 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
     float tc_right;
     float tc_upper;
     
-    if (extension == SH_ARB_NV_FLOAT_BUFFER) {
+    if (extension == ARB_NV_FLOAT_BUFFER) {
       tc_right = static_cast<float>(cache->tex_size());
       tc_upper = static_cast<float>(cache->tex_size());
     } else {
@@ -317,23 +317,23 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
     TIMING_RESULT(finish);
     
     // Unbind, just to be safe
-    shUnbind(**I);
+    unbind(**I);
     
     int gl_error = glGetError();
     if (gl_error != GL_NO_ERROR) {
-      shError(PBufferStreamException("Could not render"));
+      error(PBufferStreamException("Could not render"));
       return;
     }
   
     DECLARE_TIMER(findouthost);
 
-    ShValueType valueType = output->valueType();
+    ValueType valueType = output->valueType();
     
-    ShHostStoragePtr outhost
-      = shref_dynamic_cast<ShHostStorage>(output->memory()->findStorage("host"));
+    HostStoragePtr outhost
+      = shref_dynamic_cast<HostStorage>(output->memory()->findStorage("host"));
     if (!outhost) {
-      int datasize = shTypeInfo(valueType)->datasize(); 
-      outhost = new ShHostStorage(output->memory().object(),
+      int datasize = typeInfo(valueType)->datasize(); 
+      outhost = new HostStorage(output->memory().object(),
                                   datasize * output->size() * output->count(),
 				  valueType);
     }
@@ -365,7 +365,7 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
       {
 	std::stringstream s;
 	s << "Output size of " << output->size() << " is not currently supported.";
-	shError(PBufferStreamException(s.str()));
+	error(PBufferStreamException(s.str()));
 	break;
       }
     }
@@ -374,30 +374,30 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
     
     // @todo half-float
     GLenum readpixelType;
-    ShValueType convertedType; 
-    readpixelType = shGlType(valueType, convertedType);
-    if (convertedType != SH_VALUETYPE_END) {
+    ValueType convertedType; 
+    readpixelType = glType(valueType, convertedType);
+    if (convertedType != VALUETYPE_END) {
       SH_DEBUG_WARN("GL backend does not handle stream output type " 
-		    << shValueTypeName(valueType) << " natively."
-                    << "  Using " << shValueTypeName(convertedType) 
+		    << valueTypeName(valueType) << " natively."
+                    << "  Using " << valueTypeName(convertedType) 
 		    << " temporary buffer.");
     }
     
-    ShVariantPtr  resultBuffer;
+    VariantPtr  resultBuffer;
     int resultDatasize = output->size() * count;
     bool using_temporary_buffer = false;
-    if ((output->size() != 2) && (SH_VALUETYPE_END == convertedType)) {
+    if ((output->size() != 2) && (VALUETYPE_END == convertedType)) {
       // Use the output buffer directly
-      resultBuffer = shVariantFactory(valueType, SH_MEM)->
+      resultBuffer = variantFactory(valueType, MEM)->
 	generate(resultDatasize, outhost->data(), false);
     } else {
       if (2 == output->size()) {
 	// Hack to support 2-component outputs (add an extra component)
 	resultDatasize = 3 * count;
-	if (SH_VALUETYPE_END == convertedType) convertedType = valueType;
+	if (VALUETYPE_END == convertedType) convertedType = valueType;
       }
       // Use a temporary buffer
-      resultBuffer = shVariantFactory(convertedType, SH_MEM)->
+      resultBuffer = variantFactory(convertedType, MEM)->
 	generate(resultDatasize);
       using_temporary_buffer = true;
     }
@@ -407,7 +407,7 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
                  readpixelType, resultBuffer->array());
     gl_error = glGetError();
     if (gl_error != GL_NO_ERROR) {
-      shError(PBufferStreamException("Could not do glReadPixels()"));
+      error(PBufferStreamException("Could not do glReadPixels()"));
       return;
     }
     if (count % cache->tex_size()) {
@@ -418,7 +418,7 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
 		   output->size() * resultBuffer->datasize());
       gl_error = glGetError();
       if (gl_error != GL_NO_ERROR) {
-        shError(PBufferStreamException("Could not do rest of glReadPixels()"));
+        error(PBufferStreamException("Could not do rest of glReadPixels()"));
         return;
       }
     }
@@ -426,10 +426,10 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
     if (using_temporary_buffer) { // need to copy to outhoust->data()
       if (2 == output->size()) {
 	// Hack to support 2-component output (discard third component)
-	resultBuffer = resultBuffer->get(false, ShSwizzle(3,0,1), count);
+	resultBuffer = resultBuffer->get(false, Swizzle(3,0,1), count);
 	resultDatasize = 2 * count;
       }
-      ShVariantPtr outhostVariant = shVariantFactory(valueType, SH_MEM)->
+      VariantPtr outhostVariant = variantFactory(valueType, MEM)->
 	generate(resultDatasize, outhost->data(), false);
       outhostVariant->set(resultBuffer);
     }
@@ -440,31 +440,31 @@ void PBufferStreams::execute(const ShProgramNodeCPtr& program_const,
   if (intermediate_stream) {
     // Once all programs have been executed, update the values in the
     // output stream using the values from the intermediate stream.
-    ShStream::const_iterator j = intermediate_stream->begin();
-    for (ShStream::const_iterator i = dest.begin(); i != dest.end(); j++, i++) {
-      ShChannelNode* intermediate_node = j->object();
-      ShChannelNode* real_node = i->object();
+    Stream::const_iterator j = intermediate_stream->begin();
+    for (Stream::const_iterator i = dest.begin(); i != dest.end(); j++, i++) {
+      ChannelNode* intermediate_node = j->object();
+      ChannelNode* real_node = i->object();
 
-      ShValueType valueType = real_node->valueType();
-      int datasize = shTypeInfo(valueType)->datasize(); 
+      ValueType valueType = real_node->valueType();
+      int datasize = typeInfo(valueType)->datasize(); 
       int size = real_node->size();
       int count = real_node->count();
     
-      ShHostStoragePtr real_host 
-	= shref_dynamic_cast<ShHostStorage>(real_node->memory()->findStorage("host"));
+      HostStoragePtr real_host 
+	= shref_dynamic_cast<HostStorage>(real_node->memory()->findStorage("host"));
       if (!real_host) {
-	real_host = new ShHostStorage(real_node->memory().object(), datasize * size * count, valueType);
+	real_host = new HostStorage(real_node->memory().object(), datasize * size * count, valueType);
       }
-      ShVariantPtr real_variant 
-	= shVariantFactory(valueType, SH_MEM)->generate(size * count, real_host->data(), false);
+      VariantPtr real_variant 
+	= variantFactory(valueType, MEM)->generate(size * count, real_host->data(), false);
 
-      ShHostStoragePtr intermediate_host 
-	= shref_dynamic_cast<ShHostStorage>(intermediate_node->memory()->findStorage("host"));
+      HostStoragePtr intermediate_host 
+	= shref_dynamic_cast<HostStorage>(intermediate_node->memory()->findStorage("host"));
       if (!intermediate_host) {
-	intermediate_host = new ShHostStorage(intermediate_node->memory().object(), datasize * size * count, valueType);
+	intermediate_host = new HostStorage(intermediate_node->memory().object(), datasize * size * count, valueType);
       }
-      ShVariantPtr intermediate_variant 
-	= shVariantFactory(valueType, SH_MEM)->generate(size * count, intermediate_host->data(), false);
+      VariantPtr intermediate_variant 
+	= variantFactory(valueType, MEM)->generate(size * count, intermediate_host->data(), false);
 
       real_variant->set(intermediate_variant); // copy channel data
       real_host->dirty();

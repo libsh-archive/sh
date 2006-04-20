@@ -28,9 +28,9 @@
 #include <string>
 #include <sstream>
 
-#include "ShVariant.hpp"
-#include "ShBackend.hpp"
-#include "ShTransformer.hpp"
+#include "Variant.hpp"
+#include "Backend.hpp"
+#include "Transformer.hpp"
 
 // #define SH_CC_DEBUG 1
 
@@ -44,34 +44,34 @@ extern "C" typedef void (*CcShaderFunc)(void** inputs,
 			                                  void** textures,
 			                                  void** outputs);
 
-namespace ShCc {
+namespace Cc {
 
 struct CcVariable
 {
   CcVariable(void);
-  CcVariable(int num, const std::string& name, int size, SH::ShValueType valueType);
+  CcVariable(int num, const std::string& name, int size, SH::ValueType valueType);
 
   int m_num;
   std::string m_name;
   int m_size;
-  SH::ShValueType m_valueType;
+  SH::ValueType m_valueType;
 };
 
-class CcBackendCode: public SH::ShBackendCode
+class CcBackendCode: public SH::BackendCode
 {
 public:
-  CcBackendCode(const SH::ShProgramNodeCPtr& program);
+  CcBackendCode(const SH::ProgramNodeCPtr& program);
   ~CcBackendCode(void);
 
-  bool allocateRegister(const SH::ShVariableNodePtr& var);
-  void freeRegister(const SH::ShVariableNodePtr& var);
+  bool allocateRegister(const SH::VariableNodePtr& var);
+  void freeRegister(const SH::VariableNodePtr& var);
     
   void upload(void);
   void bind(void);
   void unbind(void);
   void update(void);
     
-  void updateUniform(const SH::ShVariableNodePtr& uniform);
+  void updateUniform(const SH::VariableNodePtr& uniform);
     
   std::ostream& print(std::ostream& out);
   std::ostream& describe_interface(std::ostream& out);
@@ -80,14 +80,14 @@ public:
 protected:
   friend class CcBackend;
   bool generate(void);
-  bool execute(SH::ShStream& dest);
+  bool execute(const SH::Stream& src, SH::Stream& dest);
 
 private:
 
   /// Starting from num = 0, adds CcVariables to the m_varmap with variables
   /// named varPrefix + num = arrayName[num]. 
   /// 
-  /// T must be of type ShVariableNodePtr 
+  /// T must be of type VariableNodePtr 
   template<typename T>
   void allocate_varlist(const std::list<T> &varList, const char* varPrefix, const char* arrayName, const char* typePrefix=""); 
 
@@ -102,26 +102,25 @@ private:
   void allocate_consts(void);
   void allocate_inputs(void);
   void allocate_outputs(void);
-  void allocate_channels(void);
   void allocate_textures(void);
   void allocate_uniforms(void);
   void allocate_temps(void);
   // @}
 
-  std::string resolve(const SH::ShVariable& v);
-  std::string resolve(const SH::ShVariable& v, int idx);
-  const char* ctype(SH::ShValueType valueType);
+  std::string resolve(const SH::Variable& v);
+  std::string resolve(const SH::Variable& v, int idx);
+  const char* ctype(SH::ValueType valueType);
 
   class LabelFunctor
   {
   public:
-    LabelFunctor(std::map<SH::ShCtrlGraphNodePtr, int>& label_map);
+    LabelFunctor(std::map<SH::CtrlGraphNodePtr, int>& label_map);
         
-    void operator()(SH::ShCtrlGraphNode* node);
+    void operator()(SH::CtrlGraphNode* node);
         
   public:
     int m_cur_label;
-    std::map<SH::ShCtrlGraphNodePtr, int>& m_label_map;
+    std::map<SH::CtrlGraphNodePtr, int>& m_label_map;
   };
         
   class EmitFunctor
@@ -129,29 +128,29 @@ private:
   public:
     EmitFunctor(CcBackendCode* bec);
 
-    void operator()(SH::ShCtrlGraphNode* node);
+    void operator()(SH::CtrlGraphNode* node);
         
   public:
     CcBackendCode* m_bec;
   };
         
-  void emit(const SH::ShStatement& stmt);
-  void emitTexLookup(const SH::ShStatement &stmt, const char* texfunc);
-  void emit(const SH::ShBasicBlockPtr& block);
-  void emit(const SH::ShCtrlGraphNodePtr& node);
+  void emit(const SH::Statement& stmt);
+  void emitTexLookup(const SH::Statement &stmt, const char* texfunc);
+  void emit(const SH::BasicBlockPtr& block);
+  void emit(const SH::CtrlGraphNodePtr& node);
       
 private:
-  const SH::ShProgramNodeCPtr& m_original_program;
-  SH::ShProgramNodePtr m_program;
+  const SH::ProgramNodeCPtr& m_original_program;
+  SH::ProgramNodePtr m_program;
 
-  std::map<SH::ShCtrlGraphNodePtr, int> m_label_map;
-  std::map<SH::ShVariableNodePtr, CcVariable> m_varmap;
+  std::map<SH::CtrlGraphNodePtr, int> m_label_map;
+  std::map<SH::VariableNodePtr, CcVariable> m_varmap;
 
   /// The conversions done to change types not handled in hardware into
   // floating point types
   //
   // @todo may want more intelligent conversion if hardware 
-  SH::ShTransformer::ValueTypeMap m_convertMap;
+  SH::Transformer::ValueTypeMap m_convertMap;
 
   std::stringstream m_code;
 
@@ -172,28 +171,29 @@ private:
   int m_cur_temp;
 
   void** m_params;
-  std::vector<SH::ShVariantPtr> m_paramVariants;
+  std::vector<SH::VariantPtr> m_paramVariants;
 
-  //std::vector<SH::ShChannelNodePtr> m_channels;
+  //std::vector<SH::ChannelNodePtr> m_channels;
   //std::vector<CcVariable> m_temps;
-  //std::vector<SH::ShTextureNodePtr> m_textures;
+  //std::vector<SH::TextureNodePtr> m_textures;
 };
   
-class CcBackend: public SH::ShBackend
+class CcBackend: public SH::Backend
 {
 public:
   CcBackend(void);
   ~CcBackend(void);
   
-  SH::ShBackendCodePtr generate_code(const std::string& target,
-				     const SH::ShProgramNodeCPtr& program);
+  SH::BackendCodePtr generate_code(const std::string& target,
+				     const SH::ProgramNodeCPtr& program);
   
-  void execute(const SH::ShProgramNodeCPtr& program, SH::ShStream& dest);
+  void execute(const SH::Program& program, SH::Stream& dest);
+  SH::BaseTexture gather(const SH::BaseTexture& src, const SH::BaseTexture& index);
 };
 
 
-typedef SH::ShPointer<CcBackendCode> CcBackendCodePtr;
-typedef SH::ShPointer<CcBackend> CcBackendPtr;
+typedef SH::Pointer<CcBackendCode> CcBackendCodePtr;
+typedef SH::Pointer<CcBackend> CcBackendPtr;
 
 }
 

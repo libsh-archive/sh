@@ -63,10 +63,10 @@ def header():
     copyright()
 
 def guard(name):
-    inprint("#ifndef SH_" + name + "\n#define SH_""" + name + "\n")
+    inprint("#ifndef " + name + "\n#define """ + name + "\n")
 
 def endguard(name):
-    inprint("\n#endif // SH_" + name)
+    inprint("\n#endif // " + name)
 
 def namespace():
     inprint("namespace SH {\n")
