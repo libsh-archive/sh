@@ -265,8 +265,8 @@ bool GlTextureHostTransfer::transfer(const Storage* from, Storage* to)
   SH_DEBUG_ASSERT(host_variant);
     
   SH_DEBUG_ASSERT(tuplesize > 0 && tuplesize < 5)
-  int glTuplesize[5] = { 0, 1, 3, 3, 4 };
-  GLenum format[5] = { 0, GL_RED, GL_RGB, GL_RGB, GL_RGBA };
+  int glTuplesize[5] = { 0, 1, 4, 3, 4 };
+  GLenum format[5] = { 0, GL_RED, GL_RGBA, GL_RGB, GL_RGBA };
 
   if (converted_type != VALUETYPE_END || 
       texture_type != host_type || tuplesize == 2) {
@@ -302,7 +302,7 @@ bool GlTextureHostTransfer::transfer(const Storage* from, Storage* to)
 
   if (dest_variant != host_variant) {
     if (tuplesize == 2) {
-      dest_variant = dest_variant->get(false, Swizzle(3, 0, 1), count);
+      dest_variant = dest_variant->get(false, Swizzle(4, 0, 3), count);
     }
     host_variant->set(dest_variant);
   }

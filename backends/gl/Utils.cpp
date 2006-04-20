@@ -100,10 +100,10 @@ void StreamCache::generate_programs(ProgramVersion version)
       m_inputs[version].push_back(input_data);
     }
     
-    Program preamble;
+    Program prologue;
     switch (version & ~SINGLE_OUTPUT) {
     case OS_NONE_2D:
-      preamble = SH_BEGIN_PROGRAM(target) {
+      prologue = SH_BEGIN_PROGRAM(target) {
         InputTexCoord2f DECL(streamcoord);
 
         InputList::iterator input_data = m_inputs[version].begin();
@@ -128,7 +128,7 @@ void StreamCache::generate_programs(ProgramVersion version)
       break;
     
     case OS_1D:
-      preamble = SH_BEGIN_PROGRAM(target) {
+      prologue = SH_BEGIN_PROGRAM(target) {
         InputTexCoord4f DECL(streamcoord);
             
         Attrib4f DECL(index);
@@ -181,7 +181,7 @@ void StreamCache::generate_programs(ProgramVersion version)
       break;
       
     case OS_2D:
-      preamble = SH_BEGIN_PROGRAM(target) {
+      prologue = SH_BEGIN_PROGRAM(target) {
         InputTexCoord2f DECL(streamcoord);
 
         TexCoord2f DECL(index);
@@ -223,7 +223,23 @@ void StreamCache::generate_programs(ProgramVersion version)
       
     }
 
-    Program prog = Program(*I) << preamble;
+    Program epilogue = SH_BEGIN_PROGRAM(target) {
+      for (ProgramNode::VarList::const_iterator output = (*I)->begin_outputs();
+           output != (*I)->end_outputs(); ++output) {
+
+        Variable in((*output)->clone(SH_INPUT));
+        if ((*output)->size() == 2) {
+          Variable out((*output)->clone(SH_OUTPUT, 4));
+          shASN(out, in(0, 1, 0, 1));
+        }
+        else {
+          Variable out((*output)->clone());
+          shASN(out, in);
+        }
+      }
+    } SH_END_PROGRAM;
+
+    Program prog = epilogue << Program(*I) << prologue;
     *I = prog.node();
   }
 
