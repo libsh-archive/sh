@@ -38,7 +38,11 @@ ArrayTraits : public TextureTraits {
   {}
 };
 
+template<typename T> class Array1D;
+template<typename T> class Array2D;
 template<typename T> class ArrayRect;
+template<typename T> class Array3D;
+
 /** One-dimensional array.
  */
 template<typename T>
@@ -50,12 +54,20 @@ public:
   {}
   Array1D(int width);
   Array1D(const MemoryPtr& mem, int width);
+  Array1D(const BaseTexture& base);
   
   typedef ArrayRect<T> rectangular_type;
   typedef BaseTexture1D<T> base_type;
   typedef T return_type;
   
   Array1D& operator=(const Program& program);
+  
+  template <typename T2>
+  Array1D<T> operator[](const Array1D<T2>& index);
+  template <typename T2>
+  Array2D<T> operator[](const Array2D<Generic<1, T2> >& index);
+  template <typename T2>
+  Array3D<T> operator[](const Array3D<Generic<1, T2> >& index);
   
   typename T::mem_type* read_data();
   typename T::mem_type* write_data();
@@ -78,6 +90,13 @@ public:
   typedef T return_type;
   
   Array2D& operator=(const Program& program);
+
+  template <typename T2>
+  Array1D<T> operator[](const Array1D<Generic<2, T2> >& index);
+  template <typename T2>
+  Array2D<T> operator[](const Array2D<Generic<2, T2> >& index);
+  template <typename T2>
+  Array3D<T> operator[](const Array3D<Generic<2, T2> >& index);
 
   typename T::mem_type* read_data();
   typename T::mem_type* write_data();
@@ -122,6 +141,13 @@ public:
   typedef T return_type;
   
   Array3D& operator=(const Program& program);
+
+  template <typename T2>
+  Array1D<T> operator[](const Array1D<Generic<3, T2> >& index);
+  template <typename T2>
+  Array2D<T> operator[](const Array2D<Generic<3, T2> >& index);
+  template <typename T2>
+  Array3D<T> operator[](const Array3D<Generic<3, T2> >& index);
 
   typename T::mem_type* read_data();
   typename T::mem_type* write_data();

@@ -87,6 +87,12 @@ BaseTextureCube<T>::BaseTextureCube(const TextureTraits& traits)
 }
 
 template<typename T>
+BaseTexture1D<T>::BaseTexture1D(const BaseTexture& base)
+  : BaseTexture(base)
+{
+}
+
+template<typename T>
 template<typename T2>
 TexData<T, 1, T2> BaseTexture1D<T>::operator()(const Generic<1, T2>& coords) const
 {

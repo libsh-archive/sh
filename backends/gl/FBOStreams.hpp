@@ -20,6 +20,7 @@
 #ifndef SHFBOSTREAMS_HPP
 #define SHFBOSTREAMS_HPP
 
+#include <string>
 #include "Program.hpp"
 #include "GlBackend.hpp"
 #include "Utils.hpp"
@@ -27,16 +28,21 @@
 namespace shgl {
 
 struct FBOStreams : public StreamStrategy {
-  FBOStreams();
+  FBOStreams(std::string name);
   virtual ~FBOStreams();
 
   void execute(const SH::Program& program, 
                SH::Stream& dest, TextureStrategy *texture);
 
+  SH::BaseTexture gather(const SH::BaseTexture& src,
+                         const SH::BaseTexture& index,
+                         TextureStrategy* texture_strategy);
+
   virtual StreamStrategy* create();
 
 private:
-  SH::ProgramSet* m_shaders;
+  std::string m_name;
+
   bool m_setup_vp;
   SH::Program m_vp;
   
@@ -50,7 +56,15 @@ private:
   FloatExtension m_float_extension;
   int m_max_draw_buffers;
   
-  GLuint m_framebuffer;
+  struct GatherData {
+    SH::ProgramSetPtr program;
+    SH::TextureNodePtr src, index;
+    SH::Attrib4f size;
+  };
+  typedef std::map<std::pair<SH::TextureDims, SH::TextureDims>, GatherData> GatherCache;
+  GatherCache m_gather_cache;
+  
+  GatherData& get_gather_data(SH::TextureDims src_dims, SH::TextureDims idx_dims);
 };
 
 }

@@ -82,9 +82,9 @@ public:
 };
 
 
-FBOStreams::FBOStreams(void) :
-  m_shaders(NULL), m_setup_vp(false), 
-  m_draw_buffers_ext(NONE), m_max_draw_buffers(1)
+FBOStreams::FBOStreams(string name)
+  : m_name(name), m_setup_vp(false),
+    m_draw_buffers_ext(NONE), m_max_draw_buffers(1)
 {
 }
 
@@ -232,6 +232,42 @@ static int dimension(const BaseTexture& tex)
   }
 }
 
+static void stream_to_texture(const TextureNodePtr& tex, TextureDims& dims,
+                              int& width, int& height, int& depth, bool indexed)
+{
+  switch (tex->dims()) {
+  case SH_TEXTURE_1D:
+  case SH_TEXTURE_2D:
+    if (indexed) {
+      dims = SH_TEXTURE_RECT;
+    } else {
+      dims = SH_TEXTURE_2D;
+    }
+  break;
+  case SH_TEXTURE_3D:
+    dims = SH_TEXTURE_3D;
+    break;
+  default:
+    SH_DEBUG_ASSERT(false);
+    break;
+  }
+      
+  if (tex->dims() == SH_TEXTURE_1D) {
+    int tex_size = 1;
+    while (tex_size * tex_size < tex->width())
+      tex_size <<= 1;
+    width = tex_size;
+    height = tex_size;
+    depth = 1;
+  }
+  else {
+    width = tex->width();
+    height = tex->height();
+    depth = tex->depth();
+  }
+}
+
+
 static int choose_program_version(const Stream& input, const Stream& output)
 {
   int os_versions[3] = { StreamCache::OS_1D, 
@@ -371,8 +407,6 @@ void FBOStreams::execute(const Program& program,
         m_float_extension = ARB_NO_FLOAT_EXT;
       }
     }
-    SH_GL_CHECK_ERROR(glGenFramebuffersEXT(1, &m_framebuffer));
-
     // The (trivial) vertex program
     m_vp = keep<Position4f>() & keep<TexCoord4f>();
     m_vp.node()->target() = get_target_backend(program_node) + "vertex";
@@ -441,38 +475,10 @@ void FBOStreams::execute(const Program& program,
       dest_tex = dest_iter;
       TextureNodePtr dest_node = dest_iter->node();
       
-      TextureDims dims = SH_TEXTURE_2D;
-      switch (dest_node->dims()) {
-      case SH_TEXTURE_1D:
-      case SH_TEXTURE_2D:
-        if (m_float_extension == ARB_NV_FLOAT_BUFFER) {
-          dims = SH_TEXTURE_RECT;
-        } else {
-          dims = SH_TEXTURE_2D;
-        }
-        break;
-      case SH_TEXTURE_3D:
-        dims = SH_TEXTURE_3D;
-        break;
-      default:
-        SH_DEBUG_ASSERT(false);
-        break;
-      }
-      
-      if (dest_node->dims() == SH_TEXTURE_1D) {
-        int tex_size = 1;
-        while (tex_size * tex_size < dest_node->width())
-          tex_size <<= 1;
-        dest_width = tex_size;
-        dest_height = tex_size;
-        dest_depth = 1;
-      }
-      else {
-        dest_width = dest_node->width();
-        dest_height = dest_node->height();
-        dest_depth = dest_node->depth();
-      }
-      
+      TextureDims dims;
+      stream_to_texture(dest_node, dims, dest_width, dest_height, dest_depth,
+                        m_float_extension == ARB_NV_FLOAT_BUFFER);
+            
       TextureNodePtr tex = new TextureNode(dims, dest_node->size(), 
                               dest_node->valueType(), ArrayTraits(),
                               dest_width, dest_height, dest_depth);
@@ -557,9 +563,172 @@ void FBOStreams::execute(const Program& program,
   }
 }
 
+FBOStreams::GatherData& FBOStreams::get_gather_data(TextureDims src_dims,
+                                                    TextureDims idx_dims)
+{
+  GatherCache::iterator cached = m_gather_cache.find(make_pair(src_dims, idx_dims));
+  if (cached != m_gather_cache.end()) {
+    return cached->second;
+  }
+
+  GatherData& data = m_gather_cache[make_pair(src_dims, idx_dims)];
+  data.src = new TextureNode(src_dims, 4, SH_FLOAT, ArrayTraits(), 1, 1, 1);
+  data.index = new TextureNode(idx_dims, 1, SH_FLOAT, ArrayTraits(), 1, 1, 1);
+
+  Program gather_vsh = keep<Position4f>() & keep<TexCoord2f>();
+  gather_vsh.target() = m_name + ":vertex";
+
+  Program gather_fsh = SH_BEGIN_PROGRAM(m_name + ":fragment") {
+    InputTexCoord2f DECL(input);
+    TexCoord3f DECL(coord);
+    
+    Statement stmt(coord(2), Variable(data.index), OP_TEX, input);
+    Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
+    
+    coord(2) = mad(coord(2), -data.size(0), data.size(3));
+    coord(0) = frac(coord(2));
+    coord(1) = (coord | data.size(0,1,2)) + data.size(3);
+    
+    OutputAttrib4f out;
+
+    Statement stmt2(out, Variable(data.src), OP_TEX, coord);
+    Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt2);
+    
+  } SH_END_PROGRAM
+
+  data.program = new ProgramSet(gather_vsh, gather_fsh);
+
+  return data;
+}
+
+BaseTexture FBOStreams::gather(const BaseTexture& src_stream, 
+                               const BaseTexture& index_stream, 
+                               TextureStrategy* texture_strategy)
+{
+  PBufferHandlePtr old_handle = 0;
+#ifdef WIN32
+  if (wglGetCurrentContext() == NULL) {
+#else
+  if (glXGetCurrentContext() == NULL) {
+#endif
+    PBufferFactory* factory = PBufferFactory::instance();
+    PBufferContextPtr context = factory->get_context(1,1);
+    old_handle = context->activate();
+  }
+  
+  // Create the destination texture
+  BaseTexture result(new TextureNode(index_stream.node()->dims(), 
+                                     src_stream.node()->size(),
+                                     src_stream.node()->valueType(),
+                                     src_stream.node()->traits(), 
+                                     index_stream.node()->width(),
+                                     index_stream.node()->height(),
+                                     index_stream.node()->depth()));
+  int result_size = result.node()->width() * result.node()->height() *
+                    result.node()->depth() * result.node()->size() *
+                    typeInfo(result.node()->valueType(), MEM)->datasize();
+  MemoryPtr memory = new HostMemory(result_size, result.node()->valueType());;
+  result.node()->memory(memory, 0);
+
+  // Convert the index and src stream textures into texture nodes we 
+  // can actually use (i.e. 1D -> 2D)  
+  int dest_size[3] = {0, 0, 0};
+  int src_size[3] = {0, 0, 0};
+  TextureDims src_dims, dest_dims;
+  stream_to_texture(src_stream.node(), src_dims, 
+                    src_size[0], src_size[1], src_size[2],
+                    m_float_extension == ARB_NV_FLOAT_BUFFER);  
+  stream_to_texture(index_stream.node(), dest_dims,
+                    dest_size[0], dest_size[1], dest_size[2],
+                    m_float_extension == ARB_NV_FLOAT_BUFFER);
+
+  // Create the texture nodes we are going to use
+  TextureNodePtr src = new TextureNode(src_dims,
+                                       src_stream.node()->size(),
+                                       src_stream.node()->valueType(),
+                                       src_stream.node()->traits(), 
+                                       src_size[0], src_size[1], src_size[2]);
+  src->memory(src_stream.node()->memory(0), 0);
+  
+  TextureNodePtr index = new TextureNode(dest_dims,
+                                         index_stream.node()->size(),
+                                         index_stream.node()->valueType(),
+                                         index_stream.node()->traits(), 
+                                         dest_size[0], dest_size[1], dest_size[2]);
+  index->memory(index_stream.node()->memory(0), 0);
+
+  TextureNodePtr dest = new TextureNode(dest_dims,
+                                        src_stream.node()->size(),
+                                        src_stream.node()->valueType(),
+                                        src_stream.node()->traits(), 
+                                        dest_size[0], dest_size[1], dest_size[2]);
+  dest->memory(memory, 0);
+  
+  // HACK ALERT! binding the texture here ensures that there is an upto
+  // date opengl storage. The generic gathering program will then simply
+  // use the storage even though it doesn't know the correct texture
+  // parameters
+  texture_strategy->bindTexture(src, GL_TEXTURE0, false);
+  texture_strategy->bindTexture(index, GL_TEXTURE0, false);
+  
+  // Generate the gathering program
+  GatherData& gather_data = get_gather_data(src_dims, dest_dims);
+
+  // Setup the gethering program parameters
+  gather_data.src->memory(src->memory(0), 0);
+  gather_data.src->setTexSize(src->width(), src->height());
+  gather_data.index->memory(index->memory(0), 0);
+  gather_data.index->setTexSize(index->width(), index->height());
+  
+  float size[4];
+  size[0] = -1.0/src_size[0];
+  size[1] = 0;
+  size[2] = 1.0/src_size[1];
+  size[3] = 1.0/2/src_size[0];
+  gather_data.size.setValues(size);
+
+#if 0
+  {
+    ProgramSet::NodeList::const_iterator i = gather_data.program->begin();
+    (*i)->code()->print(std::cerr);
+    ++i;
+    (*i)->code()->print(std::cerr);
+  }
+#endif
+
+  // Setup the rendering destination
+  SH_GL_CHECK_ERROR(glPushAttrib(GL_VIEWPORT_BIT));
+  FBOCache::instance()->bindFramebuffer();
+  
+  texture_strategy->bindTexture(dest, GL_COLOR_ATTACHMENT0_EXT, true);
+    
+  FBOCache::instance()->check();
+
+  // Gather.
+  bind(*gather_data.program);
+    
+  glViewport(0, 0, dest_size[0], dest_size[1]);
+  glBegin(GL_QUADS);
+  draw_rectangle(0, 0, dest_size[0], dest_size[1],
+                 dest_size[0], dest_size[1], dest_size[0], dest_size[1]);
+  glEnd();
+  
+  unbind(*gather_data.program);
+  
+  SH_GL_CHECK_ERROR(glPopAttrib());
+  FBOCache::instance()->unbindFramebuffer();
+  
+  if (old_handle) {
+    old_handle->restore();
+  }
+
+  return result;
+}
+
 StreamStrategy* FBOStreams::create()
 {
-  return new FBOStreams();
+  SH_DEBUG_ASSERT(false);
+  return 0;
 }
 
 }

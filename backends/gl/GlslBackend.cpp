@@ -38,7 +38,7 @@ struct GlslBackend : public GlBackend {
 #ifdef __APPLE__
                 0,
 #else
-                new FBOStreams(),
+                new FBOStreams("glsl"),
 #endif
                 "glsl", "1.0")
   {

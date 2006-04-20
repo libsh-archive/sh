@@ -71,6 +71,11 @@ template <typename T>
 Array3D<T> repeat(const Array3D<T>& array, int x, int y, int z);
 
 
+template <typename T, typename T2>
+Array1D<T> gather(const Array1D<T>& src, 
+                  const Array1D<T2>& index,
+                  std::string target = "gpu:stream");
+
 }
 
 #include "LibStreamImpl.hpp"

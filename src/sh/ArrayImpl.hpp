@@ -24,8 +24,15 @@
 #include "Stream.hpp"
 #include "BaseTexture.hpp"
 #include "BaseTextureND.hpp"
+#include "LibStream.hpp"
 
 namespace SH {
+
+template <typename T>
+Array1D<T>::Array1D(const BaseTexture& base)
+  : BaseTexture1D<T>(base)
+{
+}
 
 template <typename T>
 Array1D<T>::Array1D(int width)
@@ -49,6 +56,13 @@ Array1D<T>& Array1D<T>::operator=(const Program& program)
   Stream stream(*this);
   stream = program;
   return *this;
+}
+
+template <typename T>
+template <typename T2>
+Array1D<T> Array1D<T>::operator[](const Array1D<T2>& index)
+{
+  return gather(*this, index);
 }
 
 template <typename T> inline

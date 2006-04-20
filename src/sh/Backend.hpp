@@ -28,6 +28,7 @@
 #include "Program.hpp"
 #include "ProgramSet.hpp"
 #include "VariableNode.hpp"
+#include "BaseTexture.hpp"
 
 #if defined(_WIN32)
 #elif defined(__APPLE__) && !defined(AUTOTOOLS)
@@ -118,6 +119,9 @@ public:
   
   /** Execute a stream program, if supported */
   virtual void execute(const Program& program, Stream& dest) = 0;
+  
+  /** Gather data from src at points specified by index */
+  virtual BaseTexture gather(const BaseTexture& src, const BaseTexture& index) = 0;
   
   /** Unbind all programs bound under the backend */
   virtual void unbind_all_programs();

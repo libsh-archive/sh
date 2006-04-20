@@ -147,6 +147,9 @@ struct StreamStrategy {
   virtual void execute(const SH::Program& program, 
                        SH::Stream& dest,
                        TextureStrategy* texture) = 0;
+  virtual SH::BaseTexture gather(const SH::BaseTexture& src,
+                                 const SH::BaseTexture& index,
+                                 TextureStrategy* texture_strategy) = 0;
 };
 
 struct CodeStrategy {
@@ -174,6 +177,10 @@ public:
 
   // execute a stream program, if supported
   virtual void execute(const SH::Program& program, SH::Stream& dest);
+
+  // gather elements of src indexed by index  
+  virtual SH::BaseTexture gather(const SH::BaseTexture& src,
+                                 const SH::BaseTexture& index);
 
 protected:
   GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrategy* stream,

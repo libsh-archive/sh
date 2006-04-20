@@ -42,6 +42,7 @@ class BaseTexture1D : public BaseTexture {
 public:
   BaseTexture1D(const TextureTraits& traits);
   BaseTexture1D(int width, const TextureTraits& traits);
+  BaseTexture1D(const BaseTexture& base);
 
   template<typename T2>
   TexData<T, 1, T2> operator()(const Generic<1, T2>& coords) const;

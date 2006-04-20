@@ -40,9 +40,10 @@ template <typename T>
 Array1D<T> offset(const Array1D<T>& array, int val)
 {
   Array1D<T> result = array;
-  int offset;
+  int offset, stride;
   result.get_offset(&offset, 1);
-  offset += val;
+  result.get_stride(&stride, 1);
+  offset += val * stride;
   result.set_offset(&offset, 1);
   return result;
 }
@@ -51,10 +52,11 @@ template <typename T>
 Array2D<T> offset(const Array2D<T>& array, int x, int y)
 {
   Array2D<T> result = array;
-  int offset[2];
+  int offset[2], stride[2];
   result.get_offset(offset, 2);
-  offset[0] += x;
-  offset[1] += y;
+  result.get_stride(stride, 2);
+  offset[0] += x * stride[0];
+  offset[1] += y * stride[1];
   result.set_offset(offset, 2);
   return result;
 }
@@ -63,11 +65,12 @@ template <typename T>
 Array3D<T> offset(const Array3D<T>& array, int x, int y, int z)
 {
   Array3D<T> result = array;
-  int offset[3];
+  int offset[3], stride[2];
   result.get_offset(offset, 3);
-  offset[0] += x;
-  offset[1] += y;
-  offset[2] += z;
+  result.get_stride(stride, 3);
+  offset[0] += x * stride[0];
+  offset[1] += y * stride[1];
+  offset[2] += z * stride[2];
   result.set_offset(offset, 3);
   return result;
 }
@@ -76,10 +79,13 @@ template <typename T>
 Array1D<T> stride(const Array1D<T>& array, int val)
 {
   Array1D<T> result = array;
-  int stride;
+  int stride, count;
   result.get_stride(&stride, 1);
+  result.get_count(&count, 1);
   stride *= val;
+  count  /= val;
   result.set_stride(&stride, 1);
+  result.set_count(&count, 1);
   return result;
 }
   
@@ -87,11 +93,15 @@ template <typename T>
 Array2D<T> stride(const Array2D<T>& array, int x, int y)
 {
   Array2D<T> result = array;
-  int stride[2];
+  int stride[2], count[2];
   result.get_stride(stride, 2);
+  result.get_count(count, 2);
   stride[0] *= x;
   stride[1] *= y;
+  count[0]  /= x;
+  count[1]  /= y;
   result.set_stride(stride, 2);
+  result.set_count(count, 2);
   return result;
 }
 
@@ -99,12 +109,17 @@ template <typename T>
 Array3D<T> stride(const Array3D<T>& array, int x, int y, int z)
 {
   Array3D<T> result = array;
-  int stride[3];
+  int stride[3], count[3];
   result.get_stride(stride, 3);
+  result.get_count(count, 3);
   stride[0] *= x;
   stride[1] *= y;
   stride[2] *= z;
+  count[0]  /= x;
+  count[1]  /= y;
+  count[2]  /= z;
   result.set_stride(stride, 3);
+  result.set_count(count, 3);
   return result;
 }
 
@@ -176,6 +191,18 @@ Array3D<T> repeat(const Array3D<T>& array, int x, int y, int z)
   return result;
 }
 
+
+template <typename T, typename T2>
+Array1D<T> gather(const Array1D<T>& src, const Array1D<T2>& index, std::string target)
+{
+  if (T2::typesize != 1) {
+    error(Exception("gather index must be a 1 tuple"));
+    return BaseTexture(0);
+  }
+  BackendPtr backend = Backend::get_backend(target);
+  SH_DEBUG_ASSERT(backend);
+  return backend->gather(src, index);
+}
 
 }
 
