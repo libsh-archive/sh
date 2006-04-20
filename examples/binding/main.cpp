@@ -47,6 +47,7 @@ float angle = 0;
 
 Program vsh;
 Program fsh;
+ProgramSetPtr shader;
 
 void display()
 {
@@ -61,8 +62,7 @@ void display()
   
   // turn off vertex and fragment programs, this
   // effectively turns off Sh
-  unbind(vsh);
-  unbind(fsh);
+  unbind(*shader);
 
   // push modelview matrix and load the rotation
   // for the point light
@@ -86,8 +86,7 @@ void display()
   
   // turn vertex and fragment programs back on 
   // bind programs
-  bind(vsh);
-  bind(fsh);
+  bind(*shader);
 
   // setup the modelview matrix with the rotation
   // for the dodecahedron and draw it
@@ -209,6 +208,8 @@ void init_sh()
     // standard diffuse shading
     oclr = pos(inrm|ilightv)*diffuse + ambient;
   } SH_END;
+
+  shader = new ProgramSet(vsh, fsh);
 
 #if 0
   cout << "Vertex Unit:" << endl;
