@@ -153,34 +153,36 @@ int main(int argc, char* argv[])
                      reinterpret_cast<float*>(mem[2]->hostStorage()->data()),
                      expected, 16, 0.001)) errors++;}
 
-
-  Array2D<Attrib1f> a2(mem[0], 4, 4), b2(mem[1], 4, 4), c2(mem[2], 4, 4);
-
-  {float expected[] = {0,2,4,6, 8,10,12,14, 16,18,20,22, 24,26,28,30};
-  reset_memories(mem, 3);
-  c2 = prg << a2 << b2;
-  mem[2]->hostStorage()->sync();
-  if (test.output_result<float*>("2D", inputs, 
-                     reinterpret_cast<float*>(mem[2]->hostStorage()->data()),
-                     expected, 16, 0.001)) errors++;}
-
-  {float expected[] = {9,11,2,3, 17,19,6,7, 25,27,10,11, 12,13,14,15};
-  reset_memories(mem, 3);
-  count(c2, 2, 3) = prg << offset(count(a2, 2, 3), 1, 1)
-                        << offset(count(b2, 2, 3), 0, 1);
-  mem[2]->hostStorage()->sync();
-  if (test.output_result<float*>("2D offset", inputs, 
-                     reinterpret_cast<float*>(mem[2]->hostStorage()->data()),
-                     expected, 16, 0.001)) errors++;}
-
-  {float expected[] = {5,8,2,3, 21,24,6,7, 8,9,10,11, 12,13,14,15};
-  reset_memories(mem, 3);
-  count(c2, 2, 2) = prg << stride(count(a2, 2, 2), 2, 2)
-                        << offset(stride(count(b2, 2, 2), 1, 2), 1, 1);
-  mem[2]->hostStorage()->sync();
-  if (test.output_result<float*>("2D stride", inputs, 
-                     reinterpret_cast<float*>(mem[2]->hostStorage()->data()),
-                     expected, 16, 0.001)) errors++;}
+  // 2D tests
+  if (test.backend() != "cc") {
+    Array2D<Attrib1f> a2(mem[0], 4, 4), b2(mem[1], 4, 4), c2(mem[2], 4, 4);
+    
+    {float expected[] = {0,2,4,6, 8,10,12,14, 16,18,20,22, 24,26,28,30};
+    reset_memories(mem, 3);
+    c2 = prg << a2 << b2;
+    mem[2]->hostStorage()->sync();
+    if (test.output_result<float*>("2D", inputs, 
+                                   reinterpret_cast<float*>(mem[2]->hostStorage()->data()),
+                                   expected, 16, 0.001)) errors++;}
+    
+    {float expected[] = {9,11,2,3, 17,19,6,7, 25,27,10,11, 12,13,14,15};
+    reset_memories(mem, 3);
+    count(c2, 2, 3) = prg << offset(count(a2, 2, 3), 1, 1)
+                          << offset(count(b2, 2, 3), 0, 1);
+    mem[2]->hostStorage()->sync();
+    if (test.output_result<float*>("2D offset", inputs, 
+                                   reinterpret_cast<float*>(mem[2]->hostStorage()->data()),
+                                   expected, 16, 0.001)) errors++;}
+    
+    {float expected[] = {5,8,2,3, 21,24,6,7, 8,9,10,11, 12,13,14,15};
+    reset_memories(mem, 3);
+    count(c2, 2, 2) = prg << stride(count(a2, 2, 2), 2, 2)
+                          << offset(stride(count(b2, 2, 2), 1, 2), 1, 1);
+    mem[2]->hostStorage()->sync();
+    if (test.output_result<float*>("2D stride", inputs, 
+                                   reinterpret_cast<float*>(mem[2]->hostStorage()->data()),
+                                   expected, 16, 0.001)) errors++;}
+  }
 
   mismatch_test(total_tests, errors);
 
