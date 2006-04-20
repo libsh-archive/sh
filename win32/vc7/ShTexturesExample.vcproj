@@ -121,7 +121,7 @@
 				RelativePath="..\..\examples\textures\main.cpp">
 			</File>
 			<File
-				RelativePath="..\..\examples\textures\ShTrackball.cpp">
+				RelativePath="..\..\examples\textures\Trackball.cpp">
 			</File>
 		</Filter>
 		<Filter
@@ -132,7 +132,7 @@
 				RelativePath="..\..\examples\textures\Camera.hpp">
 			</File>
 			<File
-				RelativePath="..\..\examples\textures\ShTrackball.hpp">
+				RelativePath="..\..\examples\textures\Trackball.hpp">
 			</File>
 		</Filter>
 	</Files>

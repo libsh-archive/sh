@@ -129,7 +129,7 @@
 				RelativePath="..\..\examples\glut\main.cpp">
 			</File>
 			<File
-				RelativePath="..\..\examples\glut\ShTrackball.cpp">
+				RelativePath="..\..\examples\glut\Trackball.cpp">
 			</File>
 		</Filter>
 		<Filter
@@ -140,7 +140,7 @@
 				RelativePath="..\..\examples\glut\Camera.hpp">
 			</File>
 			<File
-				RelativePath="..\..\examples\glut\ShTrackball.hpp">
+				RelativePath="..\..\examples\glut\Trackball.hpp">
 			</File>
 		</Filter>
 		<Filter
