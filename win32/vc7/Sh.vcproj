@@ -157,9 +157,6 @@
 				RelativePath="..\..\src\sh\CfgBlock.cpp">
 			</File>
 			<File
-				RelativePath="..\..\src\sh\ChannelNode.cpp">
-			</File>
-			<File
 				RelativePath="..\..\src\sh\ConcreteCTypeOp.cpp">
 			</File>
 			<File
