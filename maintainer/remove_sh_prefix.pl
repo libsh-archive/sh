@@ -73,6 +73,7 @@ my %special_macros = (
     "INSTALL"  => "SH_INSTALL",
     "REGRESS"  => "SH_REGRESS",
     "DLLEXPORT"=> "SH_DLLEXPORT",
+    "DEBUG"    => "SH_DEBUG",
 );
 
 my %reserved_words = (
