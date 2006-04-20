@@ -396,7 +396,7 @@ void GlslCode::updateUniform(const ShVariableNodePtr& uniform)
   // Variable is in the map?
   const GlslVariable *var;
   if (m_varmap->contains(uniform, var)) {
-    if (!var->texture()) {
+    if (!var->texture() && !var->builtin()) {
       real_update_uniform(uniform, var->name());
     }
   }
