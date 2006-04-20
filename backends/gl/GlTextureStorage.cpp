@@ -271,7 +271,7 @@ bool GlTextureHostTransfer::transfer(const Storage* from, Storage* to)
   if (converted_type != VALUETYPE_END || 
       texture_type != host_type || tuplesize == 2) {
     dest_variant = variantFactory(texture_type, MEM)->
-      generate(width * height * depth * glTuplesize[tuplesize]);
+      generate(count * glTuplesize[tuplesize]);
   } 
   else {
     dest_variant = host_variant;

@@ -61,10 +61,12 @@ private:
     SH::TextureNodePtr src, index;
     SH::Attrib4f size;
   };
-  typedef std::map<std::pair<SH::TextureDims, SH::TextureDims>, GatherData> GatherCache;
+  typedef std::pair<SH::TextureDims, bool> TexSpec;
+  typedef std::map<std::pair<TexSpec, TexSpec>, GatherData> GatherCache;
   GatherCache m_gather_cache;
   
-  GatherData& get_gather_data(SH::TextureDims src_dims, SH::TextureDims idx_dims);
+  GatherData& get_gather_data(SH::TextureDims src_dims, bool src_two_comp,
+                              SH::TextureDims idx_dims, bool idx_two_comp);
 };
 
 }

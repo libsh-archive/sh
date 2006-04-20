@@ -563,16 +563,23 @@ void FBOStreams::execute(const Program& program,
   }
 }
 
-FBOStreams::GatherData& FBOStreams::get_gather_data(TextureDims src_dims,
-                                                    TextureDims idx_dims)
+FBOStreams::GatherData& 
+FBOStreams::get_gather_data(TextureDims src_dims, bool src_two_comp,
+                            TextureDims idx_dims, bool idx_two_comp)
 {
-  GatherCache::iterator cached = m_gather_cache.find(make_pair(src_dims, idx_dims));
+  std::pair<TexSpec, TexSpec> ver = make_pair(make_pair(src_dims, src_two_comp),
+                                              make_pair(idx_dims, idx_two_comp));
+  GatherCache::iterator cached = m_gather_cache.find(ver);
   if (cached != m_gather_cache.end()) {
     return cached->second;
   }
 
-  GatherData& data = m_gather_cache[make_pair(src_dims, idx_dims)];
-  data.src = new TextureNode(src_dims, 4, SH_FLOAT, ArrayTraits(), 1, 1, 1);
+  GatherData& data = m_gather_cache[ver];
+  if (src_two_comp)
+    data.src = new TextureNode(src_dims, 2, SH_FLOAT, ArrayTraits(), 1, 1, 1);
+  else 
+    data.src = new TextureNode(src_dims, 4, SH_FLOAT, ArrayTraits(), 1, 1, 1);
+
   data.index = new TextureNode(idx_dims, 1, SH_FLOAT, ArrayTraits(), 1, 1, 1);
 
   Program gather_vsh = keep<Position4f>() & keep<TexCoord2f>();
@@ -589,11 +596,16 @@ FBOStreams::GatherData& FBOStreams::get_gather_data(TextureDims src_dims,
     coord(0) = frac(coord(2));
     coord(1) = (coord | data.size(0,1,2)) + data.size(3);
     
-    OutputAttrib4f out;
-
-    Statement stmt2(out, Variable(data.src), OP_TEX, coord);
-    Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt2);
-    
+    if (src_two_comp) {
+      OutputAttrib2f out;
+      Statement stmt2(out, Variable(data.src), OP_TEX, coord);
+      Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt2);
+    }
+    else {
+      OutputAttrib4f out;
+      Statement stmt2(out, Variable(data.src), OP_TEX, coord);
+      Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt2);
+    }    
   } SH_END_PROGRAM
 
   data.program = new ProgramSet(gather_vsh, gather_fsh);
@@ -672,7 +684,9 @@ BaseTexture FBOStreams::gather(const BaseTexture& src_stream,
   texture_strategy->bindTexture(index, GL_TEXTURE0, false);
   
   // Generate the gathering program
-  GatherData& gather_data = get_gather_data(src_dims, dest_dims);
+  GatherData& gather_data = 
+    get_gather_data(src_dims, src_stream.node()->size() == 2,
+                    dest_dims, index_stream.node()->size() == 2);
 
   // Setup the gethering program parameters
   gather_data.src->memory(src->memory(0), 0);
