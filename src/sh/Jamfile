@@ -9,6 +9,6 @@ alias headers
 
 alias sources
 : # sources
-	[ set.difference [ glob *.cpp ] : ShGeneric.cpp ShDomTree.cpp ShSection.cpp ]
-	binreloc.c
+	[ set.difference [ glob *.cpp ] : Generic.cpp DomTree.cpp ]
+	[ glob *.c ]
 ;
