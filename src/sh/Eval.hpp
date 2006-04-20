@@ -86,13 +86,13 @@ class
 SH_DLLEXPORT
 Eval {
   public:
+     // TODO: should really break this out into separate functions.  EvalOps can
+     //       have a single function in the interface
+
     /** Decides which evaluation evalOp to use and calls it up.
      * If an op is unary, leave b, c = 0.
      * If an op is binary leave c = 0.
      * If an op has no dest, leave dest = 0.
-     *
-     * TODO (should really break this out into separate functions.  EvalOps can
-     * have a single function in th einterface)
      * @{*/
     void operator()(Operation op, Variant* dest,
         const Variant* a, const Variant* b, const Variant* c) const;

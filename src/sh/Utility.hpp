@@ -93,10 +93,9 @@ struct MatchEitherType {
  *
  * You can subclass this like this:
  * template<typename T> struct MatchMyType: public MatchTemplateType<T, MyType> {}; 
- * to match your own complex types with less typing (hah hah, stupid pun).
+ * to match your own complex types.
  *
- * The basic class here is standards compliant and works in VC .NET 2003,
- * but not sure what will happen in more complex template vodoo.
+ * The basic class here is standards compliant and works in VC .NET 2003.
  */
 template<typename T, template<typename A> class B>
 struct MatchTemplateType {

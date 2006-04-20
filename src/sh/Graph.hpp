@@ -85,8 +85,9 @@ struct GraphEdge {
   typedef typename G::Vertex Vertex;
 
   /** \brief Builds an edge with null endpoints 
-   * TODO should not have this?*/ 
+   */
   GraphEdge(); 
+  // TODO: should not have this?
 
   /** \brief Builds an edge with the given endpoints */
   GraphEdge(Vertex *start, Vertex *end);
@@ -157,7 +158,7 @@ class Graph {
     Graph<G>& operator=(const Graph<G> &other);
 
     /** Some useful graph algorithms */
-    /** TODO may want to separate these out */
+    // TODO: may want to separate these out
 
     /** \brief Performs a DFS of the graph starting from the given vertex,
      * applying the given functor to each node as it is traversed
@@ -171,7 +172,7 @@ class Graph {
      * W::WeightType must define the type used for weight values. 
      * W::LARGE must be a large constant (larger than any expected shortest path
      * length)
-     * TODO BUT for now, LARGE must also be MAX_INT / 2 + longest edge weight
+     * BUT for now, LARGE must also be MAX_INT / 2 + longest edge weight
      *
      * W::ZERO is the initalizing for distance of a vert from itself.
      *
@@ -191,12 +192,11 @@ class Graph {
     // @}
 
     /** \brief Single-Source shortest path using Bellman-Ford (CLRS 24.1)
-     * TODO - might want this to return all shortest distances/paths (from the
-     * given start)
      * @{
      * */
     template<typename W>
     typename W::WeightType bellmanFord(Vertex *start, Vertex *end, W &weigher, EdgeList *path = 0); 
+    // TODO: might want this to return all shortest distances/paths (from the given start)
     // @}
 
     /** \brief All-pairs shortest path using Floyd-Warshall (CLRS 25.2)

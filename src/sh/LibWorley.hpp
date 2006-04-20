@@ -96,11 +96,11 @@ struct PropertyFactory {
 
 /** \brief Worley texture generator.
  * This uses the DefaultGeneratorFactory and DistSqPropFactory 
- * TODO allow arbitrary distance function
  * @{
  */
 template<int K, int D, typename T>
 Generic<K, T> worley(const Generic<D, T> &p, bool useTexture = true); 
+// TODO allow arbitrary distance function
 //@}
 
 /** \brief Worley texture generator.
@@ -113,8 +113,6 @@ void worley(Generic<K, T> result[], const Generic<D, T> &p,
 
 /** Makes a shader that takes 
  *  IN(1) TexCoord<D,T> texcoord; // texture lookup coordinates
- *
- * TODO make Output a struct of some kind when Sh supports structs
  *  OUT(0) Attrib<K, T> result[N]; // properties of k-nearest neighbours 
  * @{
  */
@@ -124,6 +122,7 @@ Program worley(bool useTexture);
 template<int K, int N, int P, int D, typename T>
 Program worley(const GeneratorFactory<P, D, T> *genFactory,
                    const PropertyFactory<N, D, T> *propFactory);
+// TODO: make Output a struct of some kind when Sh supports structs
 //@}
 
 #endif // _WIN32

@@ -121,10 +121,10 @@ Record operator&(const Record& left, const Record& right);
 
 /** Apply a program to a record. 
  * This function connects records onto the output of programs
- * TODO: is this right?  why is the record argument first?
  */
 SH_DLLEXPORT
 Program connect(const Record& rec, const Program& program);
+// TODO: is this right?  why is the record argument first?
 
 /** An operator alias for connect(p,s).
  */

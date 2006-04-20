@@ -91,7 +91,7 @@ public:
    * B contains a block with all statements after the given iterator.
    *
    * This is useful for splicing in a control graph between A and B to replace 
-   * some statement (or TODO a sequence of statements)
+   * some statement.
    *
    * Returns B. 
    */

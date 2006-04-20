@@ -120,12 +120,12 @@ public:
    *
    * The first version adds to a specified cfg node in addition to this.
    * The second adds to this and the entry node.
-   *  
-   * @todo range check that adding to the cfg node doesn't screw anything up...
-   * (i.e. if somewhere we don't copy cfg when manipulating program...) */
+   */
   //@{
   void addDecl(const VariableNodePtr& node, const CtrlGraphNodePtr&);
   void addDecl(const VariableNodePtr& node);
+  // TODO: range check that adding to the cfg node doesn't screw anything up...
+  // (i.e. if somewhere we don't copy cfg when manipulating program...)
   //@}
 
   typedef std::set<VariableNodePtr> VarSet;

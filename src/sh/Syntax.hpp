@@ -204,7 +204,6 @@
  * Starts a block grouping - for affine analysis and organization of code for
  * visual languages.
  *
- * @todo range This interface is really quite crappy
  * @param name - String name of the block (this shouldn't be required... 
  *               This is only to keep me sane when debugging 
  */

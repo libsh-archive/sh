@@ -38,7 +38,7 @@ class VariantCast;
  * It also holds the precedence DAG for types. 
  *
  * The graph formed by automatic type casts should remain a DAG
- * // TODO maybe it's okay otherewise if we define "least common ancestor"
+ * (maybe it's okay otherewise if we define "least common ancestor")
  * succinctly, but probably would be too confusing to end users if 
  * automatic promotions could end up in cycles...
  *

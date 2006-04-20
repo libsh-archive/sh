@@ -103,10 +103,10 @@ Stream operator&(const Stream& left, const Stream& right);
 
 /** Apply a program to a stream. 
  * This function connects streams onto the output of programs
- * TODO: is this right?  why is the stream argument first?
  */
 SH_DLLEXPORT
 Program connect(const Stream& stream, const Program& program);
+// TODO: is this right?  why is the stream argument first?
 
 /** An operator alias for connect(p,s).
  */
