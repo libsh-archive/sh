@@ -72,8 +72,9 @@ public:
 private:
   
   struct InputData {
-    SH::TextureNodePtr tex;
-    SH::Attrib4f os1, os2;
+    SH::TextureNodePtr tex[4];
+    SH::Attrib4f uniform4[2];
+    SH::Attrib4f uniform2[2][2];
   };
   typedef std::vector<InputData> InputList;
 

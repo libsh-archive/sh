@@ -136,56 +136,140 @@ struct PrintStorages {
   }
 };
 
-static void draw_rectangle(float x, float y, float w, float h, 
-                           float tex_w, float tex_h, float coord_w, float coord_h)
+static void gl_attribs(const vector<float>& coords)
 {
-  glTexCoord4f(x/coord_w, y/coord_h, 0.0, 1.0);
-  glVertex3f(2.0*x/tex_w-1.0, 2.0*y/tex_h-1.0, 0.0);
-  glTexCoord4f((x+w)/coord_w, y/coord_h, 0.0, 1.0);
-  glVertex3f(2.0*(x+w)/tex_w-1.0, 2.0*y/tex_h-1.0, 0.0);
-  glTexCoord4f((x+w)/coord_w, (y+h)/coord_h, 0.0, 1.0);
-  glVertex3f(2.0*(x+w)/tex_w-1.0, 2.0*(y+h)/tex_h-1.0, 0.0);
-  glTexCoord4f(x/coord_w, (y+h)/coord_h, 0.0, 1.0);
-  glVertex3f(2.0*x/tex_w-1.0, 2.0*(y+h)/tex_h-1.0, 0.0);
+  vector<float>::const_iterator i = coords.begin();
+  for (int n = 1; i != coords.end(); ++n) {
+    switch (coords.end() - i) {
+    case 1:
+      glVertexAttrib1f(n, *i);
+      ++i;
+      break;
+    case 2:
+      glVertexAttrib2fv(n, &*i);
+      i += 2;
+      break;
+    case 3:
+      glVertexAttrib3fv(n, &*i);
+      i += 3;
+      break;
+    default:
+      glVertexAttrib4fv(n, &*i);
+      i += 4;
+      break;
+    }
+  }
 }
 
-static void draw_rectangle(float x, float y, float w, float h, float size, float coords)
+static void draw_rectangle(int x, int y, int w, int h, 
+                           const vector<float> coords[3])
 {
-  draw_rectangle(x, y, w, h, size, size, coords, coords);
+  SH_GL_CHECK_ERROR(glScissor(x, y, w, h));
+
+  glBegin(GL_TRIANGLES);
+  gl_attribs(coords[0]);
+  glVertex3f(-1.0, -1.0, 0.0);
+  gl_attribs(coords[1]);
+  glVertex3f(3.0, -1.0, 0.0);
+  gl_attribs(coords[2]);
+  glVertex3f(-1.0, 3.0, 0.0);
+  glEnd();
 }
 
-static void draw_1d_stream(int size, const BaseTexture& tex, bool indexed)
+static void draw_1d_stream(int size, const BaseTexture& tex, bool indexed,
+                           int version, const Stream& inputs)
 {
-  int coords = indexed ? 1 : size;
-  glViewport(0, 0, size, size);
+  int dest_width = size;
+  int dest_height = size;
+  
+  SH_GL_CHECK_ERROR(glEnable(GL_SCISSOR_TEST));
+  SH_GL_CHECK_ERROR(glViewport(0, 0, dest_width, dest_height));
+
+  int dest_offset, dest_stride, dest_repeat, dest_count;
+  tex.get_offset(&dest_offset, 1);
+  tex.get_stride(&dest_stride, 1);
+  tex.get_repeat(&dest_repeat, 1);
+  tex.get_count(&dest_count, 1);
+
+  vector<float> coords[3];
+  if ((version & ~StreamCache::SINGLE_OUTPUT) == StreamCache::OS_1D) {
+    for (int i = 0; i < 3; ++i) {
+      coords[i].reserve(inputs.size());
+    }
+    for (Stream::const_iterator in = inputs.begin(); in != inputs.end(); ++in) {
+      int offset, stride, repeat, count;
+      in->get_offset(&offset, 1);
+      in->get_stride(&stride, 1);
+      in->get_repeat(&repeat, 1);
+      in->get_count(&count, 1);
+
+      // Rasterization is a linear transformation of the form
+      //
+      // |r|    |a11 a12 a13| |x + bias|
+      // |s|  = |a21 a22 a23|.|y + bias|
+      // |t|    |a31 a32 a33| |   1    |
+      // |q|    |a41 a42 a43|
+      //
+      // Each input uses one component of the vertex attribute. For one input
+      // the calculation is
+      //
+      // i = a1(x + bias) + a2(y + bias) + a3
+      //
+      // hence if the desired computation is 
+      //
+      // i = (dest_width*x + dest_width*dest_height*y - dest_offset) / count
+      //
+      // the coefficients are
+      //
+      float bias = 1.0/(2*dest_width); // note that dest_width == dest_height
+      float a1 = (float)dest_width / count;
+      float a2 = (float)dest_width * dest_height / count;
+      float a3 = -dest_offset/(float)count - (a1 + a2) * bias;
+      //
+      // The vertices of our triangle are at (0,0), (2,0) and (0,2) hence 
+      // the coordinate at the vertices are
+      //
+      // (0,0) -> a3
+      // (2,0) -> 2*a1 + a3
+      // (0,2) -> 2*a2 + a3
+      //
+      coords[0].push_back(a3);
+      coords[1].push_back(2*a1 + a3);
+      coords[2].push_back(2*a2 + a3);
+    }
+  }
+  else {
+    for (int i = 0; i < 3; ++i) {
+      coords[i].reserve(2);
+    }
+    coords[0].push_back(0);
+    coords[0].push_back(0);
+    coords[1].push_back(indexed ? 2*dest_width : 2);
+    coords[1].push_back(0);
+    coords[2].push_back(0);
+    coords[2].push_back(indexed ? 2*dest_height : 2);
+  }
 
   DECLARE_TIMER(render);
 
-  int offset, stride, count;
-  tex.get_offset(&offset, 1);
-  tex.get_stride(&stride, 1);
-  tex.get_count(&count, 1);
-
-  // Generate quad geometry
-  glBegin(GL_QUADS); {
-    int full_lines_start = offset / size;
-    int full_lines_end = (offset+count*stride) / size;
-    int last_line_count = (offset+count*stride) % size;
-    int first_line_start = offset % size;
+  // Generate geometry
+  int full_lines_start = dest_offset / size;
+  int full_lines_end = (dest_offset+dest_count*dest_stride) / size;
+  int last_line_count = (dest_offset+dest_count*dest_stride) % size;
+  int first_line_start = dest_offset % size;
     
-    if (first_line_start) {
-      draw_rectangle(first_line_start, full_lines_start, 
-                     size - first_line_start, 1, size, coords);
-      ++full_lines_start;
-    }
-    if (last_line_count) {
-      draw_rectangle(0, full_lines_end, last_line_count, 1, size, coords);
-    }
-    if (full_lines_end != full_lines_start) {
-      draw_rectangle(0, full_lines_start, size, 
-                     full_lines_end - full_lines_start, size, coords);
-    }
-  } glEnd();
+  if (first_line_start) {
+    draw_rectangle(first_line_start, full_lines_start, 
+                   size - first_line_start, 1, coords);
+    ++full_lines_start;
+  }
+  if (last_line_count) {
+    draw_rectangle(0, full_lines_end, last_line_count, 1, coords);
+  }
+  if (full_lines_end != full_lines_start) {
+    draw_rectangle(0, full_lines_start, size,
+                   full_lines_end - full_lines_start, coords);
+  }
 
   TIMING_RESULT(render);    
 }
@@ -193,18 +277,23 @@ static void draw_1d_stream(int size, const BaseTexture& tex, bool indexed)
 static void draw_2d_stream(int width, int height,
                            const BaseTexture& tex, int indexed)
 {
-  int coords_width = indexed ? 1 : width;
-  int coords_height = indexed ? 1 : height;
-  glViewport(0, 0, width, height);
-  
   int offset[2], stride[2], count[2];
   tex.get_offset(offset, 2);
   tex.get_stride(stride, 2);
   tex.get_count(count, 2);
   
-  glBegin(GL_QUADS);
-  draw_rectangle(offset[0], offset[1], stride[0]*count[0], stride[1]*count[1],
-                 width, height, coords_width, coords_height);  
+  SH_GL_CHECK_ERROR(glViewport(0, 0, width, height));
+  SH_GL_CHECK_ERROR(glEnable(GL_SCISSOR_TEST));
+  SH_GL_CHECK_ERROR(glScissor(offset[0], offset[1], 
+                              stride[0]*count[0], stride[1]*count[1]));
+
+  glBegin(GL_TRIANGLES);
+  glVertexAttrib2f(1, 0, 0);
+  glVertex3f(-1.0, -1.0, 0);
+  glVertexAttrib2f(1, indexed ? 2*width : 2, 0);
+  glVertex3f(3.0, -1.0, 0);
+  glVertexAttrib2f(1, 0, indexed ? 2*height : 2);
+  glVertex3f(-1.0, 3.0, 0);
   glEnd();
 }
 
@@ -409,6 +498,7 @@ void FBOStreams::execute(const Program& program,
     }
     // The (trivial) vertex program
     m_vp = keep<Position4f>() & keep<TexCoord4f>();
+    m_vp.meta("opengl:matching", "generic");
     m_vp.node()->target() = get_target_backend(program_node) + "vertex";
     compile(m_vp);
     m_setup_vp = true;
@@ -460,7 +550,7 @@ void FBOStreams::execute(const Program& program,
   }  
 #endif
 
-  SH_GL_CHECK_ERROR(glPushAttrib(GL_VIEWPORT_BIT));
+  SH_GL_CHECK_ERROR(glPushAttrib(GL_VIEWPORT_BIT | GL_SCISSOR_BIT | GL_ENABLE_BIT));
   FBOCache::instance()->bindFramebuffer();
 
   Stream::iterator dest_iter = dest.begin();
@@ -514,7 +604,8 @@ void FBOStreams::execute(const Program& program,
     case SH_TEXTURE_1D:
       SH_DEBUG_ASSERT(dest_width == dest_height);
       draw_1d_stream(dest_width, *dest_tex,
-                     m_float_extension == ARB_NV_FLOAT_BUFFER);
+                     m_float_extension == ARB_NV_FLOAT_BUFFER,
+                     program_version, program.stream_inputs());
       break;
     case SH_TEXTURE_2D:
       draw_2d_stream(dest_width, dest_height, *dest_tex,
@@ -554,7 +645,7 @@ void FBOStreams::execute(const Program& program,
   for (Stream::iterator I = dest.begin(); I != dest.end(); ++I) {
     I->node()->memory(0)->findStorage("opengl:texture", UnflagWrite());
   }
-    
+
   SH_GL_CHECK_ERROR(glPopAttrib());
   FBOCache::instance()->unbindFramebuffer();
   
@@ -722,17 +813,23 @@ BaseTexture FBOStreams::gather(const BaseTexture& src_stream,
 
   // Gather.
   bind(*gather_data.program);
-    
+  
   glViewport(0, 0, dest_size[0], dest_size[1]);
-  glBegin(GL_QUADS);
-  draw_rectangle(0, 0, dest_size[0], dest_size[1],
-                 dest_size[0], dest_size[1], dest_size[0], dest_size[1]);
+  glBegin(GL_TRIANGLES);
+  glTexCoord2f(0, 0);
+  glVertex3f(-1.0, -1.0, 0);
+  glTexCoord2f(m_float_extension == ARB_NV_FLOAT_BUFFER ? 2*dest_size[0] : 2, 0);
+  glVertex3f(3.0, -1.0, 0);
+  glTexCoord2f(0, m_float_extension == ARB_NV_FLOAT_BUFFER ? 2*dest_size[1] : 2);
+  glVertex3f(-1.0, 3.0, 0);
   glEnd();
   
   unbind(*gather_data.program);
   
   SH_GL_CHECK_ERROR(glPopAttrib());
   FBOCache::instance()->unbindFramebuffer();
+
+  dest->memory(0)->findStorage("opengl:texture", UnflagWrite());
   
   if (old_handle) {
     old_handle->restore();

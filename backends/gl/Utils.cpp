@@ -90,96 +90,109 @@ void StreamCache::generate_programs(ProgramVersion version)
        I != m_programs[version].end(); ++I) {
          
     string target = get_target_backend(m_stream_program) + "fragment";
-
-    for (ProgramNode::VarList::const_iterator input = (*I)->begin_inputs();
-         input != (*I)->end_inputs(); ++input) {
-      InputData input_data;
-      input_data.tex =
-        new TextureNode(dims, (*input)->size(), (*input)->valueType(),
-                          ArrayTraits(), 1, 1, 1);
-      m_inputs[version].push_back(input_data);
-    }
     
     Program prologue;
     switch (version & ~SINGLE_OUTPUT) {
-    case OS_NONE_2D:
+    case OS_NONE_2D: {
+      // Create the appropriate amount of InputData
+      // (need to do this outside the program so that it is uniform)
+      ProgramNode::VarList::const_iterator input = (*I)->begin_inputs();
+      for (int i = 0; input != (*I)->end_inputs(); ++input, ++i) {
+        if ((i % 4) == 0) {
+          m_inputs[version].push_back(InputData());
+        }
+      }
+      
       prologue = SH_BEGIN_PROGRAM(target) {
-        InputTexCoord2f DECL(streamcoord);
+        InputAttrib2f DECL(streamcoord);
 
         InputList::iterator input_data = m_inputs[version].begin();
         for (ProgramNode::VarList::const_iterator input = (*I)->begin_inputs();
-             input != (*I)->end_inputs(); ++input, ++input_data) {
-          Variable out((*input)->clone(SH_OUTPUT));
-          Variable tex(input_data->tex);
-          if (m_float_extension == ARB_NV_FLOAT_BUFFER) {
-            Statement stmt(out, tex, OP_TEXI, streamcoord);
-            Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
-          }
-          else {
-            Statement stmt(out, tex, OP_TEX, streamcoord);
-            Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
+             input != (*I)->end_inputs(); ++input_data) {
+          for (int i = 0; i < 4 && input != (*I)->end_inputs(); ++input, ++i) {
+            Variable out((*input)->clone(SH_OUTPUT));
+            input_data->tex[i] = new TextureNode(dims, (*input)->size(), 
+                                                 (*input)->valueType(),
+                                                 ArrayTraits(), 1, 1, 1);
+            Variable tex(input_data->tex[i]);
+            if (m_float_extension == ARB_NV_FLOAT_BUFFER) {
+              Statement stmt(out, tex, OP_TEXI, streamcoord);
+              Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
+            }
+            else {
+              Statement stmt(out, tex, OP_TEX, streamcoord);
+              Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
+            }
           }
         }
       } SH_END_PROGRAM;
       break;
-    
+    }
+      
     case OS_NONE_3D:
       SH_DEBUG_ASSERT(false /* TODO */);
       break;
     
-    case OS_1D:
+    case OS_1D: {
+      // Create the appropriate amount of InputData
+      // (need to do this outside the program so that it is uniform)
+      ProgramNode::VarList::const_iterator input = (*I)->begin_inputs();
+      for (int i = 0; input != (*I)->end_inputs(); ++input, ++i) {
+        if ((i % 4) == 0) {
+          m_inputs[version].push_back(InputData());
+        }
+      }
+    
       prologue = SH_BEGIN_PROGRAM(target) {
-        InputTexCoord4f DECL(streamcoord);
-            
-        Attrib4f DECL(index);
-        // index = (x - bias, y - bias, -bias, 1-bias)
-        index = streamcoord - m_output_offset(3,3,3,3);
-        // z = (x + y*width + z*dest_offset/bias)/dest_stride/height
-        index(2) = index(0,1,2) | m_output_offset(0,1,2);
-
-        Attrib1f DECL(stride);
-        // bias = 1/2 * 1/stride
-        // stride = z*width*height + bias
-        stride = mad(index(2), m_output_stride(0), m_output_stride(1));
-        // if (stride - 2*bias < 0) discard
-        discard(frac(stride) - m_output_stride(2));
-
-        InputList::iterator input_data = m_inputs[version].begin();
+        InputList::iterator data = m_inputs[version].begin();
         for (ProgramNode::VarList::const_iterator input = (*I)->begin_inputs();
-             input != (*I)->end_inputs(); ++input, ++input_data) {
+             input != (*I)->end_inputs(); ++data) {
+          InputAttrib4f DECL(input_index);
+          Attrib4f DECL(index);
+          
+          // Wrap [0..count)
+          index = frac(input_index);
+          // (index * count * stride + offset) / width
+          index = mad(index, data->uniform4[0], data->uniform4[1]);
+          
+          for (int i = 0; i < 2 && input != (*I)->end_inputs(); ++i) {
 
-          TexCoord4f DECL(coord);
-          Variable tex(input_data->tex);
-          Variable out((*input)->clone(SH_OUTPUT));
-          
-          // index(2) * dest_width * dest_height is the integer index
-          // of the currently computed stream element
-          //
-          // compute the fractional index modulo count
-          // coord(2) = frac(index(2) * dw * dh / count)
-          coord(2) = mad(index(2), input_data->os1(0), input_data->os1(1));          
-          coord(2) = frac(coord(2));
-          
-          // coord(2) = coord(2) * stride + offset
-          coord(2) = mad(coord(2), input_data->os1(2), input_data->os1(3));
-          // x = frac z
-          coord(0) = frac(coord(2));
-          // y = x*-2*b + y*0 + z/wi + w*b/(1-b)
-          coord(1) = coord | input_data->os2;
-          
-          if (m_float_extension == ARB_NV_FLOAT_BUFFER) {
-            coord(0,1) *= m_output_stride(3, 3);
-            Statement stmt(out, tex, OP_TEXI, coord(0,1));
-            Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
-          }
-          else {
-            Statement stmt(out, tex, OP_TEX, coord(0,1));
-            Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
+            TexCoord4f DECL(coord);
+            // x = frac(index)
+            coord(0,2) = frac(index(2*i,2*i+1));
+            // y = index / width + bias
+            coord(1,3) = mad(index(2*i,2*i+1), 
+                             data->uniform2[i][0](0,1),
+                             data->uniform2[i][0](2,3));
+            // y -= x * 2 * bias
+            coord(1,3) =  mad(coord(0,2),
+                              data->uniform2[i][1](0,1),
+                              coord(1,3));
+
+            for (int j = 0; j < 2 && input != (*I)->end_inputs(); ++j, ++input) {
+
+              data->tex[i*2+j] = new TextureNode(dims, (*input)->size(), 
+                                                 (*input)->valueType(),
+                                                 ArrayTraits(), 1, 1, 1);
+              Variable tex(data->tex[i*2+j]);
+              Variable out((*input)->clone(SH_OUTPUT));
+            
+              if (m_float_extension == ARB_NV_FLOAT_BUFFER) {
+                coord(0,1) *= m_output_stride(3, 3);
+                Statement stmt(out, tex, OP_TEXI, coord(2*j, 2*j+1));
+                Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
+              }
+              else {
+                Statement stmt(out, tex, OP_TEX, coord(2*j, 2*j+1));
+                Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
+              }
+            }
           }
         }
       } SH_END_PROGRAM;
       break;
-      
+    }
+/*      
     case OS_2D:
       prologue = SH_BEGIN_PROGRAM(target) {
         InputTexCoord2f DECL(streamcoord);
@@ -216,7 +229,7 @@ void StreamCache::generate_programs(ProgramVersion version)
         }
       } SH_END_PROGRAM;
       break;
-         
+*/         
     default:
       SH_DEBUG_ASSERT(false);
       break;
@@ -240,6 +253,7 @@ void StreamCache::generate_programs(ProgramVersion version)
     } SH_END_PROGRAM;
 
     Program prog = epilogue << Program(*I) << prologue;
+    prog.meta("opengl:binding", "generic");
     *I = prog.node();
   }
 
@@ -265,64 +279,65 @@ void StreamCache::update_channels(ProgramVersion version,
   if (m_program_sets[version].empty())
     generate_programs(version);
 
-  SH_DEBUG_ASSERT(input_stream.size() == m_inputs[version].size());
-  InputList::iterator I = m_inputs[version].begin();
-  Stream::const_iterator J = input_stream.begin();
-  for (; I != m_inputs[version].end(); ++I, ++J) {
-    I->tex->memory(J->node()->memory(0), 0);
-    
-    if (J->node()->dims() == SH_TEXTURE_1D) {
-      int tex_size = 1;
-      while (tex_size * tex_size < J->node()->width())
-        tex_size <<= 1;
-      I->tex->setTexSize(tex_size, tex_size);
-    }
-    else {
-      I->tex->setTexSize(J->node()->width(), J->node()->height());
-    }
-    
-    if ((version & ~SINGLE_OUTPUT) == OS_1D) {
-      //
-      // See TexFetcher::operator() for explanation of the two
-      // offset/stride parameters
-      //
-      int stride, offset, count;
-      J->get_stride(&stride, 1);
-      J->get_offset(&offset, 1);
-      J->get_count(&count, 1);
-      float os1_val[4];
-      os1_val[0] = (width * height) / (float)count;
-      os1_val[1] = 1/(2.0*count*stride);
-      os1_val[2] = stride * count / (float)I->tex->width();
-      os1_val[3] = offset / (float)I->tex->width();
-      I->os1.setValues(os1_val);
+  if ((version & ~SINGLE_OUTPUT) == OS_1D) {
+    Stream::const_iterator input = input_stream.begin();
+    for (InputList::iterator I = m_inputs[version].begin();
+         input != input_stream.end(); ++I) {
+      float uniform4[2][4];
+      for (int i = 0; i < 2 && input != input_stream.end(); ++i) {
+        float uniform2[2][4];
+        for (int j = 0; j < 2 && input != input_stream.end(); ++j, ++input) {
 
-      float os2_val[4];
-      os2_val[0] = -1.0/I->tex->width();
-      os2_val[1] = 0;
-      os2_val[2] = 1.0/I->tex->width();
-      os2_val[3] = 1.0/(2*I->tex->width() - 1);
-      I->os2.setValues(os2_val);
-    }
-    
-    if ((version & ~SINGLE_OUTPUT) == OS_2D) {
-      int stride[2], offset[2];
-      J->get_stride(stride, 2);
-      J->get_offset(offset, 2);
-      
-      float os_val[4];
-      os_val[0] = stride[0];
-      os_val[1] = stride[1];
-      os_val[2] = offset[0] + 0.5;
-      os_val[3] = offset[1] + 0.5;
-      if (m_float_extension != ARB_NV_FLOAT_BUFFER) {
-        os_val[2] /= J->node()->width();
-        os_val[3] /= J->node()->height();
+          int stride, repeat, offset, count;
+          input->get_stride(&stride, 1);
+          input->get_repeat(&repeat, 1);
+          input->get_offset(&offset, 1);
+          input->get_count(&count, 1);
+
+          // Find out and set the texture size
+          int tex_size = 1;
+          while (tex_size * tex_size < input->node()->width())
+            tex_size <<= 1;
+          I->tex[2*i+j]->setTexSize(tex_size, tex_size);
+          I->tex[2*i+j]->memory(input->node()->memory(0), 0);
+          
+          // stride and offset calculation
+          uniform4[0][2*i+j] = stride * count / (float)tex_size;
+          uniform4[1][2*i+j] = offset / (float)tex_size;
+          
+          // 1D -> 2D conversion
+          float bias = 1.0/(2*tex_size);
+          uniform2[0][j]   = 1.0 / tex_size;
+          uniform2[0][j+2] = bias;
+          uniform2[1][j]   = -2 * bias;
+        }
+        I->uniform2[i][0].setValues(uniform2[0]);
+        I->uniform2[i][1].setValues(uniform2[1]);
       }
-      I->os1.setValues(os_val);
-    } 
+      I->uniform4[0].setValues(uniform4[0]);
+      I->uniform4[1].setValues(uniform4[1]);
+    }
   }
 
+  if ((version & ~SINGLE_OUTPUT) == OS_NONE_2D) {
+    Stream::const_iterator input = input_stream.begin();
+    for (InputList::iterator I = m_inputs[version].begin();
+         input != input_stream.end(); ++I) {
+      for (int i = 0; i < 4 && input != input_stream.end(); ++i, ++input) {
+        if (input->node()->dims() == SH_TEXTURE_1D) {
+          int tex_size = 1;
+          while (tex_size * tex_size < input->node()->width())
+            tex_size <<= 1;
+          I->tex[i]->setTexSize(tex_size, tex_size);
+        }
+        else {
+          I->tex[i]->setTexSize(input->node()->width(), input->node()->height());
+        }
+        I->tex[i]->memory(input->node()->memory(0), 0);
+      }
+    }
+  }
+  
   if ((version & ~SINGLE_OUTPUT) == OS_1D) {
     int stride, offset;
     dest_tex.get_stride(&stride, 1);
