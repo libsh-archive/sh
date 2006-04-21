@@ -1,3 +1,9 @@
+2006-04-21  Hans-Friedrich Pabst  <hfp@users.sf.net>
+
+	* array.hpp: Array1D<T> using BaseTexture1D<T>::operator[];
+	Avoid hiding of BaseTexture1D<T>::operator[]'s with
+	Array1D<T>::operator[]'s.
+
 2006-04-07  Andrew Lauritzen  <atlaurit@rapidmind.net>
 
 	* backends/gl/GlslVariable.cpp, GlslVariable.hpp, GlslVariableMap.cpp, 

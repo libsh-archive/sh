@@ -61,6 +61,8 @@ public:
   typedef T return_type;
   
   Array1D& operator=(const Program& program);
+
+  using BaseTexture1D<T>::operator[];
   
   template <typename T2>
   Array1D<T> operator[](const Array1D<T2>& index);
