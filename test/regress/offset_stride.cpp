@@ -114,7 +114,7 @@ int main(int argc, char* argv[])
 
   {float expected[] = {3,7,11,15, 4,5,6,7, 8,9,10,11, 12,13,14,15};
   reset_memories(mem, 3);
-  c = prg << a << stride(offset(b, 3), 3);
+  c = prg << a << stride(offset(count(b, 12), 3), 3);
   mem[2]->hostStorage()->sync();
   if (test.output_result<float*>("one stride offset", inputs, 
                      reinterpret_cast<float*>(mem[2]->hostStorage()->data()),
@@ -122,7 +122,8 @@ int main(int argc, char* argv[])
   
   {float expected[] = {11,16,21,26, 4,5,6,7, 8,9,10,11, 12,13,14,15};
   reset_memories(mem, 3);
-  c = prg << stride(offset(a, 2), 3) << stride(offset(b, 9), 2);
+  c = prg << stride(offset(count(a, 12), 2), 3) 
+          << stride(offset(count(b, 8), 9), 2);
   mem[2]->hostStorage()->sync();
   if (test.output_result<float*>("two stride offset", inputs, 
                      reinterpret_cast<float*>(mem[2]->hostStorage()->data()),
@@ -138,7 +139,7 @@ int main(int argc, char* argv[])
 
   {float expected[] = {0,1,2,2, 4,5,4,7, 8,6,10,11, 12,13,14,15};
   reset_memories(mem, 3);
-  stride(c, 3) = prg << a << b;
+  stride(count(c, 12), 3) = prg << a << b;
   mem[2]->hostStorage()->sync();
   if (test.output_result<float*>("destination stride", inputs, 
                      reinterpret_cast<float*>(mem[2]->hostStorage()->data()),
@@ -146,8 +147,8 @@ int main(int argc, char* argv[])
 
   {float expected[] = {0,1,2,11, 4,5,16,7, 8,21,10,11, 26,13,14,15};
   reset_memories(mem, 3);
-  stride(offset(c, 3), 3) = prg << stride(offset(a, 2), 3)
-                                << stride(offset(b, 9), 2);
+  stride(offset(count(c, 12), 3), 3) = prg << stride(offset(count(a, 12), 2), 3)
+                                           << stride(offset(count(b, 8), 9), 2);
   mem[2]->hostStorage()->sync();
   if (test.output_result<float*>("everything", inputs, 
                      reinterpret_cast<float*>(mem[2]->hostStorage()->data()),
@@ -176,8 +177,8 @@ int main(int argc, char* argv[])
     
     {float expected[] = {5,8,2,3, 21,24,6,7, 8,9,10,11, 12,13,14,15};
     reset_memories(mem, 3);
-    count(c2, 2, 2) = prg << stride(count(a2, 2, 2), 2, 2)
-                          << offset(stride(count(b2, 2, 2), 1, 2), 1, 1);
+    count(c2, 2, 2) = prg << stride(a2, 2, 2)
+                          << stride(offset(b2, 1, 1), 1, 2);
     mem[2]->hostStorage()->sync();
     if (test.output_result<float*>("2D stride", inputs, 
                                    reinterpret_cast<float*>(mem[2]->hostStorage()->data()),
