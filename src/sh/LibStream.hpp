@@ -71,6 +71,17 @@ template <typename T>
 Array3D<T> repeat(const Array3D<T>& array, int x, int y, int z);
 
 
+template <typename T>
+Array1D<T> slice(const Array1D<T>& array, int start, int count);
+
+template <typename T>
+Array2D<T> slice(const Array2D<T>& array, int x, int y, int nx, int ny);
+
+template <typename T>
+Array3D<T> slice(const Array3D<T>& array, 
+                 int x, int y, int z, int nx, int ny, int nz);
+
+
 template <typename T, typename T2>
 Array1D<T> gather(const Array1D<T>& src, 
                   const Array1D<T2>& index,

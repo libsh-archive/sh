@@ -191,6 +191,53 @@ Array3D<T> repeat(const Array3D<T>& array, int x, int y, int z)
   return result;
 }
 
+template <typename T>
+Array1D<T> slice(const Array1D<T>& array, int start, int count)
+{
+  Array1D<T> result = array;
+  int offset, stride;
+  result.get_offset(&offset, 1);
+  result.get_stride(&stride, 1);
+  offset += start * stride;
+  result.set_offset(&offset, 1);
+  result.set_count(&count, 1);
+  return result;
+}
+  
+template <typename T>
+Array2D<T> slice(const Array2D<T>& array, int x, int y, int nx, int ny)
+{
+  Array2D<T> result = array;
+  int offset[2], stride[2], count[2];
+  result.get_offset(offset, 2);
+  result.get_stride(stride, 2);
+  offset[0] += x * stride[0];
+  offset[1] += y * stride[1];
+  count[0]   = nx;
+  count[1]   = ny;
+  result.set_offset(offset, 2);
+  result.set_count(count, 2);
+  return result;
+}
+
+template <typename T>
+Array3D<T> slice(const Array3D<T>& array, 
+                 int x, int y, int z, int nx, int ny, int nz)
+{
+  Array3D<T> result = array;
+  int offset[3], stride[2], count[3];
+  result.get_offset(offset, 3);
+  result.get_stride(stride, 3);
+  offset[0] += x * stride[0];
+  offset[1] += y * stride[1];
+  offset[2] += z * stride[2];
+  count[0]   = nx;
+  count[1]   = ny;
+  count[2]   = nz;
+  result.set_offset(offset, 3);
+  result.set_count(count, 3);
+  return result;
+}
 
 template <typename T, typename T2>
 Array1D<T> gather(const Array1D<T>& src, const Array1D<T2>& index, std::string target)
