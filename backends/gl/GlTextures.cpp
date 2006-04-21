@@ -560,9 +560,7 @@ void GlTextures::bindTexture(const TextureNodePtr& node, GLenum target, bool wri
                                        node->valueType(),
                                        width, height, node->depth(), node->size(),
                                        name, i, write || node->size() >= 3);
-        if (write) {
-          storage->initTexture();
-        }
+        storage->initTexture();
       }
       if (!write) {
         storage->sync();
