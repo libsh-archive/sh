@@ -597,9 +597,11 @@ FBOStreams::get_gather_data(TextureDims src_dims, bool src_two_comp,
     coord(1) = (coord | data.size(0,1,2)) + data.size(3);
     
     if (src_two_comp) {
-      OutputAttrib2f out;
-      Statement stmt2(out, Variable(data.src), OP_TEX, coord);
+      Attrib2f tex_data;
+      Statement stmt2(tex_data, Variable(data.src), OP_TEX, coord);
       Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt2);
+      OutputAttrib4f out;
+      out = tex_data(0, 1, 0, 1);
     }
     else {
       OutputAttrib4f out;
