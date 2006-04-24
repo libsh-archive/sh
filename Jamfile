@@ -30,6 +30,7 @@ local usage-requirements =
   <define>SHDLLEXPORT_HPP # no export header needed
   <toolset>msvc:<define>NOMINMAX
   <variant>debug:<define>SH_DEBUG
+  <variant>debug:<define>SH_GLSL_DEBUG
 ;
 
 
