@@ -34,9 +34,10 @@ struct FBOStreams : public StreamStrategy {
   void execute(const SH::Program& program, 
                SH::Stream& dest, TextureStrategy *texture);
 
-  SH::BaseTexture gather(const SH::BaseTexture& src,
-                         const SH::BaseTexture& index,
-                         TextureStrategy* texture_strategy);
+  void gather(const SH::BaseTexture& dest,
+              const SH::BaseTexture& src,
+              const SH::BaseTexture& index,
+              TextureStrategy* texture_strategy);
 
   virtual StreamStrategy* create();
 

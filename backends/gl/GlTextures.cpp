@@ -292,7 +292,8 @@ struct StorageFinder {
   enum LookFor {
     READ_CLEAN,
     READ_ANY,
-    WRITE
+    WRITE_DIRTY,
+    WRITE_ANY
   };
 
   // Can optionally provide custom dimensions, otherwise node dimentions are used
@@ -330,8 +331,11 @@ struct StorageFinder {
     if (m_lookFor == READ_ANY && !t->write()) {
       return true;
     }
+    if (m_lookFor == WRITE_ANY && t->internalFormatRGB()) {
+      return true;
+    }
     // either a dirty page or the second clean one
-    if (m_lookFor == WRITE) {
+    if (m_lookFor == WRITE_DIRTY) {
       // only RGB textures can be rendered to
       if (!t->internalFormatRGB()) {
         return false;
@@ -520,8 +524,10 @@ void GlTextures::bindTexture(const TextureNodePtr& node, GLenum target, bool wri
         s << "No memory for the texture at mipmap level " << i << " (nb levels = " << mipmap_levels << ").";
         error(Exception(s.str()));
       }
-      
-      StorageFinder finder(node, (write ? StorageFinder::WRITE : StorageFinder::READ_CLEAN),
+
+      // TODO: use WRITE_DIRTY if the whole texture is written to      
+      StorageFinder finder(node, (write ? StorageFinder::WRITE_ANY : 
+                                          StorageFinder::READ_CLEAN),
                            false, width, height);
       GlTextureStoragePtr storage =
         shref_dynamic_cast<GlTextureStorage>(node->memory(i)->findStorage("opengl:texture", finder));

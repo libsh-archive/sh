@@ -623,7 +623,6 @@ void FBOStreams::execute(const Program& program,
  
     DECLARE_TIMER(finish);
     glFinish();
-    
     TIMING_RESULT(finish);
     
     // Unbind, just to be safe
@@ -706,9 +705,10 @@ FBOStreams::get_gather_data(TextureDims src_dims, bool src_two_comp,
   return data;
 }
 
-BaseTexture FBOStreams::gather(const BaseTexture& src_stream, 
-                               const BaseTexture& index_stream, 
-                               TextureStrategy* texture_strategy)
+void FBOStreams::gather(const BaseTexture& dest_stream,
+                        const BaseTexture& src_stream, 
+                        const BaseTexture& index_stream, 
+                        TextureStrategy* texture_strategy)
 {
   PBufferHandlePtr old_handle = 0;
 #ifdef WIN32
@@ -720,20 +720,6 @@ BaseTexture FBOStreams::gather(const BaseTexture& src_stream,
     PBufferContextPtr context = factory->get_context(1,1);
     old_handle = context->activate();
   }
-  
-  // Create the destination texture
-  BaseTexture result(new TextureNode(index_stream.node()->dims(), 
-                                     src_stream.node()->size(),
-                                     src_stream.node()->valueType(),
-                                     src_stream.node()->traits(), 
-                                     index_stream.node()->width(),
-                                     index_stream.node()->height(),
-                                     index_stream.node()->depth()));
-  int result_size = result.node()->width() * result.node()->height() *
-                    result.node()->depth() * result.node()->size() *
-                    typeInfo(result.node()->valueType(), MEM)->datasize();
-  MemoryPtr memory = new HostMemory(result_size, result.node()->valueType());;
-  result.node()->memory(memory, 0);
 
   // Convert the index and src stream textures into texture nodes we 
   // can actually use (i.e. 1D -> 2D)  
@@ -767,7 +753,7 @@ BaseTexture FBOStreams::gather(const BaseTexture& src_stream,
                                         src_stream.node()->valueType(),
                                         src_stream.node()->traits(), 
                                         dest_size[0], dest_size[1], dest_size[2]);
-  dest->memory(memory, 0);
+  dest->memory(dest_stream.node()->memory(0), 0);
   
   // HACK ALERT! binding the texture here ensures that there is an upto
   // date opengl storage. The generic gathering program will then simply
@@ -834,8 +820,6 @@ BaseTexture FBOStreams::gather(const BaseTexture& src_stream,
   if (old_handle) {
     old_handle->restore();
   }
-
-  return result;
 }
 
 StreamStrategy* FBOStreams::create()

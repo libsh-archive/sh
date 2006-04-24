@@ -463,10 +463,11 @@ void GlBackend::execute(const SH::Program& program, SH::Stream& dest)
   m_stream->execute(program, dest, m_texture);
 }
 
-SH::BaseTexture GlBackend::gather(const SH::BaseTexture& src,
-                                  const SH::BaseTexture& index)
+void GlBackend::gather(const SH::BaseTexture& dest,
+                       const SH::BaseTexture& src,
+                       const SH::BaseTexture& index)
 {
-  return m_stream->gather(src, index, m_texture);
+  m_stream->gather(dest, src, index, m_texture);
 }
 
 }

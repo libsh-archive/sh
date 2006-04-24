@@ -60,9 +60,17 @@ Array1D<T>& Array1D<T>::operator=(const Program& program)
 
 template <typename T>
 template <typename T2>
-Array1D<T> Array1D<T>::operator[](const Array1D<T2>& index)
+Array1D<T>& Array1D<T>::operator=(const ArrayGather1D<T, T2>& array)
 {
-  return gather(*this, index);
+  gather(*this, array.source(), array.index());
+  return *this;
+}
+
+template <typename T>
+template <typename T2>
+ArrayGather1D<T, T2> Array1D<T>::operator[](const Array1D<T2>& index)
+{
+  return ArrayGather1D<T, T2>(*this, index);
 }
 
 template <typename T> inline

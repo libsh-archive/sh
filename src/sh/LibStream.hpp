@@ -83,9 +83,10 @@ Array3D<T> slice(const Array3D<T>& array,
 
 
 template <typename T, typename T2>
-Array1D<T> gather(const Array1D<T>& src, 
-                  const Array1D<T2>& index,
-                  std::string target = "gpu:stream");
+void gather(const Array1D<T>& dest,
+            const Array1D<T>& src, 
+            const Array1D<T2>& index,
+            std::string target = "gpu:stream");
 
 }
 

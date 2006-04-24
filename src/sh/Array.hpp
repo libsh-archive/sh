@@ -27,6 +27,8 @@ template<typename T> class BaseTexture2D;
 template<typename T> class BaseTexture3D;
 template<typename T> class BaseTextureRect;
 template<typename T> class BaseTextureCube;
+
+template<typename T, typename T2> class ArrayGather1D;
   
 /** Default traits for Array.
  * An array is a texture that does not support filtering or interpolation.
@@ -61,15 +63,13 @@ public:
   typedef T return_type;
   
   Array1D& operator=(const Program& program);
+  template <typename T2>
+  Array1D& operator=(const ArrayGather1D<T, T2>& array);
 
   using BaseTexture1D<T>::operator[];
   
   template <typename T2>
-  Array1D<T> operator[](const Array1D<T2>& index);
-  template <typename T2>
-  Array2D<T> operator[](const Array2D<Generic<1, T2> >& index);
-  template <typename T2>
-  Array3D<T> operator[](const Array3D<Generic<1, T2> >& index);
+  ArrayGather1D<T, T2> operator[](const Array1D<T2>& index);
   
   typename T::mem_type* read_data();
   typename T::mem_type* write_data();
@@ -92,13 +92,6 @@ public:
   typedef T return_type;
   
   Array2D& operator=(const Program& program);
-
-  template <typename T2>
-  Array1D<T> operator[](const Array1D<Generic<2, T2> >& index);
-  template <typename T2>
-  Array2D<T> operator[](const Array2D<Generic<2, T2> >& index);
-  template <typename T2>
-  Array3D<T> operator[](const Array3D<Generic<2, T2> >& index);
 
   typename T::mem_type* read_data();
   typename T::mem_type* write_data();
@@ -144,13 +137,6 @@ public:
   
   Array3D& operator=(const Program& program);
 
-  template <typename T2>
-  Array1D<T> operator[](const Array1D<Generic<3, T2> >& index);
-  template <typename T2>
-  Array2D<T> operator[](const Array2D<Generic<3, T2> >& index);
-  template <typename T2>
-  Array3D<T> operator[](const Array3D<Generic<3, T2> >& index);
-
   typename T::mem_type* read_data();
   typename T::mem_type* write_data();
 };
@@ -173,6 +159,22 @@ public:
   typedef BaseTextureCube<T> base_type;
   typedef T return_type;
 };
+
+template <typename T, typename T2>
+class ArrayGather1D {
+public:
+  ArrayGather1D(const Array1D<T>& src, const Array1D<T2>& index)
+    : m_src(src), m_index(index)
+  {}
+  
+  const Array1D<T>& source() const { return m_src; }
+  const Array1D<T2>& index() const { return m_index; }
+  
+private:
+  Array1D<T> m_src;
+  Array1D<T2> m_index;
+};
+
 
 }
 

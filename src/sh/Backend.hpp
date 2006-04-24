@@ -121,7 +121,9 @@ public:
   virtual void execute(const Program& program, Stream& dest) = 0;
   
   /** Gather data from src at points specified by index */
-  virtual BaseTexture gather(const BaseTexture& src, const BaseTexture& index) = 0;
+  virtual void gather(const BaseTexture& dest,
+                      const BaseTexture& src, 
+                      const BaseTexture& index) = 0;
   
   /** Unbind all programs bound under the backend */
   virtual void unbind_all_programs();
