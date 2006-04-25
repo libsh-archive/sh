@@ -32,7 +32,7 @@
 #define SH_COLOR_NORMAL "[0m"
 
 // turns on output of all results, even if they pass 
-//#define REGRESS_OWALL 
+//#define SH_REGRESS_SHOWALL 
 
 class Test {
 public:
@@ -110,7 +110,7 @@ public:
         return 1;
       }
     }
-#ifdef REGRESS_OWALL
+#ifdef SH_REGRESS_SHOWALL
     print_pass(name);
     for (unsigned j=0; j < inputs.size(); j++) {
       char label[4] = "  A";
