@@ -20,10 +20,18 @@
 #ifndef SHVARIANTFACTORY_HPP
 #define SHVARIANTFACTORY_HPP
 
+// HACK:
+// This requires TypeInfo.hpp to compile.
+// TypeInfo.hpp includes TypeInfoImpl.hpp.
+// TypeInfoImpl.hpp requires including this to compile.
+//
+// By including this file outside of the header gaurd, we eliminate the user
+// from requiring a specific include ordering.
+#include "TypeInfo.hpp"
+
 #include <string>
 #include "DllExport.hpp"
 #include "RefCount.hpp"
-#include "TypeInfo.hpp"
 
 namespace SH {
 

@@ -17,6 +17,9 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
+#ifndef SHQUATERNIONIMPL_HPP
+#define SHQUATERNIONIMPL_HPP
+
 #include "Quaternion.hpp"
 
 namespace SH {
@@ -368,3 +371,5 @@ void Quaternion<B, T>::name(const std::string& name)
 
 
 }
+
+#endif // SHQUATERNIONIMPL_HPP

@@ -47,7 +47,7 @@ template<> struct CompileTimeChecker<false> {
 #define STATIC_CHECK(expr, msg) \
 { \
   class ERROR_##msg {} y; \
-  (void)sizeof(CompileTimeChecker<(expr)>(y));\
+  (void)sizeof(SH::CompileTimeChecker<(expr)>(y));\
 }
 
 struct 
