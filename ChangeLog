@@ -1,3 +1,10 @@
+2006-04-26  Hans-Friedrich Pabst  <hfp@users.sf.net>
+
+	* backends/gl/GlslVariable.cpp: Support non-trivial opengl.state
+	'depth.range'.
+	* backends/gl/GlslVariable.hpp: Make ArbToGlslEntry::from and
+	ArbToGlslEntry::to const.
+
 2006-04-21  Hans-Friedrich Pabst  <hfp@users.sf.net>
 
 	* array.hpp: Array1D<T> using BaseTexture1D<T>::operator[];

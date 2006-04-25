@@ -95,8 +95,8 @@ public:
   // ARB to GLSL state translation tables
   struct ArbToGlslEntry
   {
-    char *from;
-    char *to;
+    char const *from;
+    char const *to;
     bool to_is_array;
     const ArbToGlslEntry *subtable;
   };

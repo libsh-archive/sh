@@ -94,12 +94,17 @@ const GlslVariable::ArbToGlslEntry arb_to_glsl_fog_table[] = {
   // GLSL making the mapping non-trivial.
   {0, 0, false}   // Indicates end of list!
 };
+const GlslVariable::ArbToGlslEntry arb_to_glsl_depth_table[] = {
+  {"range", "vec3(gl_DepthRange.near, gl_DepthRange.far, gl_DepthRange.diff)", false, 0},
+  {0, 0, false}   // Indicates end of list!
+};
 const GlslVariable::ArbToGlslEntry arb_to_glsl_state_table[] = {
   {"matrix",                   "", false, arb_to_glsl_matrix_table},
   {"material",                 "", false, arb_to_glsl_material_table},
   {"light",      "gl_LightSource", true,  arb_to_glsl_light_table},
   {"lightmodel",  "gl_LightModel", false, arb_to_glsl_lightmodel_table},
   {"fog",                "gl_Fog", false, arb_to_glsl_fog_table},
+  {"depth",                    "", false, arb_to_glsl_depth_table},
   {0, 0, false}   // Indicates end of list!
 };
 const GlslVariable::ArbToGlslEntry arb_to_glsl_table[] = {
