@@ -150,7 +150,7 @@ Record& Record::operator=(const Record &other)
 Record& Record::operator=(const Program& program)
 {
   //SH_DEBUG_PRINT("Assigning program to record");
-  if(!program.node()->inputs.empty()) {
+  if(program.binding_spec.size() != program.node()->inputs.size()) {
     std::ostringstream out;
     out << "Insufficient arguments for calling an Program." << std::endl; 
     out << "Expected arguments for:" << std::endl;
@@ -158,9 +158,26 @@ Record& Record::operator=(const Program& program)
 
     error(Exception(out.str()));
   }
+  for (Program::BindingSpec::const_iterator I = program.binding_spec.begin();
+       I != program.binding_spec.end(); ++I) {
+    if (*I == Program::STREAM) {
+      error(Exception("Program cannot have stream inputs"));
+    }
+  }
 
   if(Context::current()->parsing()) { 
-    Program outputMappedProgram = (*this) << program;
+    Program connect_inputs = SH_BEGIN_PROGRAM() {
+      VarList::const_iterator I = program.uniform_inputs.begin();
+      for(; I != program.uniform_inputs.end(); ++I) {
+        Variable out(I->node()->clone(SH_OUTPUT, I->size(), VALUETYPE_END,
+                                      SEMANTICTYPE_END, true, false));
+        shASN(out, *I);
+      }
+    } SH_END;
+
+    // need to get rid of inputs before connecting the program
+    ProgramNodePtr p = shref_const_cast<ProgramNode>(program.node());
+    Program outputMappedProgram = (*this) << Program(p) << connect_inputs;
     Context::current()->parsing()->tokenizer.blockList()->addBlock(
         new CfgBlock(outputMappedProgram, false));
   } else { //immediate mode
@@ -173,16 +190,10 @@ Record& Record::operator=(const Program& program)
 
 Program connect(const Record& rec, const Program& program)
 {
-  Program nibble = SH_BEGIN_PROGRAM() {
-    for(Record::VarList::const_iterator I = rec.begin(); I != rec.end(); ++I) {
-      Variable out(I->node()->clone(SH_OUTPUT, I->size(), VALUETYPE_END, SEMANTICTYPE_END, 
-        true, false));
-      //SH_DEBUG_PRINT("connect Record output size = " << I->size()); 
-      Context::current()->parsing()->tokenizer.blockList()->addStatement(
-        Statement(out, OP_ASN, *I));  
-    }
-  } SH_END;
-  return connect(nibble, program);
+  Program result = program;
+  result.uniform_inputs = result.uniform_inputs & rec;
+  std::fill_n(std::back_inserter(result.binding_spec), rec.size(), Program::UNIFORM);
+  return result;
 }
 
 Program operator<<(const Program& program, const Record& rec)

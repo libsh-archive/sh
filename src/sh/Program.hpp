@@ -24,6 +24,7 @@
 #include "ProgramNode.hpp"
 #include "Backend.hpp"
 #include "Stream.hpp"
+#include "Record.hpp"
 
 namespace SH {
 
@@ -146,9 +147,6 @@ public:
   ProgramNode::PaletteList::const_iterator begin_palettes() const   { return m_node->begin_palettes(); }
   ProgramNode::PaletteList::const_iterator end_palettes() const     { return m_node->end_palettes(); }
 
-  void append_input(const BaseTexture& input) { m_stream_inputs.append(input); }
-  const Stream& stream_inputs() const { return m_stream_inputs; }
-
   // Call operators for channels and streams.
   // Equivalent to operator<< invocations.
   Program operator()(const BaseTexture& t0) const;
@@ -195,9 +193,18 @@ public:
                        const Variable &v1, 
                        const Variable &v2, 
                        const Variable &v3) const;
-  
+
+  enum BindingType {
+    STREAM,
+    UNIFORM
+  };
+  typedef std::list<BindingType> BindingSpec;
+
+  BindingSpec binding_spec;
+  Stream stream_inputs;
+  Record uniform_inputs;
+
 private:
-  Stream m_stream_inputs;
   ProgramNodePtr m_node;
 };
 

@@ -41,9 +41,14 @@ Program::Program(const std::string& target)
 
 Program::Program(const Program& other)
   : MetaForwarder(other.m_node.object()),
-    m_stream_inputs(other.m_stream_inputs),
+    binding_spec(other.binding_spec),
+    stream_inputs(other.stream_inputs),
     m_node(other.m_node)
 {
+  for (Record::const_iterator I = other.uniform_inputs.begin();
+       I != other.uniform_inputs.end(); ++I) {
+    uniform_inputs.append(*I);
+  }
 }
 
 Program::Program(const ProgramNodePtr& node)
@@ -55,7 +60,12 @@ Program::Program(const ProgramNodePtr& node)
 Program& Program::operator=(const Program& other)
 {
   m_node = other.m_node;
-  m_stream_inputs = other.m_stream_inputs;
+  binding_spec = other.binding_spec;
+  stream_inputs = other.stream_inputs;
+  for (Record::const_iterator I = other.uniform_inputs.begin();
+       I != other.uniform_inputs.end(); ++I) {
+    uniform_inputs.append(*I);
+  }
   real_meta(m_node.object());
   return *this;
 }

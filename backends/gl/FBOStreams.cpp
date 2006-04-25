@@ -428,7 +428,7 @@ void FBOStreams::execute(const Program& program,
   ProgramNodePtr program_node = shref_const_cast<ProgramNode>(program.node());
 
   // Make sure all inputs are bound
-  if (program_node->inputs.size() > program.stream_inputs().size()) {
+  if (program_node->inputs.size() > program.binding_spec.size()) {
     error(FBOStreamException("Stream program has unbound inputs, and can hence not be executed."));
     return;
   }
@@ -448,7 +448,7 @@ void FBOStreams::execute(const Program& program,
   }
   
   check_stream(dest, dest.begin()->node()->dims());
-  check_stream(program.stream_inputs(), dest.begin()->node()->dims());
+  check_stream(program.stream_inputs, dest.begin()->node()->dims());
 
   PBufferHandlePtr old_handle = 0;
 #ifdef WIN32
@@ -515,22 +515,27 @@ void FBOStreams::execute(const Program& program,
   SH_GL_CHECK_ERROR(glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS_EXT, &max_outputs));
 
   // --- Set up the fragment programs and such
-  StreamCache* cache = program_node->get_info<StreamCache>();
+  StreamBindingCache* binding_cache = program_node->get_info<StreamBindingCache>();
+  if (!binding_cache) {
+    binding_cache = new StreamBindingCache;
+    program_node->add_info(binding_cache);
+  }
+  StreamCache*& cache = (*binding_cache)[program.binding_spec];
   if (!cache) {
     cache = new StreamCache(program_node.object(), m_vp.node().object(), 
-                            max_outputs, m_float_extension);
-    program_node->add_info(cache);
+                            program.binding_spec, max_outputs, m_float_extension);
   }
-  
+    
   StreamCache::ProgramVersion program_version;
-  program_version = choose_program_version(program.stream_inputs(), dest);
+  program_version = choose_program_version(program.stream_inputs, dest);
   if (program_version & StreamCache::SINGLE_OUTPUT)
     max_outputs = 1;
 
   cache->generate_programs(program_version);
+  cache->update_uniforms(program.uniform_inputs);
 
-  for (Stream::const_iterator I = program.stream_inputs().begin();
-       I != program.stream_inputs().end(); ++I) {
+  for (Stream::const_iterator I = program.stream_inputs.begin();
+       I != program.stream_inputs.end(); ++I) {
     I->node()->memory(0)->freeze(true);
   }
 
@@ -542,11 +547,11 @@ void FBOStreams::execute(const Program& program,
     I->node()->memory(0)->findStorage("opengl:texture", PrintStorages());
   }
   num = 0;
-  for (ProgramNode::ChannelList::const_iterator I = program->begin_channels();
-       I != program->end_channels(); ++I, ++num) {
+  for (Stream::const_iterator I = program.stream_inputs.begin();
+       I != program.stream_inputs.end(); ++I, ++num) {
     std::cerr << "input " << num << " memory time "
-              << (*I)->memory()->timestamp() << std::endl;
-    (*I)->memory()->findStorage("opengl:texture", PrintStorages());
+              << I->node()->memory(0)->timestamp() << std::endl;
+    I->node()->memory(0)->findStorage("opengl:texture", PrintStorages());
   }  
 #endif
 
@@ -583,7 +588,7 @@ void FBOStreams::execute(const Program& program,
 
     FBOCache::instance()->check();
     
-    cache->update_channels(program_version, program.stream_inputs(),
+    cache->update_channels(program_version, program.stream_inputs,
                            *dest_tex, dest_width, dest_height, dest_depth);
 
 #ifdef SH_DEBUG_FBOS_PRINTFP
@@ -605,7 +610,7 @@ void FBOStreams::execute(const Program& program,
       SH_DEBUG_ASSERT(dest_width == dest_height);
       draw_1d_stream(dest_width, *dest_tex,
                      m_float_extension == ARB_NV_FLOAT_BUFFER,
-                     program_version, program.stream_inputs());
+                     program_version, program.stream_inputs);
       break;
     case SH_TEXTURE_2D:
       draw_2d_stream(dest_width, dest_height, *dest_tex,
@@ -635,8 +640,8 @@ void FBOStreams::execute(const Program& program,
     } 
   }
   
-  for (Stream::const_iterator I = program.stream_inputs().begin();
-       I != program.stream_inputs().end(); ++I) {
+  for (Stream::const_iterator I = program.stream_inputs.begin();
+       I != program.stream_inputs.end(); ++I) {
     I->node()->memory(0)->freeze(false);
   }
 

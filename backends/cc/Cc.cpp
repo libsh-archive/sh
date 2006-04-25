@@ -776,7 +776,7 @@ void CcBackend::execute(const Program& program, Stream& dest)
   Pointer<Backend> b(this);
     
   CcBackendCodePtr backendcode = shref_dynamic_cast<CcBackendCode>(prg->code(b)); // = new CcBackendCode(program);
-  backendcode->execute(program.stream_inputs(), dest);
+  backendcode->execute(program.stream_inputs, dest);
   backendcode->delete_temporary_files();
 }
 

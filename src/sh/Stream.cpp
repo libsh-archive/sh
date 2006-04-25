@@ -139,15 +139,16 @@ Program operator<<(const Program& program, const Stream& stream)
 }
 
 Program connect(const BaseTexture& array,
-                  const Program& program)
+                const Program& program)
 {
   Program result = program;
-  result.append_input(array);
+  result.binding_spec.push_back(Program::STREAM);
+  result.stream_inputs.append(array);
   return result;
 }
 
 Program operator<<(const Program& program,
-                     const BaseTexture& array)
+                   const BaseTexture& array)
 {
   return connect(array, program);
 }

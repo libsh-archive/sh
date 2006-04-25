@@ -43,7 +43,7 @@ Program connect(Program pa, Program pb)
   if( !b ) return a;
   
   int aosize = a->outputs.size();
-  int bisize = b->inputs.size();
+  int bisize = b->inputs.size() - pb.binding_spec.size();
   std::string rtarget;
 
   if (a->target().empty()) {
@@ -69,25 +69,29 @@ Program connect(Program pa, Program pb)
   CtrlGraphPtr new_graph = new CtrlGraph(heada, tailb);
   program->ctrlGraph = new_graph;
 
-  program->inputs = a->inputs;
+  ProgramNode::VarList::iterator a_free_inputs = a->inputs.begin();
+  std::advance(a_free_inputs, pa.binding_spec.size());
+  ProgramNode::VarList::iterator b_free_inputs = b->inputs.begin();
+  std::advance(b_free_inputs, pb.binding_spec.size());
+
+  std::copy(a->inputs.begin(), a_free_inputs, std::back_inserter(program->inputs));
+  std::copy(b->inputs.begin(), b_free_inputs, std::back_inserter(program->inputs));
+  std::copy(a_free_inputs, a->inputs.end(), std::back_inserter(program->inputs));
 
   // push back extra inputs from b if aosize < bisize
   if(aosize < bisize) {
-    ProgramNode::VarList::const_iterator II = b->inputs.begin();
-    for(int i = 0; i < aosize; ++i, ++II); 
-    for(; II != b->inputs.end(); ++II) {
-      program->inputs.push_back(*II);
-    }
+    ProgramNode::VarList::iterator I = b_free_inputs;
+    std::advance(I, aosize);
+    std::copy(I, b->inputs.end(), std::back_inserter(program->inputs));
   }
+
   program->outputs = b->outputs;
 
   // push back extra outputs from a if aosize > bisize
   if(aosize > bisize) { 
-    ProgramNode::VarList::const_iterator II = a->outputs.begin();
-    for(int i = 0; i < bisize; ++i, ++II); 
-    for(; II != a->outputs.end(); ++II) {
-      program->outputs.push_back(*II);
-    }
+    ProgramNode::VarList::iterator I = a->outputs.begin();
+    std::advance(I, bisize);
+    std::copy(I, a->outputs.end(), std::back_inserter(program->outputs));
   }
   
   VarMap varMap;
@@ -100,7 +104,7 @@ Program connect(Program pa, Program pb)
   ProgramNode::VarList InOutOutputs;
 
   // replace outputs and inputs connected together by temps 
-  for (I = a->outputs.begin(), J = b->inputs.begin(); 
+  for (I = a->outputs.begin(), J = b_free_inputs; 
       I != a->outputs.end() && J != b->inputs.end(); ++I, ++J) { 
     if((*I)->size() != (*J)->size()) {
       std::ostringstream err;
@@ -159,7 +163,15 @@ Program connect(Program pa, Program pb)
   program->collectVariables();
 
   optimize(program);
-  return program;
+  
+  Program prg(program);  
+  prg.binding_spec = pa.binding_spec;
+  std::copy(pb.binding_spec.begin(), pb.binding_spec.end(),
+            std::back_inserter(prg.binding_spec));
+  prg.stream_inputs = pa.stream_inputs & pb.stream_inputs;
+  prg.uniform_inputs = pa.uniform_inputs & pb.uniform_inputs;
+  
+  return prg;
 }
 
 Program combine(Program pa, Program pb)
@@ -194,15 +206,29 @@ Program combine(Program pa, Program pb)
   CtrlGraphPtr new_graph = new CtrlGraph(heada, tailb);
   program->ctrlGraph = new_graph;
 
-  program->inputs = a->inputs;
-  program->inputs.insert(program->inputs.end(), b->inputs.begin(), b->inputs.end());
+  ProgramNode::VarList::iterator a_free_inputs = a->inputs.begin();
+  std::advance(a_free_inputs, pa.binding_spec.size());
+  ProgramNode::VarList::iterator b_free_inputs = b->inputs.begin();
+  std::advance(b_free_inputs, pb.binding_spec.size());
+  std::copy(a->inputs.begin(), a_free_inputs, std::back_inserter(program->inputs));
+  std::copy(b->inputs.begin(), b_free_inputs, std::back_inserter(program->inputs));
+  std::copy(a_free_inputs, a->inputs.end(), std::back_inserter(program->inputs));
+  std::copy(b_free_inputs, b->inputs.end(), std::back_inserter(program->inputs));
+
   program->outputs = a->outputs;
   program->outputs.insert(program->outputs.end(), b->outputs.begin(), b->outputs.end());
 
   program->collectVariables();
-
   optimize(program);
-  return program;
+
+  Program prg(program);  
+  prg.binding_spec = pa.binding_spec;
+  std::copy(pb.binding_spec.begin(), pb.binding_spec.end(),
+            std::back_inserter(prg.binding_spec));
+  prg.stream_inputs = pa.stream_inputs & pb.stream_inputs;
+  prg.uniform_inputs = pa.uniform_inputs & pb.uniform_inputs;
+
+  return prg;
 }
 
 // Duplicates to inputs with matching name/type
@@ -398,11 +424,10 @@ Program replaceVariable(Program a, const Variable& v)
 
 Program operator<<(Program a, const Variable& var)
 {
-  Program vNibble = SH_BEGIN_PROGRAM() {
-    Variable out(var.node()->clone(SH_OUTPUT, var.size(), var.valueType(), SEMANTICTYPE_END, true, false));
-    shASN(out, var);
-  } SH_END_PROGRAM;
-  return connect(vNibble, a); 
+  Program result = a;
+  result.binding_spec.push_back(Program::UNIFORM);
+  result.uniform_inputs.append(var);
+  return result;
 }
 
 }
