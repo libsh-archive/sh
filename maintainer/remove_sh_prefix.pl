@@ -67,6 +67,7 @@ my %special_macros = (
     "FUSHORT"  => "SH_FUSHORT",
     "FUINT"    => "SH_FUINT",
 # other:
+    "OWALL"    => "SHOWALL",
     "ORT"      => "SHORT",
     "ADER"     => "SHADER",
     "LIB"      => "SHLIB",
