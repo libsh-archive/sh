@@ -83,7 +83,9 @@ sub process_standard_files
 sub main
 {
     if (@ARGV > 0) {
-        process_file($ARGV[0]);
+        while (@ARGV > 0) {
+            process_file(shift @ARGV);
+        }
     } else {
         &process_standard_files;
     }

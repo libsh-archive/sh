@@ -15,6 +15,7 @@ my $COLOR_NORMAL = "[0m";
 # Directories which contain files to be processed
 my @SRC_DIRS = ('backends', 'src', 'test', 'examples');
 
+# Warning: only the first word is matched in the regexp
 my %special_macros = (
 # control flow:
     "BEGIN"    => "SH_BEGIN",
@@ -163,7 +164,9 @@ sub process_standard_files
 sub main
 {
     if (@ARGV > 0) {
-        process_file($ARGV[0]);
+        while (@ARGV > 0) {
+            process_file(shift @ARGV);
+        }
     } else {
         &process_standard_files;
     }
