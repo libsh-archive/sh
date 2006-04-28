@@ -182,6 +182,8 @@ private:
                          const SH::Swizzle& destSwiz,
                          bool do_swiz) const;
 
+  std::ostream& print_indent(std::ostream& out) const;
+
   /// Check whether inst is a sampling instruction. If so, output it
   /// and return true. Otherwise, output nothing and return false.
   bool printSamplingInstruction(std::ostream& out, const ArbInst& inst) const;
@@ -266,6 +268,8 @@ private:
 
   // For array lookup
   SH::Variable m_address_register;
+
+  unsigned int m_indent;
 };
 
 typedef SH::Pointer<ArbCode> ArbCodePtr;
