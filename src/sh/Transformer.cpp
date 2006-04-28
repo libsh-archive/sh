@@ -97,9 +97,9 @@ struct VariableSplitter {
     int n = node->size();
     if(n <= maxTuple ) return false;
     else if(splits.count(node) > 0) return true;
-    if( node->kind() == SH_TEXTURE || node->kind() == SH_STREAM ) {
+    if( node->kind() == SH_TEXTURE) {
       error( TransformerException(
-            "Long tuple support is not implemented for textures or streams"));
+            "Long tuple support is not implemented for textures"));
             
     }
     changed = true;
@@ -874,6 +874,34 @@ void Transformer::expand_div()
   m_changed |= ed.transform(m_program);
 }
 
+struct ExpandXpdBase : public TransformerParent 
+{
+  bool handleStmt(BasicBlock::StmtList::iterator &I, CtrlGraphNodePtr node)
+  { 
+    if (OP_XPD == I->op) {
+      BasicBlock::StmtList new_stmts;
+      
+      Variable tmp(allocate_temp(I->dest));
+
+      new_stmts.push_back(Statement(tmp, I->src[0](1,2,0), OP_MUL, I->src[1](2,0,1)));
+      new_stmts.push_back(Statement(I->dest, OP_MAD, - I->src[1](1,2,0), I->src[0](2,0,1), tmp));
+
+      I = node->block->erase(I);
+      node->block->splice(I, new_stmts);
+      m_changed = true;
+      return true;
+    } else {
+      return false;
+    }
+  }
+};
+
+typedef DefaultTransformer<ExpandXpdBase> ExpandXpd;
+void Transformer::expand_xpd()
+{
+  ExpandXpd ex;
+  m_changed |= ex.transform(m_program);
+}
 
 struct InverseHyperbolicExpanderBase: public TransformerParent 
 {

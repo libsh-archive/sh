@@ -134,6 +134,10 @@ public:
    */
   void expand_div();
 
+  /** Replace XPD with MUL and MAD
+   */
+  void expand_xpd();
+
   void order_dest_swizzles();
 
   // Assumes order_dest_swizzles has already run
