@@ -1,3 +1,8 @@
+2006-04-28  Stefanus Du Toit  <sdt@rapidmind.net>
+
+	* backends/gl/ArbCode.hpp, ArbCode.cpp: Indent arb backend code 
+	to make it easier to read/debug.
+
 2006-04-07  Andrew Lauritzen  <atlaurit@rapidmind.net>
 
 	* backends/gl/GlslVariable.cpp, GlslVariable.hpp, GlslVariableMap.cpp, 
