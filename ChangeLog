@@ -1,3 +1,8 @@
+2006-04-28  Stefanus Du Toit  <sdt@rapidmind.net>
+
+	* backends/gl/ArbCode.hpp, ArbCode.cpp: Indent arb backend code 
+	to make it easier to read/debug.
+
 2006-04-26  Hans-Friedrich Pabst  <hfp@users.sf.net>
 
 	* backends/gl/GlslVariable.cpp: Support non-trivial opengl.state
