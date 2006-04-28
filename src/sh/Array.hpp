@@ -20,13 +20,10 @@
 #ifndef SHARRAY_HPP
 #define SHARRAY_HPP
 
-namespace SH {
+#include "BaseTextureND.hpp"
+#include "TextureNode.hpp"
 
-template<typename T> class BaseTexture1D;
-template<typename T> class BaseTexture2D;
-template<typename T> class BaseTexture3D;
-template<typename T> class BaseTextureRect;
-template<typename T> class BaseTextureCube;
+namespace SH {
 
 template<typename T, typename T2> class ArrayGather1D;
   
@@ -57,20 +54,20 @@ public:
   Array1D(int width);
   Array1D(const MemoryPtr& mem, int width);
   Array1D(const BaseTexture& base);
-  
+
   typedef ArrayRect<T> rectangular_type;
   typedef BaseTexture1D<T> base_type;
   typedef T return_type;
-  
+
   Array1D& operator=(const Program& program);
   template <typename T2>
   Array1D& operator=(const ArrayGather1D<T, T2>& array);
 
-  using BaseTexture1D<T>::operator[];
-  
+  using base_type::operator[];
+
   template <typename T2>
   ArrayGather1D<T, T2> operator[](const Array1D<T2>& index);
-  
+
   typename T::mem_type* read_data();
   typename T::mem_type* write_data();
 };

@@ -1,3 +1,10 @@
+2006-04-26  Hans-Friedrich Pabst  <hfp@users.sf.net>
+
+	* Array.hpp: Compile error with VC7.1 fixed. Base class definitions
+	must be included (TextureTraits, BaseTextureND) they can't be
+	forward-declared. Compilation tested with gcc, VC71, VC80.
+	Need struct ArrayTraits to be marked with SH_DLLEXPORT?
+
 2006-04-28  Stefanus Du Toit  <sdt@rapidmind.net>
 
 	* backends/gl/ArbCode.hpp, ArbCode.cpp: Indent arb backend code 
@@ -12,7 +19,7 @@
 
 2006-04-21  Hans-Friedrich Pabst  <hfp@users.sf.net>
 
-	* array.hpp: Array1D<T> using BaseTexture1D<T>::operator[];
+	* Array.hpp: Array1D<T> using BaseTexture1D<T>::operator[];
 	Avoid hiding of BaseTexture1D<T>::operator[]'s with
 	Array1D<T>::operator[]'s.
 
