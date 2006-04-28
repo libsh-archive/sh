@@ -111,7 +111,8 @@ ArbCode::ArbCode(const ShProgramNodeCPtr& shader, const string& unit,
     m_numTemps(0), m_numHalfTemps(0), m_numInputs(0), m_numOutputs(0), m_numParams(0), m_numParamBindings(0),
     m_numConsts(0),
     m_numTextures(0), m_programId(0), m_environment(0), m_max_label(0),
-    m_address_register(new ShVariableNode(SH_TEMP, 1, SH_FLOAT))
+    m_address_register(new ShVariableNode(SH_TEMP, 1, SH_FLOAT)),
+    m_indent(0)
 {
   m_originalShader =  const_cast<ShProgramNode*>(shader.object());
 
@@ -565,7 +566,7 @@ bool ArbCode::printSamplingInstruction(ostream& out, const ArbInst& instr) const
 
   const ArbReg& texReg = *texRegIt->second;
   
-  out << "  ";
+  print_indent(out);
   out << arbOpInfo[instr.op].name << " ";
   printVar(out, true, instr.dest, false) << ", ";
   printVar(out, false, instr.src[0], true, instr.dest.swizzle()) << ", ";
@@ -595,7 +596,15 @@ bool ArbCode::printSamplingInstruction(ostream& out, const ArbInst& instr) const
   return true;
 }
 
-ostream& ArbCode::print(ostream& out)
+std::ostream& ArbCode::print_indent(ostream& out) const
+{
+  for (unsigned int i = 0; i < m_indent; i++) {
+    out << "  ";
+  }
+  return out;
+}
+
+std::ostream& ArbCode::print(ostream& out)
 {
   LineNumberer endl;
   const char* swizChars = "xyzw";
@@ -626,16 +635,17 @@ ostream& ArbCode::print(ostream& out)
     if ((*I)->type == SH_ARB_REG_TEMP) continue;
     if ((*I)->type == SH_ARB_REG_HALF_TEMP) continue;
     if ((*I)->type == SH_ARB_REG_TEXTURE) continue;
-    out << "  ";
+    print_indent(out);
     (*I)->printDecl(out);
     out << endl;
   }
   bool halfSupport = (m_environment & SH_ARB_NVFP) != 0;
   if (m_numTemps > 0) { 
+    print_indent(out);
     if (halfSupport) {
-      out << "  LONG TEMP ";
+      out << "LONG TEMP ";
     } else {
-      out << "  TEMP ";
+      out << "TEMP ";
     }
     for (int i = 0; i < m_numTemps; i++) {
       if (i > 0) out << ", ";
@@ -645,8 +655,9 @@ ostream& ArbCode::print(ostream& out)
   }
 
   if (m_numHalfTemps > 0) { 
+    print_indent(out);
     SH_DEBUG_ASSERT(halfSupport); // assume half support...
-    out << "  SHORT TEMP ";
+    out << "SHORT TEMP ";
     for (int i = 0; i < m_numHalfTemps; i++) {
       if (i > 0) out << ", ";
       out << ArbReg(SH_ARB_REG_HALF_TEMP, i);
@@ -655,20 +666,29 @@ ostream& ArbCode::print(ostream& out)
   }
 
   out << endl;
-  
+
+  m_indent++;
+
   // Print instructions
   for (ArbInstList::const_iterator I = m_instructions.begin();
        I != m_instructions.end(); ++I) {
     if (I->op == SH_ARB_LABEL) {
       out << "label" << I->label << ": ";
     } else if (I->op == SH_ARB_COMMENT) {
+      print_indent(out);
       out << "### " << I->comment;
     } else if (I->op == SH_ARB_ELSE) {
-      out << "  ELSE;";
+      m_indent--;
+      print_indent(out);
+      out << "ELSE;";
+      m_indent++;
     } else if (I->op == SH_ARB_ENDIF) {
-      out << "  ENDIF;";
+      m_indent--;
+      print_indent(out);
+      out << "ENDIF;";
     } else if (I->op == SH_ARB_BRA) {
-      out << "  BRA label" << I->label;
+      print_indent(out);
+      out << "BRA label" << I->label;
       if (I->src[0].node()) {
         out << "  (GT";
         out << ".";
@@ -679,11 +699,14 @@ ostream& ArbCode::print(ostream& out)
       }
       out << ";";
     } else if (I->op == SH_ARB_REP) {
-      out << "  REP ";
+      print_indent(out);
+      out << "REP ";
       printVar(out, false, I->src[0], false, I->src[0].swizzle());
       out << ";";
+      m_indent++;
     } else if (I->op == SH_ARB_BRK) {
-      out << "  BRK ";
+      print_indent(out);
+      out << "BRK ";
       if (I->src[0].node()) {
         out << " (";
         if (I->invert) {
@@ -699,7 +722,8 @@ ostream& ArbCode::print(ostream& out)
       }
       out << ";";
     } else if (I->op == SH_ARB_RET) {
-      out << "  RET ";
+      print_indent(out);
+      out << "RET ";
       if (I->src[0].node()) {
         out << " (";
         if (I->invert) {
@@ -715,9 +739,12 @@ ostream& ArbCode::print(ostream& out)
       }
       out << ";";
     } else if (I->op == SH_ARB_ENDREP) {
-      out << "  ENDREP;";
+      m_indent--;
+      print_indent(out);
+      out << "ENDREP;";
     } else if (I->op == SH_ARB_IF) {
-      out << "  IF ";
+      print_indent(out);
+      out << "IF ";
       if (I->src[0].node()) {
         if (I->invert) {
           out << "LE";
@@ -732,8 +759,10 @@ ostream& ArbCode::print(ostream& out)
         out << "TR";
       }
       out << ";";
+      m_indent++;
     } else if (I->op == SH_ARB_ARRAYMOV) {
-      out << "  MOV ";
+      print_indent(out);
+      out << "MOV ";
       printVar(out, true, I->dest, false);
       out << ", ";
       printVar(out, false, I->src[0], false, ShSwizzle(4), false);
@@ -742,7 +771,7 @@ ostream& ArbCode::print(ostream& out)
       out << "]";
       out << ";";
     } else if (!printSamplingInstruction(out, *I)) {
-      out << "  ";
+      print_indent(out);
       out << arbOpInfo[I->op].name;
       if (I->update_cc) out << "C";
       out << " ";
@@ -777,6 +806,7 @@ ostream& ArbCode::print(ostream& out)
     out << endl;
   }
 
+  m_indent--;
   out << "END" << endl;
   return out;
 }
