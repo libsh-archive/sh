@@ -68,6 +68,17 @@ template<int N, typename T1, typename T2, typename T3>
 ShGeneric<N, CT1T2T3> 
 refract(const ShGeneric<N, T1>& view, const ShGeneric<N, T2>& normal, const ShGeneric<1, T3>& eta);
 
+/** Compute refraction vector and determine whether or not total internal reflection takes place.
+ * @param normal Outward facing normal vector
+ * @param view Outward facing view vector
+ * @param eta Ratio of IOR of second surface divided by IOR of first
+ * @tir eta Set to 1 if TIR happens, 0 otherwise.
+ */
+template<int N, typename T1, typename T2, typename T3, typename T4>
+ShGeneric<N, CT1T2T3> refract_tir(const ShGeneric<N, T1>& v, const ShGeneric<N, T2>& n,
+                                  const ShGeneric<1, T3>& eta, ShGeneric<1, T4>& tir)
+
+
 /** Make a vector face the same way as another
  * Negates b if it does not face the same way as a (i.e. the dot
  * product between a and b is negative).

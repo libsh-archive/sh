@@ -80,18 +80,8 @@ template<int N, typename T1, typename T2, typename T3>
 ShGeneric<N, CT1T2T3> refract(const ShGeneric<N, T1>& v, const ShGeneric<N, T2>& n,
                         const ShGeneric<1, T3>& eta)
 {
-  ShGeneric<N, T1> vn = normalize(v);
-  ShGeneric<N, T2> nn = normalize(n);
-  ShGeneric<1, CT1T2T3> c = (vn|nn);
-
-  ShGeneric<1, T3> theta = rcp(eta);
-
-  ShGeneric<1, CT1T2T3> k = c*c - ShDataTypeConstant<CT1T2T3, SH_HOST>::One;
-  k = ShDataTypeConstant<CT1T2T3, SH_HOST>::One + theta*theta*k;
-  k = clamp(k, ShDataTypeConstant<CT1T2T3, SH_HOST>::Zero, ShDataTypeConstant<CT1T2T3, SH_HOST>::One); 
-  ShGeneric<1, CT1T2T3> a = -theta;
-  ShGeneric<1, CT1T2T3> b = theta*c - sqrt(k);
-  return (a*vn + b*nn);
+  ShAttrib1f tir;
+  return refract_tir(v, n, eta, tir);
 }
 
 template<int N, typename T1, typename T2, typename T3, typename T4>
@@ -106,12 +96,12 @@ ShGeneric<N, CT1T2T3> refract_tir(const ShGeneric<N, T1>& v, const ShGeneric<N, 
 
   ShGeneric<1, CT1T2T3> k = c*c - ShDataTypeConstant<CT1T2T3, SH_HOST>::One;
   k = ShDataTypeConstant<CT1T2T3, SH_HOST>::One + theta*theta*k;
+  tir = k < 0.0;
   k = clamp(k, ShDataTypeConstant<CT1T2T3, SH_HOST>::Zero, ShDataTypeConstant<CT1T2T3, SH_HOST>::One); 
   ShGeneric<1, CT1T2T3> a = -theta;
   ShGeneric<1, CT1T2T3> b = theta*c - sqrt(k);
 
-  tir = k < 0.0;
-  return (a*vn + b*nn);
+  return cond(tir, cast<N>(0.0), (a*vn + b*nn));
 }
 
 
