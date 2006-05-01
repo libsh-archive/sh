@@ -1,3 +1,9 @@
+2006-04-30  Stefanus Du Toit  <sdt@rapidmind.net>
+
+	* src/sh/ShLibGeometry.hpp, ShLibGeometryImpl.hpp: Fix refract_tir, add 
+	a prototype declaration for it in the non-implementation header, and 
+	use it for refract().
+
 2006-04-28  Stefanus Du Toit  <sdt@rapidmind.net>
 
 	* backends/gl/ArbCode.hpp, ArbCode.cpp: Indent arb backend code 
