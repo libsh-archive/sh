@@ -78,7 +78,15 @@ Generic<N, CT1T2> reflect(const Generic<N, T1>& a, const Generic<N, T2>& b)
 
 template<int N, typename T1, typename T2, typename T3>
 Generic<N, CT1T2T3> refract(const Generic<N, T1>& v, const Generic<N, T2>& n,
-                        const Generic<1, T3>& eta)
+                            const Generic<1, T3>& eta)
+{
+  Attrib1f tir;
+  return refract_tir(v, n, eta, tir);
+}
+
+template<int N, typename T1, typename T2, typename T3, typename T4>
+Generic<N, CT1T2T3> refract_tir(const Generic<N, T1>& v, const Generic<N, T2>& n,
+                                const Generic<1, T3>& eta, Generic<1, T4>& tir)
 {
   Generic<N, T1> vn = normalize(v);
   Generic<N, T2> nn = normalize(n);
@@ -88,10 +96,12 @@ Generic<N, CT1T2T3> refract(const Generic<N, T1>& v, const Generic<N, T2>& n,
 
   Generic<1, CT1T2T3> k = c*c - DataTypeConstant<CT1T2T3, HOST>::One;
   k = DataTypeConstant<CT1T2T3, HOST>::One + theta*theta*k;
+  tir = k < 0.0;
   k = clamp(k, DataTypeConstant<CT1T2T3, HOST>::Zero, DataTypeConstant<CT1T2T3, HOST>::One); 
   Generic<1, CT1T2T3> a = -theta;
   Generic<1, CT1T2T3> b = theta*c - sqrt(k);
-  return (a*vn + b*nn);
+
+  return cond(tir, cast<N>(0.0), (a*vn + b*nn));
 }
 
 template<int N, typename T1, typename T2>

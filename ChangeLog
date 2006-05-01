@@ -1,4 +1,10 @@
-2006-04-26  Hans-Friedrich Pabst  <hfp@users.sf.net>
+2006-04-30  Stefanus Du Toit  <sdt@rapidmind.net>
+
+	* src/sh/ShLibGeometry.hpp, ShLibGeometryImpl.hpp: Fix refract_tir, add 
+	a prototype declaration for it in the non-implementation header, and 
+	use it for refract().
+
+2006-04-28  Hans-Friedrich Pabst  <hfp@users.sf.net>
 
 	* Array.hpp: Compile error with VC7.1 fixed. Base class definitions
 	must be included (TextureTraits, BaseTextureND) they can't be
