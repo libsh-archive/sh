@@ -1,3 +1,7 @@
+2006-05-01  Filip Spacek  <filip@rapidmind.net>
+
+	* src/sh/Fraction.hpp: Add extra conversions for 'fb' type.
+
 2006-04-30  Stefanus Du Toit  <sdt@rapidmind.net>
 
 	* src/sh/ShLibGeometry.hpp, ShLibGeometryImpl.hpp: Fix refract_tir, add 

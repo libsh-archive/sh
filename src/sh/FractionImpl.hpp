@@ -108,7 +108,7 @@ Fraction<T>& Fraction<T>::operator+=(double value)
 template<typename T/* @todo clamp , bool Clamp */>
 Fraction<T>& Fraction<T>::operator+=(const Fraction& other)
 {
-  m_val = clamp_val(CompType(m_val) + CompType(other.m_val));
+  m_val = clamp_val(CompType(CompType(m_val) + CompType(other.m_val)));
   return *this;
 }
 
@@ -134,7 +134,7 @@ Fraction<T>& Fraction<T>::operator*=(double value)
 template<typename T/* @todo clamp , bool Clamp */>
 Fraction<T>& Fraction<T>::operator*=(const Fraction& other)
 {
-  m_val = clamp_val(CompType(m_val) * CompType(other.m_val));
+  m_val = clamp_val(CompType(CompType(m_val) * CompType(other.m_val)));
   return *this;
 }
 
