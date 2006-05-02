@@ -76,8 +76,7 @@ refract(const ShGeneric<N, T1>& view, const ShGeneric<N, T2>& normal, const ShGe
  */
 template<int N, typename T1, typename T2, typename T3, typename T4>
 ShGeneric<N, CT1T2T3> refract_tir(const ShGeneric<N, T1>& v, const ShGeneric<N, T2>& n,
-                                  const ShGeneric<1, T3>& eta, ShGeneric<1, T4>& tir)
-
+                                  const ShGeneric<1, T3>& eta, ShGeneric<1, T4>& tir);
 
 /** Make a vector face the same way as another
  * Negates b if it does not face the same way as a (i.e. the dot

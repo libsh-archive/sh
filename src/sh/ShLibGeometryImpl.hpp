@@ -104,7 +104,6 @@ ShGeneric<N, CT1T2T3> refract_tir(const ShGeneric<N, T1>& v, const ShGeneric<N, 
   return cond(tir, cast<N>(0.0), (a*vn + b*nn));
 }
 
-
 template<int N, typename T1, typename T2>
 inline
 ShGeneric<N, CT1T2> faceforward(const ShGeneric<N, T1>& a, const ShGeneric<N, T2>& b)
