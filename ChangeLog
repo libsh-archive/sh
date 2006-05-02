@@ -1,3 +1,8 @@
+2006-05-02  Andrew Lauritzen  <atlaurit@rapidmind.net>
+
+	* src/sh/ShStructural.hpp, ShStructural.cpp, backends/gl/GlslCode.cpp, 
+	ArbCode.cpp: Fix some memory leaks in ShStructural.
+
 2006-04-30  Stefanus Du Toit  <sdt@rapidmind.net>
 
 	* src/sh/ShLibGeometry.hpp, ShLibGeometryImpl.hpp: Fix refract_tir, add 
