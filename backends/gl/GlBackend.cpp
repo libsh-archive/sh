@@ -410,6 +410,16 @@ GlBackend::GlBackend(CodeStrategy* code, TextureStrategy* texture, StreamStrateg
   GlTextureGlTextureTransfer::instance = new GlTextureGlTextureTransfer();
 }
 
+GlBackend::~GlBackend()
+{
+  delete HostGlTextureTransfer::instance;
+  delete GlTextureHostTransfer::instance;
+  delete GlTextureGlTextureTransfer::instance;
+  delete m_code;
+  delete m_texture;
+  delete m_stream;
+}
+
 SH::ShBackendCodePtr GlBackend::generate_code(const std::string& target,
                                               const SH::ShProgramNodeCPtr& shader)
 {
