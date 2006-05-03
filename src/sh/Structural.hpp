@@ -57,13 +57,13 @@ public:
   // Structural information
   NodeType type;
   StructuralNode* container;
-  typedef std::list< Pointer< StructuralNode> > StructNodeList;
+  typedef std::list<StructuralNode*> StructNodeList;
   StructNodeList structnodes; ///< Nodes in this region
   bool contains(const CtrlGraphNodePtr& node) const; ///< Contains the cfg_node in this region
   
   // Graph structure
   CtrlGraphNodePtr cfg_node;
-  typedef std::pair<Variable, Pointer<StructuralNode> > SuccessorEdge;
+  typedef std::pair<Variable, StructuralNode* > SuccessorEdge;
   typedef std::list<SuccessorEdge> SuccessorList;
   SuccessorList succs;
   typedef std::pair<Variable, StructuralNode*> PredecessorEdge;
@@ -102,16 +102,16 @@ public:
   
   // Retrieves all successors from CFG in this node that leave the given node 
   // node = 0 indicates the typical case of node = this;
-  void getExits(CfgMatchList &result, Pointer<StructuralNode> node = 0);
+  void getExits(CfgMatchList &result, StructuralNode* node = 0);
 
   // Retrieves all successor edges from CFG in this node that enter the given node 
   // node = 0 indicates the typical case of node = this
-  void getEntries(CfgMatchList &result, Pointer<StructuralNode> node = 0);
+  void getEntries(CfgMatchList &result, StructuralNode* node = 0);
 
 
   // Spanning tree
   StructuralNode* parent;
-  typedef std::list< Pointer<StructuralNode> > ChildList;
+  typedef std::list< StructuralNode* > ChildList;
   ChildList children;
 
 };
@@ -127,17 +127,31 @@ public:
   // Graphviz-format dump of the structural tree.
   std::ostream& dump(std::ostream& out) const;
 
-  const StructuralNodePtr& head();
+  StructuralNode* head();
   
 private:
   CtrlGraphPtr m_graph;
-  StructuralNodePtr m_head;
+  StructuralNode* m_head;
 
   typedef std::list<StructuralNode*> PostorderList;
   PostorderList m_postorder;
 
-  StructuralNodePtr build_tree(const CtrlGraphNodePtr& node, std::map<CtrlGraphNodePtr, StructuralNodePtr>& nodemap);
-  void build_postorder(const StructuralNodePtr& node);
+  StructuralNode* build_tree(const CtrlGraphNodePtr& node, std::map<CtrlGraphNodePtr, StructuralNode*>& nodemap);
+  void build_postorder(StructuralNode* node);
+
+
+  // Keep StructuralNodes alive
+  typedef std::list<StructuralNodePtr> StructuralNodePtrList;
+  StructuralNodePtrList m_live_structural_nodes;
+  
+  // Structural node factory
+  template <typename T>
+  StructuralNode * create_structural_node(T p)
+  {
+    StructuralNode *i = new StructuralNode(p);
+    m_live_structural_nodes.push_back(i);
+    return i;
+  }
 };
 
 }

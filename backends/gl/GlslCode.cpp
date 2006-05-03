@@ -631,7 +631,7 @@ void GlslCode::gen_structural_node(const StructuralNodePtr& node)
     append_line("} // while", false);
   } 
   else if (node->type == StructuralNode::SELFLOOP) {
-    StructuralNodePtr loopnode = node->structnodes.front();
+    StructuralNode* loopnode = node->structnodes.front();
 
     bool condexit = true; // true if the condition causes us to exit the
                           // loop, rather than continue it

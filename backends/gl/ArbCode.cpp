@@ -950,7 +950,7 @@ void ArbCode::genStructNode(const StructuralNodePtr& node)
     m_instructions.push_back(ArbInst(ARB_ENDREP, Variable()));
   } 
   else if (node->type == StructuralNode::SELFLOOP) {
-    StructuralNodePtr loopnode = node->structnodes.front();
+    StructuralNode* loopnode = node->structnodes.front();
 
     bool condexit = true; // true if the condition causes us to exit the
                           // loop, rather than continue it
