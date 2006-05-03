@@ -180,6 +180,8 @@ struct CodeStrategy {
 
 class GlBackend : public SH::Backend {
 public:
+  virtual ~GlBackend();
+
   virtual SH::BackendCodePtr generate_code(const std::string& target,
                                              const SH::ProgramNodeCPtr& shader);
   virtual SH::BackendSetPtr generate_set(const SH::ProgramSet& s);
