@@ -110,6 +110,7 @@ lib libshgl
 : # usage-requirements
   <library>libsh/<link>shared
   <include>src/sh
+  <include>backends/gl
 ;
 
 
