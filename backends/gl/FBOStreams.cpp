@@ -379,7 +379,8 @@ static int choose_program_version(const Stream& input, const Stream& output)
     // If the outputs differ in any way, we have to render them separately
     if (I->node()->width() != output.begin()->node()->width() ||
         I->node()->height() != output.begin()->node()->height() ||
-        I->node()->depth() != output.begin()->node()->depth()) {
+        I->node()->depth() != output.begin()->node()->depth() ||
+        I->node()->size() != output.begin()->node()->size()) {
       single_output = true;
     }
     for (int i = 0; i < dimension(*I); ++i) {
@@ -532,7 +533,6 @@ void FBOStreams::execute(const Program& program,
     max_outputs = 1;
 
   cache->generate_programs(program_version);
-  cache->update_uniforms(program.uniform_inputs);
 
   for (Stream::const_iterator I = program.stream_inputs.begin();
        I != program.stream_inputs.end(); ++I) {
@@ -588,7 +588,8 @@ void FBOStreams::execute(const Program& program,
 
     FBOCache::instance()->check();
     
-    cache->update_channels(program_version, program.stream_inputs,
+    cache->update_uniforms(I, program.uniform_inputs);
+    cache->update_channels(program_version, I, program.stream_inputs,
                            *dest_tex, dest_width, dest_height, dest_depth);
 
 #ifdef SH_DEBUG_FBOS_PRINTFP

@@ -56,7 +56,7 @@ StreamCache::StreamCache(ProgramNode* stream_program,
 
 void StreamCache::generate_programs(ProgramVersion version)
 {
-  if (!m_program_sets[version].empty())
+  if (!m_split_programs[version].empty())
     return;
 
   TextureDims dims = SH_TEXTURE_2D;
@@ -84,12 +84,12 @@ void StreamCache::generate_programs(ProgramVersion version)
     break;
   }
  
-  split_program(m_stream_program, m_programs[version],
+  split_program(m_stream_program, m_split_programs[version],
                 get_target_backend(m_stream_program) + "fragment",
                 (version & SINGLE_OUTPUT) ? 1 : m_max_outputs);
 
-  for (std::list<ProgramNodePtr>::iterator I = m_programs[version].begin();
-       I != m_programs[version].end(); ++I) {
+  for (std::list<SplitProgramData>::iterator I = m_split_programs[version].begin();
+       I != m_split_programs[version].end(); ++I) {
          
     string target = get_target_backend(m_stream_program) + "fragment";
     
@@ -99,27 +99,27 @@ void StreamCache::generate_programs(ProgramVersion version)
       // Create the appropriate amount of InputData
       // (need to do this outside the program so that it is uniform)
       Program::BindingSpec::const_iterator binding = m_binding_spec.begin();
-      ProgramNode::VarList::const_iterator input = (*I)->begin_inputs();
+      ProgramNode::VarList::const_iterator input = I->program->begin_inputs();
       for (int stream = 0; binding != m_binding_spec.end(); ++binding, ++input) {
         if (*binding == Program::STREAM) {
           if ((stream % 4) == 0) {
-            m_streams[version].push_back(StreamData());
+            I->streams.push_back(StreamData());
           }
           ++stream;
         }
         else {
-          m_uniforms.push_back(Variable((*input)->clone(SH_TEMP, 0, VALUETYPE_END, SEMANTICTYPE_END, false, false)));
+          I->uniforms.push_back(Variable((*input)->clone(SH_TEMP, 0, VALUETYPE_END, SEMANTICTYPE_END, false, false)));
         }          
       }
-      
+
       prologue = SH_BEGIN_PROGRAM(target) {
         InputAttrib2f SH_DECL(streamcoord);
 
-        StreamList::iterator stream = m_streams[version].begin();
-        UniformList::iterator uniform = m_uniforms.begin();
+        StreamList::iterator stream = I->streams.begin();
+        UniformList::iterator uniform = I->uniforms.begin();
         Program::BindingSpec::const_iterator binding = m_binding_spec.begin();
-        ProgramNode::VarList::const_iterator input = (*I)->begin_inputs();
-        for (int i = 0; input != (*I)->end_inputs(); ++input, ++binding) {
+        ProgramNode::VarList::const_iterator input = I->program->begin_inputs();
+        for (int i = 0; input != I->program->end_inputs(); ++input, ++binding) {
           Variable out((*input)->clone(SH_OUTPUT));
           if (*binding == Program::UNIFORM) {
             shASN(out, *uniform);
@@ -154,25 +154,25 @@ void StreamCache::generate_programs(ProgramVersion version)
       // Create the appropriate amount of InputData
       // (need to do this outside the program so that it is uniform)
       Program::BindingSpec::const_iterator binding = m_binding_spec.begin();
-      ProgramNode::VarList::const_iterator input = (*I)->begin_inputs();
+      ProgramNode::VarList::const_iterator input = I->program->begin_inputs();
       for (int stream = 0; binding != m_binding_spec.end(); ++binding, ++input) {
         if (*binding == Program::STREAM) {
           if ((stream % 4) == 0) {
-            m_streams[version].push_back(StreamData());
+            I->streams.push_back(StreamData());
           }
           ++stream;
         }
         else {
-          m_uniforms.push_back(Variable((*input)->clone(SH_TEMP, 0, VALUETYPE_END, SEMANTICTYPE_END, false, false)));
+          I->uniforms.push_back(Variable((*input)->clone(SH_TEMP, 0, VALUETYPE_END, SEMANTICTYPE_END, false, false)));
         }          
       }
     
       prologue = SH_BEGIN_PROGRAM(target) {
-        StreamList::iterator stream = m_streams[version].begin();
-        UniformList::iterator uniform = m_uniforms.begin();
+        StreamList::iterator stream = I->streams.begin();
+        UniformList::iterator uniform = I->uniforms.begin();
         Program::BindingSpec::const_iterator binding = m_binding_spec.begin();
-        ProgramNode::VarList::const_iterator input = (*I)->begin_inputs();
-        for (; input != (*I)->end_inputs(); ++stream) {
+        ProgramNode::VarList::const_iterator input = I->program->begin_inputs();
+        for (; input != I->program->end_inputs(); ++stream) {
           InputAttrib4f SH_DECL(input_index);
           Attrib4f SH_DECL(index);
           
@@ -181,7 +181,7 @@ void StreamCache::generate_programs(ProgramVersion version)
           // (index * count * stride + offset) / width
           index = mad(index, stream->uniform4[0], stream->uniform4[1]);
           
-          for (int i = 0; i < 2 && input != (*I)->end_inputs(); ++i) {
+          for (int i = 0; i < 2 && input != I->program->end_inputs(); ++i) {
 
             TexCoord4f SH_DECL(coord);
             // x = frac(index)
@@ -195,7 +195,7 @@ void StreamCache::generate_programs(ProgramVersion version)
                               stream->uniform2[i][1](0,1),
                               coord(1,3));
 
-            for (int j = 0; j < 2 && input != (*I)->end_inputs(); ++j, ++input) {
+            for (int j = 0; j < 2 && input != I->program->end_inputs(); ++j, ++input) {
               Variable out((*input)->clone(SH_OUTPUT));
               if (*binding == Program::UNIFORM) {
                 shASN(out, *uniform);
@@ -267,8 +267,8 @@ void StreamCache::generate_programs(ProgramVersion version)
     }
 
     Program epilogue = SH_BEGIN_PROGRAM(target) {
-      for (ProgramNode::VarList::const_iterator output = (*I)->begin_outputs();
-           output != (*I)->end_outputs(); ++output) {
+      for (ProgramNode::VarList::const_iterator output = I->program->begin_outputs();
+           output != I->program->end_outputs(); ++output) {
 
         Variable in((*output)->clone(SH_INPUT));
         if ((*output)->size() == 2) {
@@ -282,41 +282,42 @@ void StreamCache::generate_programs(ProgramVersion version)
       }
     } SH_END_PROGRAM;
 
-    Program prog = epilogue << Program(*I) << prologue;
+    Program prog = epilogue << Program(I->program) << prologue;
     prog.meta("opengl:binding", "generic");
-    *I = prog.node();
+    I->program = prog.node();
   }
 
-  for (std::list<ProgramNodePtr>::iterator I = m_programs[version].begin(); 
-       I != m_programs[version].end(); ++I) {
-    m_program_sets[version].push_back(new ProgramSet(Program(m_vertex_program),
-                                                     Program(*I)));
+  for (std::list<SplitProgramData>::iterator I = m_split_programs[version].begin(); 
+       I != m_split_programs[version].end(); ++I) {
+    I->program_set = new ProgramSet(Program(m_vertex_program), Program(I->program));
   }
 }
 
-void StreamCache::update_uniforms(const Record& input_uniforms)
+void StreamCache::update_uniforms(const set_iterator& program_set,
+                                  const Record& input_uniforms)
 {
-  SH_DEBUG_ASSERT(input_uniforms.size() == m_uniforms.size());
+  SplitProgramData& split_data = 
+    program_set.list<SplitProgramData>::iterator::operator*();
   
   Record::const_iterator input = input_uniforms.begin(); 
-  UniformList::iterator uniform = m_uniforms.begin();
+  UniformList::iterator uniform = split_data.uniforms.begin();
   for (; input != input_uniforms.end(); ++input, ++uniform) {
     shASN(*uniform, *input);
   }
 }
   
-
-void StreamCache::update_channels(ProgramVersion version, 
+void StreamCache::update_channels(ProgramVersion version,
+                                  const set_iterator& program_set, 
                                   const Stream& input_stream,
                                   const BaseTexture& dest_tex,
                                   int width, int height, int depth)
 {
-  if (m_program_sets[version].empty())
-    generate_programs(version);
+  SplitProgramData& split_data = 
+    program_set.list<SplitProgramData>::iterator::operator*();  
 
   if ((version & ~SINGLE_OUTPUT) == OS_1D) {
     Stream::const_iterator input = input_stream.begin();
-    for (StreamList::iterator I = m_streams[version].begin();
+    for (StreamList::iterator I = split_data.streams.begin();
          input != input_stream.end(); ++I) {
       float uniform4[2][4];
       for (int i = 0; i < 2 && input != input_stream.end(); ++i) {
@@ -356,7 +357,7 @@ void StreamCache::update_channels(ProgramVersion version,
 
   if ((version & ~SINGLE_OUTPUT) == OS_NONE_2D) {
     Stream::const_iterator input = input_stream.begin();
-    for (StreamList::iterator I = m_streams[version].begin();
+    for (StreamList::iterator I = split_data.streams.begin();
          input != input_stream.end(); ++I) {
       for (int i = 0; i < 4 && input != input_stream.end(); ++i, ++input) {
         if (input->node()->dims() == SH_TEXTURE_1D) {
@@ -415,29 +416,15 @@ void StreamCache::update_channels(ProgramVersion version,
 StreamCache::set_iterator StreamCache::sets_begin(ProgramVersion version)
 {
   SH_DEBUG_ASSERT(version >= 0 && version < NUM_PROGRAM_VERSIONS);
-  SH_DEBUG_ASSERT(!m_program_sets[version].empty());
-  return m_program_sets[version].begin();
+  SH_DEBUG_ASSERT(!m_split_programs[version].empty());
+  return m_split_programs[version].begin();
 }
 
 StreamCache::set_iterator StreamCache::sets_end(ProgramVersion version)
 {
   SH_DEBUG_ASSERT(version >= 0 && version < NUM_PROGRAM_VERSIONS);
-  SH_DEBUG_ASSERT(!m_program_sets[version].empty());
-  return m_program_sets[version].end();
-}
-
-StreamCache::set_const_iterator StreamCache::sets_begin(ProgramVersion version) const
-{
-  SH_DEBUG_ASSERT(version >= 0 && version < NUM_PROGRAM_VERSIONS);
-  SH_DEBUG_ASSERT(!m_program_sets[version].empty());
-  return m_program_sets[version].begin();
-}
-
-StreamCache::set_const_iterator StreamCache::sets_end(ProgramVersion version) const
-{
-  SH_DEBUG_ASSERT(version >= 0 && version < NUM_PROGRAM_VERSIONS);
-  SH_DEBUG_ASSERT(!m_program_sets[version].empty());
-  return m_program_sets[version].end();
+  SH_DEBUG_ASSERT(!m_split_programs[version].empty());
+  return m_split_programs[version].end();
 }
 
 Info* StreamBindingCache::clone() const
@@ -454,9 +441,9 @@ StreamBindingCache::~StreamBindingCache()
   }
 }
 
-void split_program(ProgramNode* program,
-                   std::list<ProgramNodePtr>& programs,
-                   const std::string& target, int chunk_size)
+void StreamCache::split_program(ProgramNode* program,
+                                std::list<SplitProgramData>& split_data,
+                                const std::string& target, int chunk_size)
 {
   SH_DEBUG_ASSERT(chunk_size > 0);
   int var = 0;
@@ -468,7 +455,8 @@ void split_program(ProgramNode* program,
     }
     Program p = swizzle(chunk) << Program(program);
     p.node()->target() = target;
-    programs.push_back(p.node());
+    split_data.push_back(SplitProgramData());
+    split_data.back().program = p.node();
   }
 }
 

@@ -52,21 +52,17 @@ public:
   static const int SINGLE_OUTPUT        = 0x08;
   static const int NUM_PROGRAM_VERSIONS = 16;
 
+  struct set_iterator;
+
   void generate_programs(ProgramVersion version);
-  void update_uniforms(const SH::Record& input_uniforms);
-  void update_channels(ProgramVersion version, 
+  void update_uniforms(const set_iterator& program_set,
+                       const SH::Record& input_uniforms);
+  void update_channels(ProgramVersion version, const set_iterator& program_set,
                        const SH::Stream& stream, const SH::BaseTexture& tex,
                        int width, int height, int depth);
 
-  typedef std::list<SH::ProgramSetPtr>::iterator set_iterator;
-  typedef std::list<SH::ProgramSetPtr>::const_iterator set_const_iterator;
-  typedef std::list<SH::ProgramNodePtr>::iterator program_iterator;
-  typedef std::list<SH::ProgramNodePtr>::const_iterator program_const_iterator;
-
   set_iterator sets_begin(ProgramVersion version);
   set_iterator sets_end(ProgramVersion version);
-  set_const_iterator sets_begin(ProgramVersion version) const;
-  set_const_iterator sets_end(ProgramVersion version) const;
 
 private:
   
@@ -76,13 +72,16 @@ private:
     SH::Attrib4f uniform2[2][2];
   };
   typedef std::vector<StreamData> StreamList;
-  StreamList m_streams[NUM_PROGRAM_VERSIONS];
-  
   typedef std::vector<SH::Variable> UniformList;
-  UniformList m_uniforms;
+
+  struct SplitProgramData {
+    StreamList streams;
+    UniformList uniforms;
+    SH::ProgramNodePtr program;
+    SH::ProgramSetPtr program_set;
+  };
   
-  std::list<SH::ProgramNodePtr> m_programs[NUM_PROGRAM_VERSIONS];
-  std::list<SH::ProgramSetPtr> m_program_sets[NUM_PROGRAM_VERSIONS];
+  std::list<SplitProgramData> m_split_programs[NUM_PROGRAM_VERSIONS];
 
   SH::ProgramNode* m_stream_program;
   SH::ProgramNode* m_vertex_program;
@@ -95,6 +94,21 @@ private:
 
   StreamCache(const StreamCache& other);
   StreamCache& operator=(const StreamCache& other);
+
+  void split_program(SH::ProgramNode* program,
+                     std::list<SplitProgramData>& split_data,
+                     const std::string& target, int chunk_size);
+
+public:
+  class set_iterator : public std::list<SplitProgramData>::iterator {
+  public:
+    set_iterator(const std::list<SplitProgramData>::iterator& base)
+      : std::list<SplitProgramData>::iterator(base)
+    { }
+    
+    SH::ProgramSetPtr& operator*() 
+    { return std::list<SplitProgramData>::iterator::operator*().program_set; }
+  };                 
 };
 
 class StreamBindingCache 
@@ -104,11 +118,6 @@ public:
 
   SH::Info* clone() const;
 };
-
-
-void split_program(SH::ProgramNode* program,
-                   std::list<SH::ProgramNodePtr>& programs,
-                   const std::string& target, int chunk_size);
 
 std::string get_target_backend(const SH::ProgramNodeCPtr& program);
 
