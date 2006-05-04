@@ -179,21 +179,21 @@ void initShaders()
   mvd = mvd * mv;
 
   vsh = SH_BEGIN_VERTEX_PROGRAM {
-    InOutNormal3f DECL(normal);
-    InOutPosition4f DECL(pos); // TODO swap the order of normal and pos
-    InOutColor3f DECL(col1);
-    InputColor3f DECL(col2);
-    InputColor3f DECL(col3);
-    InputColor3f DECL(col4);
-    InputColor3f DECL(col5);
-    InputColor3f DECL(col6);
-    InputColor3f DECL(col7);
-    InputColor3f DECL(col8);
-    InputColor3f DECL(col9);
-    InputColor3f DECL(col10);
-    InputColor3f DECL(col11);
-    InputColor3f DECL(col12);
-    InputColor3f DECL(col13);
+    InOutNormal3f SH_DECL(normal);
+    InOutPosition4f SH_DECL(pos); // TODO swap the order of normal and pos
+    InOutColor3f SH_DECL(col1);
+    InputColor3f SH_DECL(col2);
+    InputColor3f SH_DECL(col3);
+    InputColor3f SH_DECL(col4);
+    InputColor3f SH_DECL(col5);
+    InputColor3f SH_DECL(col6);
+    InputColor3f SH_DECL(col7);
+    InputColor3f SH_DECL(col8);
+    InputColor3f SH_DECL(col9);
+    InputColor3f SH_DECL(col10);
+    InputColor3f SH_DECL(col11);
+    InputColor3f SH_DECL(col12);
+    InputColor3f SH_DECL(col13);
 
     pos = mvd | pos; // Project position
     normal = mv | normal; // Project normal

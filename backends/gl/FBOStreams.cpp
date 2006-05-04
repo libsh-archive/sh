@@ -681,8 +681,8 @@ FBOStreams::get_gather_data(TextureDims src_dims, bool src_two_comp,
   gather_vsh.target() = m_name + ":vertex";
 
   Program gather_fsh = SH_BEGIN_PROGRAM(m_name + ":fragment") {
-    InputTexCoord2f DECL(input);
-    TexCoord3f DECL(coord);
+    InputTexCoord2f SH_DECL(input);
+    TexCoord3f SH_DECL(coord);
     
     Statement stmt(coord(2), Variable(data.index), OP_TEX, input);
     Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt);

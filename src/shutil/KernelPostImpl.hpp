@@ -41,10 +41,10 @@ using namespace SH;
 template<typename T>
 Program halftone(const BaseTexture2D<T> &tex) {
   Program kernel = SH_BEGIN_FRAGMENT_PROGRAM {
-    typename T::InputType NAMEDECL(in, "result");
-    InputTexCoord2f NAMEDECL(tc, "texcoord");
+    typename T::InputType SH_NAMEDECL(in, "result");
+    InputTexCoord2f SH_NAMEDECL(tc, "texcoord");
 
-    typename T::OutputType NAMEDECL(out, "result");
+    typename T::OutputType SH_NAMEDECL(out, "result");
 
     // TODO rotate color components...
     // TODO decide whether this frac should stay
@@ -56,11 +56,11 @@ Program halftone(const BaseTexture2D<T> &tex) {
 template<int N, typename T>
 Program noisify(bool useTexture) {
   Program kernel = SH_BEGIN_FRAGMENT_PROGRAM {
-    InputAttrib1f DECL(noise_scale);
-    typename T::InputType NAMEDECL(in, "result");
-    Attrib<N, SH_INPUT, typename T::storage_type> NAMEDECL(tc, "texcoord");
+    InputAttrib1f SH_DECL(noise_scale);
+    typename T::InputType SH_NAMEDECL(in, "result");
+    Attrib<N, SH_INPUT, typename T::storage_type> SH_NAMEDECL(tc, "texcoord");
 
-    typename T::OutputType NAMEDECL(out, "result");
+    typename T::OutputType SH_NAMEDECL(out, "result");
 
     out = in + cellnoise<T::typesize>(tc, useTexture)*noise_scale; 
   } SH_END;

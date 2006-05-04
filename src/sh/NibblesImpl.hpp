@@ -30,7 +30,7 @@ template<typename T>
 Program keep(const std::string & name) 
 {
   Program nibble = SH_BEGIN_PROGRAM() {
-    typename T::InOutType NAMEDECL(attr, name); 
+    typename T::InOutType SH_NAMEDECL(attr, name); 
   } SH_END_PROGRAM;
   nibble.name("keep");
   return nibble;
@@ -40,9 +40,9 @@ template<typename T>
 Program dup(const std::string & name) 
 {
   Program nibble = SH_BEGIN_PROGRAM() {
-    typename T::InputType NAMEDECL(attr, name); 
-    typename T::OutputType NAMEDECL(attr1, name + "_1") = attr; 
-    typename T::OutputType NAMEDECL(attr2, name + "_2") = attr; 
+    typename T::InputType SH_NAMEDECL(attr, name); 
+    typename T::OutputType SH_NAMEDECL(attr1, name + "_1") = attr; 
+    typename T::OutputType SH_NAMEDECL(attr2, name + "_2") = attr; 
   } SH_END_PROGRAM;
   nibble.name("dup");
   return nibble;
@@ -52,7 +52,7 @@ template<typename T>
 Program lose(const std::string & name) 
 {
   Program nibble = SH_BEGIN_PROGRAM() {
-    typename T::InputType NAMEDECL(attr, name);
+    typename T::InputType SH_NAMEDECL(attr, name);
   } SH_END_PROGRAM;
   nibble.name("lose");
   return nibble;
@@ -62,8 +62,8 @@ template<typename T>
 Program access(const BaseTexture1D<T> &tex, const std::string &tcname, const std::string & name) 
 {
   Program nibble = SH_BEGIN_PROGRAM() {
-    InputTexCoord1f NAMEDECL(tc, tcname);
-    typename T::OutputType NAMEDECL(result, name) = tex(tc);
+    InputTexCoord1f SH_NAMEDECL(tc, tcname);
+    typename T::OutputType SH_NAMEDECL(result, name) = tex(tc);
   } SH_END;
   nibble.name("access");
   return nibble;
@@ -73,8 +73,8 @@ template<typename T>
 Program access(const BaseTexture2D<T> &tex, const std::string & tcname, const std::string & name) 
 {
   Program nibble = SH_BEGIN_PROGRAM() {
-    InputTexCoord2f NAMEDECL(tc, tcname);
-    typename T::OutputType NAMEDECL(result, name) = tex(tc);
+    InputTexCoord2f SH_NAMEDECL(tc, tcname);
+    typename T::OutputType SH_NAMEDECL(result, name) = tex(tc);
   } SH_END;
   nibble.name("access");
   return nibble;
@@ -84,8 +84,8 @@ template<typename T>
 Program access(const BaseTextureRect<T> &tex, const std::string & tcname, const std::string & name) 
 {
   Program nibble = SH_BEGIN_PROGRAM() {
-    InputTexCoord2f NAMEDECL(tc, tcname);
-    typename T::OutputType NAMEDECL(result, name) = tex(tc);
+    InputTexCoord2f SH_NAMEDECL(tc, tcname);
+    typename T::OutputType SH_NAMEDECL(result, name) = tex(tc);
   } SH_END;
   nibble.name("access");
   return nibble;
@@ -95,8 +95,8 @@ template<typename T>
 Program access(const BaseTexture3D<T> &tex, const std::string & tcname, const std::string & name) 
 {
   Program nibble = SH_BEGIN_PROGRAM() {
-    InputTexCoord3f NAMEDECL(tc, tcname);
-    typename T::OutputType NAMEDECL(result, name) = tex(tc);
+    InputTexCoord3f SH_NAMEDECL(tc, tcname);
+    typename T::OutputType SH_NAMEDECL(result, name) = tex(tc);
   } SH_END;
   nibble.name("access");
   return nibble;
@@ -106,8 +106,8 @@ template<typename T>
 Program access(const BaseTextureCube<T> &tex, const std::string & tcname, const std::string & name) 
 {
   Program nibble = SH_BEGIN_PROGRAM() {
-    InputTexCoord3f NAMEDECL(tc, tcname);
-    typename T::OutputType NAMEDECL(result, name) = tex(tc);
+    InputTexCoord3f SH_NAMEDECL(tc, tcname);
+    typename T::OutputType SH_NAMEDECL(result, name) = tex(tc);
   } SH_END;
   nibble.name("access");
   return nibble;
@@ -117,7 +117,7 @@ template<typename T, int Rows, int Cols, BindingType Binding, typename T2>
 Program transform(const Matrix<Rows, Cols, Binding, T2> &m, const std::string & name) 
 {
   Program nibble = SH_BEGIN_PROGRAM() {
-    typename T::InOutType NAMEDECL(attrib, name) = m | attrib;
+    typename T::InOutType SH_NAMEDECL(attrib, name) = m | attrib;
   } SH_END;
   nibble.name("transform");
   return nibble;
@@ -127,8 +127,8 @@ template<typename T, typename T2>
 Program cast(const std::string & name)
 {
   Program nibble = SH_BEGIN_PROGRAM() {
-    typename T::InputType NAMEDECL(in, name);
-    typename T2::OutputType NAMEDECL(out, name) = cast<T2::typesize>( in );
+    typename T::InputType SH_NAMEDECL(in, name);
+    typename T2::OutputType SH_NAMEDECL(out, name) = cast<T2::typesize>( in );
   } SH_END;
   nibble.name("cast");
   return nibble;
@@ -138,8 +138,8 @@ template<typename T, typename T2>
 Program fillcast(const std::string & name)
 {
   Program nibble = SH_BEGIN_PROGRAM() {
-    typename T::InputType NAMEDECL(in, name);
-    typename T2::OutputType NAMEDECL(out, name) = fillcast<T2::typesize>( in );
+    typename T::InputType SH_NAMEDECL(in, name);
+    typename T2::OutputType SH_NAMEDECL(out, name) = fillcast<T2::typesize>( in );
   } SH_END;
   nibble.name("fillcast");
   return nibble;
@@ -150,7 +150,7 @@ template<typename T>\
 Program opfunc(const std::string & name) \
 {\
   Program nibble = SH_BEGIN_PROGRAM() {\
-    typename T::InOutType NAMEDECL(x, name) = opcode;\
+    typename T::InOutType SH_NAMEDECL(x, name) = opcode;\
   } SH_END;\
   nibble.name(# opfunc); \
   return nibble; \
@@ -201,10 +201,10 @@ Program opfunc(const std::string & output_name, \
     const std::string & input_name0, const std::string & input_name1) \
 { \
   Program nibble = SH_BEGIN_PROGRAM() { \
-    typename T1::InputType NAMEDECL(a, input_name0); \
-    typename T2::InputType NAMEDECL(b, input_name1); \
+    typename T1::InputType SH_NAMEDECL(a, input_name0); \
+    typename T2::InputType SH_NAMEDECL(b, input_name1); \
     typename SelectType<(T1::typesize > T2::typesize), typename T1::OutputType, typename T2::OutputType>::type\
-      NAMEDECL(result, output_name) = opcode; \
+      SH_NAMEDECL(result, output_name) = opcode; \
   } SH_END; \
   nibble.name(# opfunc); \
   return nibble; \
@@ -244,13 +244,13 @@ Program opfunc(const std::string & output_name, \
     const std::string & input_name2) \
 { \
   Program nibble = SH_BEGIN_PROGRAM() { \
-    typename T1::InputType NAMEDECL(a, input_name0); \
-    typename T2::InputType NAMEDECL(b, input_name1); \
-    typename T3::InputType NAMEDECL(c, input_name2); \
+    typename T1::InputType SH_NAMEDECL(a, input_name0); \
+    typename T2::InputType SH_NAMEDECL(b, input_name1); \
+    typename T3::InputType SH_NAMEDECL(c, input_name2); \
     typedef typename SelectType<(T1::typesize > T2::typesize), typename T1::OutputType, \
                                 typename T2::OutputType>::type T1T2; \
     typename SelectType<(T1T2::typesize > T3::typesize), typename T1T2::OutputType, \
-                        typename T3::OutputType>::type NAMEDECL(result, output_name) = opcode; \
+                        typename T3::OutputType>::type SH_NAMEDECL(result, output_name) = opcode; \
   } SH_END; \
   nibble.name(# opfunc); \
   return nibble; \
@@ -282,8 +282,8 @@ template<typename T1, typename T2> \
 Program opfunc(const std::string & output_name, const std::string & input_name0) \
 { \
   Program nibble = SH_BEGIN_PROGRAM() { \
-    typename T1::InputType NAMEDECL(a, input_name0); \
-    typename T2::OutputType NAMEDECL(result, output_name) = opcode<T2::typesize>(a); \
+    typename T1::InputType SH_NAMEDECL(a, input_name0); \
+    typename T2::OutputType SH_NAMEDECL(result, output_name) = opcode<T2::typesize>(a); \
   } SH_END; \
   nibble.name(# opfunc); \
   return nibble; \
@@ -299,8 +299,8 @@ template<typename T1, typename T2> \
 Program opfunc(const std::string & output_name, const std::string & input_name0) \
 { \
   Program nibble = SH_BEGIN_PROGRAM() { \
-    typename T1::InputType NAMEDECL(a, input_name0); \
-    typename T2::OutputType NAMEDECL(result, output_name) = opcode<T2::typesize>(a); \
+    typename T1::InputType SH_NAMEDECL(a, input_name0); \
+    typename T2::OutputType SH_NAMEDECL(result, output_name) = opcode<T2::typesize>(a); \
   } SH_END; \
   nibble.name(# opfunc); \
   return nibble; \
@@ -310,9 +310,9 @@ Program opfunc(const std::string & output_name, const std::string & input_name0,
                  const std::string & input_name1) \
 { \
   Program nibble = SH_BEGIN_PROGRAM() { \
-    typename T1::InputType NAMEDECL(a, input_name0); \
-    typename T2::InputType NAMEDECL(b, input_name1); \
-    typename T3::OutputType NAMEDECL(result, output_name) = opcode<T2::typesize>(a, b); \
+    typename T1::InputType SH_NAMEDECL(a, input_name0); \
+    typename T2::InputType SH_NAMEDECL(b, input_name1); \
+    typename T3::OutputType SH_NAMEDECL(result, output_name) = opcode<T2::typesize>(a, b); \
   } SH_END; \
   nibble.name(# opfunc); \
   return nibble; \
@@ -334,9 +334,9 @@ Program opfunc(const std::string & output_name, \
                  const std::string & input_name1) \
 { \
   Program nibble = SH_BEGIN_PROGRAM() { \
-    typename T1::InputType NAMEDECL(a, input_name0); \
-    typename T2::InputType NAMEDECL(b, input_name1); \
-    OutputAttrib1f NAMEDECL(result, output_name) = opcode; \
+    typename T1::InputType SH_NAMEDECL(a, input_name0); \
+    typename T2::InputType SH_NAMEDECL(b, input_name1); \
+    OutputAttrib1f SH_NAMEDECL(result, output_name) = opcode; \
   } SH_END; \
   nibble.name(# opfunc); \
   return nibble; \
@@ -359,8 +359,8 @@ Program opfunc(const std::string & output_name, \
                  const std::string & input_name0) \
 { \
   Program nibble = SH_BEGIN_PROGRAM() { \
-    typename T::InputType NAMEDECL(a, input_name0); \
-    OutputAttrib1f NAMEDECL(result, output_name) = opcode; \
+    typename T::InputType SH_NAMEDECL(a, input_name0); \
+    OutputAttrib1f SH_NAMEDECL(result, output_name) = opcode; \
   } SH_END; \
   nibble.name(# opfunc); \
   return nibble; \
@@ -380,8 +380,8 @@ template<int N, typename T>
 Program bernstein(const std::string& name, const std::string& input_name0)
 {
   Program nibble = SH_BEGIN_PROGRAM() {
-    typename T::InputType NAMEDECL(a, input_name0);
-    Attrib<N, SH_OUTPUT, float> NAMEDECL(result, name) = bernstein<N>(a);
+    typename T::InputType SH_NAMEDECL(a, input_name0);
+    Attrib<N, SH_OUTPUT, float> SH_NAMEDECL(result, name) = bernstein<N>(a);
   } SH_END;
   nibble.name("bernstein");
   return nibble;
@@ -392,9 +392,9 @@ Program bezier(const std::string& name, const std::string& input_name0,
                    const std::string& input_name1)
 {
   Program nibble = SH_BEGIN_PROGRAM() {
-    typename T1::InputType NAMEDECL(a, input_name0);
-    typename T2::InputType NAMEDECL(b, input_name1);
-    typename T2::OutputType NAMEDECL(result, name) = bezier(a, b);
+    typename T1::InputType SH_NAMEDECL(a, input_name0);
+    typename T2::InputType SH_NAMEDECL(b, input_name1);
+    typename T2::OutputType SH_NAMEDECL(result, name) = bezier(a, b);
   } SH_END;
   nibble.name("bezier");
   return nibble;
@@ -405,9 +405,9 @@ Program cross(const std::string& name, const std::string& input_name0,
                   const std::string& input_name1)
 { 
   Program nibble = SH_BEGIN_PROGRAM() {
-    typename T::InputType NAMEDECL(a, input_name0); 
-    typename T::InputType NAMEDECL(b, input_name1); 
-    typename T::OutputType NAMEDECL(result, name) = cross(a, b); 
+    typename T::InputType SH_NAMEDECL(a, input_name0); 
+    typename T::InputType SH_NAMEDECL(b, input_name1); 
+    typename T::OutputType SH_NAMEDECL(result, name) = cross(a, b); 
   } SH_END; 
   nibble.name("cross");
   return nibble;
@@ -417,7 +417,7 @@ template<typename T>
 Program discard(const std::string & name, const std::string& input_name0)
 { 
   Program nibble = SH_BEGIN_PROGRAM() {
-    typename T::InputType NAMEDECL(a, input_name0);
+    typename T::InputType SH_NAMEDECL(a, input_name0);
     discard(a);
   } SH_END;
   nibble.name("discard");
@@ -429,9 +429,9 @@ Program dot(const std::string & name, const std::string& input_name0,
                 const std::string& input_name1)
 { 
   Program nibble = SH_BEGIN_PROGRAM() {
-    typename T::InputType NAMEDECL(a, input_name0);
-    typename T::InputType NAMEDECL(b, input_name1);
-    OutputAttrib1f NAMEDECL(result, name) = dot(a, b);
+    typename T::InputType SH_NAMEDECL(a, input_name0);
+    typename T::InputType SH_NAMEDECL(b, input_name1);
+    OutputAttrib1f SH_NAMEDECL(result, name) = dot(a, b);
   } SH_END;
   nibble.name("dot");
   return nibble;
@@ -441,8 +441,8 @@ template<typename T>
 Program gradient(const std::string& name, const std::string& input_name0)
 { 
   Program nibble = SH_BEGIN_PROGRAM() {
-    typename T::InputType NAMEDECL(a, input_name0);
-    OutputAttrib2f NAMEDECL(result, name) = gradient(a); 
+    typename T::InputType SH_NAMEDECL(a, input_name0);
+    OutputAttrib2f SH_NAMEDECL(result, name) = gradient(a); 
   } SH_END; 
   nibble.name("gradient");
   return nibble;
@@ -452,7 +452,7 @@ template<int S, typename T>
 Program groupsort(const std::string & name, const std::string& input_name0)
 { 
   Program nibble = SH_BEGIN_PROGRAM() {
-    typename T::InputType NAMEDECL(a, input_name0);
+    typename T::InputType SH_NAMEDECL(a, input_name0);
     groupsort<S>(a);
   } SH_END;
   nibble.name("groupsort");
@@ -465,12 +465,12 @@ Program hermite(const std::string& name, const std::string& input_name0,
                     const std::string& input_name3, const std::string& input_name4)
 {
   Program nibble = SH_BEGIN_PROGRAM() {
-    typename T1::InputType NAMEDECL(a, input_name0);
-    typename T2::InputType NAMEDECL(b, input_name1);
-    typename T2::InputType NAMEDECL(c, input_name2);
-    typename T2::InputType NAMEDECL(d, input_name3);
-    typename T2::InputType NAMEDECL(e, input_name4);
-    typename T2::OutputType NAMEDECL(result, name) = hermite(a, b, c, d, e);
+    typename T1::InputType SH_NAMEDECL(a, input_name0);
+    typename T2::InputType SH_NAMEDECL(b, input_name1);
+    typename T2::InputType SH_NAMEDECL(c, input_name2);
+    typename T2::InputType SH_NAMEDECL(d, input_name3);
+    typename T2::InputType SH_NAMEDECL(e, input_name4);
+    typename T2::OutputType SH_NAMEDECL(result, name) = hermite(a, b, c, d, e);
   } SH_END;
   nibble.name("hermite");
   return nibble;
@@ -482,9 +482,9 @@ Program join(const std::string & name,
                  const std::string & input_name1)
 {
   Program nibble = SH_BEGIN_PROGRAM() {
-    typename T1::InputType NAMEDECL(a, input_name0);
-    typename T2::InputType NAMEDECL(b, input_name1);
-    Attrib<T1::typesize + T2::typesize, SH_OUTPUT, float> NAMEDECL(result, name) = join(a, b); 
+    typename T1::InputType SH_NAMEDECL(a, input_name0);
+    typename T2::InputType SH_NAMEDECL(b, input_name1);
+    Attrib<T1::typesize + T2::typesize, SH_OUTPUT, float> SH_NAMEDECL(result, name) = join(a, b); 
   } SH_END; 
   nibble.name("join");
   return nibble;
@@ -495,10 +495,10 @@ Program lerp(const std::string & name, const std::string& input_name0,
                  const std::string& input_name1, const std::string& input_name2)
 { 
   Program nibble = SH_BEGIN_PROGRAM() {
-    typename T1::InputType NAMEDECL(a, input_name0);
-    typename T1::InputType NAMEDECL(b, input_name1); 
-    typename T2::InputType NAMEDECL(alpha, input_name2);
-    typename T1::OutputType NAMEDECL(result, name) = lerp(alpha, a, b); 
+    typename T1::InputType SH_NAMEDECL(a, input_name0);
+    typename T1::InputType SH_NAMEDECL(b, input_name1); 
+    typename T2::InputType SH_NAMEDECL(alpha, input_name2);
+    typename T1::OutputType SH_NAMEDECL(result, name) = lerp(alpha, a, b); 
   } SH_END; 
   nibble.name("lerp");
   return nibble;
@@ -518,10 +518,10 @@ Program lit(const std::string& name,
                 const std::string& input_name2)
 { 
   Program nibble = SH_BEGIN_PROGRAM() {
-    typename T::InputType NAMEDECL(a, input_name0);
-    typename T::InputType NAMEDECL(b, input_name1);
-    typename T::InputType NAMEDECL(c, input_name2);
-    OutputAttrib4f NAMEDECL(result, name) = lit(a, b, c); 
+    typename T::InputType SH_NAMEDECL(a, input_name0);
+    typename T::InputType SH_NAMEDECL(b, input_name1);
+    typename T::InputType SH_NAMEDECL(c, input_name2);
+    OutputAttrib4f SH_NAMEDECL(result, name) = lit(a, b, c); 
   } SH_END; 
   nibble.name("lit");
   return nibble;
@@ -533,9 +533,9 @@ Program poly(const std::string & name,
                  const std::string & input_name1)
 {
   Program nibble = SH_BEGIN_PROGRAM() {
-    typename T1::InputType NAMEDECL(a, input_name0);
-    typename T2::InputType NAMEDECL(b, input_name1);
-    typename T1::OutputType NAMEDECL(result, name) = poly(a, b);
+    typename T1::InputType SH_NAMEDECL(a, input_name0);
+    typename T2::InputType SH_NAMEDECL(b, input_name1);
+    typename T1::OutputType SH_NAMEDECL(result, name) = poly(a, b);
   } SH_END;
   nibble.name("poly");
   return nibble;
@@ -556,10 +556,10 @@ Program refract(const std::string& name,
                     const std::string& input_name2)
 {
   Program nibble = SH_BEGIN_PROGRAM() {
-    typename T1::InputType NAMEDECL(a, input_name0);
-    typename T1::InputType NAMEDECL(b, input_name1);
-    typename T2::InputType NAMEDECL(c, input_name2);
-    typename T1::OutputType NAMEDECL(result, name) = refract(a, b, c);
+    typename T1::InputType SH_NAMEDECL(a, input_name0);
+    typename T1::InputType SH_NAMEDECL(b, input_name1);
+    typename T2::InputType SH_NAMEDECL(c, input_name2);
+    typename T1::OutputType SH_NAMEDECL(result, name) = refract(a, b, c);
   } SH_END;
   nibble.name("refract");
   return nibble;
@@ -582,11 +582,11 @@ Program smoothpulse(const std::string& name,
                         const std::string& input_name3)
 {
   Program nibble = SH_BEGIN_PROGRAM() {
-    typename T::InputType NAMEDECL(a, input_name0);
-    typename T::InputType NAMEDECL(b, input_name1);
-    typename T::InputType NAMEDECL(c, input_name2);
-    typename T::InputType NAMEDECL(d, input_name3);
-    typename T::OutputType NAMEDECL(result, name) = smoothpulse(a, b, c, d);
+    typename T::InputType SH_NAMEDECL(a, input_name0);
+    typename T::InputType SH_NAMEDECL(b, input_name1);
+    typename T::InputType SH_NAMEDECL(c, input_name2);
+    typename T::InputType SH_NAMEDECL(d, input_name3);
+    typename T::OutputType SH_NAMEDECL(result, name) = smoothpulse(a, b, c, d);
   } SH_END;
   nibble.name("smoothpulse");
   return nibble;

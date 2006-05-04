@@ -40,8 +40,8 @@ using namespace SH;
 template <typename T>
 Program KernelLight::pointLight() {
   Program kernel =  SH_BEGIN_PROGRAM() {
-    typename T::InputType DECL(lightColor);
-    typename T::OutputType DECL(irrad) = lightColor;
+    typename T::InputType SH_DECL(lightColor);
+    typename T::OutputType SH_DECL(irrad) = lightColor;
   } SH_END;
   return kernel;
 }
@@ -49,13 +49,13 @@ Program KernelLight::pointLight() {
 template<typename T>
 Program KernelLight::spotLight() {
   Program kernel =  SH_BEGIN_PROGRAM() {
-    typename T::InputType DECL(lightColor);
-    InputAttrib1f DECL(falloff);
-    InputAttrib1f DECL(lightAngle);
-    InputVector3f DECL(lightDir);
-    InputVector3f DECL(lightVec);
+    typename T::InputType SH_DECL(lightColor);
+    InputAttrib1f SH_DECL(falloff);
+    InputAttrib1f SH_DECL(lightAngle);
+    InputVector3f SH_DECL(lightDir);
+    InputVector3f SH_DECL(lightVec);
 
-    typename T::OutputType DECL(irrad); 
+    typename T::OutputType SH_DECL(irrad); 
 
     lightDir = normalize(lightDir);
     lightVec = normalize(lightVec);
@@ -73,13 +73,13 @@ Program KernelLight::spotLight() {
 template<typename T>
 Program KernelLight::texLight2D(const BaseTexture2D<T> &tex) {
   Program kernel =  SH_BEGIN_PROGRAM() {
-    InputAttrib1f DECL(scaling);
-    InputAttrib1f DECL(lightAngle);
-    InputVector3f DECL(lightDir);
-    InputVector3f DECL(lightUp);
-    InputVector3f DECL(lightVec);
+    InputAttrib1f SH_DECL(scaling);
+    InputAttrib1f SH_DECL(lightAngle);
+    InputVector3f SH_DECL(lightDir);
+    InputVector3f SH_DECL(lightUp);
+    InputVector3f SH_DECL(lightVec);
 
-    typename T::OutputType DECL(irrad); 
+    typename T::OutputType SH_DECL(irrad); 
 
     lightDir = normalize(lightDir);
     lightUp = normalize(lightUp);

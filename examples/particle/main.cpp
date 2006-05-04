@@ -382,10 +382,10 @@ void init_streams(void)
   // Specifiy the generic particle update program, later it will
   // be specialized for the the actual particle update.
   particle = SH_BEGIN_PROGRAM("stream") {
-    InOutPoint3f  DECL(pos);
-    InOutVector3f DECL(vel);
-    InputVector3f DECL(acc);
-    InputAttrib1f DECL(delta);
+    InOutPoint3f  SH_DECL(pos);
+    InOutVector3f SH_DECL(vel);
+    InputVector3f SH_DECL(acc);
+    InputAttrib1f SH_DECL(delta);
 
     // clamp acceleration to zero if particles at or below ground plane 
     acc = cond(abs(pos(1)) < 0.05, Vector3f(0.0, 0.0, 0.0), acc);

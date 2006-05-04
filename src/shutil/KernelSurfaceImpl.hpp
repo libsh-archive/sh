@@ -41,14 +41,14 @@ using namespace SH;
 template<typename T>
 Program KernelSurface::diffuse() {
   Program kernel = SH_BEGIN_FRAGMENT_PROGRAM {
-    typename T::InputType DECL(kd);
-    typename T::InputType DECL(irrad);
-    InputNormal3f DECL(normal);
-    InputVector3f DECL(lightVec);
-    InputPosition4f DECL(posh);
+    typename T::InputType SH_DECL(kd);
+    typename T::InputType SH_DECL(irrad);
+    InputNormal3f SH_DECL(normal);
+    InputVector3f SH_DECL(lightVec);
+    InputPosition4f SH_DECL(posh);
 
     irrad *= pos(dot(normalize(normal), normalize(lightVec)));
-    typename T::OutputType DECL(result);
+    typename T::OutputType SH_DECL(result);
     result = irrad * kd; 
   } SH_END;
   return kernel;
@@ -57,21 +57,21 @@ Program KernelSurface::diffuse() {
 template<typename T>
 Program KernelSurface::specular() {
   Program kernel = SH_BEGIN_FRAGMENT_PROGRAM {
-    typename T::InputType DECL(ks);
-    InputAttrib1f DECL(specExp);
-    typename T::InputType DECL(irrad);
+    typename T::InputType SH_DECL(ks);
+    InputAttrib1f SH_DECL(specExp);
+    typename T::InputType SH_DECL(irrad);
 
-    InputNormal3f DECL(normal);
-    InputVector3f DECL(halfVec);
-    InputVector3f DECL(lightVec);
-    InputPosition4f DECL(posh);
+    InputNormal3f SH_DECL(normal);
+    InputVector3f SH_DECL(halfVec);
+    InputVector3f SH_DECL(lightVec);
+    InputPosition4f SH_DECL(posh);
 
     normal = normalize(normal);
     halfVec = normalize(halfVec);
     lightVec = normalize(lightVec);
     irrad *= pos(normal | lightVec);
 
-    typename T::OutputType DECL(result);
+    typename T::OutputType SH_DECL(result);
     result = irrad * ks * pow(pos(normal | halfVec),specExp); 
   } SH_END;
   return kernel;
@@ -81,17 +81,17 @@ Program KernelSurface::specular() {
 template<typename T>
 Program KernelSurface::phong() {
   Program kernel = SH_BEGIN_PROGRAM("gpu:fragment") {
-    typename T::InputType DECL(kd);
-    typename T::InputType DECL(ks);
-    InputAttrib1f DECL(specExp);
-    typename T::InputType DECL(irrad);
+    typename T::InputType SH_DECL(kd);
+    typename T::InputType SH_DECL(ks);
+    InputAttrib1f SH_DECL(specExp);
+    typename T::InputType SH_DECL(irrad);
 
-    InputNormal3f DECL(normal);
-    InputVector3f DECL(halfVec);
-    InputVector3f DECL(lightVec);
-    InputPosition4f DECL(posh);
+    InputNormal3f SH_DECL(normal);
+    InputVector3f SH_DECL(halfVec);
+    InputVector3f SH_DECL(lightVec);
+    InputPosition4f SH_DECL(posh);
 
-    typename T::OutputType DECL(result);
+    typename T::OutputType SH_DECL(result);
 
     normal = normalize(normal);
     halfVec = normalize(halfVec);
@@ -105,16 +105,16 @@ Program KernelSurface::phong() {
 template<typename T>
 Program KernelSurface::gooch() {
   Program kernel = SH_BEGIN_PROGRAM("gpu:fragment") {
-    typename T::InputType DECL(kd);
-    typename T::InputType DECL(cool);
-    typename T::InputType DECL(warm);
-    typename T::InputType DECL(irrad);
+    typename T::InputType SH_DECL(kd);
+    typename T::InputType SH_DECL(cool);
+    typename T::InputType SH_DECL(warm);
+    typename T::InputType SH_DECL(irrad);
 
-    InputNormal3f DECL(normal);
-    InputVector3f DECL(lightVec);
-    InputPosition4f DECL(posh);
+    InputNormal3f SH_DECL(normal);
+    InputVector3f SH_DECL(lightVec);
+    InputPosition4f SH_DECL(posh);
 
-    typename T::OutputType DECL(result);
+    typename T::OutputType SH_DECL(result);
 
     normal = normalize(normal);
     lightVec = normalize(lightVec);
@@ -126,10 +126,10 @@ Program KernelSurface::gooch() {
 template<typename T>
 Program KernelSurface::null() {
   Program kernel = SH_BEGIN_PROGRAM("gpu:fragment") {
-    typename T::InputType DECL(irrad);
-    InputPosition4f DECL(posh);
+    typename T::InputType SH_DECL(irrad);
+    InputPosition4f SH_DECL(posh);
 
-    typename T::OutputType DECL(result) = irrad;
+    typename T::OutputType SH_DECL(result) = irrad;
   } SH_END;
   return kernel;
 }

@@ -27,8 +27,8 @@ namespace ShUtil {
 
 Program KernelSurfMap::bump() {
   Program kernel = SH_BEGIN_PROGRAM() {
-    InputAttrib2f DECL(gradient);
-    InOutNormal3f DECL(normalt);
+    InputAttrib2f SH_DECL(gradient);
+    InOutNormal3f SH_DECL(normalt);
 
     normalt(1,2) += gradient;
   } SH_END;
@@ -37,10 +37,10 @@ Program KernelSurfMap::bump() {
 
 Program KernelSurfMap::vcsBump() {
   Program kernel = SH_BEGIN_PROGRAM() {
-    InputAttrib2f DECL(gradient);
-    InOutNormal3f DECL(normal);
-    InputVector3f DECL(tangent);
-    InputVector3f DECL(tangent2);
+    InputAttrib2f SH_DECL(gradient);
+    InOutNormal3f SH_DECL(normal);
+    InputVector3f SH_DECL(tangent);
+    InputVector3f SH_DECL(tangent2);
 
     normal = mad(gradient(0), tangent, normal);
     normal = mad(gradient(1), tangent2, normal);

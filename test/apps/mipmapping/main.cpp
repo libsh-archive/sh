@@ -215,7 +215,7 @@ void init_sh()
     normal = mv | normal; // Project normal
   } SH_END;
 
-  Color3f DECL(diffusecolor) = Color3f(0.2, 0.2, 0.2);
+  Color3f SH_DECL(diffusecolor) = Color3f(0.2, 0.2, 0.2);
   Attrib1f exponent(30.0);
 
   // construct fragment program

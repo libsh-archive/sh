@@ -57,10 +57,10 @@ Program KernelLib::inputPass( const Program &p ) {
 Program KernelLib::change_basis(std::string name, 
     std::string b0Name, std::string b1Name, std::string b2Name) {
   Program kernel = SH_BEGIN_PROGRAM() {
-    InputVector3f NAMEDECL( b0, b0Name );
-    InputVector3f NAMEDECL( b1, b1Name );
-    InputVector3f NAMEDECL( b2, b2Name );
-    InOutVector3f NAMEDECL( vec, name ) = changeBasis(b0, b1, b2, vec);
+    InputVector3f SH_NAMEDECL( b0, b0Name );
+    InputVector3f SH_NAMEDECL( b1, b1Name );
+    InputVector3f SH_NAMEDECL( b2, b2Name );
+    InOutVector3f SH_NAMEDECL( vec, name ) = changeBasis(b0, b1, b2, vec);
   } SH_END;
   return kernel;
 }

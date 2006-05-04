@@ -23,6 +23,7 @@ my %special_macros = (
     "IF"       => "SH_IF",
     "ELSE"     => "SH_ELSE",
     "ELSEIF"   => "SH_ELSEIF",
+    "ENDIF"    => "SH_ENDIF",
     "FOR"      => "SH_FOR",
     "ENDFOR"   => "SH_ENDFOR",
     "DO"       => "SH_DO",
@@ -76,6 +77,9 @@ my %special_macros = (
     "REGRESS"  => "SH_REGRESS",
     "DLLEXPORT"=> "SH_DLLEXPORT",
     "DEBUG"    => "SH_DEBUG",
+    "DECL"     => "SH_DECL",
+    "NAME"     => "SH_NAME",
+    "NAMEDECL" => "SH_NAMEDECL"
 );
 
 my %reserved_words = (

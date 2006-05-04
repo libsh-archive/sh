@@ -33,6 +33,7 @@
 #define IF       SH_IF
 #define ELSE     SH_ELSE
 #define ELSEIF   SH_ELSEIF
+#define ENDIF    SH_ENDIF
 #define FOR      SH_FOR
 #define ENDFOR   SH_ENDFOR
 #define DO       SH_DO
@@ -43,5 +44,10 @@
 #define BREAK    SH_BREAK
 #define CONTINUE SH_CONTINUE
 #define RETURN   SH_RETURN
+
+// Named declaration
+#define DECL     SH_DECL
+#define NAME     SH_NAME
+#define NAMEDECL SH_NAMEDECL
 
 #endif /* SHMACROS_HPP */

@@ -51,15 +51,15 @@ Program KernelLib::vsh(const Matrix<N, N, Binding, T> &mv,
   int i;
   Program generalVsh = SH_BEGIN_VERTEX_PROGRAM {
     // INPUTS
-    InputTexCoord2f NAMEDECL(u, "texcoord");  
-    InputNormal3f NAMEDECL(nm, "normal");     
+    InputTexCoord2f SH_NAMEDECL(u, "texcoord");  
+    InputNormal3f SH_NAMEDECL(nm, "normal");     
     Vector3f tgt; 
     Vector3f tgt2; 
     if(numTangents > 0) {
-      InputVector3f NAMEDECL(inTangent, "tangent");
+      InputVector3f SH_NAMEDECL(inTangent, "tangent");
       tgt = inTangent;
       if( numTangents > 1) {
-        InputVector3f NAMEDECL(inTangent2, "tangent2");
+        InputVector3f SH_NAMEDECL(inTangent2, "tangent2");
         tgt2 = inTangent2;
       }  else {
         tgt2 = cross(nm, tgt);
@@ -67,18 +67,18 @@ Program KernelLib::vsh(const Matrix<N, N, Binding, T> &mv,
     }
     InputPoint3f* lpv = new InputPoint3f[numLights];                 
     for(i = 0; i < numLights; ++i) lpv[i].name(makeName("lightPos", i));
-    InputPosition4f NAMEDECL(pm, "posm");     
+    InputPosition4f SH_NAMEDECL(pm, "posm");     
 
     // OUTPUTS
-    OutputTexCoord2f NAMEDECL(uo, "texcoord");  
-    OutputPoint3f NAMEDECL(pv, "posv");         
-    OutputPoint4f NAMEDECL(pmo, "posm");
+    OutputTexCoord2f SH_NAMEDECL(uo, "texcoord");  
+    OutputPoint3f SH_NAMEDECL(pv, "posv");         
+    OutputPoint4f SH_NAMEDECL(pmo, "posm");
     
     // VCS outputs
-    OutputNormal3f NAMEDECL(nv, "normal");      
-    OutputVector3f NAMEDECL(tv, "tangent");
-    OutputVector3f NAMEDECL(tv2, "tangent2");
-    OutputVector3f NAMEDECL(vv, "viewVec");     
+    OutputNormal3f SH_NAMEDECL(nv, "normal");      
+    OutputVector3f SH_NAMEDECL(tv, "tangent");
+    OutputVector3f SH_NAMEDECL(tv2, "tangent2");
+    OutputVector3f SH_NAMEDECL(vv, "viewVec");     
     OutputVector3f* hv = new OutputVector3f[numLights];    
     for(i = 0; i < numLights; ++i) hv[i].name(makeName("halfVec", i).c_str());
     OutputVector3f* lv = new OutputVector3f[numLights];    
@@ -88,14 +88,14 @@ Program KernelLib::vsh(const Matrix<N, N, Binding, T> &mv,
     for(i = 0; i < numLights; ++i) lpo[i].name(makeName("lightPos", i).c_str()); 
 
     // TCS outputs
-    OutputNormal3f NAMEDECL(nvt, "normalt");      
-    OutputVector3f NAMEDECL(vvt, "viewVect");     
+    OutputNormal3f SH_NAMEDECL(nvt, "normalt");      
+    OutputVector3f SH_NAMEDECL(vvt, "viewVect");     
     OutputVector3f* hvt = new OutputVector3f[numLights];    
     for(i = 0; i < numLights; ++i) hvt[i].name(makeName("halfVect", i).c_str());
     OutputVector3f* lvt = new OutputVector3f[numLights];    
     for(i = 0; i < numLights; ++i) lvt[i].name(makeName("lightVect", i).c_str()); 
 
-    OutputPosition4f NAMEDECL(pd, "posh");      
+    OutputPosition4f SH_NAMEDECL(pd, "posh");      
 
     uo = u;
     pv = (mv | pm)(0,1,2); 

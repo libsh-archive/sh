@@ -33,8 +33,8 @@ int main()
 
   for(int i = 0; i < 5000; ++i) {
     Program test = SH_BEGIN_PROGRAM("gpu:stream") {
-      InputVector3f DECL(in);
-      OutputVector3f DECL(out);
+      InputVector3f SH_DECL(in);
+      OutputVector3f SH_DECL(out);
       out = in * (a + b * c(2,1,0));
     } SH_END;
   }

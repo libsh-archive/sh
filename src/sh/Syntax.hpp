@@ -30,9 +30,9 @@
 
 /// @internal
 //@{
-#define PUSH_ARG_QUEUE ::SH::pushArgQueue()
-#define PUSH_ARG ::SH::pushArg()
-#define PROCESS_ARG(arg, internal_cond) ::SH::processArg(arg, internal_cond)
+#define SH_PUSH_ARG_QUEUE ::SH::pushArgQueue()
+#define SH_PUSH_ARG ::SH::pushArg()
+#define SH_PROCESS_ARG(arg, internal_cond) ::SH::processArg(arg, internal_cond)
 //@}
 
 /// @name Shader definitions
@@ -65,27 +65,27 @@
 /** \def SH_IF(cond)
  * Begin an if statement.
  * @see SH_ELSE
- * @see ENDIF
+ * @see SH_ENDIF
  */
 #define SH_IF(cond) { \
   bool sh__internal_cond; \
-  ::SH::internal_if(PUSH_ARG_QUEUE && PUSH_ARG && PROCESS_ARG(cond, &sh__internal_cond)); \
+  ::SH::internal_if(SH_PUSH_ARG_QUEUE && SH_PUSH_ARG && SH_PROCESS_ARG(cond, &sh__internal_cond)); \
   if (::SH::Context::current()->parsing() || sh__internal_cond) {{
 /** \def SH_ELSE
  * Indicate the start of the else-block of an if statement.
  * @see SH_IF
- * @see ENDIF
+ * @see SH_ENDIF
  */
 #define SH_ELSE  \
   }} \
   ::SH::internal_else(); \
   if (::SH::Context::current()->parsing() || !sh__internal_cond) {{
-/** \def ENDIF
+/** \def SH_ENDIF
  * Indicate the end of an if-statement.
  * @see SH_IF
  * @see SH_ELSE
  */
-#define ENDIF \
+#define SH_ENDIF \
   }} \
   ::SH::endIf(); \
 }
@@ -99,7 +99,7 @@
  */
 #define SH_WHILE(cond) { \
   bool sh__internal_cond; \
-  ::SH::internal_while(PUSH_ARG_QUEUE && PUSH_ARG && PROCESS_ARG(cond, &sh__internal_cond)); \
+  ::SH::internal_while(SH_PUSH_ARG_QUEUE && SH_PUSH_ARG && SH_PROCESS_ARG(cond, &sh__internal_cond)); \
   bool sh__internal_firsttime = true; \
   while ((sh__internal_firsttime && (::SH::Context::current()->parsing() || sh__internal_cond)) \
          || (!::SH::Context::current()->parsing() && ::SH::evaluateCondition(cond))) {{{
@@ -129,7 +129,7 @@
  */
 #define SH_UNTIL(cond) \
   }}}} while (!::SH::Context::current()->parsing() && !::SH::evaluateCondition(cond)); \
-  if (::SH::Context::current()->parsing()) ::SH::until(PUSH_ARG_QUEUE && PUSH_ARG && PROCESS_ARG(cond, 0)); }
+  if (::SH::Context::current()->parsing()) ::SH::until(SH_PUSH_ARG_QUEUE && SH_PUSH_ARG && SH_PROCESS_ARG(cond, 0)); }
 //@}
 
 /// @name For loops
@@ -143,10 +143,10 @@
 // TODO: It is possible to make declaring variables in init work. do so.
 #define SH_FOR(init,cond,update) { \
   if (::SH::Context::current()->parsing()) \
-    ::SH::internal_for(PUSH_ARG_QUEUE \
-             && PUSH_ARG && PROCESS_ARG(init, 0) \
-             && PUSH_ARG && PROCESS_ARG(cond, 0) \
-             && PUSH_ARG && PROCESS_ARG(update, 0)); \
+    ::SH::internal_for(SH_PUSH_ARG_QUEUE \
+             && SH_PUSH_ARG && SH_PROCESS_ARG(init, 0) \
+             && SH_PUSH_ARG && SH_PROCESS_ARG(cond, 0) \
+             && SH_PUSH_ARG && SH_PROCESS_ARG(update, 0)); \
   if (!::SH::Context::current()->parsing()) init; \
   bool sh__internal_first_time = true; \
   while (1) {{{{{ \
@@ -179,7 +179,7 @@
   if (!::SH::Context::current()->parsing()) { \
     if (::SH::evaluateCondition(cond)) break;\
   } else {\
-    ::SH::internal_break(PUSH_ARG_QUEUE && PUSH_ARG && PROCESS_ARG(cond, 0));\
+    ::SH::internal_break(SH_PUSH_ARG_QUEUE && SH_PUSH_ARG && SH_PROCESS_ARG(cond, 0));\
   }
 /** \def SH_CONTINUE
  * Break out of a loop, continuing with the next iteration.
@@ -192,7 +192,7 @@
   if (!::SH::Context::current()->parsing()) { \
     if (::SH::evaluateCondition(cond)) continue;\
   } else {\
-    ::SH::internal_continue(PUSH_ARG_QUEUE && PUSH_ARG && PROCESS_ARG(cond, 0));\
+    ::SH::internal_continue(SH_PUSH_ARG_QUEUE && SH_PUSH_ARG && SH_PROCESS_ARG(cond, 0));\
   }
 /** \def SH_RETURN
  * Terminate the fragment program without killing the fragment.
@@ -221,34 +221,34 @@
 
 /// @name Named Declaration macros 
 //@{
-/** \def NAME
+/** \def SH_NAME
  * Set the name of a variable to be its C++ name.
  *
- * @see DECL
- * @see NAMEDECL
+ * @see SH_DECL
+ * @see SH_NAMEDECL
  */
-#define NAME(var) do { var.name( # var); } while (0)
+#define SH_NAME(var) do { var.name( # var); } while (0)
 
-/** \def DECL
+/** \def SH_DECL
  * Declare variable with the same name as var.
  * Usage:
- *  Sh_Some_Type DECL(var);
+ *  Sh_Some_Type SH_DECL(var);
  * or 
- *  Sh_Some_TYPE DECL(var) = initial_value;
+ *  Sh_Some_TYPE SH_DECL(var) = initial_value;
  *
- * @see NAMEDDECL
+ * @see SH_NAMEDECL
  */
-#define DECL(var) var; var.name( # var ); ::SH::Ignore() & var
+#define SH_DECL(var) var; var.name( # var ); ::SH::Ignore() & var
 
-/** \def NAMEDECL
+/** \def SH_NAMEDECL
  * Declare variable with the given name 
  * Usage:
- *  Sh_Some_Type NAMEDECL(var, "name");
- * or Sh_Some_Type NAMEDECL(var, "name") = initial_value;
+ *  Sh_Some_Type SH_NAMEDECL(var, "name");
+ * or Sh_Some_Type SH_NAMEDECL(var, "name") = initial_value;
  *
- * @see DECL
+ * @see SH_DECL
  */
-#define NAMEDECL(var, varName) var; var.name( varName ); ::SH::Ignore() & var
+#define SH_NAMEDECL(var, varName) var; var.name( varName ); ::SH::Ignore() & var
 //@}
 
 namespace SH {

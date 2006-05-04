@@ -152,8 +152,8 @@ void initShaders()
   mvd = mvd * mv;
 
   vsh = SH_BEGIN_VERTEX_PROGRAM {
-    InOutNormal3f DECL(normal);
-    InOutPosition4f DECL(pos); // TODO swap the order of normal and pos
+    InOutNormal3f SH_DECL(normal);
+    InOutPosition4f SH_DECL(pos); // TODO swap the order of normal and pos
 
     Point3f posv = (mv | pos)(0,1,2); // Compute viewspace position
     

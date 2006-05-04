@@ -446,7 +446,7 @@ Program worley(const GeneratorFactory<P, D, T> *genFactory,
                    const PropertyFactory<L, D, T> *propFactory)
 {
   Program program = SH_BEGIN_PROGRAM() {
-    Attrib<D, SH_INPUT, T, SH_TEXCOORD> DECL(texcoord);
+    Attrib<D, SH_INPUT, T, SH_TEXCOORD> SH_DECL(texcoord);
 
     Attrib<K, SH_OUTPUT, T> result[L]; 
     worley(&result[0], texcoord, genFactory, propFactory); 

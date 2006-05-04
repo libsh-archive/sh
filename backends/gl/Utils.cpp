@@ -113,7 +113,7 @@ void StreamCache::generate_programs(ProgramVersion version)
       }
       
       prologue = SH_BEGIN_PROGRAM(target) {
-        InputAttrib2f DECL(streamcoord);
+        InputAttrib2f SH_DECL(streamcoord);
 
         StreamList::iterator stream = m_streams[version].begin();
         UniformList::iterator uniform = m_uniforms.begin();
@@ -173,8 +173,8 @@ void StreamCache::generate_programs(ProgramVersion version)
         Program::BindingSpec::const_iterator binding = m_binding_spec.begin();
         ProgramNode::VarList::const_iterator input = (*I)->begin_inputs();
         for (; input != (*I)->end_inputs(); ++stream) {
-          InputAttrib4f DECL(input_index);
-          Attrib4f DECL(index);
+          InputAttrib4f SH_DECL(input_index);
+          Attrib4f SH_DECL(index);
           
           // Wrap [0..count)
           index = frac(input_index);
@@ -183,7 +183,7 @@ void StreamCache::generate_programs(ProgramVersion version)
           
           for (int i = 0; i < 2 && input != (*I)->end_inputs(); ++i) {
 
-            TexCoord4f DECL(coord);
+            TexCoord4f SH_DECL(coord);
             // x = frac(index)
             coord(0,2) = frac(index(2*i,2*i+1));
             // y = index / width + bias
@@ -225,16 +225,16 @@ void StreamCache::generate_programs(ProgramVersion version)
 /*      
     case OS_2D:
       prologue = SH_BEGIN_PROGRAM(target) {
-        InputTexCoord2f DECL(streamcoord);
+        InputTexCoord2f SH_DECL(streamcoord);
 
-        TexCoord2f DECL(index);
+        TexCoord2f SH_DECL(index);
         // (x, y) = ((x, y) - bias - offset) / stride
         index = mad(streamcoord, m_output_offset(0,1), m_output_offset(2,3));
         
-        Attrib2f DECL(stride);
+        Attrib2f SH_DECL(stride);
         // stride = index * size
         stride = index * m_output_stride(0, 1);
-        Attrib4f DECL(disc);
+        Attrib4f SH_DECL(disc);
         disc = (frac(stride) - m_output_stride(2, 3))(0,1,0,1);
         discard(disc);
 
@@ -244,7 +244,7 @@ void StreamCache::generate_programs(ProgramVersion version)
           Variable out((*input)->clone(SH_OUTPUT));
           Variable tex(input_data->tex);
           
-          TexCoord2f DECL(coord);
+          TexCoord2f SH_DECL(coord);
           coord = mad(index, input_data->os1(0,1), input_data->os1(2,3));
           
           if (m_float_extension == ARB_NV_FLOAT_BUFFER) {
