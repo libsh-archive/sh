@@ -257,16 +257,18 @@ static void draw_1d_stream(int size, const BaseTexture& tex, bool indexed,
   int full_lines_end = (dest_offset+dest_count*dest_stride) / size;
   int last_line_count = (dest_offset+dest_count*dest_stride) % size;
   int first_line_start = dest_offset % size;
+  int first_line_count = dest_count*dest_stride > size-first_line_start ?
+                         size-first_line_start : dest_count*dest_stride;
     
   if (first_line_start) {
     draw_rectangle(first_line_start, full_lines_start, 
-                   size - first_line_start, 1, coords);
+                   first_line_count, 1, coords);
     ++full_lines_start;
   }
-  if (last_line_count) {
+  if (full_lines_end >= full_lines_start && last_line_count) {
     draw_rectangle(0, full_lines_end, last_line_count, 1, coords);
   }
-  if (full_lines_end != full_lines_start) {
+  if (full_lines_end > full_lines_start) {
     draw_rectangle(0, full_lines_start, size,
                    full_lines_end - full_lines_start, coords);
   }
