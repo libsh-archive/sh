@@ -169,7 +169,8 @@ Program connect(Program pa, Program pb)
   std::copy(pb.binding_spec.begin(), pb.binding_spec.end(),
             std::back_inserter(prg.binding_spec));
   prg.stream_inputs = pa.stream_inputs & pb.stream_inputs;
-  prg.uniform_inputs = pa.uniform_inputs & pb.uniform_inputs;
+  prg.uniform_inputs.append(pa.uniform_inputs);
+  prg.uniform_inputs.append(pb.uniform_inputs);
   
   return prg;
 }
@@ -226,7 +227,8 @@ Program combine(Program pa, Program pb)
   std::copy(pb.binding_spec.begin(), pb.binding_spec.end(),
             std::back_inserter(prg.binding_spec));
   prg.stream_inputs = pa.stream_inputs & pb.stream_inputs;
-  prg.uniform_inputs = pa.uniform_inputs & pb.uniform_inputs;
+  prg.uniform_inputs.append(pa.uniform_inputs);
+  prg.uniform_inputs.append(pb.uniform_inputs);
 
   return prg;
 }
