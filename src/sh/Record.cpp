@@ -166,6 +166,8 @@ Record& Record::operator=(const Program& program)
   }
 
   if(Context::current()->parsing()) { 
+    int oldOpt = Context::current()->optimization();
+    Context::current()->optimization(0);
     Program connect_inputs = SH_BEGIN_PROGRAM() {
       VarList::const_iterator I = program.uniform_inputs.begin();
       for(; I != program.uniform_inputs.end(); ++I) {
@@ -173,11 +175,13 @@ Record& Record::operator=(const Program& program)
                                       SEMANTICTYPE_END, true, false));
         shASN(out, *I);
       }
-    } SH_END;
+    } SH_END_PROGRAM;
 
     // need to get rid of inputs before connecting the program
     ProgramNodePtr p = shref_const_cast<ProgramNode>(program.node());
     Program outputMappedProgram = (*this) << Program(p) << connect_inputs;
+    Context::current()->optimization(oldOpt);
+
     Context::current()->parsing()->tokenizer.blockList()->addBlock(
         new CfgBlock(outputMappedProgram, false));
   } else { //immediate mode
@@ -191,7 +195,7 @@ Record& Record::operator=(const Program& program)
 Program connect(const Record& rec, const Program& program)
 {
   Program result = program;
-  result.uniform_inputs = result.uniform_inputs & rec;
+  result.uniform_inputs.append(rec);
   std::fill_n(std::back_inserter(result.binding_spec), rec.size(), Program::UNIFORM);
   return result;
 }

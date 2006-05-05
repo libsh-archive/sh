@@ -118,8 +118,9 @@ Program operator<<(const Program &p, const Manipulator<T> &m) {
      * default output value is zero, so for those that have
      * no matching inputs, they become zero outputs */
     std::vector<Variable> outputs;
-    for(ProgramNode::VarList::const_iterator inIt = p.node()->inputs.begin();
-        inIt != p.node()->inputs.end(); ++inIt) {
+    ProgramNode::VarList::const_iterator inIt = p.node()->inputs.begin();
+    std::advance(inIt, p.binding_spec.size());
+    for (; inIt != p.node()->inputs.end(); ++inIt) {
       Variable out((*inIt)->clone(SH_OUTPUT));
       outputs.push_back(out);
     }
@@ -140,6 +141,9 @@ Program operator<<(const Program &p, const Manipulator<T> &m) {
           << " for an Program with output size " << static_cast<unsigned>(size);
         error(AlgebraException(os.str())); 
       }
+      
+      start -= p.binding_spec.size();
+      end -= p.binding_spec.size();
 
       for(i = start; i <= end; ++i) {
         if(used[i]) {

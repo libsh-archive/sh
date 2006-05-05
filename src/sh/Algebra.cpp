@@ -37,7 +37,7 @@ Program connect(Program pa, Program pb)
 {
   ProgramNodePtr a = pa.node();
   ProgramNodePtr b = pb.node();
-  
+
   if( !a || !b ) SH_DEBUG_WARN( "Connecting with a null Program" );
   if( !a ) return b;
   if( !b ) return a;
@@ -171,7 +171,7 @@ Program connect(Program pa, Program pb)
   prg.stream_inputs = pa.stream_inputs & pb.stream_inputs;
   prg.uniform_inputs.append(pa.uniform_inputs);
   prg.uniform_inputs.append(pb.uniform_inputs);
-  
+
   return prg;
 }
 
@@ -242,11 +242,12 @@ Program mergeNames(Program p)
   FirstOccurenceMap firsts;
   // dups[i] stores the set of positions that have matching input types with position i.
   // The whole set is stored in the smallest i position.
-  Duplicates dups( p.node()->inputs.size(), std::vector<int>()); 
+  Duplicates dups(p.node()->inputs.size() - p.binding_spec.size(), std::vector<int>()); 
 
   std::size_t i = 0;
-  for(ProgramNode::VarList::const_iterator I = p.node()->inputs.begin();
-      I != p.node()->inputs.end(); ++I, ++i) {
+  ProgramNode::VarList::const_iterator I = p.node()->inputs.begin();
+  std::advance(I, p.binding_spec.size());
+  for (; I != p.node()->inputs.end(); ++I, ++i) {
     InputType it( (*I)->name(), (*I)->size() );
     if( firsts.find( it ) != firsts.end() ) { // duplicate
       dups[ firsts[it] ].push_back(i); 
@@ -281,15 +282,17 @@ Program namedConnect(Program pa, Program pb, bool keepExtra)
   typedef std::map<int, int> MatchedChannelMap; 
 
   std::vector<bool> aMatch(a->outputs.size(), false);
-  std::vector<bool> bMatch(b->inputs.size(), false);
+  std::vector<bool> bMatch(b->inputs.size() - pb.binding_spec.size(), false);
   MatchedChannelMap mcm;
   std::size_t i, j;
   ProgramNode::VarList::const_iterator I, J;
+  ProgramNode::VarList::const_iterator b_free_inputs = b->inputs.begin();
+  std::advance(b_free_inputs, pb.binding_spec.size());
 
   i = 0;
   for(I = a->outputs.begin(); I != a->outputs.end(); ++I, ++i) {
     j = 0;
-    for(J = b->inputs.begin(); J != b->inputs.end(); ++J, ++j) {
+    for(J = b_free_inputs; J != b->inputs.end(); ++J, ++j) {
       if(bMatch[j]) continue;
       if((*I)->name() != (*J)->name()) continue;
       if((*I)->size() != (*J)->size()) {
@@ -303,7 +306,7 @@ Program namedConnect(Program pa, Program pb, bool keepExtra)
     }
   }
 
-  std::vector<int> swiz(b->inputs.size(), 0); 
+  std::vector<int> swiz(b->inputs.size() - pb.binding_spec.size(), 0); 
   for(MatchedChannelMap::iterator mcmit = mcm.begin(); mcmit != mcm.end(); ++mcmit) {
     swiz[mcmit->second] = mcmit->first;
   }
@@ -311,7 +314,7 @@ Program namedConnect(Program pa, Program pb, bool keepExtra)
   // swizzle unmatched inputs and make a pass them through properly
   Program passer = SH_BEGIN_PROGRAM() {} SH_END;
   int newInputIdx = a->outputs.size(); // index of next new input added to a
-  for(j = 0, J= b->inputs.begin(); J != b->inputs.end(); ++J, ++j) {
+  for(j = 0, J = b_free_inputs; J != b->inputs.end(); ++J, ++j) {
     if( !bMatch[j] ) {
       Program passOne = SH_BEGIN_PROGRAM() {
         Variable var((*J)->clone(SH_INOUT));
@@ -332,11 +335,12 @@ Program namedConnect(Program pa, Program pb, bool keepExtra)
 }
 
 Program renameInput(Program a, const std::string& oldName,
-                      const std::string& newName)
+                    const std::string& newName)
 {
   Program renamer = SH_BEGIN_PROGRAM() {
-    for(ProgramNode::VarList::const_iterator I = a.node()->inputs.begin();
-        I != a.node()->inputs.end(); ++I) {
+    ProgramNode::VarList::const_iterator I = a.node()->inputs.begin();
+    std::advance(I, a.binding_spec.size());
+    for (; I != a.node()->inputs.end(); ++I) {
       Variable var((*I)->clone(SH_INOUT));
 
       if (!(*I)->has_name()) continue;
@@ -353,7 +357,7 @@ Program renameInput(Program a, const std::string& oldName,
 
 // TODO factor out common code from renameInput, renameOutput
 Program renameOutput(Program a, const std::string& oldName, 
-                       const std::string& newName)
+                     const std::string& newName)
 {
   Program renamer = SH_BEGIN_PROGRAM() {
     for(ProgramNode::VarList::const_iterator I = a.node()->outputs.begin();
@@ -376,8 +380,9 @@ Program namedAlign(Program a, Program b)
 {
   Manipulator<std::string> ordering;
 
-  for(ProgramNode::VarList::const_iterator I = b.node()->inputs.begin();
-      I != b.node()->inputs.end(); ++I) {
+  ProgramNode::VarList::const_iterator I = b.node()->inputs.begin();
+  std::advance(I, b.binding_spec.size());
+  for (; I != b.node()->inputs.end(); ++I) {
     ordering((*I)->name());
   }
 
