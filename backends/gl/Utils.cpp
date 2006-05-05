@@ -83,7 +83,7 @@ void StreamCache::generate_programs(ProgramVersion version)
     dims = SH_TEXTURE_3D;
     break;
   }
- 
+
   split_program(m_stream_program, m_split_programs[version],
                 get_target_backend(m_stream_program) + "fragment",
                 (version & SINGLE_OUTPUT) ? 1 : m_max_outputs);
@@ -195,7 +195,7 @@ void StreamCache::generate_programs(ProgramVersion version)
                               stream->uniform2[i][1](0,1),
                               coord(1,3));
 
-            for (int j = 0; j < 2 && input != I->program->end_inputs(); ++j, ++input) {
+            for (int j = 0; j < 2 && input != I->program->end_inputs(); ++j, ++input, ++binding) {
               Variable out((*input)->clone(SH_OUTPUT));
               if (*binding == Program::UNIFORM) {
                 shASN(out, *uniform);

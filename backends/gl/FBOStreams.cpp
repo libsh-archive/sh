@@ -627,10 +627,6 @@ void FBOStreams::execute(const Program& program,
       break;
     }
  
-    DECLARE_TIMER(finish);
-    glFinish();
-    TIMING_RESULT(finish);
-    
     // Unbind, just to be safe
     unbind(**I);
     
