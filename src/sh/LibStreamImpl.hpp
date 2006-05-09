@@ -240,14 +240,13 @@ Array3D<T> slice(const Array3D<T>& array,
 }
 
 template <typename T, typename T2>
-void gather(const Array1D<T>& dest, const Array1D<T>& src, 
-            const Array1D<T2>& index, std::string target)
+void gather(const Array1D<T>& dest, const Array1D<T>& src, const Array1D<T2>& index)
 {
   if (T2::typesize != 1) {
     error(Exception("gather index must be a 1 tuple"));
     return;
   }
-  BackendPtr backend = Backend::get_backend(target);
+  BackendPtr backend = Backend::get_backend("stream");
   SH_DEBUG_ASSERT(backend);
   backend->gather(dest, src, index);
 }

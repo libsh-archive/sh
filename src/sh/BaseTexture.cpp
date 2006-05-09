@@ -27,6 +27,7 @@ BaseTexture::BaseTexture(const TextureNodePtr& node)
 {
   for (int i = 0; i < 3; ++i) {
     m_stride[i] = 1;
+    m_repeat[i] = 1;
     m_offset[i] = 0;
   }
   m_count[0] = node->width();
