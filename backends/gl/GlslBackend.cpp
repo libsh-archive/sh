@@ -26,7 +26,6 @@
 #include "Glsl.hpp"
 #include "GlTextures.hpp"
 #include "GlBackend.hpp"
-#include "PBufferStreams.hpp"
 #include "FBOStreams.hpp"
 
 namespace shgl {
