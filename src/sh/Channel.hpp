@@ -60,7 +60,7 @@ public:
   void memory(const MemoryPtr& memory, int count);
   
   /// Sync and return a pointer to the channel's host storage
-  typename T::mem_type* read_data()
+  const typename T::mem_type* read_data() const
   { return static_cast<typename T::mem_type*>(BaseTexture::read_data(0)); }
   
   /// Dirty and return a pointer to the channel's host storage

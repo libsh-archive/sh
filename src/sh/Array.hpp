@@ -25,7 +25,7 @@
 
 namespace SH {
 
-template<typename T, typename T2> class IndexedArray1D;
+template<typename T, typename T2> class IndexedArray;
   
 /** Default traits for Array.
  * An array is a texture that does not support filtering or interpolation.
@@ -61,14 +61,16 @@ public:
 
   Array1D& operator=(const Program& program);
   template <typename T2>
-  Array1D& operator=(const IndexedArray1D<T, T2>& array);
+  Array1D& operator=(const IndexedArray< Array1D<T>, Array1D<T2> >& array);
 
   using base_type::operator[];
 
-  template <typename T2>
-  IndexedArray1D<T, T2> operator[](const Array1D<T2>& index);
+  template <typename T2> const IndexedArray< Array1D<T>, Array1D<T2> > 
+  operator[](const Array1D<T2>& index) const;
+  template <typename T2> IndexedArray< Array1D<T>, Array1D<T2> > 
+  operator[](const Array1D<T2>& index);
 
-  typename T::mem_type* read_data();
+  const typename T::mem_type* read_data() const;
   typename T::mem_type* write_data();
 };
 
@@ -90,7 +92,7 @@ public:
   
   Array2D& operator=(const Program& program);
 
-  typename T::mem_type* read_data();
+  const typename T::mem_type* read_data() const;
   typename T::mem_type* write_data();
 };
 
@@ -112,7 +114,7 @@ public:
   
   ArrayRect& operator=(const Program& program);
 
-  typename T::mem_type* read_data();
+  const typename T::mem_type* read_data() const;
   typename T::mem_type* write_data();
 };
 
@@ -134,7 +136,7 @@ public:
   
   Array3D& operator=(const Program& program);
 
-  typename T::mem_type* read_data();
+  const typename T::mem_type* read_data() const;
   typename T::mem_type* write_data();
 };
 
@@ -158,22 +160,21 @@ public:
 };
 
 template <typename T1, typename T2>
-class IndexedArray1D {
+class IndexedArray {
 public:
-  IndexedArray1D(const Array1D<T1>& array, const Array1D<T2>& index)
+  IndexedArray(const T1& array, const T2& index)
     : m_array(array), m_index(index)
   {}
   
-  const Array1D<T1>& array() const { return m_array; }
-  const Array1D<T2>& index() const { return m_index; }
+  const T1& array() const { return m_array; }
+  const T2& index() const { return m_index; }
   
-  Array1D<T1>& operator=(const Array1D<T1>& src);
+  T1& operator=(const T1& src);
   
 private:
-  Array1D<T1> m_array;
-  Array1D<T2> m_index;
+  T1 m_array;
+  T2 m_index;
 };
-
 
 }
 

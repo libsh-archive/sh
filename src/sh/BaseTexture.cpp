@@ -91,7 +91,7 @@ void BaseTexture::set_repeat(const int* repeat, int n)
     m_repeat[i] = repeat[i];
 }
 
-void* BaseTexture::read_data(int n)
+void* BaseTexture::read_data(int n) const
 {
   StoragePtr storage = m_node->memory(n)->findStorage("host");
   if (!storage) error(Exception("No host storage found"));

@@ -60,7 +60,7 @@ Array1D<T>& Array1D<T>::operator=(const Program& program)
 
 template <typename T>
 template <typename T2>
-Array1D<T>& Array1D<T>::operator=(const IndexedArray1D<T, T2>& array)
+Array1D<T>& Array1D<T>::operator=(const IndexedArray< Array1D<T>, Array1D<T2> >& array)
 {
   gather(*this, array.array(), array.index());
   return *this;
@@ -68,13 +68,22 @@ Array1D<T>& Array1D<T>::operator=(const IndexedArray1D<T, T2>& array)
 
 template <typename T>
 template <typename T2>
-IndexedArray1D<T, T2> Array1D<T>::operator[](const Array1D<T2>& index)
+const IndexedArray< Array1D<T>, Array1D<T2> > 
+Array1D<T>::operator[](const Array1D<T2>& index) const
 {
-  return IndexedArray1D<T, T2>(*this, index);
+  return IndexedArray< Array1D<T>, Array1D<T2> >(*this, index);
+}
+
+template <typename T>
+template <typename T2>
+IndexedArray< Array1D<T>, Array1D<T2> > 
+Array1D<T>::operator[](const Array1D<T2>& index)
+{
+  return IndexedArray< Array1D<T>, Array1D<T2> >(*this, index);
 }
 
 template <typename T> inline
-typename T::mem_type* Array1D<T>::read_data()
+const typename T::mem_type* Array1D<T>::read_data() const
 {
   return static_cast<typename T::mem_type*>(BaseTexture::read_data(0));
 }
@@ -111,7 +120,7 @@ Array2D<T>& Array2D<T>::operator=(const Program& program)
 }
 
 template <typename T> inline
-typename T::mem_type* Array2D<T>::read_data()
+const typename T::mem_type* Array2D<T>::read_data() const
 {
   return static_cast<typename T::mem_type*>(BaseTexture::read_data(0));
 }
@@ -147,7 +156,7 @@ ArrayRect<T>& ArrayRect<T>::operator=(const Program& program)
 }
 
 template <typename T> inline
-typename T::mem_type* ArrayRect<T>::read_data()
+const typename T::mem_type* ArrayRect<T>::read_data() const
 {
   return static_cast<typename T::mem_type*>(BaseTexture::read_data(0));
 }
@@ -183,7 +192,7 @@ Array3D<T>& Array3D<T>::operator=(const Program& program)
 }
 
 template <typename T> inline
-typename T::mem_type* Array3D<T>::read_data()
+const typename T::mem_type* Array3D<T>::read_data() const
 {
   return static_cast<typename T::mem_type*>(BaseTexture::read_data(0));
 }
@@ -195,7 +204,7 @@ typename T::mem_type* Array3D<T>::write_data()
 }
 
 template <typename T1, typename T2>
-Array1D<T1>& IndexedArray1D<T1, T2>::operator=(const Array1D<T1>& src)
+T1& IndexedArray<T1, T2>::operator=(const T1& src)
 {
   scatter(m_array, m_index, src);
   return m_array;

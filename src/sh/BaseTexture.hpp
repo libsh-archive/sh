@@ -56,7 +56,7 @@ public:
   void set_repeat(const int* repeat, int n);
   
   /// Sync and return a pointer to memory \a n
-  void* read_data(int n);
+  void* read_data(int n) const;
   /// Dirty and return a pointer to memory \a n
   void* write_data(int n);
 
