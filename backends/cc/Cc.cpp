@@ -408,6 +408,7 @@ bool CcBackendCode::generate(void)
   Context::current()->enter(m_program);
   Transformer transform(m_program);
 
+  transform.convertInputOutput();
   transform.convertToFloat(m_convertMap);
   transform.stripDummyOps();
   if(transform.changed()) {
@@ -625,7 +626,7 @@ void CcBackendCode::delete_temporary_files()
   }
 }
 
-bool CcBackendCode::execute(const Stream& src, Stream& dest) 
+bool CcBackendCode::execute(const Program& prg, Stream& dest) 
 {
   if (!m_shader_func) {
     if (!generate()) {
@@ -635,7 +636,7 @@ bool CcBackendCode::execute(const Stream& src, Stream& dest)
   }
 
   int num_outputs = dest.size();
-  int num_inputs = src.size();
+  int num_inputs = prg.binding_spec.size();
   int num_textures = m_program->textures.size();
   void** inputs = new void*[num_inputs];
   void** outputs = new void*[num_outputs]; 
@@ -649,24 +650,36 @@ bool CcBackendCode::execute(const Stream& src, Stream& dest)
   int iidx = 0;
     
   SH_CC_DEBUG_PRINT("Assigning input channels to arrays");
-  for(Stream::const_iterator I = src.begin(); I != src.end(); ++I, ++iidx) {
-    HostStoragePtr storage = shref_dynamic_cast<HostStorage>(I->node()->memory(0)->findStorage("host"));
+  Program::BindingSpec::const_iterator I = prg.binding_spec.begin();
+  Stream::const_iterator stream = prg.stream_inputs.begin();
+  Record::const_iterator uniform = prg.uniform_inputs.begin();
+  for(; I != prg.binding_spec.end(); ++I, ++iidx) {
+    if (*I == Program::STREAM) {
+      HostStoragePtr storage = shref_dynamic_cast<HostStorage>(stream->node()->memory(0)->findStorage("host"));
 
-    int datasize = typeInfo(I->node()->valueType(), MEM)->datasize();
-    int stride, count, offset;
-    I->get_stride(&stride, 1);
-    I->get_count(&count, 1);
-    I->get_offset(&offset, 1);
-    input_sizes[iidx] = datasize * I->node()->size() * stride;
-    input_types[iidx] = I->node()->valueType();
+      int datasize = typeInfo(stream->node()->valueType(), MEM)->datasize();
+      int stride, count, offset;
+      stream->get_stride(&stride, 1);
+      stream->get_count(&count, 1);
+      stream->get_offset(&offset, 1);
+      input_sizes[iidx] = datasize * stream->node()->size() * stride;
+      input_types[iidx] = stream->node()->valueType();
 
-    if (!storage) {
-      storage = new HostStorage(I->node()->memory(0).object(),
-				  datasize * I->node()->size() * count, I->node()->valueType());
-    }
+      if (!storage) {
+        storage = new HostStorage(stream->node()->memory(0).object(),
+				  datasize * stream->node()->size() * count, stream->node()->valueType());
+      }
 //    storage->dirty();
-    inputs[iidx] = reinterpret_cast<char*>(storage->data()) +
-                    datasize * I->node()->size() * offset;
+      inputs[iidx] = reinterpret_cast<char*>(storage->data()) +
+                     datasize * stream->node()->size() * offset;
+      ++stream;
+    }
+    else {
+      inputs[iidx] = uniform->node()->getVariant()->array();
+      input_sizes[iidx] = 0;
+      input_types[iidx] = uniform->node()->valueType();
+      ++uniform;
+    }
   }
 
   int tidx = 0;
@@ -776,7 +789,7 @@ void CcBackend::execute(const Program& program, Stream& dest)
   Pointer<Backend> b(this);
     
   CcBackendCodePtr backendcode = shref_dynamic_cast<CcBackendCode>(prg->code(b)); // = new CcBackendCode(program);
-  backendcode->execute(program.stream_inputs, dest);
+  backendcode->execute(program, dest);
   backendcode->delete_temporary_files();
 }
 

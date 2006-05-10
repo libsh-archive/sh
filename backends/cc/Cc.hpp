@@ -80,7 +80,7 @@ public:
 protected:
   friend class CcBackend;
   bool generate(void);
-  bool execute(const SH::Stream& src, SH::Stream& dest);
+  bool execute(const SH::Program& prg, SH::Stream& dest);
 
 private:
 
