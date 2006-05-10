@@ -32,9 +32,9 @@ void test_type(Test& test, int& total_tests, int& errors)
     
     try {
       result = src[index];
-      if (test.output_result<typename T1::mem_type*>("single", inputs,
-                                                     result.read_data(),
-                                                     expected, T1::typesize, 0.0))
+      if (test.output_result<const typename T1::mem_type*>("single", inputs,
+                                                           result.read_data(),
+                                                           expected, T1::typesize, 0.0))
         ++errors;
     } catch (const Exception& e) {
       cout << "SH Exception '" << e.message() << "'" << endl;
@@ -58,9 +58,9 @@ void test_type(Test& test, int& total_tests, int& errors)
     
     try {
       result = src[index];
-      if (test.output_result<typename T1::mem_type*>("many", inputs, 
-                                                     result.read_data(),
-                                                     expected, T1::typesize*3, 0.0))
+      if (test.output_result<const typename T1::mem_type*>("many", inputs, 
+                                                           result.read_data(),
+                                                           expected, T1::typesize*3, 0.0))
         ++errors;
     } catch (const Exception& e) {
       cout << "SH Exception '" << e.message() << "'" << endl;

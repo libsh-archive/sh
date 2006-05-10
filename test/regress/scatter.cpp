@@ -35,8 +35,8 @@ int main(int argc, char* argv[])
     
     try {
       dest[index] = data;
-      if (test.output_result<float*>("single", inputs, dest.read_data(),
-                                     expected, 3, 0.0))
+      if (test.output_result<const float*>("single", inputs, dest.read_data(),
+                                           expected, 3, 0.0))
         ++errors;
     } catch (const Exception& e) {
       cout << "SH Exception '" << e.message() << "'" << endl;
@@ -62,8 +62,8 @@ int main(int argc, char* argv[])
     
     try {
       dest[index] = data;
-      if (test.output_result<short*>("multiple", inputs, dest.read_data(),
-                                     expected, 3, 0.0))
+      if (test.output_result<const short*>("multiple", inputs, dest.read_data(),
+                                           expected, 3, 0.0))
         ++errors;
     } catch (const Exception& e) {
       cout << "SH Exception '" << e.message() << "'" << endl;

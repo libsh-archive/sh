@@ -38,7 +38,7 @@ void mismatch_test(int& total, int& errors)
     
     out = prg << in;
 
-    float* result = out.read_data();
+    const float* result = out.read_data();
     int first = -1, wrong = 0;
     for (int j = 0; j < i; ++j) {
       float diff = fabs(result[j] - j);
