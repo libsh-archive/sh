@@ -60,6 +60,92 @@ EntryPoint* load_function(SH::Backend::LibraryHandle module, const char* name)
 #endif
 }
 
+void get_params(const SH::BaseTexture& stream,
+                int& offset, int& stride, int& repeat, int& count)
+{
+  stream.get_offset(&offset, 1);
+  stream.get_stride(&stride, 1);
+  stream.get_repeat(&repeat, 1);
+  stream.get_count(&count, 1);
+}                
+
+class Gather {
+public:
+  Gather(const SH::BaseTexture& source)
+  {
+    m_size = source.node()->size() * 
+             SH::typeInfo(source.node()->valueType(), SH::MEM)->datasize();
+  }
+  void operator()(char *src, int src_elt, char *dest, int dest_elt) const
+  {
+    memcpy(dest + dest_elt*m_size, src + src_elt*m_size, m_size);
+  }
+private:
+  int m_size;
+};
+
+class Scatter {
+public:
+  Scatter(const SH::BaseTexture& source)
+  {
+    m_size = source.node()->size() * 
+             SH::typeInfo(source.node()->valueType(), SH::MEM)->datasize();
+  }
+  void operator()(char *dest, int dest_elt, char *src, int src_elt) const
+  {
+    memcpy(dest + dest_elt*m_size, src + src_elt*m_size, m_size);
+  }
+private:
+  int m_size;
+};
+
+template <typename Functor>
+void do_gather_scatter_1d(const SH::BaseTexture& stream1,
+                          const SH::BaseTexture& stream2,
+                          const SH::BaseTexture& index,
+                          const Functor& functor)
+{
+  SH::HostStoragePtr stream1_storage = 
+    SH::shref_dynamic_cast<SH::HostStorage>(stream1.node()->memory(0)->findStorage("host"));
+  SH::HostStoragePtr stream2_storage = 
+    SH::shref_dynamic_cast<SH::HostStorage>(stream2.node()->memory(0)->findStorage("host"));
+  SH::HostStoragePtr index_storage = 
+    SH::shref_dynamic_cast<SH::HostStorage>(index.node()->memory(0)->findStorage("host"));
+  if (!stream1_storage || !stream2_storage || !index_storage) {
+    SH::error(SH::Exception("No storage assocated with stream"));
+  }
+  
+  int index_offset, index_stride, index_repeat, index_count;
+  get_params(index, index_offset, index_stride, index_repeat, index_count);
+  int s1_offset, s1_stride, s1_repeat, s1_count;
+  get_params(stream1, s1_offset, s1_stride, s1_repeat, s1_count);
+  int s2_offset, s2_stride, s2_repeat, s2_count;
+  get_params(stream2, s2_offset, s2_stride, s2_repeat, s2_count);
+
+  SH::VariantPtr index_variant = SH::variantFactory(index_storage->value_type(), SH::MEM)->
+    generate(index_storage->length() / index_storage->value_size(),
+             const_cast<void*>(index_storage->data()), false);
+  if (index_storage->value_type() != SH::SH_INT &&
+      index_storage->value_type() != SH::SH_UINT) {
+    // TODO: we shouldn't convert [u]{s,b}
+    SH::VariantPtr converted_variant = SH::variantFactory(SH::SH_INT, SH::MEM)->
+      generate(index_storage->length() / index_storage->value_size());
+    converted_variant->set(index_variant);
+    index_variant = converted_variant;
+  }
+  
+  int* index_ptr = reinterpret_cast<int*>(index_variant->array());
+  char* stream1_ptr = reinterpret_cast<char*>(stream1_storage->data());
+  char* stream2_ptr = reinterpret_cast<char*>(stream2_storage->data());
+
+  for (int i = 0; i < index_count; ++i) {
+    int index_elt = ((i * index_stride / index_repeat) % index_count) + index_offset;
+    int stream1_elt = (index_ptr[index_elt] * s1_stride / s1_repeat) % s1_count + s1_offset;
+    int stream2_elt = ((i * s2_stride / s2_repeat) % s2_count) + s2_offset;
+    functor(stream1_ptr, stream1_elt, stream2_ptr, stream2_elt);
+  }
+}
+
 }
 
 namespace SH {
@@ -585,6 +671,26 @@ list<string> Backend::derived_targets(const string& target)
   }
 
   return ret;
+}
+
+void Backend::gather(const SH::BaseTexture& dest,
+                     const SH::BaseTexture& src,
+                     const SH::BaseTexture& index)
+{
+  if (src.node()->dims() != SH::SH_TEXTURE_1D) {
+    SH::error(SH::Exception("Only 1D gather is currently supported"));
+  }
+  do_gather_scatter_1d(src, dest, index, Gather(src));
+}
+
+void Backend::scatter(const SH::BaseTexture& dest,
+                      const SH::BaseTexture& index,
+                      const SH::BaseTexture& src)
+{
+  if (src.node()->dims() != SH::SH_TEXTURE_1D) {
+    SH::error(SH::Exception("Only 1D scatter is currently supported"));
+  }
+  do_gather_scatter_1d(dest, src, index, Scatter(src));
 }
 
 }

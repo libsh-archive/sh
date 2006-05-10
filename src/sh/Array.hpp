@@ -25,7 +25,7 @@
 
 namespace SH {
 
-template<typename T, typename T2> class ArrayGather1D;
+template<typename T, typename T2> class IndexedArray1D;
   
 /** Default traits for Array.
  * An array is a texture that does not support filtering or interpolation.
@@ -61,12 +61,12 @@ public:
 
   Array1D& operator=(const Program& program);
   template <typename T2>
-  Array1D& operator=(const ArrayGather1D<T, T2>& array);
+  Array1D& operator=(const IndexedArray1D<T, T2>& array);
 
   using base_type::operator[];
 
   template <typename T2>
-  ArrayGather1D<T, T2> operator[](const Array1D<T2>& index);
+  IndexedArray1D<T, T2> operator[](const Array1D<T2>& index);
 
   typename T::mem_type* read_data();
   typename T::mem_type* write_data();
@@ -157,18 +157,20 @@ public:
   typedef T return_type;
 };
 
-template <typename T, typename T2>
-class ArrayGather1D {
+template <typename T1, typename T2>
+class IndexedArray1D {
 public:
-  ArrayGather1D(const Array1D<T>& src, const Array1D<T2>& index)
-    : m_src(src), m_index(index)
+  IndexedArray1D(const Array1D<T1>& array, const Array1D<T2>& index)
+    : m_array(array), m_index(index)
   {}
   
-  const Array1D<T>& source() const { return m_src; }
+  const Array1D<T1>& array() const { return m_array; }
   const Array1D<T2>& index() const { return m_index; }
   
+  Array1D<T1>& operator=(const Array1D<T1>& src);
+  
 private:
-  Array1D<T> m_src;
+  Array1D<T1> m_array;
   Array1D<T2> m_index;
 };
 

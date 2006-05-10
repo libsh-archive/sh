@@ -123,7 +123,12 @@ public:
   /** Gather data from src at points specified by index */
   virtual void gather(const BaseTexture& dest,
                       const BaseTexture& src, 
-                      const BaseTexture& index) = 0;
+                      const BaseTexture& index);
+  
+  /** Scatter data from src into dest at index */
+  virtual void scatter(const BaseTexture& dest,
+                       const BaseTexture& index,
+                       const BaseTexture& src);
   
   /** Unbind all programs bound under the backend */
   virtual void unbind_all_programs();

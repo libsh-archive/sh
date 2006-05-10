@@ -8,7 +8,7 @@ GENERATED_TESTS = \
 	matrix_add matrix_div matrix_functions matrix_mul matrix_neg \
 	matrix_sub max_min misc mod mul neg poly pow prod_sum rcp rnd \
 	sign smooth_clamp sqrt sub tex trig
-TESTS = $(GENERATED_TESTS) gather offset_stride
+TESTS = $(GENERATED_TESTS) gather offset_stride scatter
 check_PROGRAMS = $(TESTS)
 BACKENDS = arb cc host glsl
 EXTRA_DIST = $(GENERATED_TESTS:=.cpp.py) shtest.py common.py tex_squares.png
@@ -60,6 +60,7 @@ pow_SOURCES = pow.cpp $(common)
 prod_sum_SOURCES = prod_sum.cpp $(common)
 rcp_SOURCES = rcp.cpp $(common)
 rnd_SOURCES = rnd.cpp $(common)
+scatter_SOURCES = scatter.cpp $(common)
 sign_SOURCES = sign.cpp $(common)
 smooth_clamp_SOURCES = smooth_clamp.cpp $(common)
 sqrt_SOURCES = sqrt.cpp $(common)

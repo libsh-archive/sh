@@ -60,17 +60,17 @@ Array1D<T>& Array1D<T>::operator=(const Program& program)
 
 template <typename T>
 template <typename T2>
-Array1D<T>& Array1D<T>::operator=(const ArrayGather1D<T, T2>& array)
+Array1D<T>& Array1D<T>::operator=(const IndexedArray1D<T, T2>& array)
 {
-  gather(*this, array.source(), array.index());
+  gather(*this, array.array(), array.index());
   return *this;
 }
 
 template <typename T>
 template <typename T2>
-ArrayGather1D<T, T2> Array1D<T>::operator[](const Array1D<T2>& index)
+IndexedArray1D<T, T2> Array1D<T>::operator[](const Array1D<T2>& index)
 {
-  return ArrayGather1D<T, T2>(*this, index);
+  return IndexedArray1D<T, T2>(*this, index);
 }
 
 template <typename T> inline
@@ -192,6 +192,13 @@ template <typename T> inline
 typename T::mem_type* Array3D<T>::write_data()
 {
   return static_cast<typename T::mem_type*>(BaseTexture::write_data(0));
+}
+
+template <typename T1, typename T2>
+Array1D<T1>& IndexedArray1D<T1, T2>::operator=(const Array1D<T1>& src)
+{
+  scatter(m_array, m_index, src);
+  return m_array;
 }
 
 }

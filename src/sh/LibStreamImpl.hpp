@@ -24,18 +24,6 @@
 
 namespace SH {
 
-/*
-Record reduce(const Program& program, const Stream& stream)
-{
-  Stream dest;
-  for (Stream::const_iterator I = stream.begin(); I != stream.end(); ++I) {
-    std::size_t dest_size = (*I)->count() + 1 / 2;
-    HostMemoryPtr dest_mem = new HostMemory(dest_size, (*I)->valueType());
-    ChannelNodePtr dest_chan = new ChannelNode
-  }
-}
-*/
-
 template <typename T>
 Array1D<T> offset(const Array1D<T>& array, int val)
 {
@@ -239,8 +227,8 @@ Array3D<T> slice(const Array3D<T>& array,
   return result;
 }
 
-template <typename T, typename T2>
-void gather(const Array1D<T>& dest, const Array1D<T>& src, const Array1D<T2>& index)
+template <typename T1, typename T2>
+void gather(const Array1D<T1>& dest, const Array1D<T1>& src, const Array1D<T2>& index)
 {
   if (T2::typesize != 1) {
     error(Exception("gather index must be a 1 tuple"));
@@ -249,6 +237,18 @@ void gather(const Array1D<T>& dest, const Array1D<T>& src, const Array1D<T2>& in
   BackendPtr backend = Backend::get_backend("stream");
   SH_DEBUG_ASSERT(backend);
   backend->gather(dest, src, index);
+}
+
+template <typename T1, typename T2>
+void scatter(const Array1D<T1>& dest, const Array1D<T2>& index, const Array1D<T1>& src)
+{
+  if (T2::typesize != 1) {
+    error(Exception("scatter index must be a 1 tuple"));
+    return;
+  }
+  BackendPtr backend = Backend::get_backend("stream");
+  SH_DEBUG_ASSERT(backend);
+  backend->scatter(dest, index, src);
 }
 
 }

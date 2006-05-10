@@ -82,10 +82,15 @@ Array3D<T> slice(const Array3D<T>& array,
                  int x, int y, int z, int nx, int ny, int nz);
 
 
-template <typename T, typename T2>
-void gather(const Array1D<T>& dest,
-            const Array1D<T>& src, 
+template <typename T1, typename T2>
+void gather(const Array1D<T1>& dest,
+            const Array1D<T1>& src, 
             const Array1D<T2>& index);
+
+template <typename T1, typename T2>
+void scatter(const Array1D<T1>& dest,
+             const Array1D<T2>& index,
+             const Array1D<T1>& src);
 
 }
 

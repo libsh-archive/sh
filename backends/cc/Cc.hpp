@@ -188,9 +188,6 @@ public:
 				     const SH::ProgramNodeCPtr& program);
   
   void execute(const SH::Program& program, SH::Stream& dest);
-  void gather(const SH::BaseTexture& dest,
-              const SH::BaseTexture& src, 
-              const SH::BaseTexture& index);
 };
 
 

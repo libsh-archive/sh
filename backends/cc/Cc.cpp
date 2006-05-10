@@ -780,14 +780,6 @@ void CcBackend::execute(const Program& program, Stream& dest)
   backendcode->delete_temporary_files();
 }
 
-void CcBackend::gather(const BaseTexture& dest,
-                       const BaseTexture& src, 
-                       const BaseTexture& index)
-{
-  SH_DEBUG_WARN("gather not implemented");
-}
-
-
 }
 
 
