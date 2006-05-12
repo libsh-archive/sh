@@ -59,14 +59,9 @@ Program connect(Program pa, Program pb)
 
   ProgramNodePtr program = new ProgramNode(rtarget);
 
-  CtrlGraphNodePtr heada, taila, headb, tailb;
-
-  a->ctrlGraph->copy(heada, taila);
-  b->ctrlGraph->copy(headb, tailb);
-
-  taila->append(headb);
-
-  CtrlGraphPtr new_graph = new CtrlGraph(heada, tailb);
+  // Create a new CFG from the two programs
+  CtrlGraphPtr new_graph = a->ctrlGraph->clone();
+  new_graph->append(std::auto_ptr<CtrlGraph>(b->ctrlGraph->clone()));
   program->ctrlGraph = new_graph;
 
   ProgramNode::VarList::iterator a_free_inputs = a->inputs.begin();
@@ -129,9 +124,9 @@ Program connect(Program pa, Program pb)
 
   // Change connected InOut variables to either Input or Output only
   // (since they have been connected and turned into temps internally)
-  CtrlGraphNodePtr graphEntry;
+  CtrlGraphNode* graphEntry = 0;
   for (I = InOutInputs.begin(); I != InOutInputs.end(); ++I) {
-    if(!graphEntry) graphEntry = program->ctrlGraph->prependEntry();
+    if(!graphEntry) graphEntry = program->ctrlGraph->prepend_entry();
     VariableNodePtr newInput((*I)->clone(SH_INPUT)); 
 
     std::replace(program->inputs.begin(), program->inputs.end(),
@@ -142,9 +137,9 @@ Program connect(Program pa, Program pb)
         Variable(varMap[*I]), OP_ASN, Variable(newInput)));
   }
 
-  CtrlGraphNodePtr graphExit;
+  CtrlGraphNode* graphExit = 0;
   for (I = InOutOutputs.begin(); I != InOutOutputs.end(); ++I) {
-    if(!graphExit) graphExit = program->ctrlGraph->appendExit();
+    if(!graphExit) graphExit = program->ctrlGraph->append_exit();
     VariableNodePtr newOutput((*I)->clone(SH_OUTPUT));
     
     std::replace(program->outputs.begin(), program->outputs.end(),
@@ -197,14 +192,9 @@ Program combine(Program pa, Program pb)
 
   ProgramNodePtr program = new ProgramNode(rtarget);
 
-  CtrlGraphNodePtr heada, taila, headb, tailb;
-
-  a->ctrlGraph->copy(heada, taila);
-  b->ctrlGraph->copy(headb, tailb);
-
-  taila->append(headb);
-
-  CtrlGraphPtr new_graph = new CtrlGraph(heada, tailb);
+  // Create a new CFG from the two programs
+  CtrlGraphPtr new_graph = a->ctrlGraph->clone();
+  new_graph->append(std::auto_ptr<CtrlGraph>(b->ctrlGraph->clone()));
   program->ctrlGraph = new_graph;
 
   ProgramNode::VarList::iterator a_free_inputs = a->inputs.begin();

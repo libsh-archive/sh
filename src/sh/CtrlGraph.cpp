@@ -32,12 +32,37 @@
 
 namespace SH {
 
-CtrlGraphNode::CtrlGraphNode()
-  : follower(0), m_marked(false)
+CtrlGraphNode::CtrlGraphNode(CtrlGraph *owner)
+  : m_owner(owner), m_follower(0), m_marked(false)
 {
+  assert(m_owner);
+  m_owner->add_owned_node(this);
 }
 
-CtrlGraphNode::~CtrlGraphNode() {
+CtrlGraphNode::~CtrlGraphNode()
+{
+  // Replace references to us from our predecessors with references to our follower
+  while (!predecessors_empty()) {  
+    CtrlGraphNode* pred = m_predecessors.back();
+    for (SuccessorIt s = pred->successors_begin(); s != pred->successors_end(); ++s) {
+      if (s->node == this) {
+        // This is safe during iteration since it doesn't mess with the list item itself
+        pred->replace_successor(s, follower());
+      }
+    }
+    if (pred->follower() == this) {
+      pred->follower(follower());
+    }
+
+    // That item should now be gone from the list (we've removed all successor references!)
+    assert(m_predecessors.empty() || m_predecessors.back() != pred);
+  }
+
+  // Release all of our successor references
+  for (SuccessorList::iterator i = m_successors.begin(); i != m_successors.end(); ++i) {
+    remove_successor_reference(i->node);
+  }
+  remove_successor_reference(m_follower);
 }
 
 std::ostream& CtrlGraphNode::print(std::ostream& out, int indent) const
@@ -46,13 +71,13 @@ std::ostream& CtrlGraphNode::print(std::ostream& out, int indent) const
   mark();
   
   if (block) block->print(out, indent);
-  if (follower) {
+  if (m_follower) {
     printIndent(out, indent);
     out << "->" << std::endl;
-    follower->print(out, indent + 2);
+    m_follower->print(out, indent + 2);
   }
-  for (SuccessorList::const_iterator I = successors.begin();
-       I != successors.end(); ++I) {
+  for (SuccessorList::const_iterator I = m_successors.begin();
+       I != m_successors.end(); ++I) {
     printIndent(out, indent);
     if (!I->cond.null()) {
       out << "[" << I->cond.name() << "]" << std::endl;
@@ -63,7 +88,7 @@ std::ostream& CtrlGraphNode::print(std::ostream& out, int indent) const
   return out;
 }
 
-std::ostream& CtrlGraphNode::graphvizDump(std::ostream& out) const
+std::ostream& CtrlGraphNode::graphviz_dump(std::ostream& out) const
 {
   if (marked()) return out;
   mark();
@@ -80,29 +105,29 @@ std::ostream& CtrlGraphNode::graphvizDump(std::ostream& out) const
 
   if (block) {
     out << "CODE:\\n";
-    block->graphvizDump(out);
+    block->graphviz_dump(out);
     out << "\", shape=box]";
   } else {
     out << " \", shape=circle]";
   }
   out << ";" << std::endl;
 
-  for (SuccessorList::const_iterator I = successors.begin();
-       I != successors.end(); ++I) {
-    I->node->graphvizDump(out);
+  for (SuccessorList::const_iterator I = m_successors.begin();
+       I != m_successors.end(); ++I) {
+    I->node->graphviz_dump(out);
     out << "\"" << this << "\" ";
     out << "-> ";
-    out << "\"" << I->node.object() << "\" ";
+    out << "\"" << I->node << "\" ";
 
     out << "[style=dashed, label=\"" << I->cond.name() << "\"]";
     out << ";" << std::endl;
   }
 
-  if (follower) {
-    follower->graphvizDump(out);
+  if (m_follower) {
+    m_follower->graphviz_dump(out);
     out << "\"" << this << "\" ";
     out << "-> ";
-    out << "\"" << follower.object() << "\";" << std::endl;
+    out << "\"" << m_follower << "\";" << std::endl;
   }
   
   return out;
@@ -118,44 +143,61 @@ void CtrlGraphNode::mark() const
   m_marked = true;
 }
 
-void CtrlGraphNode::clearMarked() const
+void CtrlGraphNode::clear_marked() const
 {
-  if (!marked()) return ;
+  if (!marked()) return;
   m_marked = false;
 
-  if (follower) follower->clearMarked();
+  if (m_follower) m_follower->clear_marked();
   
-  for (SuccessorList::const_iterator I = successors.begin();
-       I != successors.end(); ++I) {
-    I->node->clearMarked();
+  for (SuccessorList::const_iterator I = m_successors.begin();
+       I != m_successors.end(); ++I) {
+    I->node->clear_marked();
   }
 }
 
-void CtrlGraphNode::append(const Pointer<CtrlGraphNode>& node)
+void CtrlGraphNode::append(CtrlGraphNode* node)
 {
-  if (!node) return;
-  assert(!follower);
-  follower = node;
+  if (node) {
+    assert(!m_follower);
+
+    // Take ownership of the new subtree
+    node->change_owner(m_owner, true);
+
+    m_follower = node;
+    // Update predecessors
+    m_follower->m_predecessors.push_back(this);
+  }
 }
 
-void CtrlGraphNode::append(const Pointer<CtrlGraphNode>& node,
-                             Variable cond)
+void CtrlGraphNode::append(CtrlGraphNode* node, Variable cond)
 {
-  if (node) successors.push_back(CtrlGraphBranch(node, cond));
+  if (node) {
+    // Take ownership of the new subtree
+    node->change_owner(m_owner, true);
+
+    m_successors.push_back(CtrlGraphBranch(node, cond));
+    // Update predecessors
+    node->m_predecessors.push_back(this);
+  }
 }
 
+/*
 CtrlGraphNodePtr CtrlGraphNode::split(BasicBlock::StmtList::iterator stmt) 
 {
-  // make a new node to hold the statements after stmt
-  // and move over the successors/follower info
+  // make a new node to hold the statements after stmt  
   CtrlGraphNodePtr after = new CtrlGraphNode();
-  after->successors = successors;
-  after->follower = follower;
-  successors.clear();
+
+  // move over the successors/follower info
+  for (SuccessorIt i = successors_begin(); i != successors_end(); ++i) {
+    append(i->node, i->cond);
+  }
+  successors_clear();
+  after->append(m_follower);
+  m_follower = 0;
 
   // link up the two nodes
-  follower = after;
-  after->predecessors.push_back(this);
+  append(after);
 
   // make a block for after and split up the statements
   after->block = new BasicBlock();
@@ -163,6 +205,58 @@ CtrlGraphNodePtr CtrlGraphNode::split(BasicBlock::StmtList::iterator stmt)
   after->block->splice(after->block->begin(), block->m_statements, stmt);
 
   return after;
+}
+*/
+
+void CtrlGraphNode::remove_successor_reference(CtrlGraphNode* node)
+{
+  if (node) {
+    // Remove a single matching predecessor link
+    PredecessorList::iterator i =
+      std::find(node->m_predecessors.begin(), node->m_predecessors.end(), this);
+    if (i != node->m_predecessors.end()) {
+      node->m_predecessors.erase(i);
+    }
+
+    // Check if we were the only predecessor
+    if (node->predecessors_empty()) {
+      m_owner->release_owned_node(node);
+    }
+  }
+}
+
+CtrlGraphNode::SuccessorIt CtrlGraphNode::successors_erase(SuccessorIt i)
+{
+  remove_successor_reference(i->node);
+  return m_successors.erase(i);
+}
+
+void CtrlGraphNode::replace_successor(SuccessorIt current, CtrlGraphNode* new_node)
+{
+  CtrlGraphNode *old_node = current->node;
+  current->node = 0;
+
+  // Take ownership of the new subtree
+  if (new_node) {
+    new_node->change_owner(m_owner, true);
+    // Update predecessors
+    new_node->m_predecessors.push_back(this);
+  }
+  current->node = new_node;
+  
+  // Release references to the old node
+  remove_successor_reference(old_node);
+}
+
+void CtrlGraphNode::follower(CtrlGraphNode *new_follower)
+{
+  // Setup the new follower
+  CtrlGraphNode *old_follower = m_follower;
+  m_follower = 0;
+  append(new_follower);
+
+  // Release references to the old follower
+  remove_successor_reference(old_follower);
 }
 
 void CtrlGraphNode::addDecl(const VariableNodePtr& node)
@@ -189,25 +283,105 @@ CtrlGraphNode::DeclIt CtrlGraphNode::decl_end() const
   return m_decls.end();
 }
 
-CtrlGraphBranch::CtrlGraphBranch(const Pointer<CtrlGraphNode>& node,
-                                     Variable cond)
-  : node(node), cond(cond)
+void CtrlGraphNode::change_owner(CtrlGraph *new_owner, bool recursive)
 {
+  // NOTE: This does not handle the case where the ROOT owner matches but some recursive
+  // owner does not. However this case should not arise, and this condition provides
+  // an early-out to avoid traversing the whole cfg needlessly.
+  // It is also an easy way to avoid looping endlessly in the cfg.
+  if (new_owner == m_owner) return;
+
+  // Don't allow us to be deleted (naturally) as we're inserting ourselves into a new list
+  m_owner->release_owned_node(this, false);
+  m_owner = new_owner;
+  m_owner->add_owned_node(this);
+  
+
+  // If recursive, call on our children (this MUST be last, after marking ourselves)
+  if (recursive) {
+    for (SuccessorList::iterator i = m_successors.begin(); i != m_successors.end(); ++i) {
+      if (i->node) i->node->change_owner(new_owner, recursive);
+    }
+    if (m_follower) m_follower->change_owner(new_owner, recursive);
+  }
 }
 
-CtrlGraph::CtrlGraph(const CtrlGraphNodePtr& head, const CtrlGraphNodePtr& tail)
-  : m_entry(head),
-    m_exit(tail)
+CtrlGraphNode * CtrlGraphNode::clone(CloneMap *clone_map) const
 {
+  // Clone this node
+  CtrlGraphNode *new_node = new CtrlGraphNode(m_owner);  
+  new_node->m_marked = m_marked;
+  new_node->m_decls = m_decls;
+  new_node->block = block ? new BasicBlock(*block) : 0;
+  
+
+  (*clone_map)[this] = new_node;
+
+  // We deal with successors and predecessors manually to maintain the
+  // cloned graph structure.
+  new_node->m_successors.clear();
+  new_node->m_predecessors.clear();
+  new_node->m_follower = 0;
+
+  // Clone successors as necessary
+  for (SuccessorList::const_iterator i = m_successors.begin();
+       i != m_successors.end(); ++i) {
+    if (i->node) {
+      CloneMap::const_iterator j = clone_map->find(i->node);
+      if (j == clone_map->end()) {
+        // Create a new node
+        new_node->append(i->node->clone(clone_map), i->cond);
+      } else {
+        // We've already cloned this successor, so just point to it
+        new_node->append(j->second, i->cond);
+      }
+    }
+  }
+
+  // Clone follower
+  if (m_follower) {
+    CloneMap::const_iterator j = clone_map->find(m_follower);
+    if (j == clone_map->end()) {
+      new_node->append(m_follower->clone(clone_map));
+    } else {
+      new_node->append(j->second);
+    }
+  }
+
+  // Return the new node
+  return new_node;
+}
+
+CtrlGraphNode * CtrlGraphNode::clone() const
+{
+  CloneMap *clone_map = new CloneMap();
+  CtrlGraphNode *cloned = clone(clone_map);
+  delete clone_map;
+  return cloned;
+}
+
+
+
+
+CtrlGraph::CtrlGraph(CtrlGraphNode* head, CtrlGraphNode* tail)
+  : m_entry(head), m_exit(tail)
+{
+  // Take ownership of the given graph
+  m_entry->change_owner(this, true);
+
+  // Make sure the graph actually contained both the head and tail
+  assert(m_owned_nodes.count(head) > 0 && m_owned_nodes.count(tail) > 0);
 }
 
 CtrlGraph::CtrlGraph(const BlockListPtr& blocks)
-  : m_entry(new CtrlGraphNode()),
-    m_exit(new CtrlGraphNode())
 {
-  CtrlGraphNodePtr head, tail;
+  m_entry = new CtrlGraphNode(this);
+  m_exit = new CtrlGraphNode(this);
 
-  Parser::instance()->parse(head, tail, blocks);
+  CtrlGraphNode* head = 0;
+  CtrlGraphNode* tail = 0;
+  Parser parser(this);
+  parser.parse(head, tail, blocks);
 
   if(!head && !tail) {
     m_entry->append(m_exit);
@@ -220,21 +394,33 @@ CtrlGraph::CtrlGraph(const BlockListPtr& blocks)
 
 CtrlGraph::~CtrlGraph()
 {
+  release_all_owned_nodes();
 }
 
-CtrlGraphNodePtr CtrlGraph::entry() const
+void CtrlGraph::release_owned_node(CtrlGraphNode* node, bool allow_delete)
 {
-  return m_entry;
+  // Careful here so that we don't ever redestruct something currently being destructed
+  // i.e. we have to handle the re-entrant case correctly.
+  // Also ONLY destruct something that belongs to us!
+  NodeSet::iterator i = m_owned_nodes.find(node);
+  if (i != m_owned_nodes.end()) {
+    m_owned_nodes.erase(i);
+    if (allow_delete) delete node;
+  }
 }
 
-CtrlGraphNodePtr CtrlGraph::exit() const
+void CtrlGraph::release_all_owned_nodes()
 {
-  return m_exit;
+  // Remove one by one
+  while (!m_owned_nodes.empty()) {
+    release_owned_node(*m_owned_nodes.begin());
+  }
 }
 
-CtrlGraphNodePtr CtrlGraph::prependEntry() {
-  CtrlGraphNodePtr newEntry = new CtrlGraphNode();
-  CtrlGraphNodePtr oldEntry = m_entry;
+CtrlGraphNode* CtrlGraph::prepend_entry()
+{
+  CtrlGraphNode* newEntry = new CtrlGraphNode(this);
+  CtrlGraphNode* oldEntry = m_entry;
   newEntry->append(oldEntry);
   newEntry->mark();
   
@@ -247,9 +433,10 @@ CtrlGraphNodePtr CtrlGraph::prependEntry() {
   return oldEntry;
 }
 
-CtrlGraphNodePtr CtrlGraph::appendExit() {
-  CtrlGraphNodePtr newExit = new CtrlGraphNode();
-  CtrlGraphNodePtr oldExit = m_exit;
+CtrlGraphNode* CtrlGraph::append_exit()
+{
+  CtrlGraphNode* newExit = new CtrlGraphNode(this);
+  CtrlGraphNode* oldExit = m_exit;
   oldExit->append(newExit);
   
   if( oldExit->block ) {
@@ -261,124 +448,64 @@ CtrlGraphNodePtr CtrlGraph::appendExit() {
   return oldExit;
 }
 
-void CtrlGraph::prepend(Pointer<CtrlGraph> cfg)
+void CtrlGraph::prepend(const std::auto_ptr<CtrlGraph> cfg)
 {
-  cfg->exit()->append(m_entry);
-  m_entry = cfg->entry();
+  // Take ownership of their graph
+  cfg->m_entry->change_owner(this, true);
+  
+  // Attach it before us
+  cfg->m_exit->append(m_entry);
+  m_entry = cfg->m_entry;
 }
 
-void CtrlGraph::append(Pointer<CtrlGraph> cfg)
+void CtrlGraph::append(const std::auto_ptr<CtrlGraph> cfg)
 {
-  m_exit->append(cfg->entry());
-  m_exit = cfg->exit();
+  // Take ownership of their graph
+  cfg->m_entry->change_owner(this, true);
+
+  // Attach it after us
+  m_exit->append(cfg->m_entry);
+  m_exit = cfg->m_exit;
 }
 
 std::ostream& CtrlGraph::print(std::ostream& out, int indent) const
 {
   if (m_entry) {
-    m_entry->clearMarked();
+    m_entry->clear_marked();
     m_entry->print(out, indent);
   }
   
   return out;
 }
 
-std::ostream& CtrlGraph::graphvizDump(std::ostream& out) const
+std::ostream& CtrlGraph::graphviz_dump(std::ostream& out) const
 {
   out << "digraph control {" << std::endl;
   
   if (m_entry) {
-    m_entry->clearMarked();
-    m_entry->graphvizDump(out);
+    m_entry->clear_marked();
+    m_entry->graphviz_dump(out);
   }
   
   out << "}" << std::endl;
   return out;
 }
 
-struct ClearPreds {
-  void operator()(const CtrlGraphNodePtr& node) {
-    if (!node) return;
-    node->predecessors.clear();
-  }
-};
-
-struct ComputePreds {
-  void operator()(CtrlGraphNode* node) {
-    if (!node) return;
-    
-    for (CtrlGraphNode::SuccessorList::iterator I = node->successors.begin();
-         I != node->successors.end(); ++I) {
-      if (I->node) I->node->predecessors.push_back(node);
-    }
-    if (node->follower) node->follower->predecessors.push_back(node);
-  }
-};
-
-
-void CtrlGraph::computePredecessors()
+CtrlGraph * CtrlGraph::clone() const
 {
-  ClearPreds clear;
-  dfs(clear);
-
-  ComputePreds comp;
-  dfs(comp);
-}
-
-typedef std::map<CtrlGraphNodePtr, CtrlGraphNodePtr> CtrlGraphCopyMap;
-
-struct CtrlGraphCopier {
-  CtrlGraphCopier(CtrlGraphCopyMap& copyMap)
-    : copyMap(copyMap)
-  {
-  }
-
-  // assignment operator could not be generated: declaration only
-  CtrlGraphCopier& operator=(CtrlGraphCopier const&);
+  // Use our own clone map
+  CtrlGraphNode::CloneMap *clone_map = new CtrlGraphNode::CloneMap();
   
-  void operator()(const CtrlGraphNodePtr& node) {
-    if (!node) return;
-    CtrlGraphNodePtr newNode = new CtrlGraphNode(*node);
-    copyMap[node] = newNode;
-  }
+  // Clone the graph and find the new tail
+  CtrlGraphNode *newHead = m_entry->clone(clone_map);
+  CtrlGraphNode *newTail = (*clone_map)[m_exit];
 
-  CtrlGraphCopyMap& copyMap;
-};
-
-void CtrlGraph::copy(CtrlGraphNodePtr& newHead, CtrlGraphNodePtr& newTail) const
-{
-  CtrlGraphCopyMap copyMap;
-  copyMap[0] = 0;
+  assert(newHead && newTail);    // Check for a malformed control graph
   
-  CtrlGraphCopier copier(copyMap);
-  SH_DEBUG_ASSERT(m_entry);
-  SH_DEBUG_ASSERT(m_exit); // catch empty tails
-  m_entry->clearMarked();
-  m_entry->dfs(copier);
-
-  // Replace the successors and followers in the new graph with their new equivalents
-  for (CtrlGraphCopyMap::iterator I = copyMap.begin(); I != copyMap.end(); ++I) {
-    CtrlGraphNodePtr node = I->second; // Get the new node
-    if (!node) continue;
-    for (CtrlGraphNode::SuccessorList::iterator J = node->successors.begin();
-         J != node->successors.end(); ++J) {
-      J->node = copyMap[J->node];
-    }
-    node->follower = copyMap[node->follower];
-    if (node->block) {
-      BasicBlockPtr new_block = new BasicBlock(*node->block);
-      node->block = new_block;
-    }
-  }
-  newHead = copyMap[m_entry];
-  newTail = copyMap[m_exit];
-  SH_DEBUG_ASSERT(newHead);
-  SH_DEBUG_ASSERT(newTail);
-
-  m_entry->clearMarked();
+  // Construct a new graph and return it
+  delete clone_map;
+  return new CtrlGraph(newHead, newTail);
 }
-
-
 
 }
 

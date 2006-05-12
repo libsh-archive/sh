@@ -73,7 +73,7 @@ CastMgrEdge: public GraphEdge<CastMgrGraphType>
   CastMgrEdge(const VariantCast *caster, bool automatic);
   CastMgrEdge(const CastMgrEdge &other);
 
-  std::ostream& graphvizDump(std::ostream& out) const;
+  std::ostream& graphviz_dump(std::ostream& out) const;
 
   const VariantCast *m_caster;
   bool m_auto; ///< indicates whether this is an automatic promotion 
@@ -86,7 +86,7 @@ CastMgrVertex: public GraphVertex<CastMgrGraphType>
   CastMgrVertex(ValueType valueType, DataType dataType);
   CastMgrVertex(const CastMgrVertex &other);
 
-  std::ostream& graphvizDump(std::ostream& out) const;
+  std::ostream& graphviz_dump(std::ostream& out) const;
 
   ValueType m_valueType;
   DataType m_dataType;
@@ -148,7 +148,7 @@ CastManager {
     // -1 if the cast is impossible
     int castDist(ValueType destValueType, ValueType srcValueType);
 
-    std::ostream& graphvizDump(std::ostream& out) const;
+    std::ostream& graphviz_dump(std::ostream& out) const;
 
     static CastManager* instance();
 

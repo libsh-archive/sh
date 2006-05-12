@@ -85,7 +85,7 @@ public:
 private:
 
   /// Generate code for this node and those following it.
-  void genNode(const SH::CtrlGraphNodePtr& node);
+  void genNode(SH::CtrlGraphNode* node);
 
   /// Generate code for this structural node and those contained by
   /// it.
@@ -188,7 +188,7 @@ private:
   /// and return true. Otherwise, output nothing and return false.
   bool printSamplingInstruction(std::ostream& out, const ArbInst& inst) const;
 
-  int getLabel(const SH::CtrlGraphNodePtr& node);
+  int getLabel(SH::CtrlGraphNode* node);
   
   TextureStrategy* m_texture;
   // NOTE: These two pointer are deliberately not smart pointers
@@ -262,7 +262,7 @@ private:
   // Extensions and language alternatives available. See list above
   unsigned int m_environment;
 
-  typedef std::map<SH::CtrlGraphNodePtr, int> LabelMap;
+  typedef std::map<SH::CtrlGraphNode*, int> LabelMap;
   LabelMap m_label_map; 
   int m_max_label;
 

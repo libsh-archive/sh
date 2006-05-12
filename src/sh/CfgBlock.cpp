@@ -34,7 +34,7 @@ CfgBlock::CfgBlock(const CtrlGraphPtr& cfg, bool copy)
   init(cfg, copy);
 }
 
-CfgBlock::CfgBlock(const CtrlGraphNodePtr& node, bool copy)
+CfgBlock::CfgBlock(CtrlGraphNode* node, bool copy)
 {
   CtrlGraphPtr cfg = new CtrlGraph(node, node); 
   init(cfg, copy);
@@ -43,25 +43,14 @@ CfgBlock::CfgBlock(const CtrlGraphNodePtr& node, bool copy)
 void CfgBlock::init(const CtrlGraphPtr& cfg, bool copy)
 {
   if(copy) {
-    cfg->copy(m_entry, m_exit);
+    m_cfg = cfg->clone();
   } else {
-    m_entry = cfg->entry();
-    m_exit = cfg->exit();
+    m_cfg = cfg;
   }
 }
 
 CfgBlock::~CfgBlock()
 {
-}
-
-CtrlGraphNodePtr CfgBlock::entry() const 
-{
-  return m_entry;
-}
-
-CtrlGraphNodePtr CfgBlock::exit() const 
-{
-  return m_exit;
 }
 
 void CfgBlock::print(std::ostream& out, int indent) const
@@ -70,15 +59,15 @@ void CfgBlock::print(std::ostream& out, int indent) const
   
   printIndent(out, indent);
   out << "CfgBlock {" << endl;
-    m_entry->print(out, indent + 2);
+    graph()->entry()->print(out, indent + 2);
   printIndent(out, indent);
   out << "}" << endl;
 }
 
-void CfgBlock::graphvizDump(std::ostream& out) const
+void CfgBlock::graphviz_dump(std::ostream& out) const
 {
   out << "subgraph cfgblock {";
-    m_entry->graphvizDump(out);
+    graph()->entry()->graphviz_dump(out);
   out << "}";
 }
 

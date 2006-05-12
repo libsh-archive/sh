@@ -45,7 +45,7 @@ namespace SH {
 // shortest path + a weight for total distance of the shortest
 // path...
 //
-// These new graphs would have predefined graphvizdump ops
+// These new graphs would have predefined graphviz_dump ops
 // so it would be easy to output the shortest-path
 // result through graphviz.
 // 
@@ -74,7 +74,7 @@ struct GraphVertex {
   /** \brief Clones the vertex.  Default version only copies marked field */
   GraphVertex(const GraphVertex<G> &other);
 
-  std::ostream& graphvizDump(std::ostream& out) const;
+  std::ostream& graphviz_dump(std::ostream& out) const;
 
   EdgeList edges;
   bool marked;
@@ -95,7 +95,7 @@ struct GraphEdge {
   /** \brief Clones the edge, but leaves start, end empty */
   GraphEdge(const GraphEdge<G> &other);
 
-  std::ostream& graphvizDump(std::ostream& out) const;
+  std::ostream& graphviz_dump(std::ostream& out) const;
 
   Vertex *start;
   Vertex *end;
@@ -152,7 +152,7 @@ class Graph {
     void clear();
 
     /** \brief clears marks on all vertices */
-    void clearMarked();
+    void clear_marked();
 
     /** \brief Clones the vertices and edges in this graph */ 
     Graph<G>& operator=(const Graph<G> &other);
@@ -264,7 +264,7 @@ class Graph {
  * ostream& operator()(ostream& out, const G::Edge& e);
  * that outputs information per vertex and per edge.
  *
- * The default dump functor uses the built in graphvizDump functions in 
+ * The default dump functor uses the built in graphviz_dump functions in 
  * GraphVertex and GraphEdge.
  *
  * You can either override the function sin the vertex/edge or here
@@ -280,10 +280,10 @@ struct GraphDefaultDumper {
 };
 
 template<typename G>
-std::ostream& graphvizDump(std::ostream &out, const Graph<G> &g); 
+std::ostream& graphviz_dump(std::ostream &out, const Graph<G> &g); 
 
 template<typename G, typename D>
-std::ostream& graphvizDump(std::ostream &out, const Graph<G> &g, D &dumpFunctor); 
+std::ostream& graphviz_dump(std::ostream &out, const Graph<G> &g, D &dumpFunctor); 
 
 }
 

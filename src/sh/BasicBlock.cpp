@@ -43,7 +43,7 @@ void BasicBlock::print(std::ostream& out, int indent) const
   out << "}" << endl;
 }
 
-void BasicBlock::graphvizDump(std::ostream& out) const
+void BasicBlock::graphviz_dump(std::ostream& out) const
 {
   for (const_iterator I = m_statements.begin();
        I != m_statements.end(); ++I) {

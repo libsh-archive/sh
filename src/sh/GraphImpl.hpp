@@ -41,7 +41,7 @@ GraphVertex<G>::GraphVertex(const GraphVertex<G> &other)
 {}
 
 template<typename G>
-std::ostream& GraphVertex<G>::graphvizDump(std::ostream &out) const
+std::ostream& GraphVertex<G>::graphviz_dump(std::ostream &out) const
 {
   out << " [label=\"\", shape=circle, height=0.25]";
   return out;
@@ -63,7 +63,7 @@ GraphEdge<G>::GraphEdge(const GraphEdge<G> &other)
 {}
 
 template<typename G>
-std::ostream& GraphEdge<G>::graphvizDump(std::ostream &out) const
+std::ostream& GraphEdge<G>::graphviz_dump(std::ostream &out) const
 {
   return out; // use default edge
 }
@@ -125,7 +125,7 @@ void Graph<G>::clear()
 }
 
 template<typename G>
-void Graph<G>::clearMarked()
+void Graph<G>::clear_marked()
 {
   for(typename VertexSet::iterator V = verts.begin(); V != verts.end(); ++V) (*V)->marked = false;
 }
@@ -358,24 +358,24 @@ void Graph<G>::leastCommonAncestor(LCAMap &ancestor)
 template<typename G>
 std::ostream& GraphDefaultDumper<G>::operator()(std::ostream& out, const typename G::Vertex *v)
 {
-  return v->graphvizDump(out);
+  return v->graphviz_dump(out);
 }
 
 template<typename G>
 std::ostream& GraphDefaultDumper<G>::operator()(std::ostream& out, const typename G::Edge *e)
 {
-  return e->graphvizDump(out);
+  return e->graphviz_dump(out);
 }
 
 template<typename G>
-std::ostream& graphvizDump(std::ostream &out, const Graph<G> &g)
+std::ostream& graphviz_dump(std::ostream &out, const Graph<G> &g)
 {
   GraphDefaultDumper<G> dumper;
-  return graphvizDump(out, g, dumper); 
+  return graphviz_dump(out, g, dumper); 
 }
 
 template<typename G, typename D>
-std::ostream& graphvizDump(std::ostream &out, const Graph<G> &g, D &dumpFunctor)
+std::ostream& graphviz_dump(std::ostream &out, const Graph<G> &g, D &dumpFunctor)
 {
   out << "digraph {" << std::endl;
     typename Graph<G>::VertexSet::const_iterator V = g.verts.begin();

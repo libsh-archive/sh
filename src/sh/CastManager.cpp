@@ -59,7 +59,7 @@ CastMgrEdge::CastMgrEdge(const CastMgrEdge &other)
   : m_caster(other.m_caster), m_auto(other.m_auto)
 {}
 
-std::ostream& CastMgrEdge::graphvizDump(std::ostream& out) const
+std::ostream& CastMgrEdge::graphviz_dump(std::ostream& out) const
 {
   if(m_auto) out << "[style=\"bold\" color=\"red\"";
   else out << "[style=\"dashed\"";
@@ -100,7 +100,7 @@ void CastMgrGraph::addEdge( CastMgrEdge *edge)
   Graph<CastMgrGraphType>::addEdge(edge);
 }
 
-std::ostream& CastMgrVertex::graphvizDump(std::ostream& out) const
+std::ostream& CastMgrVertex::graphviz_dump(std::ostream& out) const
 {
   out << "[label=\"" << valueTypeName(m_valueType) << ", " 
       << dataTypeName[m_dataType] << "\"]";
@@ -213,9 +213,9 @@ CastManager* CastManager::instance()
   return m_instance;
 }
 
-std::ostream& CastManager::graphvizDump(std::ostream& out) const
+std::ostream& CastManager::graphviz_dump(std::ostream& out) const
 {
-  SH::graphvizDump(out, m_casts);
+  SH::graphviz_dump(out, m_casts);
   return out;
 }
 

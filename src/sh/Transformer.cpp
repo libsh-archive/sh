@@ -56,7 +56,7 @@ struct VariableSplitter {
   // assignment operator could not be generated: declaration only
   VariableSplitter& operator=(VariableSplitter const&);
 
-  void operator()(const CtrlGraphNodePtr& node) {
+  void operator()(CtrlGraphNode* node) {
     if (!node) return;
     BasicBlockPtr block = node->block;
     if (!block) return;
@@ -148,7 +148,7 @@ struct StatementSplitter {
   // assignment operator could not be generated: declaration only
   StatementSplitter& operator=(StatementSplitter const&);
 
-  void operator()(const CtrlGraphNodePtr& node) {
+  void operator()(CtrlGraphNode* node) {
     if (!node) return;
     BasicBlockPtr block = node->block;
     if (!block) return;
@@ -404,7 +404,7 @@ struct InputOutputConvertor {
   // assignment operator could not be generated: declaration only
   InputOutputConvertor& operator=(InputOutputConvertor const&);
 
-  void operator()(const CtrlGraphNodePtr& node) {
+  void operator()(CtrlGraphNode* node) {
     if (!node) return;
     BasicBlockPtr block = node->block;
     if (!block) return;
@@ -462,8 +462,8 @@ struct InputOutputConvertor {
     m_changed = true;
 
     // create block after exit
-    CtrlGraphNodePtr oldExit = m_program->ctrlGraph->appendExit(); 
-    CtrlGraphNodePtr oldEntry = m_program->ctrlGraph->prependEntry();
+    CtrlGraphNode* oldExit = m_program->ctrlGraph->append_exit(); 
+    CtrlGraphNode* oldEntry = m_program->ctrlGraph->prepend_entry();
 
     for(VarMap::const_iterator it = m_varMap.begin(); it != m_varMap.end(); ++it) {
       // assign temporary to output
@@ -547,7 +547,7 @@ void Transformer::convertInputOutput(VarTransformMap *varTransMap)
 struct TextureLookupConverter {
   TextureLookupConverter() : changed(false) {}
   
-  void operator()(const CtrlGraphNodePtr& node)
+  void operator()(CtrlGraphNode* node)
   {
     if (!node) return;
     BasicBlockPtr block = node->block;
@@ -614,7 +614,7 @@ void Transformer::convertTextureLookups()
 
 struct DummyOpStripperBase: public TransformerParent 
 {
- bool handleStmt(BasicBlock::StmtList::iterator &I, const CtrlGraphNodePtr& node) { 
+ bool handleStmt(BasicBlock::StmtList::iterator &I, CtrlGraphNode* node) { 
    switch(I->op) {
      case OP_STARTSEC:
      case OP_ENDSEC:
@@ -688,7 +688,7 @@ VariableNodePtr allocate_scalar_temp(const Variable& dest)
 
 struct ATan2ExpanderBase: public TransformerParent 
 {
-  bool handleStmt(BasicBlock::StmtList::iterator &I, CtrlGraphNodePtr node)
+  bool handleStmt(BasicBlock::StmtList::iterator &I, CtrlGraphNode* node)
   { 
     if (OP_ATAN2 == I->op) {
       BasicBlock::StmtList new_stmts;
@@ -735,7 +735,7 @@ void Transformer::expand_atan2()
 
 struct TexdToTexlodBase : public TransformerParent 
 {
-  bool handleStmt(BasicBlock::StmtList::iterator &I, CtrlGraphNodePtr node)
+  bool handleStmt(BasicBlock::StmtList::iterator &I, CtrlGraphNode* node)
   { 
     if (OP_TEXD == I->op) {
       BasicBlock::StmtList new_stmts;
@@ -787,7 +787,7 @@ void Transformer::texd_to_texlod()
 
 struct ExpandNormalizeBase : public TransformerParent 
 {
-  bool handleStmt(BasicBlock::StmtList::iterator &I, CtrlGraphNodePtr node)
+  bool handleStmt(BasicBlock::StmtList::iterator &I, CtrlGraphNode* node)
   { 
     if (OP_NORM == I->op) {
       BasicBlock::StmtList new_stmts;
@@ -818,7 +818,7 @@ void Transformer::expand_normalize()
 
 struct ReciprocateSqrtBase : public TransformerParent 
 {
-  bool handleStmt(BasicBlock::StmtList::iterator &I, CtrlGraphNodePtr node)
+  bool handleStmt(BasicBlock::StmtList::iterator &I, CtrlGraphNode* node)
   { 
     if (OP_SQRT == I->op) {
       BasicBlock::StmtList new_stmts;
@@ -847,7 +847,7 @@ void Transformer::reciprocate_sqrt()
 
 struct ExpandDivBase : public TransformerParent 
 {
-  bool handleStmt(BasicBlock::StmtList::iterator &I, CtrlGraphNodePtr node)
+  bool handleStmt(BasicBlock::StmtList::iterator &I, CtrlGraphNode* node)
   { 
     if (OP_DIV == I->op) {
       BasicBlock::StmtList new_stmts;
@@ -876,7 +876,7 @@ void Transformer::expand_div()
 
 struct ExpandXpdBase : public TransformerParent 
 {
-  bool handleStmt(BasicBlock::StmtList::iterator &I, CtrlGraphNodePtr node)
+  bool handleStmt(BasicBlock::StmtList::iterator &I, CtrlGraphNode* node)
   { 
     if (OP_XPD == I->op) {
       BasicBlock::StmtList new_stmts;
@@ -905,7 +905,7 @@ void Transformer::expand_xpd()
 
 struct InverseHyperbolicExpanderBase: public TransformerParent 
 {
-  bool handleStmt(BasicBlock::StmtList::iterator &I, const CtrlGraphNodePtr& node)
+  bool handleStmt(BasicBlock::StmtList::iterator &I, CtrlGraphNode* node)
   { 
     BasicBlock::StmtList new_stmts;
     switch (I->op) {
@@ -988,7 +988,7 @@ bool ordered(const Swizzle& s)
 
 struct DestSwizzleOrdererBase : public TransformerParent 
 {
-  bool handleStmt(BasicBlock::StmtList::iterator &I, const CtrlGraphNodePtr& node)
+  bool handleStmt(BasicBlock::StmtList::iterator &I, CtrlGraphNode* node)
   { 
     if (I->dest.node() && !I->dest.swizzle().identity() && !ordered(I->dest.swizzle())) {
       BasicBlock::StmtList new_stmts;
@@ -1046,7 +1046,7 @@ void Transformer::order_dest_swizzles()
 
 struct RemoveWritemasksBase : public TransformerParent 
 {
-  bool handleStmt(BasicBlock::StmtList::iterator &I, const CtrlGraphNodePtr& node)
+  bool handleStmt(BasicBlock::StmtList::iterator &I, CtrlGraphNode* node)
   { 
     if (I->dest.node() && I->dest.swizzle().size() < I->dest.node()->size()) {
       BasicBlock::StmtList new_stmts;

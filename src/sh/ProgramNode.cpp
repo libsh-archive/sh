@@ -234,7 +234,7 @@ void ProgramNode::dump(std::string filename) const
   std::string dotfile = filename + ".dot";
   std::string psfile = filename + ".ps";
   std::ofstream dotout(dotfile.c_str());
-  ctrlGraph->graphvizDump(dotout);
+  ctrlGraph->graphviz_dump(dotout);
   std::string cmd = std::string("dot -Tps < ") + dotfile + " > " + psfile; 
   system(cmd.c_str());
 }
@@ -255,9 +255,9 @@ void ProgramNode::collectVariables()
   textures.clear();
   palettes.clear();
   if (ctrlGraph->entry()) {
-    ctrlGraph->entry()->clearMarked();
+    ctrlGraph->entry()->clear_marked();
     collect_node_vars(ctrlGraph->entry());
-    ctrlGraph->entry()->clearMarked();
+    ctrlGraph->entry()->clear_marked();
   }
 }
 
@@ -270,9 +270,9 @@ void ProgramNode::collectDecls()
   // (may actually want to put this cleaning up step in collectVariables
   // since some temps might be removed during optimizations)
   if (ctrlGraph->entry()) {
-    ctrlGraph->entry()->clearMarked();
+    ctrlGraph->entry()->clear_marked();
     collect_node_decls(ctrlGraph->entry());
-    ctrlGraph->entry()->clearMarked();
+    ctrlGraph->entry()->clear_marked();
   }
 }
 
@@ -281,7 +281,7 @@ bool ProgramNode::hasDecl(const VariableNodePtr& node) const
   return tempDecls.find(node) != tempDecls.end();
 }
 
-void ProgramNode::addDecl(const VariableNodePtr& node, const CtrlGraphNodePtr& cfgNode)
+void ProgramNode::addDecl(const VariableNodePtr& node, CtrlGraphNode* cfgNode)
 {
   tempDecls.insert(node);
   SH_DEBUG_ASSERT(ctrlGraph->entry());
@@ -293,7 +293,7 @@ void ProgramNode::addDecl(const VariableNodePtr& node)
   addDecl(node, ctrlGraph->entry());
 }
 
-void ProgramNode::collect_node_decls(const CtrlGraphNodePtr& node)
+void ProgramNode::collect_node_decls(CtrlGraphNode* node)
 {
   if (node->marked()) return;
   node->mark();
@@ -304,15 +304,15 @@ void ProgramNode::collect_node_decls(const CtrlGraphNodePtr& node)
   }
   */
 
-  for (std::vector<CtrlGraphBranch>::const_iterator J = node->successors.begin();
-       J != node->successors.end(); ++J) {
+  for (CtrlGraphNode::SuccessorIt J = node->successors_begin();
+       J != node->successors_end(); ++J) {
     collect_node_decls(J->node);
   }
   
-  if (node->follower) collect_node_decls(node->follower);
+  if (node->follower()) collect_node_decls(node->follower());
 }
 
-void ProgramNode::collect_node_vars(const CtrlGraphNodePtr& node)
+void ProgramNode::collect_node_vars(CtrlGraphNode* node)
 {
   if (node->marked()) return;
   node->mark();
@@ -328,12 +328,12 @@ void ProgramNode::collect_node_vars(const CtrlGraphNodePtr& node)
     }
   }
 
-  for (std::vector<CtrlGraphBranch>::const_iterator J = node->successors.begin();
-       J != node->successors.end(); ++J) {
+  for (CtrlGraphNode::SuccessorIt J = node->successors_begin();
+       J != node->successors_end(); ++J) {
     collect_node_vars(J->node);
   }
   
-  if (node->follower) collect_node_vars(node->follower);
+  if (node->follower()) collect_node_vars(node->follower());
 }
 
 void ProgramNode::collect_dependent_uniform(const VariableNodePtr& var)
@@ -406,13 +406,10 @@ std::ostream& ProgramNode::print(std::ostream& out,
 
 Pointer<ProgramNode> ProgramNode::clone() const
 {
-  CtrlGraphNodePtr head, tail;
-  ctrlGraph->copy(head, tail);
-
   ProgramNodePtr result = new ProgramNode(target());
   result->InfoHolder::operator=(*this);
   result->Meta::operator=(*this);
-  result->ctrlGraph = new CtrlGraph(head, tail);
+  result->ctrlGraph = ctrlGraph->clone();
   result->inputs = inputs;
   result->outputs = outputs;
   result->collectDecls();

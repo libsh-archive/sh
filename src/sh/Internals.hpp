@@ -42,14 +42,14 @@ SH_DLLEXPORT VariableReplacer {
   VariableReplacer& operator=(VariableReplacer const&);
 
   // replaces variables in node based on varMap
-  void operator()(const CtrlGraphNodePtr& node);
+  void operator()(CtrlGraphNode* node);
 
   // replaces variables in a ProgramNode::VarList based on varMap 
   void operator()(ProgramNode::VarList &varList);
 
   // replaces variables in a StructuralNode and all Structural
   // Nodes in its region.
-  void operator()(const StructuralNodePtr& node);
+  void operator()(StructuralNode* node);
 
   // replaces node in a single variable using varMap
   void repVar(Variable& var);

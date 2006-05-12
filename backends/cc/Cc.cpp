@@ -93,7 +93,7 @@ CcVariable::CcVariable(int num, const std::string& name, int size, ValueType val
     m_valueType(valueType) 
 {}
 
-CcBackendCode::LabelFunctor::LabelFunctor(std::map<CtrlGraphNodePtr, int>& label_map) 
+CcBackendCode::LabelFunctor::LabelFunctor(std::map<CtrlGraphNode*, int>& label_map) 
   : m_cur_label(0),
     m_label_map(label_map) 
 {}
@@ -364,7 +364,7 @@ void CcBackendCode::emit(const BasicBlockPtr& block)
   }
 }
 
-void CcBackendCode::emit(const CtrlGraphNodePtr& node) 
+void CcBackendCode::emit(CtrlGraphNode* node)
 {
   m_code << "label_" << m_label_map[node] << ":" << std::endl
 	 << "  ;" << std::endl;
@@ -373,8 +373,8 @@ void CcBackendCode::emit(const CtrlGraphNodePtr& node)
     emit(node->block);
   }
 
-  std::vector<CtrlGraphBranch>::iterator I = node->successors.begin();
-  for(;I != node->successors.end(); ++I) {
+  CtrlGraphNode::SuccessorIt I = node->successors_begin();
+  for(;I != node->successors_end(); ++I) {
 
     m_code << "  if (";
     for(int i = 0; i < (*I).cond.size(); i++) {
@@ -391,11 +391,11 @@ void CcBackendCode::emit(const CtrlGraphNodePtr& node)
     m_code << " goto label_" << m_label_map[(*I).node] << ";" << std::endl;
   }
 
-  if (node->follower) {
-    m_code << "  goto label_" << m_label_map[node->follower] << ";" << std::endl;
+  if (node->follower()) {
+    m_code << "  goto label_" << m_label_map[node->follower()] << ";" << std::endl;
   }
 
-  if (node->successors.empty() && !node->follower) {
+  if (node->successors_empty() && !node->follower()) {
     // Last block, need to return from the function
     m_code << "  return;" << std::endl;
   }

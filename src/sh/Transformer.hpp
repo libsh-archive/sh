@@ -165,7 +165,7 @@ private:
  *   variable lists. 
  * - handleTexList, handleChannelList, handlePaletteList are similar
  *
- * - bool handleStmt(BasicBlock::StmtList::iterator &I, const CtrlGraphNodePtr& node);
+ * - bool handleStmt(BasicBlock::StmtList::iterator &I, CtrlGraphNode* node);
  *   This performs some kind of per-statement transformation during a dfs
  *   through the cfg.  Returns true iff the transformation has already
  *   incremented I (or deleted I and moved I to the next element). 
@@ -191,7 +191,7 @@ private:
 template<typename T>
 struct DefaultTransformer: public T {
   // Applies transformation to the given ctrl graph node. 
-  void operator()(const CtrlGraphNodePtr& node); 
+  void operator()(CtrlGraphNode* node); 
 
   // Applies transformation to the given Program 
   bool transform(const ProgramNodePtr& p); 
@@ -204,7 +204,7 @@ struct TransformerParent {
  void handleTexList(ProgramNode::TexList &texlist) {}
  void handlePaletteList(ProgramNode::PaletteList &palettelist) {}
 
- bool handleStmt(BasicBlock::StmtList::iterator &I, const CtrlGraphNodePtr& node) { return false; }
+ bool handleStmt(BasicBlock::StmtList::iterator &I, CtrlGraphNode* node) { return false; }
  void finish() {}
  bool changed() 
  { return m_changed; }

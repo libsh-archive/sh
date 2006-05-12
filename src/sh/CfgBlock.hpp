@@ -37,20 +37,20 @@ CfgBlock : public Block {
 public:
   CfgBlock(const Program &program, bool copy=true);
   CfgBlock(const CtrlGraphPtr& cfg, bool copy=true);
-  CfgBlock(const CtrlGraphNodePtr& node, bool copy=true); 
+  CfgBlock(CtrlGraphNode* node, bool copy=true); 
 
   ~CfgBlock();
 
-  CtrlGraphNodePtr entry() const;
-  CtrlGraphNodePtr exit() const;
+  CtrlGraphPtr graph() const { return m_cfg; }
 
   void print(std::ostream& out, int indent) const;
-  void graphvizDump(std::ostream& out) const;
+  void graphviz_dump(std::ostream& out) const;
 
   
 private:
   void init(const CtrlGraphPtr& cfg, bool copy);
-  CtrlGraphNodePtr m_entry, m_exit;
+
+  CtrlGraphPtr m_cfg;
 };
 
 typedef Pointer<CfgBlock> CfgBlockPtr;

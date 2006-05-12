@@ -48,7 +48,7 @@ public:
     PROPINT
   };
 
-  StructuralNode(const CtrlGraphNodePtr& node);
+  StructuralNode(CtrlGraphNode* node);
   StructuralNode(NodeType type);
 
   // Graphviz-format dump of this node and its children
@@ -59,10 +59,10 @@ public:
   StructuralNode* container;
   typedef std::list<StructuralNode*> StructNodeList;
   StructNodeList structnodes; ///< Nodes in this region
-  bool contains(const CtrlGraphNodePtr& node) const; ///< Contains the cfg_node in this region
+  bool contains(CtrlGraphNode* node) const; ///< Contains the cfg_node in this region
   
   // Graph structure
-  CtrlGraphNodePtr cfg_node;
+  CtrlGraphNode* cfg_node;
   typedef std::pair<Variable, StructuralNode* > SuccessorEdge;
   typedef std::list<SuccessorEdge> SuccessorList;
   SuccessorList succs;
@@ -84,13 +84,13 @@ public:
    * graph.
    */
   struct SH_DLLEXPORT CfgMatch {
-    CtrlGraphNodePtr from, to;
-    CtrlGraphNode::SuccessorList::iterator S; //< set to succ.end() if edge is from->follower 
+    CtrlGraphNode* from;
+    CtrlGraphNode* to;
+    CtrlGraphNode::SuccessorIt S; ///< set to succ.end() if edge is from->follower 
 
     CfgMatch();
-    CfgMatch(const CtrlGraphNodePtr& from); //< for a follower
-    CfgMatch(const CtrlGraphNodePtr& from, 
-        CtrlGraphNode::SuccessorList::iterator S); //< for a successor 
+    CfgMatch(CtrlGraphNode* from); ///< for a follower
+    CfgMatch(CtrlGraphNode* from, CtrlGraphNode::SuccessorIt S); ///< for a successor 
         
     bool isFollower(); 
   };
@@ -136,7 +136,7 @@ private:
   typedef std::list<StructuralNode*> PostorderList;
   PostorderList m_postorder;
 
-  StructuralNode* build_tree(const CtrlGraphNodePtr& node, std::map<CtrlGraphNodePtr, StructuralNode*>& nodemap);
+  StructuralNode* build_tree(CtrlGraphNode* node, std::map<CtrlGraphNode*, StructuralNode*>& nodemap);
   void build_postorder(StructuralNode* node);
 
 

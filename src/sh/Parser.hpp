@@ -34,26 +34,24 @@ namespace SH {
 class
 SH_DLLEXPORT Parser {
 public:
-  /// Return a pointer to the singleton instance
-  static Parser* instance();
+  Parser(CtrlGraph *graph)
+    : m_graph(graph)
+  {}
 
   /** Parse blocks into the control graph between head and tail.
    */
-  void parse(CtrlGraphNodePtr& head, CtrlGraphNodePtr& tail, const BlockListPtr& blocks);
+  void parse(CtrlGraphNode*& head, CtrlGraphNode*& tail, const BlockListPtr& blocks);
   
 private:
-  // This class is a singleton
-  Parser() {}
-
-  void parseBlock(CtrlGraphNodePtr& head, CtrlGraphNodePtr& tail, const BasicBlockPtr& block);
-  void parseStmts(CtrlGraphNodePtr& head, CtrlGraphNodePtr& tail, const BlockListPtr& blocks);
-  void parseIf(CtrlGraphNodePtr& head, CtrlGraphNodePtr& tail, const BlockListPtr& blocks);
-  void parseFor(CtrlGraphNodePtr& head, CtrlGraphNodePtr& tail, const BlockListPtr& blocks);
-  void parseWhile(CtrlGraphNodePtr& head, CtrlGraphNodePtr& tail, const BlockListPtr& blocks);
-  void parseDo(CtrlGraphNodePtr& head, CtrlGraphNodePtr& tail, const BlockListPtr& blocks);
-  void parseSection(CtrlGraphNodePtr& head, CtrlGraphNodePtr& tail, const BlockListPtr& blocks);
-  void parse_break(CtrlGraphNodePtr& head, CtrlGraphNodePtr& tail, const BlockListPtr& blocks);
-  void parse_continue(CtrlGraphNodePtr& head, CtrlGraphNodePtr& tail, const BlockListPtr& blocks);
+  void parseBlock(CtrlGraphNode*& head, CtrlGraphNode*& tail, const BasicBlockPtr& block);
+  void parseStmts(CtrlGraphNode*& head, CtrlGraphNode*& tail, const BlockListPtr& blocks);
+  void parseIf(CtrlGraphNode*& head, CtrlGraphNode*& tail, const BlockListPtr& blocks);
+  void parseFor(CtrlGraphNode*& head, CtrlGraphNode*& tail, const BlockListPtr& blocks);
+  void parseWhile(CtrlGraphNode*& head, CtrlGraphNode*& tail, const BlockListPtr& blocks);
+  void parseDo(CtrlGraphNode*& head, CtrlGraphNode*& tail, const BlockListPtr& blocks);
+  void parseSection(CtrlGraphNode*& head, CtrlGraphNode*& tail, const BlockListPtr& blocks);
+  void parse_break(CtrlGraphNode*& head, CtrlGraphNode*& tail, const BlockListPtr& blocks);
+  void parse_continue(CtrlGraphNode*& head, CtrlGraphNode*& tail, const BlockListPtr& blocks);
 
   /// Just pops a token
   TokenPtr popToken(const BlockListPtr& blocks);
@@ -61,13 +59,16 @@ private:
   TokenPtr popToken(const BlockListPtr& blocks, TokenType expectedType, unsigned int expectedArgs=0);
 
   /// Push the break and continue scope
-  void push_scope(CtrlGraphNodePtr& break_node, CtrlGraphNodePtr& continue_node);
+  void push_scope(CtrlGraphNode*& break_node, CtrlGraphNode*& continue_node);
   /// Pop the break and continue scope
   void pop_scope();
 
   // Stacks that keep track of the current scope
-  std::stack<CtrlGraphNodePtr> m_break_node;    // for SH_BREAK
-  std::stack<CtrlGraphNodePtr> m_continue_node; // for SH_CONTINUE
+  std::stack<CtrlGraphNode*> m_break_node;    // for SH_BREAK
+  std::stack<CtrlGraphNode*> m_continue_node; // for SH_CONTINUE
+
+  // The current control graph that new nodes should be owned by
+  CtrlGraph *m_graph;
 
   // NOT IMPLEMENTED
   Parser(const Parser&);

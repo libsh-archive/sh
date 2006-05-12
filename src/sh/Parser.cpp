@@ -34,15 +34,8 @@ void checkCond(bool cond, const std::string& message = "Internal Error")
   if (!cond) error( ParseException(message) );
 }
 
-
-Parser* Parser::instance()
-{
-  static Parser* instance = new Parser();
-  return instance;
-}
-
-void Parser::parse(CtrlGraphNodePtr& head,
-                     CtrlGraphNodePtr& tail,
+void Parser::parse(CtrlGraphNode*& head,
+                     CtrlGraphNode*& tail,
                      const BlockListPtr& blocks)
 {
   parseStmts(head, tail, blocks);
@@ -50,8 +43,8 @@ void Parser::parse(CtrlGraphNodePtr& head,
 }
 
 
-void Parser::parseStmts(CtrlGraphNodePtr& head,
-                          CtrlGraphNodePtr& tail,
+void Parser::parseStmts(CtrlGraphNode*& head,
+                          CtrlGraphNode*& tail,
                           const BlockListPtr& blocks)
 {
   BlockPtr next = blocks->getFront();
@@ -105,14 +98,17 @@ void Parser::parseStmts(CtrlGraphNodePtr& head,
       return;
     }
   } else if (cfg) {
-    head = cfg->entry();
-    tail = cfg->exit();
+    // We can just adopt the new nodes since we're removing them from the list
+    cfg->graph()->entry()->change_owner(m_graph, true);
+    head = cfg->graph()->entry();
+    tail = cfg->graph()->exit();
     blocks->removeFront();
   } else { // not a basic/cfg block, not a token
     return;
   }
   if (tail) {
-    CtrlGraphNodePtr nh, nt;
+    CtrlGraphNode* nh = 0;
+    CtrlGraphNode* nt = 0;
     parseStmts(nh, nt, blocks);
     if (nh) {
       tail->append(nh);
@@ -121,10 +117,10 @@ void Parser::parseStmts(CtrlGraphNodePtr& head,
   }
 }
 
-void Parser::parseBlock(CtrlGraphNodePtr& head,
-                          CtrlGraphNodePtr& tail, const BasicBlockPtr& block)
+void Parser::parseBlock(CtrlGraphNode*& head,
+                          CtrlGraphNode*& tail, const BasicBlockPtr& block)
 {
-  head = tail = new CtrlGraphNode();
+  head = tail = new CtrlGraphNode(m_graph);
   tail->block = block;
   
   /* Move OP_DECL statement sinto the node's declaration set */
@@ -136,8 +132,8 @@ void Parser::parseBlock(CtrlGraphNodePtr& head,
   }
 }
 
-void Parser::parseIf(CtrlGraphNodePtr& head,
-                       CtrlGraphNodePtr& tail, const BlockListPtr& blocks)
+void Parser::parseIf(CtrlGraphNode*& head,
+                       CtrlGraphNode*& tail, const BlockListPtr& blocks)
 {
   head = tail = 0;
   
@@ -147,10 +143,13 @@ void Parser::parseIf(CtrlGraphNodePtr& head,
   
   parseStmts(head, tail, condArg.blockList);
   if (!tail) {
-    head = tail = new CtrlGraphNode();
+    head = tail = new CtrlGraphNode(m_graph);
   }
 
-  CtrlGraphNodePtr headIf = 0, tailIf = 0, headElse = 0, tailElse = 0;
+  CtrlGraphNode* headIf = 0;
+  CtrlGraphNode* tailIf = 0;
+  CtrlGraphNode* headElse = 0;
+  CtrlGraphNode* tailElse = 0;
   parseStmts(headIf, tailIf, blocks);
   
   TokenPtr nt = popToken(blocks); 
@@ -161,21 +160,21 @@ void Parser::parseIf(CtrlGraphNodePtr& head,
   }
   checkCond(nt->type() == TOKEN_ENDIF);
 
-  if (!headIf) headIf = tailIf = new CtrlGraphNode();
-  if (!headElse) headElse = tailElse = new CtrlGraphNode();
+  if (!headIf) headIf = tailIf = new CtrlGraphNode(m_graph);
+  if (!headElse) headElse = tailElse = new CtrlGraphNode(m_graph);
   
   tail->append(headIf, condArg.result);
   tail->append(headElse);
   
-  CtrlGraphNodePtr merge = new CtrlGraphNode();
+  CtrlGraphNode* merge = new CtrlGraphNode(m_graph);
   tailIf->append(merge);
   tailElse->append(merge);
   
   tail = merge;
 }
 
-void Parser::parseFor(CtrlGraphNodePtr& head,
-                        CtrlGraphNodePtr& tail, const BlockListPtr& blocks)
+void Parser::parseFor(CtrlGraphNode*& head,
+                        CtrlGraphNode*& tail, const BlockListPtr& blocks)
 {
   head = tail = 0;
   
@@ -187,28 +186,31 @@ void Parser::parseFor(CtrlGraphNodePtr& head,
   
   parseStmts(head, tail, initArg.blockList);
   if (!tail) {
-    head = tail = new CtrlGraphNode();
+    head = tail = new CtrlGraphNode(m_graph);
   }
 
-  CtrlGraphNodePtr headCond = 0, tailCond = 0;
+  CtrlGraphNode* headCond = 0;
+  CtrlGraphNode* tailCond = 0;
   parseStmts(headCond, tailCond, condArg.blockList);
   if (!tailCond) {
-    headCond = tailCond = new CtrlGraphNode();
+    headCond = tailCond = new CtrlGraphNode(m_graph);
   }
   
-  CtrlGraphNodePtr headUpdate = 0, tailUpdate = 0;
+  CtrlGraphNode* headUpdate = 0;
+  CtrlGraphNode* tailUpdate = 0;
   parseStmts(headUpdate, tailUpdate, updateArg.blockList);
   if (!tailUpdate) {
-    headUpdate = tailUpdate = new CtrlGraphNode();
+    headUpdate = tailUpdate = new CtrlGraphNode(m_graph);
   }
 
-  CtrlGraphNodePtr exit = new CtrlGraphNode();
+  CtrlGraphNode* exit = new CtrlGraphNode(m_graph);
   push_scope(exit, headUpdate);
 
-  CtrlGraphNodePtr headBody = 0, tailBody = 0;
+  CtrlGraphNode* headBody = 0;
+  CtrlGraphNode* tailBody = 0;
   parseStmts(headBody, tailBody, blocks);
   if (!tailBody) {
-    headBody = tailBody = new CtrlGraphNode();
+    headBody = tailBody = new CtrlGraphNode(m_graph);
   }
   
   TokenPtr nt = popToken(blocks, TOKEN_ENDFOR);
@@ -223,8 +225,8 @@ void Parser::parseFor(CtrlGraphNodePtr& head,
   pop_scope();
 }
 
-void Parser::parseWhile(CtrlGraphNodePtr& head,
-                          CtrlGraphNodePtr& tail, const BlockListPtr& blocks)
+void Parser::parseWhile(CtrlGraphNode*& head,
+                          CtrlGraphNode*& tail, const BlockListPtr& blocks)
 {
   head = tail = 0;
   
@@ -234,16 +236,17 @@ void Parser::parseWhile(CtrlGraphNodePtr& head,
   
   parseStmts(head, tail, condArg.blockList);
   if (!tail) {
-    head = tail = new CtrlGraphNode();
+    head = tail = new CtrlGraphNode(m_graph);
   }
 
-  CtrlGraphNodePtr exit = new CtrlGraphNode();
+  CtrlGraphNode* exit = new CtrlGraphNode(m_graph);
   push_scope(exit, head);
 
-  CtrlGraphNodePtr headBody = 0, tailBody = 0;
+  CtrlGraphNode* headBody = 0;
+  CtrlGraphNode* tailBody = 0;
   parseStmts(headBody, tailBody, blocks);
   if (!tailBody) {
-    headBody = tailBody = new CtrlGraphNode();
+    headBody = tailBody = new CtrlGraphNode(m_graph);
   }
   
   TokenPtr nt = popToken(blocks, TOKEN_ENDWHILE);
@@ -256,31 +259,33 @@ void Parser::parseWhile(CtrlGraphNodePtr& head,
   pop_scope();
 }
 
-void Parser::parseDo(CtrlGraphNodePtr& head,
-                       CtrlGraphNodePtr& tail, const BlockListPtr& blocks)
+void Parser::parseDo(CtrlGraphNode*& head,
+                       CtrlGraphNode*& tail, const BlockListPtr& blocks)
 {
-  head = tail = new CtrlGraphNode();
+  head = tail = new CtrlGraphNode(m_graph);
 
   TokenPtr doToken = popToken(blocks, TOKEN_DO);
 
-  CtrlGraphNodePtr exit = new CtrlGraphNode();
-  CtrlGraphNodePtr loop_end = new CtrlGraphNode();
+  CtrlGraphNode* exit = new CtrlGraphNode(m_graph);
+  CtrlGraphNode* loop_end = new CtrlGraphNode(m_graph);
   push_scope(exit, loop_end);
 
-  CtrlGraphNodePtr head_body = 0, tail_body = 0;
+  CtrlGraphNode* head_body = 0;
+  CtrlGraphNode* tail_body = 0;
   parseStmts(head_body, tail_body, blocks);
   if (!tail_body) {
-    head_body = tail_body = new CtrlGraphNode();
+    head_body = tail_body = new CtrlGraphNode(m_graph);
   }
 
   TokenPtr nt = popToken(blocks, TOKEN_UNTIL, 1);
 
   TokenArgument condArg = nt->arguments[0];
 
-  CtrlGraphNodePtr headCond = 0, tailCond = 0;
+  CtrlGraphNode* headCond = 0;
+  CtrlGraphNode* tailCond = 0;
   parseStmts(headCond, tailCond, condArg.blockList);
   if (!tailCond) {
-    headCond = tailCond = new CtrlGraphNode();
+    headCond = tailCond = new CtrlGraphNode(m_graph);
   }
 
   tail->append(head_body);
@@ -297,9 +302,9 @@ void Parser::parseDo(CtrlGraphNodePtr& head,
   pop_scope();
 }
 
-void Parser::parseSection(CtrlGraphNodePtr& head,
-                           CtrlGraphNodePtr& tail,
-                           const BlockListPtr& blocks)
+void Parser::parseSection(CtrlGraphNode*& head,
+                            CtrlGraphNode*& tail,
+                            const BlockListPtr& blocks)
 {
   TokenPtr startToken = popToken(blocks, TOKEN_STARTSEC);
 
@@ -309,22 +314,23 @@ void Parser::parseSection(CtrlGraphNodePtr& head,
   std::string name = basic->begin()->get_info<InfoComment>()->comment;
   basic->erase(basic->begin());
 
-  CtrlGraphNodePtr secHead, secTail;
+  CtrlGraphNode* secHead = 0;
+  CtrlGraphNode* secTail = 0;
   parseStmts(secHead, secTail, blocks);
   if(!secTail) {
-    secHead = secTail = new CtrlGraphNode();
+    secHead = secTail = new CtrlGraphNode(m_graph);
   }
 
   TokenPtr nt = popToken(blocks, TOKEN_ENDSEC);
 
-  head = new CtrlGraphNode();
+  head = new CtrlGraphNode(m_graph);
   head->block = new BasicBlock();
 
   Statement startStmt(OP_STARTSEC);
   startStmt.add_info(new InfoComment(name));
   head->block->addStatement(startStmt);
 
-  tail = new CtrlGraphNode();
+  tail = new CtrlGraphNode(m_graph);
   tail->block = new BasicBlock();
   //tail->block->addStatement(Statement(foo, OP_ENDSEC, foo));
   Statement endStmt(OP_ENDSEC);
@@ -335,7 +341,7 @@ void Parser::parseSection(CtrlGraphNodePtr& head,
   secTail->append(tail);
 }
 
-void Parser::parse_break(CtrlGraphNodePtr& head, CtrlGraphNodePtr& tail, 
+void Parser::parse_break(CtrlGraphNode*& head, CtrlGraphNode*& tail, 
                            const BlockListPtr& blocks)
 {
   head = tail = 0;
@@ -346,13 +352,13 @@ void Parser::parse_break(CtrlGraphNodePtr& head, CtrlGraphNodePtr& tail,
   
   parseStmts(head, tail, cond_arg.blockList);
   if (!tail) {
-    head = tail = new CtrlGraphNode();
+    head = tail = new CtrlGraphNode(m_graph);
   }
 
   tail->append(m_break_node.top(), cond_arg.result);
 }
 
-void Parser::parse_continue(CtrlGraphNodePtr& head, CtrlGraphNodePtr& tail, 
+void Parser::parse_continue(CtrlGraphNode*& head, CtrlGraphNode*& tail, 
                               const BlockListPtr& blocks)
 {
   head = tail = 0;
@@ -363,7 +369,7 @@ void Parser::parse_continue(CtrlGraphNodePtr& head, CtrlGraphNodePtr& tail,
   
   parseStmts(head, tail, cond_arg.blockList);
   if (!tail) {
-    head = tail = new CtrlGraphNode();
+    head = tail = new CtrlGraphNode(m_graph);
   }
 
   tail->append(m_continue_node.top(), cond_arg.result);
@@ -387,8 +393,8 @@ TokenPtr Parser::popToken(const BlockListPtr& blocks)
   return result;
 }
 
-void Parser::push_scope(CtrlGraphNodePtr& break_node, 
-                          CtrlGraphNodePtr& continue_node)
+void Parser::push_scope(CtrlGraphNode*& break_node, 
+                          CtrlGraphNode*& continue_node)
 {
   m_break_node.push(break_node);
   m_continue_node.push(continue_node);

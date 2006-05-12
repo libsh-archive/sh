@@ -114,7 +114,7 @@ void TypeInfo::addCasts()
 
 #if 0
   std::ofstream fout("castgraph.dot");
-  CastManager::instance()->graphvizDump(fout);
+  CastManager::instance()->graphviz_dump(fout);
   system("dot -Tps < castgraph.dot > castgraph.ps");
 #endif
 }

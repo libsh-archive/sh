@@ -27,11 +27,11 @@ VariableReplacer::VariableReplacer(VarMap& v)
 {
 }
 
-void VariableReplacer::operator()(const CtrlGraphNodePtr& node) 
+void VariableReplacer::operator()(CtrlGraphNode* node) 
 {
   // replace variables that are conditions in branches
-  CtrlGraphNode::SuccessorList::iterator I;
-  for(I = node->successors.begin(); I != node->successors.end(); ++I) {
+  CtrlGraphNode::SuccessorIt I;
+  for(I = node->successors_begin(); I != node->successors_end(); ++I) {
     repVar(I->cond);
   }
 
@@ -48,7 +48,7 @@ void VariableReplacer::operator()(const CtrlGraphNodePtr& node)
 
 }
 
-void VariableReplacer::operator()(const StructuralNodePtr& node) 
+void VariableReplacer::operator()(StructuralNode* node) 
 {
   if(node->cfg_node) operator()(node->cfg_node);
   for (StructuralNode::StructNodeList::iterator I = node->structnodes.begin(); 

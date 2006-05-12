@@ -148,7 +148,7 @@ void Transformer::vectorizeScalars()
 #endif
 
 template<typename T>
-void DefaultTransformer<T>::operator()(const CtrlGraphNodePtr& node) {
+void DefaultTransformer<T>::operator()(CtrlGraphNode* node) {
   if (!node) return;
   BasicBlockPtr block = node->block;
   if (!block) return;
