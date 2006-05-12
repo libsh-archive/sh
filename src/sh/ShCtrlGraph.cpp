@@ -182,31 +182,29 @@ void ShCtrlGraphNode::append(ShCtrlGraphNode* node, ShVariable cond)
   }
 }
 
-/*
-ShCtrlGraphNodePtr ShCtrlGraphNode::split(ShBasicBlock::ShStmtList::iterator stmt) 
-{
-  // make a new node to hold the statements after stmt  
-  ShCtrlGraphNodePtr after = new ShCtrlGraphNode();
-
-  // move over the successors/follower info
-  for (SuccessorIt i = successors_begin(); i != successors_end(); ++i) {
-    append(i->node, i->cond);
-  }
-  successors_clear();
-  after->append(m_follower);
-  m_follower = 0;
-
-  // link up the two nodes
-  append(after);
-
-  // make a block for after and split up the statements
-  after->block = new ShBasicBlock();
-  ++stmt;
-  after->block->splice(after->block->begin(), block->m_statements, stmt);
-
-  return after;
-}
-*/
+//ShCtrlGraphNodePtr ShCtrlGraphNode::split(ShBasicBlock::ShStmtList::iterator stmt) 
+//{
+//  // make a new node to hold the statements after stmt  
+//  ShCtrlGraphNodePtr after = new ShCtrlGraphNode();
+//
+//  // move over the successors/follower info
+//  for (SuccessorIt i = successors_begin(); i != successors_end(); ++i) {
+//    append(i->node, i->cond);
+//  }
+//  successors_clear();
+//  after->append(m_follower);
+//  m_follower = 0;
+//
+//  // link up the two nodes
+//  append(after);
+//
+//  // make a block for after and split up the statements
+//  after->block = new ShBasicBlock();
+//  ++stmt;
+//  after->block->splice(after->block->begin(), block->m_statements, stmt);
+//
+//  return after;
+//}
 
 void ShCtrlGraphNode::remove_successor_reference(ShCtrlGraphNode* node)
 {

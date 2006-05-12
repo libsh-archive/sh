@@ -174,45 +174,8 @@ struct EmptyBlockRemover {
 
   void remove(ShCtrlGraphNode* node)
   {
-    // Drop this node
+    // Drop this node from the graph
     graph->release_owned_node(node);
-
-    /*
-    // Replace references to us from our predecessors with references to our follower
-    for (ShCtrlGraphNode::PredecessorIt P = node->predecessors_begin(); P != node->predecessors_end();) {
-      ShCtrlGraphNode* pred = *P;
-      // Go to the next iterator position, in case we erase the current one during our operations
-      ++P;
-      for (ShCtrlGraphNode::SuccessorIt S = pred->successors_begin(); S != pred->successors_end(); ++S) {
-        if (S->node == node) {
-          // This iteration is safe since it doesn't mess with the list item itself
-          pred->replace_successor(S, node->follower());
-        }
-      }
-      if (pred->follower() == node) {
-        pred->follower(node->follower());
-      }
-    }
-    */
-
-    /*
-    // Remove ourselves from our follower's preds
-    for (ShCtrlGraphNode::PredecessorIt P = node->follower()->predecessors_begin(); P != node->follower()->predecessors_end();) {
-      if (*P == node.object()) {
-        P = node->follower()->predecessors.erase(P);
-      } else {
-        ++P;
-      }
-    }
-
-    // Add in our predecessors to our follower's preds.
-    for (ShCtrlGraphNode::PredecessorIt P = node->predecessors_begin(); P != node->predecessors_end(); ++P) {
-      if (std::find(node->follower()->predecessors_begin(), node->follower()->predecessors_end(), *P) == node->follower()->predecessors_end()) {
-        node->follower()->predecessors.push_back(*P);
-      }
-    }
-    */
-
     changed = true;
   }
 

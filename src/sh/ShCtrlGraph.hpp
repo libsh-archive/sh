@@ -100,6 +100,8 @@ public:
    *
    * Returns B. 
    */
+  // NOTE: Has not been updated to work correctly with the non-reference-counted
+  // control graph node structure (r3798 in Sh 0.8).
   //ShPointer<ShCtrlGraphNode> 
   //split(ShBasicBlock::ShStmtList::iterator stmt);
   
