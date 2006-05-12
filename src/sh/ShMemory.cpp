@@ -343,6 +343,12 @@ ShHostMemory::~ShHostMemory()
 {
 }
 
+void ShHostMemory::remove_host_storage()
+{
+  this->removeStorage(m_hostStorage);
+  m_hostStorage = 0;
+}
+
 ShHostStoragePtr ShHostMemory::hostStorage()
 {
   return m_hostStorage;

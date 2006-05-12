@@ -288,6 +288,8 @@ public:
   ShHostStoragePtr hostStorage();
   ShPointer<const ShHostStorage> hostStorage() const;
 
+  void remove_host_storage();
+
 private:
   ShHostStoragePtr m_hostStorage;
   // NOT IMPLEMENTED
