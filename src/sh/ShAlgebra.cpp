@@ -59,16 +59,6 @@ ShProgram connect(ShProgram pa, ShProgram pb)
 
   ShProgramNodePtr program = new ShProgramNode(rtarget);
 
-  //ShCtrlGraphNodePtr heada, taila, headb, tailb;
-
-  //a->ctrlGraph->copy(heada, taila);
-  //b->ctrlGraph->copy(headb, tailb);
-
-  //taila->append(headb);
-
-  //ShCtrlGraphPtr new_graph = new ShCtrlGraph(heada, tailb);
-  //program->ctrlGraph = new_graph;
-
   // Create a new CFG from the two programs
   ShCtrlGraphPtr new_graph = a->ctrlGraph->clone();
   new_graph->append(std::auto_ptr<ShCtrlGraph>(b->ctrlGraph->clone()));
@@ -188,16 +178,6 @@ ShProgram combine(ShProgram pa, ShProgram pb)
   }
 
   ShProgramNodePtr program = new ShProgramNode(rtarget);
-
-  //ShCtrlGraphNodePtr heada, taila, headb, tailb;
-
-  //a->ctrlGraph->copy(heada, taila);
-  //b->ctrlGraph->copy(headb, tailb);
-
-  //taila->append(headb);
-
-  //ShCtrlGraphPtr new_graph = new ShCtrlGraph(heada, tailb);
-  //program->ctrlGraph = new_graph;
 
   // Create a new CFG from the two programs
   ShCtrlGraphPtr new_graph = a->ctrlGraph->clone();

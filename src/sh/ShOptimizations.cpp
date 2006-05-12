@@ -110,32 +110,11 @@ struct Straightener {
       i = node->follower()->successors_erase(i);
     }
 
-    // Update predecessors (this will get automatically done now)
-    //for (std::vector<ShCtrlGraphBranch>::iterator I = node->follower()->successors_begin();
-    //     I != node->follower()->successors_end(); ++I) {
-    //  replacePredecessors(I->node, node->follower().object(), node.object());
-    //}
-    //if (node->follower()->follower()) replacePredecessors(node->follower()->follower(), node->follower().object(), node.object());
-    
     // Update our follower (this should also release the previous one)
     node->follower(node->follower()->follower());
 
     changed = true;
   }
-
-  /*
-  void replacePredecessors(ShCtrlGraphNode* node,
-                           ShCtrlGraphNode* old,
-                           ShCtrlGraphNode* replacement)
-  {
-    for (ShCtrlGraphNode::PredecessorIt I = node->predecessors_begin(); I != node->predecessors_end(); ++I) {
-      if (*I == old) {
-        *I = replacement;
-        break;
-      }
-    }
-  }
-  */
   
   ShCtrlGraphPtr graph;
   bool& changed;
