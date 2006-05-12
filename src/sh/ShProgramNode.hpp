@@ -125,7 +125,7 @@ public:
    * @todo range check that adding to the cfg node doesn't screw anything up...
    * (i.e. if somewhere we don't copy cfg when manipulating program...) */
   //@{
-  void addDecl(const ShVariableNodePtr& node, const ShCtrlGraphNodePtr&);
+  void addDecl(const ShVariableNodePtr& node, ShCtrlGraphNode*);
   void addDecl(const ShVariableNodePtr& node);
   //@}
 
@@ -197,8 +197,8 @@ private:
   std::string m_backend_name; ///< Can be empty if the program is not yet compiled for a backend.
   std::string m_target; ///< Can be empty, if there is no target associated with this program.
 
-  void collect_node_decls(const ShPointer<ShCtrlGraphNode>& node);
-  void collect_node_vars(const ShPointer<ShCtrlGraphNode>& node);
+  void collect_node_decls(ShCtrlGraphNode* node);
+  void collect_node_vars(ShCtrlGraphNode* node);
   void collect_var(const ShVariableNodePtr& node);
   void collect_dependent_uniform(const ShVariableNodePtr& var);
 

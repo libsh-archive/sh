@@ -32,15 +32,17 @@
 
 namespace SH {
 
+class ShCtrlGraph;
 class ShCtrlGraphNode;
 
 struct
 SH_DLLEXPORT ShCtrlGraphBranch {
-  ShCtrlGraphBranch(const ShPointer<ShCtrlGraphNode>& node,
-                    ShVariable cond);
+  ShCtrlGraphBranch(ShCtrlGraphNode* node, ShVariable cond)
+    : node(node), cond(cond)
+  {}
   
-  ShPointer<ShCtrlGraphNode> node; ///< The successor node
-  ShVariable cond; ///< If this is 1, take this branch.
+  ShCtrlGraphNode *node; ///< The successor node
+  ShVariable cond;       ///< If this is 1, take this branch.
 };
 
 /** A node in the control graph.
@@ -52,20 +54,30 @@ SH_DLLEXPORT ShCtrlGraphBranch {
  *
  * Only the exit node of a control graph will have an unconditional
  * successor of 0.
+ * 
+ * Since this graph will often contain cycles (loops, etc), simple reference
+ * counting is insufficient. Thus we implement an ownership mechanism whereby
+ * each control graph node has a parent ("owner") who manages the life span
+ * of the node.
  */
 class
-SH_DLLEXPORT ShCtrlGraphNode : public ShRefCountable, public ShInfoHolder {
+SH_DLLEXPORT ShCtrlGraphNode : public ShInfoHolder {
+private:
+  // NOTE: Vectors may not work here since we may erase while iterating
+  typedef std::list<ShCtrlGraphBranch> SuccessorList;
+  // May have to handle redundant edges temporarily (they will be removed by optimizer)
+  typedef std::list<ShCtrlGraphNode*> PredecessorList;
+  typedef std::set<ShVariableNodePtr> DeclSet;
+
 public:
-  ShCtrlGraphNode();
+  /// Onwer is expected to live for at least the life of this node
+  ShCtrlGraphNode(ShCtrlGraph *owner);
+
+  /// If the node is part of the graph still, predecessors will be set
+  /// to point to the current follower.
   ~ShCtrlGraphNode();
 
   ShBasicBlockPtr block;
-  typedef std::vector<ShCtrlGraphBranch> SuccessorList;
-  SuccessorList successors; ///< Conditional successors
-  ShPointer<ShCtrlGraphNode> follower; ///< Unconditional successor
-
-  typedef std::list<ShCtrlGraphNode*> ShPredList;
-  ShPredList predecessors;
 
   /// Output a graph node _and its successors_ at the given
   /// indentation level.
@@ -73,14 +85,7 @@ public:
 
   /// Output a graph node and its successors in graphviz format.
   /// See http://www.research.att.com/sw/tools/graphviz/ for more details.
-  std::ostream& graphvizDump(std::ostream& out) const;
-
-  /// Append an unconditional successor, if node is not null.
-  void append(const ShPointer<ShCtrlGraphNode>& node);
-
-  /// Append an conditional successor, if node is not null.
-  void append(const ShPointer<ShCtrlGraphNode>& node,
-              ShVariable cond);
+  std::ostream& graphviz_dump(std::ostream& out) const;
 
   /** Splits this control graph node into two nodes A, B, at the given statement.
    * A is this, and keeps all predecessor information, 
@@ -95,10 +100,9 @@ public:
    *
    * Returns B. 
    */
-  ShPointer<ShCtrlGraphNode> 
-  split(ShBasicBlock::ShStmtList::iterator stmt);
-
-  typedef std::set<ShVariableNodePtr> DeclSet;
+  //ShPointer<ShCtrlGraphNode> 
+  //split(ShBasicBlock::ShStmtList::iterator stmt);
+  
   typedef DeclSet::const_iterator DeclIt;
 
   /** Adds a temporary declaration to this cfg node */
@@ -114,6 +118,61 @@ public:
   DeclIt decl_begin() const;
   DeclIt decl_end() const;
 
+  /// If recursive is true, updates owner on all successors recursively
+  void change_owner(ShCtrlGraph *new_owner, bool recursive = true);
+
+
+  /// Successor types and functions  
+  typedef SuccessorList::iterator SuccessorIt;
+
+  SuccessorIt successors_begin() { return m_successors.begin(); }
+  SuccessorIt successors_end()   { return m_successors.end();   }
+  PredecessorList::size_type successors_size() const { return m_successors.size(); }
+  bool successors_empty() const { return m_successors.empty(); }
+
+  /// Erase the given successor, returning a new iterator to the following one
+  SuccessorIt successors_erase(SuccessorIt i);
+
+  /// Replace the given conditional successor with a different node
+  /// Similar to the follower replacement, it will drop the reference to the
+  /// current successor if we are the only predecessor.
+  void replace_successor(SuccessorIt current, ShCtrlGraphNode* new_node);
+
+  /// Append an conditional successor, if node is not null.
+  /// Takes ownership of the new subtree.
+  void append(ShCtrlGraphNode* node, ShVariable cond);
+
+  /// Append an unconditional successor, if node is not null.
+  /// NOTE: Current follower must be null! Otherwise, use follower(...) below.
+  /// Takes ownership of the new subtree.
+  void append(ShCtrlGraphNode* node);  
+
+
+  /// Predecessor types and functions  
+  typedef PredecessorList::const_iterator PredecessorIt;
+
+  PredecessorIt predecessors_begin() const { return m_predecessors.begin(); }
+  PredecessorIt predecessors_end() const   { return m_predecessors.end();   }
+  PredecessorList::size_type predecessors_size() const { return m_predecessors.size(); }
+  bool predecessors_empty() const { return m_predecessors.empty(); }
+
+  /// Follower functions
+  ShCtrlGraphNode * follower() const { return m_follower; }
+
+  /// Update the follower
+  /// Note that this will drop the reference to the previous follower if we were the
+  /// only predecessor!
+  void follower(ShCtrlGraphNode *new_follower);
+
+
+  typedef std::map<const ShCtrlGraphNode*, ShCtrlGraphNode*> CloneMap;
+
+  /// Implements a DEEP COPY of this node and successors, maintaining relative
+  /// relationships and ownership.
+  ShCtrlGraphNode * clone() const;
+
+  /// Alternate version of clone that uses and fills the given clone map
+  ShCtrlGraphNode * clone(CloneMap *clone_map) const;
 
   /// Whether this node has been "marked". Useful for mark and sweep
   /// type algorithms.
@@ -122,9 +181,9 @@ public:
   // Technically these should not be const. But they're useful in
   // functions which are const, so we just make the "marked" flag
   // mutable.
-  void mark() const; ///< Set the marked flag
-  void clearMarked() const; ///< Clears the marked flag of this and
-                            ///  all successors'/followers flags
+  void mark() const;         ///< Set the marked flag
+  void clear_marked() const; ///< Clears the marked flag of this and
+                             ///  all successors'/followers flags
   
   template<typename F>
   void dfs(F& functor);
@@ -139,13 +198,27 @@ private:
   template<typename F>
   void real_dfs(F& functor) const;
 
+  /// Internal helper function to drop references to successors
+  /// If we are the only predecessor,
+  /// it will also drop the reference to that node totally. Thus after
+  /// this function the pointer may no longer be valid.
+  /// The user function is responsible for actually removing the pointer
+  /// to that node if necessary (since they know where it came from).
+  void remove_successor_reference(ShCtrlGraphNode* node);
+
+  /// Each node is owned by a single control graph at all times
+  ShCtrlGraph *m_owner;
+
+  SuccessorList m_successors;      ///< Conditional successors
+  ShCtrlGraphNode* m_follower;     ///< Unconditional successor  
+  PredecessorList m_predecessors;
+
   mutable bool m_marked;
 
-  DeclSet m_decls; ///< temporary declarations in this node
+  DeclSet m_decls; ///< Temporary declarations in this node
 };
 
-typedef ShPointer<ShCtrlGraphNode> ShCtrlGraphNodePtr;
-typedef ShPointer<const ShCtrlGraphNode> ShCtrlGraphNodeCPtr;
+
 
 /** A control-flow graph.
  * This is the parsed form of a shader body.
@@ -153,29 +226,34 @@ typedef ShPointer<const ShCtrlGraphNode> ShCtrlGraphNodeCPtr;
 class
 SH_DLLEXPORT ShCtrlGraph : public ShRefCountable {
 public:
-  ShCtrlGraph(const ShCtrlGraphNodePtr& head, const ShCtrlGraphNodePtr& tail);
+  ShCtrlGraph(ShCtrlGraphNode* head, ShCtrlGraphNode* tail);
   ShCtrlGraph(const ShBlockListPtr& blocks);
   ~ShCtrlGraph();
 
   std::ostream& print(std::ostream& out, int indent) const;
   
-  std::ostream& graphvizDump(std::ostream& out) const;
+  std::ostream& graphviz_dump(std::ostream& out) const;
 
-  ShCtrlGraphNodePtr entry() const;
-  ShCtrlGraphNodePtr exit() const;
+  /// Use these with care... respect the ownership system!
+  ShCtrlGraphNode* entry() const { return m_entry; }
+  ShCtrlGraphNode* exit() const  { return m_exit;  }
 
   /// Adds an empty node before entry, gives old entry a block and returns it.
   // New entry is marked (so it does not prevent clearMarking on future DFSes)
-  ShCtrlGraphNodePtr prependEntry();
+  ShCtrlGraphNode* prepend_entry();
 
-  /// Adds an empty node after exit, gives old exit a block and returns it. 
-  ShCtrlGraphNodePtr appendExit();
+  /// Adds an empty node after exit, gives old exit a block and returns it.
+  ShCtrlGraphNode* append_exit();
 
-  /// prepends another ctrl graph to this' entry (updating entry) 
-  void prepend(ShPointer<ShCtrlGraph> cfg); 
+  /// Prepends another ctrl graph to this' entry (updating entry)
+  /// The passed cfg will be destructed at the end of this function, as ownership
+  /// is taken over by this cfg.
+  void prepend(const std::auto_ptr<ShCtrlGraph> cfg);
 
   /// appends another ctrl graph to this' exit (updating exit)
-  void append(ShPointer<ShCtrlGraph> cfg); 
+  /// The passed cfg will be destructed at the end of this function, as ownership
+  /// is taken over by this cfg.
+  void append(const std::auto_ptr<ShCtrlGraph> cfg);
 
 
   template<typename F>
@@ -183,18 +261,28 @@ public:
   
   template<typename F>
   void dfs(F& functor) const;
-  
-  /// Determine the predecessors in this graph
-  void computePredecessors();
 
-  // Make a copy of this control graph placing the result into head and tail.
-  void copy(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail) const;
-  
+  // Make a copy of this control graph.
+  ShCtrlGraph * clone() const;
+   
+  /// Release a node owned by this graph
+  /// Be really sure that you know what you're doing here, and that the
+  /// node is unreferenced (as it might be deleted if allow_delete is true!)  
+  void release_owned_node(ShCtrlGraphNode* node, bool allow_delete = true);
+
 private:
-  ShCtrlGraphNodePtr m_entry;
-  ShCtrlGraphNodePtr m_exit;
+  ShCtrlGraphNode* m_entry;
+  ShCtrlGraphNode* m_exit;
 
-  //  void parse(ShCtrlGraphNodePtr& tail, ShBlockListPtr blocks);
+  typedef std::set<ShCtrlGraphNode*> NodeSet;
+  NodeSet m_owned_nodes;
+
+  /// Owner reference management functions
+  void add_owned_node(ShCtrlGraphNode *node) { m_owned_nodes.insert(node); }
+  void release_all_owned_nodes();
+
+  // Allow nodes to call node management functions
+  friend class ShCtrlGraphNode;  
 };
 
 typedef ShPointer<ShCtrlGraph> ShCtrlGraphPtr;
@@ -207,10 +295,10 @@ void ShCtrlGraphNode::real_dfs(F& functor)
   if (m_marked) return;
   mark();
   functor(this);
-  for (std::vector<ShCtrlGraphBranch>::iterator I = successors.begin(); I != successors.end(); ++I) {
+  for (SuccessorList::iterator I = m_successors.begin(); I != m_successors.end(); ++I) {
     I->node->real_dfs(functor);
   }
-  if (follower) follower->real_dfs(functor);
+  if (m_follower) m_follower->real_dfs(functor);
 }
 
 template<typename F>
@@ -220,27 +308,27 @@ void ShCtrlGraphNode::real_dfs(F& functor) const
   if (m_marked) return;
   mark();
   functor(this);
-  for (std::vector<ShCtrlGraphBranch>::const_iterator I = successors.begin();
-       I != successors.end(); ++I) {
+  for (SuccessorList::const_iterator I = m_successors.begin();
+       I != m_successors.end(); ++I) {
     I->node->real_dfs(functor);
   }
-  if (follower) follower->real_dfs(functor);
+  if (m_follower) m_follower->real_dfs(functor);
 }
 
 template<typename F>
 void ShCtrlGraphNode::dfs(F& functor)
 {
-  clearMarked();
+  clear_marked();
   real_dfs(functor);
-  clearMarked();
+  clear_marked();
 }
 
 template<typename F>
 void ShCtrlGraphNode::dfs(F& functor) const
 {
-  clearMarked();
+  clear_marked();
   real_dfs(functor);
-  clearMarked();
+  clear_marked();
 }
 
 template<typename F>

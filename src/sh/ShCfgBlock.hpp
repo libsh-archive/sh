@@ -37,20 +37,20 @@ ShCfgBlock : public ShBlock {
 public:
   ShCfgBlock(const ShProgram &program, bool copy=true);
   ShCfgBlock(const ShCtrlGraphPtr& cfg, bool copy=true);
-  ShCfgBlock(const ShCtrlGraphNodePtr& node, bool copy=true); 
+  ShCfgBlock(ShCtrlGraphNode* node, bool copy=true); 
 
   ~ShCfgBlock();
 
-  ShCtrlGraphNodePtr entry() const;
-  ShCtrlGraphNodePtr exit() const;
+  ShCtrlGraphPtr graph() const { return m_cfg; }
 
   void print(std::ostream& out, int indent) const;
-  void graphvizDump(std::ostream& out) const;
+  void graphviz_dump(std::ostream& out) const;
 
   
 private:
   void init(const ShCtrlGraphPtr& cfg, bool copy);
-  ShCtrlGraphNodePtr m_entry, m_exit;
+
+  ShCtrlGraphPtr m_cfg;
 };
 
 typedef ShPointer<ShCfgBlock> ShCfgBlockPtr;

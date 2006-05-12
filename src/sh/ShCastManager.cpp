@@ -59,7 +59,7 @@ ShCastMgrEdge::ShCastMgrEdge(const ShCastMgrEdge &other)
   : m_caster(other.m_caster), m_auto(other.m_auto)
 {}
 
-std::ostream& ShCastMgrEdge::graphvizDump(std::ostream& out) const
+std::ostream& ShCastMgrEdge::graphviz_dump(std::ostream& out) const
 {
   if(m_auto) out << "[style=\"bold\" color=\"red\"";
   else out << "[style=\"dashed\"";
@@ -100,7 +100,7 @@ void ShCastMgrGraph::addEdge( ShCastMgrEdge *edge)
   ShGraph<ShCastMgrGraphType>::addEdge(edge);
 }
 
-std::ostream& ShCastMgrVertex::graphvizDump(std::ostream& out) const
+std::ostream& ShCastMgrVertex::graphviz_dump(std::ostream& out) const
 {
   out << "[label=\"" << shValueTypeName(m_valueType) << ", " 
       << dataTypeName[m_dataType] << "\"]";
@@ -213,9 +213,9 @@ ShCastManager* ShCastManager::instance()
   return m_instance;
 }
 
-std::ostream& ShCastManager::graphvizDump(std::ostream& out) const
+std::ostream& ShCastManager::graphviz_dump(std::ostream& out) const
 {
-  SH::graphvizDump(out, m_casts);
+  SH::graphviz_dump(out, m_casts);
   return out;
 }
 

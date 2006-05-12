@@ -246,7 +246,7 @@ void ShProgramNode::dump(std::string filename) const
   std::string dotfile = filename + ".dot";
   std::string psfile = filename + ".ps";
   std::ofstream dotout(dotfile.c_str());
-  ctrlGraph->graphvizDump(dotout);
+  ctrlGraph->graphviz_dump(dotout);
   std::string cmd = std::string("dot -Tps < ") + dotfile + " > " + psfile; 
   system(cmd.c_str());
 }
@@ -268,9 +268,9 @@ void ShProgramNode::collectVariables()
   channels.clear();
   palettes.clear();
   if (ctrlGraph->entry()) {
-    ctrlGraph->entry()->clearMarked();
+    ctrlGraph->entry()->clear_marked();
     collect_node_vars(ctrlGraph->entry());
-    ctrlGraph->entry()->clearMarked();
+    ctrlGraph->entry()->clear_marked();
   }
 }
 
@@ -283,9 +283,9 @@ void ShProgramNode::collectDecls()
   // (may actually want to put this cleaning up step in collectVariables
   // since some temps might be removed during optimizations)
   if (ctrlGraph->entry()) {
-    ctrlGraph->entry()->clearMarked();
+    ctrlGraph->entry()->clear_marked();
     collect_node_decls(ctrlGraph->entry());
-    ctrlGraph->entry()->clearMarked();
+    ctrlGraph->entry()->clear_marked();
   }
 }
 
@@ -294,7 +294,7 @@ bool ShProgramNode::hasDecl(const ShVariableNodePtr& node) const
   return tempDecls.find(node) != tempDecls.end();
 }
 
-void ShProgramNode::addDecl(const ShVariableNodePtr& node, const ShCtrlGraphNodePtr& cfgNode)
+void ShProgramNode::addDecl(const ShVariableNodePtr& node, ShCtrlGraphNode* cfgNode)
 {
   tempDecls.insert(node);
   SH_DEBUG_ASSERT(ctrlGraph->entry());
@@ -306,7 +306,7 @@ void ShProgramNode::addDecl(const ShVariableNodePtr& node)
   addDecl(node, ctrlGraph->entry());
 }
 
-void ShProgramNode::collect_node_decls(const ShCtrlGraphNodePtr& node)
+void ShProgramNode::collect_node_decls(ShCtrlGraphNode* node)
 {
   if (node->marked()) return;
   node->mark();
@@ -317,15 +317,15 @@ void ShProgramNode::collect_node_decls(const ShCtrlGraphNodePtr& node)
   }
   */
 
-  for (std::vector<ShCtrlGraphBranch>::const_iterator J = node->successors.begin();
-       J != node->successors.end(); ++J) {
+  for (ShCtrlGraphNode::SuccessorIt J = node->successors_begin();
+       J != node->successors_end(); ++J) {
     collect_node_decls(J->node);
   }
   
-  if (node->follower) collect_node_decls(node->follower);
+  if (node->follower()) collect_node_decls(node->follower());
 }
 
-void ShProgramNode::collect_node_vars(const ShCtrlGraphNodePtr& node)
+void ShProgramNode::collect_node_vars(ShCtrlGraphNode* node)
 {
   if (node->marked()) return;
   node->mark();
@@ -341,12 +341,12 @@ void ShProgramNode::collect_node_vars(const ShCtrlGraphNodePtr& node)
     }
   }
 
-  for (std::vector<ShCtrlGraphBranch>::const_iterator J = node->successors.begin();
-       J != node->successors.end(); ++J) {
+  for (ShCtrlGraphNode::SuccessorIt J = node->successors_begin();
+       J != node->successors_end(); ++J) {
     collect_node_vars(J->node);
   }
   
-  if (node->follower) collect_node_vars(node->follower);
+  if (node->follower()) collect_node_vars(node->follower());
 }
 
 void ShProgramNode::collect_dependent_uniform(const ShVariableNodePtr& var)
@@ -424,13 +424,10 @@ std::ostream& ShProgramNode::print(std::ostream& out,
 
 ShPointer<ShProgramNode> ShProgramNode::clone() const
 {
-  ShCtrlGraphNodePtr head, tail;
-  ctrlGraph->copy(head, tail);
-
   ShProgramNodePtr result = new ShProgramNode(target());
   result->ShInfoHolder::operator=(*this);
   result->ShMeta::operator=(*this);
-  result->ctrlGraph = new ShCtrlGraph(head, tail);
+  result->ctrlGraph = ctrlGraph->clone();
   result->inputs = inputs;
   result->outputs = outputs;
   result->collectDecls();

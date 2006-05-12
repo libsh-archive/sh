@@ -93,7 +93,7 @@ CcVariable::CcVariable(int num, const std::string& name, int size, ShValueType v
     m_valueType(valueType) 
 {}
 
-CcBackendCode::LabelFunctor::LabelFunctor(std::map<ShCtrlGraphNodePtr, int>& label_map) 
+CcBackendCode::LabelFunctor::LabelFunctor(std::map<ShCtrlGraphNode*, int>& label_map) 
   : m_cur_label(0),
     m_label_map(label_map) 
 {}
@@ -107,7 +107,7 @@ CcBackendCode::EmitFunctor::EmitFunctor(CcBackendCode* bec)
   : m_bec(bec) 
 {}
   
-void CcBackendCode::EmitFunctor::operator()(ShCtrlGraphNode* node) 
+void CcBackendCode::EmitFunctor::operator()(SH::ShCtrlGraphNode* node) 
 {
   m_bec->emit(node);
 }
@@ -369,7 +369,7 @@ void CcBackendCode::emit(const ShBasicBlockPtr& block)
   }
 }
 
-void CcBackendCode::emit(const ShCtrlGraphNodePtr& node) 
+void CcBackendCode::emit(ShCtrlGraphNode* node) 
 {
   m_code << "label_" << m_label_map[node] << ":" << std::endl
 	 << "  ;" << std::endl;
@@ -378,8 +378,8 @@ void CcBackendCode::emit(const ShCtrlGraphNodePtr& node)
     emit(node->block);
   }
 
-  std::vector<ShCtrlGraphBranch>::iterator I = node->successors.begin();
-  for(;I != node->successors.end(); ++I) {
+  ShCtrlGraphNode::SuccessorIt I = node->successors_begin();
+  for(;I != node->successors_end(); ++I) {
 
     m_code << "  if (";
     for(int i = 0; i < (*I).cond.size(); i++) {
@@ -396,11 +396,11 @@ void CcBackendCode::emit(const ShCtrlGraphNodePtr& node)
     m_code << " goto label_" << m_label_map[(*I).node] << ";" << std::endl;
   }
 
-  if (node->follower) {
-    m_code << "  goto label_" << m_label_map[node->follower] << ";" << std::endl;
+  if (node->follower()) {
+    m_code << "  goto label_" << m_label_map[node->follower()] << ";" << std::endl;
   }
 
-  if (node->successors.empty() && !node->follower) {
+  if (node->successors_empty() && !node->follower()) {
     // Last block, need to return from the function
     m_code << "  return;" << std::endl;
   }

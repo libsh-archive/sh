@@ -127,7 +127,7 @@ struct FloatConverter {
   // assignment operator could not be generated: declaration only
   FloatConverter& operator=(FloatConverter const&);
 
-  void operator()(const ShCtrlGraphNodePtr& node) {
+  void operator()(ShCtrlGraphNode* node) {
     if (!node) return;
     ShBasicBlockPtr block = node->block;
     if (!block) return;

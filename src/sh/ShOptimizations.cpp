@@ -39,12 +39,12 @@ using namespace SH;
 // Branch instruction insertion/removal
 
 struct BraInstInserter {
-  void operator()(const ShCtrlGraphNodePtr& node)
+  void operator()(ShCtrlGraphNode* node)
   {
     if (!node) return;
 
-    for (std::vector<ShCtrlGraphBranch>::const_iterator I = node->successors.begin();
-         I != node->successors.end(); ++I) {
+    for (ShCtrlGraphNode::SuccessorIt I = node->successors_begin();
+         I != node->successors_end(); ++I) {
       if (!node->block) node->block = new ShBasicBlock();
       node->block->addStatement(ShStatement(I->cond, SH_OP_OPTBRA, I->cond));
     }
@@ -52,7 +52,7 @@ struct BraInstInserter {
 };
 
 struct BraInstRemover {
-  void operator()(const ShCtrlGraphNodePtr& node)
+  void operator()(ShCtrlGraphNode* node)
   {
     if (!node) return;
     ShBasicBlockPtr block = node->block;
@@ -78,55 +78,64 @@ struct Straightener {
   // assignment operator could not be generated: declaration only
   Straightener& operator=(Straightener const&);
 
-  void operator()(const ShCtrlGraphNodePtr& node)
+  void operator()(ShCtrlGraphNode* node)
   {
     if (!node) return;
-    if (!node->follower) return;
+    if (!node->follower()) return;
     if (node == graph->entry()) return;
-    if (node->follower == graph->exit()) return;
-    if (!node->successors.empty()) return;
-    if (node->follower->predecessors.size() > 1) return;
+    if (node->follower() == graph->exit()) return;
+    if (!node->successors_empty()) return;
+    if (node->follower()->predecessors_size() > 1) return;
 
     // conditions added for maintaining section START/END marker invariants
-    // node cannot end in an ENDSEC, node->follower cannot start with a STARTSEC
+    // node cannot end in an ENDSEC, node->follower() cannot start with a STARTSEC
     if (node->block && !node->block->empty() && node->block->rbegin()->op == SH_OP_ENDSEC) return; 
-    if (node->follower->block && !node->follower->block->empty() && node->follower->block->begin()->op == SH_OP_STARTSEC) return; 
+    if (node->follower()->block && !node->follower()->block->empty() && node->follower()->block->begin()->op == SH_OP_STARTSEC) return; 
     
     if (!node->block) node->block = new ShBasicBlock();
-    if (!node->follower->block) node->follower->block = new ShBasicBlock();
+    if (!node->follower()->block) node->follower()->block = new ShBasicBlock();
 
-    for (ShBasicBlock::ShStmtList::iterator I = node->follower->block->begin(); I != node->follower->block->end(); ++I) {
+    // Merge statements
+    for (ShBasicBlock::ShStmtList::iterator I = node->follower()->block->begin(); I != node->follower()->block->end(); ++I) {
       node->block->addStatement(*I);
     }
-    node->successors = node->follower->successors;
 
-    // merge in declarations
-    node->insert_decls(node->follower->decl_begin(), node->follower->decl_end());
+    // Merge in declarations
+    node->insert_decls(node->follower()->decl_begin(), node->follower()->decl_end());
 
-    // Update predecessors
-    
-    for (std::vector<ShCtrlGraphBranch>::iterator I = node->follower->successors.begin();
-         I != node->follower->successors.end(); ++I) {
-      replacePredecessors(I->node, node->follower.object(), node.object());
+    // Move successors
+    for (ShCtrlGraphNode::SuccessorIt i = node->follower()->successors_begin();
+         i != node->follower()->successors_end();) {
+      node->append(i->node, i->cond);
+      i = node->follower()->successors_erase(i);
     }
-    if (node->follower->follower) replacePredecessors(node->follower->follower, node->follower.object(), node.object());
+
+    // Update predecessors (this will get automatically done now)
+    //for (std::vector<ShCtrlGraphBranch>::iterator I = node->follower()->successors_begin();
+    //     I != node->follower()->successors_end(); ++I) {
+    //  replacePredecessors(I->node, node->follower().object(), node.object());
+    //}
+    //if (node->follower()->follower()) replacePredecessors(node->follower()->follower(), node->follower().object(), node.object());
     
-    node->follower = node->follower->follower;
+    // Update our follower (this should also release the previous one)
+    node->follower(node->follower()->follower());
 
     changed = true;
   }
 
-  void replacePredecessors(const ShCtrlGraphNodePtr& node,
+  /*
+  void replacePredecessors(ShCtrlGraphNode* node,
                            ShCtrlGraphNode* old,
                            ShCtrlGraphNode* replacement)
   {
-    for (ShCtrlGraphNode::ShPredList::iterator I = node->predecessors.begin(); I != node->predecessors.end(); ++I) {
+    for (ShCtrlGraphNode::PredecessorIt I = node->predecessors_begin(); I != node->predecessors_end(); ++I) {
       if (*I == old) {
         *I = replacement;
         break;
       }
     }
   }
+  */
   
   ShCtrlGraphPtr graph;
   bool& changed;
@@ -143,12 +152,12 @@ struct EmptyBlockRemover {
   // assignment operator could not be generated: declaration only
   EmptyBlockRemover& operator=(EmptyBlockRemover const&);
 
-  void operator()(const ShCtrlGraphNodePtr& node)
+  void operator()(ShCtrlGraphNode* node)
   {
     if (!node) return;
-    if (!node->follower) return;
+    if (!node->follower()) return;
     if (node == graph->entry()) return;
-    if (!node->successors.empty()) return;
+    if (!node->successors_empty()) return;
 
     // TODO: section stuff?
     if (node->block && !node->block->empty()) return;
@@ -158,40 +167,51 @@ struct EmptyBlockRemover {
 
   void finish()
   {
-    for (std::list<ShCtrlGraphNodePtr>::iterator I = to_remove.begin(); I != to_remove.end(); ++I) {
+    for (std::list<ShCtrlGraphNode*>::iterator I = to_remove.begin(); I != to_remove.end(); ++I) {
       remove(*I);
     }
   }
 
-  void remove(const ShCtrlGraphNodePtr& node)
+  void remove(ShCtrlGraphNode* node)
   {
-    for (ShCtrlGraphNode::ShPredList::iterator P = node->predecessors.begin(); P != node->predecessors.end(); ++P) {
+    // Drop this node
+    graph->release_owned_node(node);
+
+    /*
+    // Replace references to us from our predecessors with references to our follower
+    for (ShCtrlGraphNode::PredecessorIt P = node->predecessors_begin(); P != node->predecessors_end();) {
       ShCtrlGraphNode* pred = *P;
-      for (std::vector<ShCtrlGraphBranch>::iterator S = pred->successors.begin(); S != pred->successors.end(); ++S) {
+      // Go to the next iterator position, in case we erase the current one during our operations
+      ++P;
+      for (ShCtrlGraphNode::SuccessorIt S = pred->successors_begin(); S != pred->successors_end(); ++S) {
         if (S->node == node) {
-          S->node = node->follower;
+          // This iteration is safe since it doesn't mess with the list item itself
+          pred->replace_successor(S, node->follower());
         }
       }
-      if (pred->follower == node) {
-        pred->follower = node->follower;
+      if (pred->follower() == node) {
+        pred->follower(node->follower());
       }
     }
+    */
 
+    /*
     // Remove ourselves from our follower's preds
-    for (ShCtrlGraphNode::ShPredList::iterator P = node->follower->predecessors.begin(); P != node->follower->predecessors.end();) {
+    for (ShCtrlGraphNode::PredecessorIt P = node->follower()->predecessors_begin(); P != node->follower()->predecessors_end();) {
       if (*P == node.object()) {
-        P = node->follower->predecessors.erase(P);
+        P = node->follower()->predecessors.erase(P);
       } else {
         ++P;
       }
     }
 
     // Add in our predecessors to our follower's preds.
-    for (ShCtrlGraphNode::ShPredList::iterator P = node->predecessors.begin(); P != node->predecessors.end(); ++P) {
-      if (std::find(node->follower->  predecessors.begin(), node->follower->predecessors.end(), *P) == node->follower->predecessors.end()) {
-        node->follower->predecessors.push_back(*P);
+    for (ShCtrlGraphNode::PredecessorIt P = node->predecessors_begin(); P != node->predecessors_end(); ++P) {
+      if (std::find(node->follower()->predecessors_begin(), node->follower()->predecessors_end(), *P) == node->follower()->predecessors_end()) {
+        node->follower()->predecessors.push_back(*P);
       }
     }
+    */
 
     changed = true;
   }
@@ -199,7 +219,7 @@ struct EmptyBlockRemover {
   ShCtrlGraphPtr graph;
   bool& changed;
 
-  std::list<ShCtrlGraphNodePtr> to_remove;
+  std::list<ShCtrlGraphNode*> to_remove;
 };
 
 
@@ -213,24 +233,18 @@ struct RedundantEdgeRemover {
   // assignment operator could not be generated: declaration only
   RedundantEdgeRemover& operator=(RedundantEdgeRemover const&);
 
-  void operator()(const ShCtrlGraphNodePtr& node)
+  void operator()(ShCtrlGraphNode* node)
   {
     if (!node) return;
-    if (!node->follower) return;
-    if (node->successors.empty()) return;
+    if (!node->follower()) return;
+    if (node->successors_empty()) return;
 
-    ShCtrlGraphNode::SuccessorList::iterator I = node->successors.end();
-    --I;
-    while (1) {
-      if (I->node == node->follower) {
-        I = node->successors.erase(I);
-        if (I != node->successors.begin()) {
-          --I;
-        } else {
-          break;
-        }
+    for (ShCtrlGraphNode::SuccessorIt i = node->successors_begin();
+         i != node->successors_end();) {
+      if (i->node == node->follower()) {
+        i = node->successors_erase(i);
       } else {
-        break;
+        ++i;
       }
     }
   }
@@ -249,7 +263,7 @@ struct InitLiveCode {
   // assignment operator could not be generated: declaration only
   InitLiveCode& operator=(InitLiveCode const&);
 
-  void operator()(const ShCtrlGraphNodePtr& node) {
+  void operator()(ShCtrlGraphNode* node) {
     if (!node) return;
     ShBasicBlockPtr block = node->block;
     if (!block) return;
@@ -290,7 +304,7 @@ struct DeadCodeRemover {
   // assignment operator could not be generated: declaration only
   DeadCodeRemover& operator=(DeadCodeRemover const&);
 
-  void operator()(const ShCtrlGraphNodePtr& node) {
+  void operator()(ShCtrlGraphNode* node) {
     if (!node) return;
     ShBasicBlockPtr block = node->block;
     if (!block) return;
@@ -320,7 +334,7 @@ struct CopyPropagator {
   // assignment operator could not be generated: declaration only
   CopyPropagator& operator=(CopyPropagator const&);
 
-  void operator()(const ShCtrlGraphNodePtr& node) {
+  void operator()(ShCtrlGraphNode* node) {
     if (!node) return;
     ShBasicBlockPtr block = node->block;
     
@@ -394,7 +408,7 @@ struct ForwardSubst {
   // assignment operator could not be generated: declaration only
   ForwardSubst& operator=(ForwardSubst const&);
 
-  void operator()(const ShCtrlGraphNodePtr& node) {
+  void operator()(ShCtrlGraphNode* node) {
     if (!node) return;
     ShBasicBlockPtr block = node->block;
     if (!block) return;
@@ -452,7 +466,7 @@ struct ForwardSubst {
 
 struct ForwardPlacement {
   
-  void operator()(const ShCtrlGraphNodePtr& node) {
+  void operator()(ShCtrlGraphNode* node) {
     if (!node) return;
     ShBasicBlockPtr block = node->block;
     if (!block) return;
@@ -589,7 +603,7 @@ void optimize(ShProgram& p, int level)
     s << "opt_" << pass;
     std::string filename = s.str() + ".dot";
     std::ofstream out(filename.c_str());
-    p.node()->ctrlGraph->graphvizDump(out);
+    p.node()->ctrlGraph->graphviz_dump(out);
     out.close();
     std::string cmdline = std::string("dot -Tps -o ") + s.str() + ".ps " + s.str() + ".dot";
     system(cmdline.c_str());
@@ -603,8 +617,6 @@ void optimize(ShProgram& p, int level)
     if (!ShContext::current()->optimization_disabled("forward substitution")) {
       forward_substitute(p, changed);
     }
-    
-    p.node()->ctrlGraph->computePredecessors();
 
     if (!ShContext::current()->optimization_disabled("remove_empty_blocks")) {
       remove_empty_blocks(p, changed);

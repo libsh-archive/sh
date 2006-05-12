@@ -62,7 +62,7 @@ void evaluate(ShStatement& stmt)
 
 void evaluate(const ShProgramNodePtr& p)
 {
-  ShCtrlGraphNodePtr node = p->ctrlGraph->entry();
+  ShCtrlGraphNode* node = p->ctrlGraph->entry();
 
   while (node != p->ctrlGraph->exit()) {
     if (!node) break; // Should never happen!
@@ -76,8 +76,7 @@ void evaluate(const ShProgramNodePtr& p)
 
     bool done = false;
     
-    for (std::vector<ShCtrlGraphBranch>::const_iterator I = node->successors.begin();
-         I != node->successors.end(); ++I) {
+    for (ShCtrlGraphNode::SuccessorIt I = node->successors_begin(); I != node->successors_end(); ++I) {
       I->cond.node()->addVariant(); // Make sure the condition has values.
       bool jmp = false;
       for (int i = 0; i < I->cond.size(); i++) if (I->cond.getVariant()->isTrue()) jmp = true;
@@ -89,7 +88,7 @@ void evaluate(const ShProgramNodePtr& p)
     }
     if (done) continue;
 
-    node = node->follower;
+    node = node->follower();
   }
 }
 

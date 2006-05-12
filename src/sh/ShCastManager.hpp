@@ -73,7 +73,7 @@ ShCastMgrEdge: public ShGraphEdge<ShCastMgrGraphType>
   ShCastMgrEdge(const ShVariantCast *caster, bool automatic);
   ShCastMgrEdge(const ShCastMgrEdge &other);
 
-  std::ostream& graphvizDump(std::ostream& out) const;
+  std::ostream& graphviz_dump(std::ostream& out) const;
 
   const ShVariantCast *m_caster;
   bool m_auto; ///< indicates whether this is an automatic promotion 
@@ -86,7 +86,7 @@ ShCastMgrVertex: public ShGraphVertex<ShCastMgrGraphType>
   ShCastMgrVertex(ShValueType valueType, ShDataType dataType);
   ShCastMgrVertex(const ShCastMgrVertex &other);
 
-  std::ostream& graphvizDump(std::ostream& out) const;
+  std::ostream& graphviz_dump(std::ostream& out) const;
 
   ShValueType m_valueType;
   ShDataType m_dataType;
@@ -148,7 +148,7 @@ ShCastManager {
     // -1 if the cast is impossible
     int castDist(ShValueType destValueType, ShValueType srcValueType);
 
-    std::ostream& graphvizDump(std::ostream& out) const;
+    std::ostream& graphviz_dump(std::ostream& out) const;
 
     static ShCastManager* instance();
 

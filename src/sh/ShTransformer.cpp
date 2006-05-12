@@ -56,7 +56,7 @@ struct VariableSplitter {
   // assignment operator could not be generated: declaration only
   VariableSplitter& operator=(VariableSplitter const&);
 
-  void operator()(const ShCtrlGraphNodePtr& node) {
+  void operator()(ShCtrlGraphNode* node) {
     if (!node) return;
     ShBasicBlockPtr block = node->block;
     if (!block) return;
@@ -148,7 +148,7 @@ struct StatementSplitter {
   // assignment operator could not be generated: declaration only
   StatementSplitter& operator=(StatementSplitter const&);
 
-  void operator()(const ShCtrlGraphNodePtr& node) {
+  void operator()(ShCtrlGraphNode* node) {
     if (!node) return;
     ShBasicBlockPtr block = node->block;
     if (!block) return;
@@ -404,7 +404,7 @@ struct InputOutputConvertor {
   // assignment operator could not be generated: declaration only
   InputOutputConvertor& operator=(InputOutputConvertor const&);
 
-  void operator()(const ShCtrlGraphNodePtr& node) {
+  void operator()(ShCtrlGraphNode* node) {
     if (!node) return;
     ShBasicBlockPtr block = node->block;
     if (!block) return;
@@ -462,8 +462,8 @@ struct InputOutputConvertor {
     m_changed = true;
 
     // create block after exit
-    ShCtrlGraphNodePtr oldExit = m_program->ctrlGraph->appendExit(); 
-    ShCtrlGraphNodePtr oldEntry = m_program->ctrlGraph->prependEntry();
+    ShCtrlGraphNode* oldExit = m_program->ctrlGraph->append_exit(); 
+    ShCtrlGraphNode* oldEntry = m_program->ctrlGraph->prepend_entry();
 
     for(ShVarMap::const_iterator it = m_varMap.begin(); it != m_varMap.end(); ++it) {
       // assign temporary to output
@@ -547,7 +547,7 @@ void ShTransformer::convertInputOutput(ShVarTransformMap *varTransMap)
 struct TextureLookupConverter {
   TextureLookupConverter() : changed(false) {}
   
-  void operator()(const ShCtrlGraphNodePtr& node)
+  void operator()(ShCtrlGraphNode* node)
   {
     if (!node) return;
     ShBasicBlockPtr block = node->block;
@@ -614,7 +614,7 @@ void ShTransformer::convertTextureLookups()
 
 struct DummyOpStripperBase: public ShTransformerParent 
 {
- bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, const ShCtrlGraphNodePtr& node) { 
+ bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNode* node) { 
    switch(I->op) {
      case SH_OP_STARTSEC:
      case SH_OP_ENDSEC:
@@ -688,7 +688,7 @@ ShVariableNodePtr allocate_scalar_temp(const ShVariable& dest)
 
 struct ATan2ExpanderBase: public ShTransformerParent 
 {
-  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNodePtr node)
+  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNode* node)
   { 
     if (SH_OP_ATAN2 == I->op) {
       ShBasicBlock::ShStmtList new_stmts;
@@ -735,7 +735,7 @@ void ShTransformer::expand_atan2()
 
 struct TexdToTexlodBase : public ShTransformerParent 
 {
-  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNodePtr node)
+  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNode* node)
   { 
     if (SH_OP_TEXD == I->op) {
       ShBasicBlock::ShStmtList new_stmts;
@@ -787,7 +787,7 @@ void ShTransformer::texd_to_texlod()
 
 struct ExpandNormalizeBase : public ShTransformerParent 
 {
-  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNodePtr node)
+  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNode* node)
   { 
     if (SH_OP_NORM == I->op) {
       ShBasicBlock::ShStmtList new_stmts;
@@ -818,7 +818,7 @@ void ShTransformer::expand_normalize()
 
 struct ReciprocateSqrtBase : public ShTransformerParent 
 {
-  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNodePtr node)
+  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNode* node)
   { 
     if (SH_OP_SQRT == I->op) {
       ShBasicBlock::ShStmtList new_stmts;
@@ -847,7 +847,7 @@ void ShTransformer::reciprocate_sqrt()
 
 struct ExpandDivBase : public ShTransformerParent 
 {
-  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNodePtr node)
+  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNode* node)
   { 
     if (SH_OP_DIV == I->op) {
       ShBasicBlock::ShStmtList new_stmts;
@@ -877,7 +877,7 @@ void ShTransformer::expand_div()
 
 struct InverseHyperbolicExpanderBase: public ShTransformerParent 
 {
-  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, const ShCtrlGraphNodePtr& node)
+  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNode* node)
   { 
     ShBasicBlock::ShStmtList new_stmts;
     switch (I->op) {
@@ -960,7 +960,7 @@ bool ordered(const ShSwizzle& s)
 
 struct DestSwizzleOrdererBase : public ShTransformerParent 
 {
-  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, const ShCtrlGraphNodePtr& node)
+  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNode* node)
   { 
     if (I->dest.node() && !I->dest.swizzle().identity() && !ordered(I->dest.swizzle())) {
       ShBasicBlock::ShStmtList new_stmts;
@@ -1018,7 +1018,7 @@ void ShTransformer::order_dest_swizzles()
 
 struct RemoveWritemasksBase : public ShTransformerParent 
 {
-  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, const ShCtrlGraphNodePtr& node)
+  bool handleStmt(ShBasicBlock::ShStmtList::iterator &I, ShCtrlGraphNode* node)
   { 
     if (I->dest.node() && I->dest.swizzle().size() < I->dest.node()->size()) {
       ShBasicBlock::ShStmtList new_stmts;

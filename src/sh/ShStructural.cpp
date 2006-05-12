@@ -140,24 +140,23 @@ namespace SH {
 
 ShStructuralNode::CfgMatch::CfgMatch() {}
 
-ShStructuralNode::CfgMatch::CfgMatch(const ShCtrlGraphNodePtr& from)
-  : from(from), to(from->follower), S(from->successors.end())
+ShStructuralNode::CfgMatch::CfgMatch(ShCtrlGraphNode* from)
+  : from(from), to(from->follower()), S(from->successors_end())
 {
   SH_DEBUG_ASSERT(to);
 }
 
-ShStructuralNode::CfgMatch::CfgMatch(const ShCtrlGraphNodePtr& from, 
-    ShCtrlGraphNode::SuccessorList::iterator S)
+ShStructuralNode::CfgMatch::CfgMatch(ShCtrlGraphNode* from, ShCtrlGraphNode::SuccessorIt S)
   : from(from), to(S->node), S(S)
 {
 }
 
 bool ShStructuralNode::CfgMatch::isFollower()
 {
-  return S == from->successors.end();
+  return S == from->successors_end();
 }
 
-ShStructuralNode::ShStructuralNode(const ShCtrlGraphNodePtr& node)
+ShStructuralNode::ShStructuralNode(ShCtrlGraphNode* node)
   : type(UNREDUCED),
     container(0),
     cfg_node(node),
@@ -185,7 +184,7 @@ ShStructuralNode::ShStructuralNode(NodeType type)
 {
 }
 
-bool ShStructuralNode::contains(const ShCtrlGraphNodePtr& node) const
+bool ShStructuralNode::contains(ShCtrlGraphNode* node) const
 {
   if(cfg_node == node) return true;
   for(StructNodeList::const_iterator S = structnodes.begin();
@@ -203,7 +202,7 @@ std::ostream& ShStructuralNode::dump(std::ostream& out, int noedges) const
       out << gvname(this) << " ";
       if (cfg_node->block) {
         out << "[label=\"";
-        cfg_node->block->graphvizDump(out);
+        cfg_node->block->graphviz_dump(out);
         out << "\", shape=box]";
       } else {
         out << " [label=\"\", shape=circle, height=0.25]";
@@ -265,7 +264,7 @@ struct SuccEdgePred {
   const ShStructuralNode::SuccessorEdge &edge;
   SuccEdgePred(const ShStructuralNode::SuccessorEdge &edge): edge(edge) {}
   SuccEdgePred& operator=(SuccEdgePred const&);
-  bool operator()(const ShCtrlGraphNodePtr& from, const ShCtrlGraphNodePtr& to, const ShVariable& var) const 
+  bool operator()(ShCtrlGraphNode* from, ShCtrlGraphNode* to, const ShVariable& var) const 
   {
     return (edge.first == var && edge.second->contains(to));
   }
@@ -280,7 +279,7 @@ struct SuccNodePred {
   ShStructuralNode* node;
   bool in;
   SuccNodePred(ShStructuralNode* node, bool in): node(node), in(in) {}
-  bool operator()(const ShCtrlGraphNodePtr& from, const ShCtrlGraphNodePtr& to, const ShVariable& var) const 
+  bool operator()(ShCtrlGraphNode* from, ShCtrlGraphNode* to, const ShVariable& var) const 
   {
     return node->contains(to) == in; 
   }
@@ -294,13 +293,13 @@ struct SuccNodePred {
 template<typename P>
 void getStructuralSuccs(ShStructuralNode::CfgMatchList &result, ShStructuralNode* node, const P &predicate) 
 {
-  ShCtrlGraphNodePtr cfg = node->cfg_node;
+  ShCtrlGraphNode* cfg = node->cfg_node;
   if(cfg) {
-    if(cfg->follower && predicate(cfg, cfg->follower, ShVariable())) {
+    if(cfg->follower() && predicate(cfg, cfg->follower(), ShVariable())) {
       result.push_back(ShStructuralNode::CfgMatch(cfg));
     }
-    for(ShCtrlGraphNode::SuccessorList::iterator S = cfg->successors.begin();
-        S != cfg->successors.end(); ++S) {
+    for(ShCtrlGraphNode::SuccessorIt S = cfg->successors_begin();
+        S != cfg->successors_end(); ++S) {
       if(predicate(cfg, S->node, S->cond)) {
         result.push_back(ShStructuralNode::CfgMatch(cfg, S));
       }
@@ -353,10 +352,10 @@ ShStructural::ShStructural(const ShCtrlGraphPtr& graph)
 {
   // Build DFS spanning tree, and postorder traversal stack
 
-  std::map<ShCtrlGraphNodePtr, ShStructuralNode*> nodemap;
-  graph->entry()->clearMarked();
+  std::map<ShCtrlGraphNode*, ShStructuralNode*> nodemap;
+  graph->entry()->clear_marked();
   m_head = build_tree(graph->entry(), nodemap);
-  graph->entry()->clearMarked();
+  graph->entry()->clear_marked();
 
   bool changed;
   do {
@@ -671,7 +670,7 @@ std::ostream& ShStructural::dump(std::ostream& out) const
   return out;
 }
 
-ShStructuralNode* ShStructural::build_tree(const ShCtrlGraphNodePtr& node, std::map<ShCtrlGraphNodePtr, ShStructuralNode*>& nodemap)
+ShStructuralNode* ShStructural::build_tree(ShCtrlGraphNode* node, std::map<ShCtrlGraphNode*, ShStructuralNode*>& nodemap)
 {
   using std::make_pair;
   
@@ -683,8 +682,8 @@ ShStructuralNode* ShStructural::build_tree(const ShCtrlGraphNodePtr& node, std::
 
   nodemap[node] = snode;
   
-  for (ShCtrlGraphNode::SuccessorList::iterator I = node->successors.begin();
-       I != node->successors.end(); ++I) {
+  for (ShCtrlGraphNode::SuccessorIt I = node->successors_begin();
+       I != node->successors_end(); ++I) {
     if (!I->node) continue; // should never happen
     ShStructuralNode* child = build_tree(I->node, nodemap);
     if (child) {
@@ -696,14 +695,14 @@ ShStructuralNode* ShStructural::build_tree(const ShCtrlGraphNodePtr& node, std::
     nodemap[I->node]->preds.push_back(make_pair(I->cond, snode));
   }
 
-  if (node->follower) {
-    ShStructuralNode* fchild = build_tree(node->follower, nodemap);
+  if (node->follower()) {
+    ShStructuralNode* fchild = build_tree(node->follower(), nodemap);
     if (fchild) {
       fchild->parent = snode;
       snode->children.push_back(fchild);
     }
-    snode->succs.push_back(make_pair(ShVariable(), nodemap[node->follower]));
-    nodemap[node->follower]->preds.push_back(make_pair(ShVariable(), snode));
+    snode->succs.push_back(make_pair(ShVariable(), nodemap[node->follower()]));
+    nodemap[node->follower()]->preds.push_back(make_pair(ShVariable(), snode));
   }
 
   return snode;

@@ -115,13 +115,13 @@ private:
   class LabelFunctor
   {
   public:
-    LabelFunctor(std::map<SH::ShCtrlGraphNodePtr, int>& label_map);
+    LabelFunctor(std::map<SH::ShCtrlGraphNode*, int>& label_map);
         
     void operator()(SH::ShCtrlGraphNode* node);
         
   public:
     int m_cur_label;
-    std::map<SH::ShCtrlGraphNodePtr, int>& m_label_map;
+    std::map<SH::ShCtrlGraphNode*, int>& m_label_map;
   };
         
   class EmitFunctor
@@ -138,13 +138,13 @@ private:
   void emit(const SH::ShStatement& stmt);
   void emitTexLookup(const SH::ShStatement &stmt, const char* texfunc);
   void emit(const SH::ShBasicBlockPtr& block);
-  void emit(const SH::ShCtrlGraphNodePtr& node);
+  void emit(SH::ShCtrlGraphNode* node);
       
 private:
   const SH::ShProgramNodeCPtr& m_original_program;
   SH::ShProgramNodePtr m_program;
 
-  std::map<SH::ShCtrlGraphNodePtr, int> m_label_map;
+  std::map<SH::ShCtrlGraphNode*, int> m_label_map;
   std::map<SH::ShVariableNodePtr, CcVariable> m_varmap;
 
   /// The conversions done to change types not handled in hardware into

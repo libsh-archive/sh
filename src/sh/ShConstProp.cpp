@@ -569,7 +569,7 @@ struct InitConstProp {
   // assignment operator could not be generated: declaration only
   InitConstProp& operator=(InitConstProp const&);
 
-  void operator()(const ShCtrlGraphNodePtr& node)
+  void operator()(ShCtrlGraphNode* node)
   {
     if (!node) return;
     ShBasicBlockPtr block = node->block;
@@ -586,7 +586,7 @@ struct InitConstProp {
 };
 
 struct DumpConstProp {
-  void operator()(const ShCtrlGraphNodePtr& node)
+  void operator()(ShCtrlGraphNode* node)
   {
     if (!node) return;
     ShBasicBlockPtr block = node->block;
@@ -626,7 +626,7 @@ struct FinishConstProp
   {
   }
   
-  void operator()(const ShCtrlGraphNodePtr& node) {
+  void operator()(ShCtrlGraphNode* node) {
     if (!node) return;
     ShBasicBlockPtr block = node->block;
     if (!block) return;
@@ -822,7 +822,7 @@ struct FinishConstProp
       s << "lifted_" << valuenum;
       std::string dotfilename(s.str() + ".dot");
       std::ofstream dot(dotfilename.c_str());
-      prg.node()->ctrlGraph->graphvizDump(dot);
+      prg.node()->ctrlGraph->graphviz_dump(dot);
       dot.close();
       std::string cmdline = std::string("dot -Tps -o ") + s.str() + ".ps " + s.str() + ".dot";
       system(cmdline.c_str());

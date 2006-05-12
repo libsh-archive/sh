@@ -45,7 +45,7 @@ public:
   ~ShBasicBlock();
 
   void print(std::ostream& out, int indent) const;
-  void graphvizDump(std::ostream& out) const;
+  void graphviz_dump(std::ostream& out) const;
 
   /**@name Add statement at start.
    * Adds the given statement after the statements in this block */

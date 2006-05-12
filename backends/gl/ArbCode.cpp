@@ -251,17 +251,17 @@ void ArbCode::generate()
       genStructNode(str.head());
     
     } else {
-      m_shader->ctrlGraph->entry()->clearMarked();
+      m_shader->ctrlGraph->entry()->clear_marked();
       genNode(m_shader->ctrlGraph->entry());
     
       if (m_environment & SH_ARB_NVVP2) {
         m_instructions.push_back(ArbInst(SH_ARB_LABEL, getLabel(m_shader->ctrlGraph->exit())));
       }
     }
-    m_shader->ctrlGraph->entry()->clearMarked();
+    m_shader->ctrlGraph->entry()->clear_marked();
     allocRegs();
   } catch (...) {
-    m_shader->ctrlGraph->entry()->clearMarked();
+    m_shader->ctrlGraph->entry()->clear_marked();
     ShContext::current()->exit();
     throw;
   }
@@ -847,7 +847,7 @@ ostream& ArbCode::describe_bindings(ostream& out)
   return out;
 }
 
-int ArbCode::getLabel(const ShCtrlGraphNodePtr& node)
+int ArbCode::getLabel(ShCtrlGraphNode* node)
 {
   if (m_label_map.find(node) == m_label_map.end()) {
     m_label_map[node] = m_max_label++;
@@ -855,7 +855,7 @@ int ArbCode::getLabel(const ShCtrlGraphNodePtr& node)
   return m_label_map[node];
 }
 
-void ArbCode::genNode(const ShCtrlGraphNodePtr& node)
+void ArbCode::genNode(ShCtrlGraphNode* node)
 {
   if (!node || node->marked()) return;
   node->mark();
@@ -873,24 +873,24 @@ void ArbCode::genNode(const ShCtrlGraphNodePtr& node)
   }
 
   if (m_environment & SH_ARB_NVVP2) {
-    for (vector<ShCtrlGraphBranch>::iterator I = node->successors.begin();
-	I != node->successors.end(); I++) {
+    for (ShCtrlGraphNode::SuccessorIt I = node->successors_begin();
+	       I != node->successors_end(); I++) {
       ShVariable dummy(new ShVariableNode(SH_TEMP, I->cond.size(), SH_FLOAT));
       ArbInst updatecc(SH_ARB_MOV, dummy, I->cond);
       updatecc.update_cc = true;
       m_instructions.push_back(updatecc);
       m_instructions.push_back(ArbInst(SH_ARB_BRA, getLabel(I->node), I->cond));
     }
-    if (!node->successors.empty() || node->follower->marked()) { // else it's next anyway, no need for bra
-      m_instructions.push_back(ArbInst(SH_ARB_BRA, getLabel(node->follower)));
+    if (!node->successors_empty() || node->follower()->marked()) { // else it's next anyway, no need for bra
+      m_instructions.push_back(ArbInst(SH_ARB_BRA, getLabel(node->follower())));
     }
-    for (vector<ShCtrlGraphBranch>::iterator I = node->successors.begin();
-	I != node->successors.end(); I++) {
+    for (ShCtrlGraphNode::SuccessorIt I = node->successors_begin();
+	       I != node->successors_end(); I++) {
       genNode(I->node);
     }
   }
 
-  genNode(node->follower);
+  genNode(node->follower());
 }
 
 void ArbCode::genStructNode(const ShStructuralNodePtr& node)

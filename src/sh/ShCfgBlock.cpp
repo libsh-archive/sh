@@ -34,7 +34,7 @@ ShCfgBlock::ShCfgBlock(const ShCtrlGraphPtr& cfg, bool copy)
   init(cfg, copy);
 }
 
-ShCfgBlock::ShCfgBlock(const ShCtrlGraphNodePtr& node, bool copy)
+ShCfgBlock::ShCfgBlock(ShCtrlGraphNode* node, bool copy)
 {
   ShCtrlGraphPtr cfg = new ShCtrlGraph(node, node); 
   init(cfg, copy);
@@ -43,25 +43,14 @@ ShCfgBlock::ShCfgBlock(const ShCtrlGraphNodePtr& node, bool copy)
 void ShCfgBlock::init(const ShCtrlGraphPtr& cfg, bool copy)
 {
   if(copy) {
-    cfg->copy(m_entry, m_exit);
+    m_cfg = cfg->clone();
   } else {
-    m_entry = cfg->entry();
-    m_exit = cfg->exit();
+    m_cfg = cfg;
   }
 }
 
 ShCfgBlock::~ShCfgBlock()
 {
-}
-
-ShCtrlGraphNodePtr ShCfgBlock::entry() const 
-{
-  return m_entry;
-}
-
-ShCtrlGraphNodePtr ShCfgBlock::exit() const 
-{
-  return m_exit;
 }
 
 void ShCfgBlock::print(std::ostream& out, int indent) const
@@ -70,15 +59,15 @@ void ShCfgBlock::print(std::ostream& out, int indent) const
   
   shPrintIndent(out, indent);
   out << "CfgBlock {" << endl;
-    m_entry->print(out, indent + 2);
+    graph()->entry()->print(out, indent + 2);
   shPrintIndent(out, indent);
   out << "}" << endl;
 }
 
-void ShCfgBlock::graphvizDump(std::ostream& out) const
+void ShCfgBlock::graphviz_dump(std::ostream& out) const
 {
   out << "subgraph cfgblock {";
-    m_entry->graphvizDump(out);
+    graph()->entry()->graphviz_dump(out);
   out << "}";
 }
 

@@ -34,15 +34,8 @@ void checkCond(bool cond, const std::string& message = "Internal Error")
   if (!cond) shError( ShParseException(message) );
 }
 
-
-ShParser* ShParser::instance()
-{
-  static ShParser* instance = new ShParser();
-  return instance;
-}
-
-void ShParser::parse(ShCtrlGraphNodePtr& head,
-                     ShCtrlGraphNodePtr& tail,
+void ShParser::parse(ShCtrlGraphNode*& head,
+                     ShCtrlGraphNode*& tail,
                      const ShBlockListPtr& blocks)
 {
   parseStmts(head, tail, blocks);
@@ -50,8 +43,8 @@ void ShParser::parse(ShCtrlGraphNodePtr& head,
 }
 
 
-void ShParser::parseStmts(ShCtrlGraphNodePtr& head,
-                          ShCtrlGraphNodePtr& tail,
+void ShParser::parseStmts(ShCtrlGraphNode*& head,
+                          ShCtrlGraphNode*& tail,
                           const ShBlockListPtr& blocks)
 {
   ShBlockPtr next = blocks->getFront();
@@ -105,14 +98,17 @@ void ShParser::parseStmts(ShCtrlGraphNodePtr& head,
       return;
     }
   } else if (cfg) {
-    head = cfg->entry();
-    tail = cfg->exit();
+    // We can just adopt the new nodes since we're removing them from the list
+    cfg->graph()->entry()->change_owner(m_graph, true);
+    head = cfg->graph()->entry();
+    tail = cfg->graph()->exit();
     blocks->removeFront();
   } else { // not a basic/cfg block, not a token
     return;
   }
   if (tail) {
-    ShCtrlGraphNodePtr nh, nt;
+    ShCtrlGraphNode* nh = 0;
+    ShCtrlGraphNode* nt = 0;
     parseStmts(nh, nt, blocks);
     if (nh) {
       tail->append(nh);
@@ -121,10 +117,10 @@ void ShParser::parseStmts(ShCtrlGraphNodePtr& head,
   }
 }
 
-void ShParser::parseBlock(ShCtrlGraphNodePtr& head,
-                          ShCtrlGraphNodePtr& tail, const ShBasicBlockPtr& block)
+void ShParser::parseBlock(ShCtrlGraphNode*& head,
+                          ShCtrlGraphNode*& tail, const ShBasicBlockPtr& block)
 {
-  head = tail = new ShCtrlGraphNode();
+  head = tail = new ShCtrlGraphNode(m_graph);
   tail->block = block;
   
   /* Move SH_OP_DECL statement sinto the node's declaration set */
@@ -136,8 +132,8 @@ void ShParser::parseBlock(ShCtrlGraphNodePtr& head,
   }
 }
 
-void ShParser::parseIf(ShCtrlGraphNodePtr& head,
-                       ShCtrlGraphNodePtr& tail, const ShBlockListPtr& blocks)
+void ShParser::parseIf(ShCtrlGraphNode*& head,
+                       ShCtrlGraphNode*& tail, const ShBlockListPtr& blocks)
 {
   head = tail = 0;
   
@@ -147,10 +143,13 @@ void ShParser::parseIf(ShCtrlGraphNodePtr& head,
   
   parseStmts(head, tail, condArg.blockList);
   if (!tail) {
-    head = tail = new ShCtrlGraphNode();
+    head = tail = new ShCtrlGraphNode(m_graph);
   }
 
-  ShCtrlGraphNodePtr headIf = 0, tailIf = 0, headElse = 0, tailElse = 0;
+  ShCtrlGraphNode* headIf = 0;
+  ShCtrlGraphNode* tailIf = 0;
+  ShCtrlGraphNode* headElse = 0;
+  ShCtrlGraphNode* tailElse = 0;
   parseStmts(headIf, tailIf, blocks);
   
   ShTokenPtr nt = popToken(blocks); 
@@ -161,21 +160,21 @@ void ShParser::parseIf(ShCtrlGraphNodePtr& head,
   }
   checkCond(nt->type() == SH_TOKEN_ENDIF);
 
-  if (!headIf) headIf = tailIf = new ShCtrlGraphNode();
-  if (!headElse) headElse = tailElse = new ShCtrlGraphNode();
+  if (!headIf) headIf = tailIf = new ShCtrlGraphNode(m_graph);
+  if (!headElse) headElse = tailElse = new ShCtrlGraphNode(m_graph);
   
   tail->append(headIf, condArg.result);
   tail->append(headElse);
   
-  ShCtrlGraphNodePtr merge = new ShCtrlGraphNode();
+  ShCtrlGraphNode* merge = new ShCtrlGraphNode(m_graph);
   tailIf->append(merge);
   tailElse->append(merge);
   
   tail = merge;
 }
 
-void ShParser::parseFor(ShCtrlGraphNodePtr& head,
-                        ShCtrlGraphNodePtr& tail, const ShBlockListPtr& blocks)
+void ShParser::parseFor(ShCtrlGraphNode*& head,
+                        ShCtrlGraphNode*& tail, const ShBlockListPtr& blocks)
 {
   head = tail = 0;
   
@@ -187,28 +186,31 @@ void ShParser::parseFor(ShCtrlGraphNodePtr& head,
   
   parseStmts(head, tail, initArg.blockList);
   if (!tail) {
-    head = tail = new ShCtrlGraphNode();
+    head = tail = new ShCtrlGraphNode(m_graph);
   }
 
-  ShCtrlGraphNodePtr headCond = 0, tailCond = 0;
+  ShCtrlGraphNode* headCond = 0;
+  ShCtrlGraphNode* tailCond = 0;
   parseStmts(headCond, tailCond, condArg.blockList);
   if (!tailCond) {
-    headCond = tailCond = new ShCtrlGraphNode();
+    headCond = tailCond = new ShCtrlGraphNode(m_graph);
   }
   
-  ShCtrlGraphNodePtr headUpdate = 0, tailUpdate = 0;
+  ShCtrlGraphNode* headUpdate = 0;
+  ShCtrlGraphNode* tailUpdate = 0;
   parseStmts(headUpdate, tailUpdate, updateArg.blockList);
   if (!tailUpdate) {
-    headUpdate = tailUpdate = new ShCtrlGraphNode();
+    headUpdate = tailUpdate = new ShCtrlGraphNode(m_graph);
   }
 
-  ShCtrlGraphNodePtr exit = new ShCtrlGraphNode();
+  ShCtrlGraphNode* exit = new ShCtrlGraphNode(m_graph);
   push_scope(exit, headUpdate);
 
-  ShCtrlGraphNodePtr headBody = 0, tailBody = 0;
+  ShCtrlGraphNode* headBody = 0;
+  ShCtrlGraphNode* tailBody = 0;
   parseStmts(headBody, tailBody, blocks);
   if (!tailBody) {
-    headBody = tailBody = new ShCtrlGraphNode();
+    headBody = tailBody = new ShCtrlGraphNode(m_graph);
   }
   
   ShTokenPtr nt = popToken(blocks, SH_TOKEN_ENDFOR);
@@ -223,8 +225,8 @@ void ShParser::parseFor(ShCtrlGraphNodePtr& head,
   pop_scope();
 }
 
-void ShParser::parseWhile(ShCtrlGraphNodePtr& head,
-                          ShCtrlGraphNodePtr& tail, const ShBlockListPtr& blocks)
+void ShParser::parseWhile(ShCtrlGraphNode*& head,
+                          ShCtrlGraphNode*& tail, const ShBlockListPtr& blocks)
 {
   head = tail = 0;
   
@@ -234,16 +236,17 @@ void ShParser::parseWhile(ShCtrlGraphNodePtr& head,
   
   parseStmts(head, tail, condArg.blockList);
   if (!tail) {
-    head = tail = new ShCtrlGraphNode();
+    head = tail = new ShCtrlGraphNode(m_graph);
   }
 
-  ShCtrlGraphNodePtr exit = new ShCtrlGraphNode();
+  ShCtrlGraphNode* exit = new ShCtrlGraphNode(m_graph);
   push_scope(exit, head);
 
-  ShCtrlGraphNodePtr headBody = 0, tailBody = 0;
+  ShCtrlGraphNode* headBody = 0;
+  ShCtrlGraphNode* tailBody = 0;
   parseStmts(headBody, tailBody, blocks);
   if (!tailBody) {
-    headBody = tailBody = new ShCtrlGraphNode();
+    headBody = tailBody = new ShCtrlGraphNode(m_graph);
   }
   
   ShTokenPtr nt = popToken(blocks, SH_TOKEN_ENDWHILE);
@@ -256,31 +259,33 @@ void ShParser::parseWhile(ShCtrlGraphNodePtr& head,
   pop_scope();
 }
 
-void ShParser::parseDo(ShCtrlGraphNodePtr& head,
-                       ShCtrlGraphNodePtr& tail, const ShBlockListPtr& blocks)
+void ShParser::parseDo(ShCtrlGraphNode*& head,
+                       ShCtrlGraphNode*& tail, const ShBlockListPtr& blocks)
 {
-  head = tail = new ShCtrlGraphNode();
+  head = tail = new ShCtrlGraphNode(m_graph);
 
   ShTokenPtr doToken = popToken(blocks, SH_TOKEN_DO);
 
-  ShCtrlGraphNodePtr exit = new ShCtrlGraphNode();
-  ShCtrlGraphNodePtr loop_end = new ShCtrlGraphNode();
+  ShCtrlGraphNode* exit = new ShCtrlGraphNode(m_graph);
+  ShCtrlGraphNode* loop_end = new ShCtrlGraphNode(m_graph);
   push_scope(exit, loop_end);
 
-  ShCtrlGraphNodePtr head_body = 0, tail_body = 0;
+  ShCtrlGraphNode* head_body = 0;
+  ShCtrlGraphNode* tail_body = 0;
   parseStmts(head_body, tail_body, blocks);
   if (!tail_body) {
-    head_body = tail_body = new ShCtrlGraphNode();
+    head_body = tail_body = new ShCtrlGraphNode(m_graph);
   }
 
   ShTokenPtr nt = popToken(blocks, SH_TOKEN_UNTIL, 1);
 
   ShTokenArgument condArg = nt->arguments[0];
 
-  ShCtrlGraphNodePtr headCond = 0, tailCond = 0;
+  ShCtrlGraphNode* headCond = 0;
+  ShCtrlGraphNode* tailCond = 0;
   parseStmts(headCond, tailCond, condArg.blockList);
   if (!tailCond) {
-    headCond = tailCond = new ShCtrlGraphNode();
+    headCond = tailCond = new ShCtrlGraphNode(m_graph);
   }
 
   tail->append(head_body);
@@ -297,9 +302,9 @@ void ShParser::parseDo(ShCtrlGraphNodePtr& head,
   pop_scope();
 }
 
-void ShParser::parseSection(ShCtrlGraphNodePtr& head,
-                           ShCtrlGraphNodePtr& tail,
-                           const ShBlockListPtr& blocks)
+void ShParser::parseSection(ShCtrlGraphNode*& head,
+                            ShCtrlGraphNode*& tail,
+                            const ShBlockListPtr& blocks)
 {
   ShTokenPtr startToken = popToken(blocks, SH_TOKEN_STARTSEC);
 
@@ -309,22 +314,23 @@ void ShParser::parseSection(ShCtrlGraphNodePtr& head,
   std::string name = basic->begin()->get_info<ShInfoComment>()->comment;
   basic->erase(basic->begin());
 
-  ShCtrlGraphNodePtr secHead, secTail;
+  ShCtrlGraphNode* secHead = 0;
+  ShCtrlGraphNode* secTail = 0;
   parseStmts(secHead, secTail, blocks);
   if(!secTail) {
-    secHead = secTail = new ShCtrlGraphNode();
+    secHead = secTail = new ShCtrlGraphNode(m_graph);
   }
 
   ShTokenPtr nt = popToken(blocks, SH_TOKEN_ENDSEC);
 
-  head = new ShCtrlGraphNode();
+  head = new ShCtrlGraphNode(m_graph);
   head->block = new ShBasicBlock();
 
   ShStatement startStmt(SH_OP_STARTSEC);
   startStmt.add_info(new ShInfoComment(name));
   head->block->addStatement(startStmt);
 
-  tail = new ShCtrlGraphNode();
+  tail = new ShCtrlGraphNode(m_graph);
   tail->block = new ShBasicBlock();
   //tail->block->addStatement(ShStatement(foo, SH_OP_ENDSEC, foo));
   ShStatement endStmt(SH_OP_ENDSEC);
@@ -335,7 +341,7 @@ void ShParser::parseSection(ShCtrlGraphNodePtr& head,
   secTail->append(tail);
 }
 
-void ShParser::parse_break(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail, 
+void ShParser::parse_break(ShCtrlGraphNode*& head, ShCtrlGraphNode*& tail, 
                            const ShBlockListPtr& blocks)
 {
   head = tail = 0;
@@ -346,13 +352,13 @@ void ShParser::parse_break(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail,
   
   parseStmts(head, tail, cond_arg.blockList);
   if (!tail) {
-    head = tail = new ShCtrlGraphNode();
+    head = tail = new ShCtrlGraphNode(m_graph);
   }
 
   tail->append(m_break_node.top(), cond_arg.result);
 }
 
-void ShParser::parse_continue(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail, 
+void ShParser::parse_continue(ShCtrlGraphNode*& head, ShCtrlGraphNode*& tail, 
                               const ShBlockListPtr& blocks)
 {
   head = tail = 0;
@@ -363,7 +369,7 @@ void ShParser::parse_continue(ShCtrlGraphNodePtr& head, ShCtrlGraphNodePtr& tail
   
   parseStmts(head, tail, cond_arg.blockList);
   if (!tail) {
-    head = tail = new ShCtrlGraphNode();
+    head = tail = new ShCtrlGraphNode(m_graph);
   }
 
   tail->append(m_continue_node.top(), cond_arg.result);
@@ -387,8 +393,8 @@ ShTokenPtr ShParser::popToken(const ShBlockListPtr& blocks)
   return result;
 }
 
-void ShParser::push_scope(ShCtrlGraphNodePtr& break_node, 
-                          ShCtrlGraphNodePtr& continue_node)
+void ShParser::push_scope(ShCtrlGraphNode*& break_node, 
+                          ShCtrlGraphNode*& continue_node)
 {
   m_break_node.push(break_node);
   m_continue_node.push(continue_node);

@@ -59,14 +59,19 @@ ShProgram connect(ShProgram pa, ShProgram pb)
 
   ShProgramNodePtr program = new ShProgramNode(rtarget);
 
-  ShCtrlGraphNodePtr heada, taila, headb, tailb;
+  //ShCtrlGraphNodePtr heada, taila, headb, tailb;
 
-  a->ctrlGraph->copy(heada, taila);
-  b->ctrlGraph->copy(headb, tailb);
+  //a->ctrlGraph->copy(heada, taila);
+  //b->ctrlGraph->copy(headb, tailb);
 
-  taila->append(headb);
+  //taila->append(headb);
 
-  ShCtrlGraphPtr new_graph = new ShCtrlGraph(heada, tailb);
+  //ShCtrlGraphPtr new_graph = new ShCtrlGraph(heada, tailb);
+  //program->ctrlGraph = new_graph;
+
+  // Create a new CFG from the two programs
+  ShCtrlGraphPtr new_graph = a->ctrlGraph->clone();
+  new_graph->append(std::auto_ptr<ShCtrlGraph>(b->ctrlGraph->clone()));
   program->ctrlGraph = new_graph;
 
   program->inputs = a->inputs;
@@ -125,9 +130,9 @@ ShProgram connect(ShProgram pa, ShProgram pb)
 
   // Change connected InOut variables to either Input or Output only
   // (since they have been connected and turned into temps internally)
-  ShCtrlGraphNodePtr graphEntry;
+  ShCtrlGraphNode* graphEntry = 0;
   for (I = InOutInputs.begin(); I != InOutInputs.end(); ++I) {
-    if(!graphEntry) graphEntry = program->ctrlGraph->prependEntry();
+    if(!graphEntry) graphEntry = program->ctrlGraph->prepend_entry();
     ShVariableNodePtr newInput((*I)->clone(SH_INPUT)); 
 
     std::replace(program->inputs.begin(), program->inputs.end(),
@@ -138,9 +143,9 @@ ShProgram connect(ShProgram pa, ShProgram pb)
         ShVariable(varMap[*I]), SH_OP_ASN, ShVariable(newInput)));
   }
 
-  ShCtrlGraphNodePtr graphExit;
+  ShCtrlGraphNode* graphExit = 0;
   for (I = InOutOutputs.begin(); I != InOutOutputs.end(); ++I) {
-    if(!graphExit) graphExit = program->ctrlGraph->appendExit();
+    if(!graphExit) graphExit = program->ctrlGraph->append_exit();
     ShVariableNodePtr newOutput((*I)->clone(SH_OUTPUT));
     
     std::replace(program->outputs.begin(), program->outputs.end(),
@@ -184,14 +189,19 @@ ShProgram combine(ShProgram pa, ShProgram pb)
 
   ShProgramNodePtr program = new ShProgramNode(rtarget);
 
-  ShCtrlGraphNodePtr heada, taila, headb, tailb;
+  //ShCtrlGraphNodePtr heada, taila, headb, tailb;
 
-  a->ctrlGraph->copy(heada, taila);
-  b->ctrlGraph->copy(headb, tailb);
+  //a->ctrlGraph->copy(heada, taila);
+  //b->ctrlGraph->copy(headb, tailb);
 
-  taila->append(headb);
+  //taila->append(headb);
 
-  ShCtrlGraphPtr new_graph = new ShCtrlGraph(heada, tailb);
+  //ShCtrlGraphPtr new_graph = new ShCtrlGraph(heada, tailb);
+  //program->ctrlGraph = new_graph;
+
+  // Create a new CFG from the two programs
+  ShCtrlGraphPtr new_graph = a->ctrlGraph->clone();
+  new_graph->append(std::auto_ptr<ShCtrlGraph>(b->ctrlGraph->clone()));
   program->ctrlGraph = new_graph;
 
   program->inputs = a->inputs;
