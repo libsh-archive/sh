@@ -179,7 +179,8 @@ AC_CONFIG_FILES([Makefile
 		 examples/particle/Makefile
 		 examples/sdl/Makefile
 		 examples/textures/Makefile
-		 doc/Makefile])
+		 doc/Makefile
+		 autopackage/default.apspec])
 
 # Add symlinks to support out of source building
 AC_CONFIG_LINKS(doc/Doxyfile:doc/Doxyfile.real)
