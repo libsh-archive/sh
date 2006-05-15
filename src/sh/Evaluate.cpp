@@ -60,7 +60,7 @@ void evaluate(Statement& stmt)
   Context::current()->exit();
 }
 
-void evaluate(const ProgramNodePtr& p)
+void evaluate(const ProgramNodeCPtr& p)
 {
   CtrlGraphNode* node = p->ctrlGraph->entry();
 

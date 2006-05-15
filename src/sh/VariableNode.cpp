@@ -27,6 +27,7 @@
 #include "VariantFactory.hpp"
 #include "ProgramNode.hpp"
 #include "Evaluate.hpp"
+#include "Record.hpp"
 
 namespace SH {
 
@@ -447,7 +448,13 @@ void VariableNode::update()
   if (!m_eval) m_eval = new VariableNodeEval;
   if (!m_eval->value) return;
 
-  evaluate(m_eval->value);
+  // Evaluate ourselves (dependent) using the interpretor
+  // Make sure the update occurs as if it were happening outside of a program definition.
+  // Otherwise the program will be evaluated into the currently parsing program if there is one.
+  Context::current()->enter(0); {
+    Record record(Variable(this));
+    record = m_eval->value;
+  } Context::current()->exit();
 }
 
 const Pointer<ProgramNode>& VariableNode::evaluator() const

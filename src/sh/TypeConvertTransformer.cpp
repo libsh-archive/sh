@@ -419,10 +419,11 @@ struct FloatConverter {
 #endif
     }
     
-    if(p->uniform()) { // @todo set up dependent uniform
+    if(p->uniform()) {
       Program prg = SH_BEGIN_PROGRAM("uniform") {
         Variable original(p);
-        Variable converted(converted_p);
+        Variable converted(converted_p->clone(SH_OUTPUT, 0, VALUETYPE_END,
+                                              SEMANTICTYPE_END, true, false));
         shASN(converted, original);
       } SH_END;
       converted_p->attach(prg.node());

@@ -30,7 +30,7 @@ SH_DLLEXPORT
 void evaluate(Statement& stmt);
 
 SH_DLLEXPORT
-void evaluate(const ProgramNodePtr& p);
+void evaluate(const ProgramNodeCPtr& p);
 
 }
 

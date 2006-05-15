@@ -50,9 +50,9 @@ Generic<M, T> cast(const Generic<N, T>& a)
 
 template<int M> 
 inline
-Generic<M, double> cast(double a)
+Generic<M, float> cast(float a)
 {
-  return cast<M>(Attrib<1, SH_CONST, double>(a));
+  return cast<M>(Attrib<1, SH_CONST, float>(a));
 }
 
 template<int M, int N, typename T> 
@@ -66,9 +66,9 @@ Generic<M, T> fillcast(const Generic<N, T>& a)
 
 template<int M> 
 inline
-Generic<M, double> fillcast(double a)
+Generic<M, float> fillcast(float a)
 {
-  return fillcast<M>(Attrib<1, SH_CONST, double>(a));
+  return fillcast<M>(Attrib<1, SH_CONST, float>(a));
 }
 
 template<int M, int N, typename T1, typename T2> 

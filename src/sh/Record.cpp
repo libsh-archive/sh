@@ -30,6 +30,7 @@
 #include "Stream.hpp"
 #include "Record.hpp"
 #include "BaseTexture.hpp"
+#include "Evaluate.hpp"
 
 namespace SH {
 
@@ -185,9 +186,27 @@ Record& Record::operator=(const Program& program)
     Context::current()->parsing()->tokenizer.blockList()->addBlock(
         new CfgBlock(outputMappedProgram, false));
   } else { //immediate mode
-    // @todo range immediate mode program calls should execute the 
-    // Eval interpreter.
-    SH_DEBUG_PRINT("Should call an interpreter here");
+    // TODO: We can handle uniform bound inputs here by copying them to the
+    // shader inputs, after calling addVariant.
+    
+    evaluate(program.node());
+
+    // Copy outputs to record variables
+    iterator r = begin();
+    ProgramNode::VarList::const_iterator o = program.begin_outputs();
+    while (o != program.end_outputs() && r != end()) {
+      shASN(*r++, *o++);
+    }
+
+    // Ensure that we got to the end of both lists
+    if (o != program.end_outputs() || r != end()) {
+      std::ostringstream out;
+      out << "Too " << (r != end() ? "many" : "few");
+      out << " return variables for calling an Program." << std::endl;
+      out << "Expected outputs for:" << std::endl;
+      ProgramNode::print(out, program.node()->outputs);
+      error(Exception(out.str()));
+    }
   }
   return *this;
 }

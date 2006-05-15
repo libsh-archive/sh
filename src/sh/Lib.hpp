@@ -36,52 +36,52 @@
 
 #define SHLIB_CONST_SCALAR_OP(operation) \
 template<typename T> \
-Generic<1, T> \
-operation(const Generic<1, T>& left, double right) \
+Generic<1, typename CommonType<T, float>::type> \
+operation(const Generic<1, T>& left, float right) \
 { \
-  return operation(left, Attrib<1, SH_CONST, T>(static_cast<T>(right))); \
+  return operation(left, Attrib<1, SH_CONST, float>(right)); \
 } \
 template<typename T> \
-Generic<1, T> \
-operation(double left, const Generic<1, T>& right) \
+Generic<1, typename CommonType<T, float>::type> \
+operation(float left, const Generic<1, T>& right) \
 { \
-  return operation(Attrib<1, SH_CONST, T>(left), right); \
+  return operation(Attrib<1, SH_CONST, float>(left), right); \
 } 
 
 #define SHLIB_CONST_SCALAR_OP_DECL(operation) \
 template<typename T> \
-Generic<1, T> \
-operation(const Generic<1, T>& left, double right); \
+Generic<1, typename CommonType<T, float>::type > \
+operation(const Generic<1, T>& left, float right); \
  \
 template<typename T> \
-Generic<1, T> \
-operation(double left, const Generic<1, T>& right);
+Generic<1, typename CommonType<T, float>::type > \
+operation(float left, const Generic<1, T>& right);
 
 #define SHLIB_CONST_N_OP_RETSIZE_LEFT(operation, retsize) \
 template<int N, typename T> \
-Generic<retsize, T> \
-operation(const Generic<N, T>& left, double right) \
+Generic<retsize, typename CommonType<T, float>::type > \
+operation(const Generic<N, T>& left, float right) \
 { \
-  return operation(left, Attrib<1, SH_CONST, T>(static_cast<T>(right))); \
+  return operation(left, Attrib<1, SH_CONST, float>(right)); \
 } 
 
 #define SHLIB_CONST_N_OP_RETSIZE_LEFT_DECL(operation, retsize) \
 template<int N, typename T> \
-Generic<retsize, T> \
-operation(const Generic<N, T>& left, double right);
+Generic<retsize, typename CommonType<T, float>::type> \
+operation(const Generic<N, T>& left, float right);
 
 #define SHLIB_CONST_N_OP_RETSIZE_RIGHT(operation, retsize) \
 template<int N, typename T> \
-Generic<retsize, T> \
-operation(double left, const Generic<N, T>& right) \
+Generic<retsize, typename CommonType<T, float>::type> \
+operation(float left, const Generic<N, T>& right) \
 { \
-  return operation(Attrib<1, SH_CONST, T>(static_cast<T>(left)), right); \
+  return operation(Attrib<1, SH_CONST, float>(left), right); \
 } 
 
 #define SHLIB_CONST_N_OP_RETSIZE_RIGHT_DECL(operation, retsize) \
 template<int N, typename T> \
-Generic<retsize, T> \
-operation(double left, const Generic<N, T>& right); 
+Generic<retsize, typename CommonType<T, float>::type> \
+operation(float left, const Generic<N, T>& right); 
 
 #define SHLIB_CONST_N_OP_LEFT(operation) \
   SHLIB_CONST_N_OP_RETSIZE_LEFT(operation, N);
@@ -115,16 +115,16 @@ SHLIB_CONST_N_OP_RETSIZE_RIGHT_DECL(operation, retsize);
 // just T , but that casues overload problems 
 #define SHLIB_CONST_TRINARY_OP_011_RETSIZE(operation, retsize) \
 template<int N, typename T> \
-Generic<retsize, T> \
-operation(const Generic<N, T>& a, double b, double c) \
+Generic<retsize, typename CommonType<T, float>::type> \
+operation(const Generic<N, T>& a, float b, float c) \
 { \
-  return operation(a, Attrib<1, SH_CONST, T>(b), Attrib<1, SH_CONST, T>(c)); \
+  return operation(a, Attrib<1, SH_CONST, float>(b), Attrib<1, SH_CONST, float>(c)); \
 } 
 
 #define SHLIB_CONST_TRINARY_OP_011_RETSIZE_DECL(operation, retsize) \
 template<int N, typename T> \
-Generic<retsize, T> \
-operation(const Generic<N, T>& a, double b, double c); 
+Generic<retsize, typename CommonType<T, float>::type> \
+operation(const Generic<N, T>& a, float b, float c); 
 
 #define SHLIB_CONST_TRINARY_OP_011(operation) \
 SHLIB_CONST_TRINARY_OP_011_RETSIZE(operation, N);
@@ -226,16 +226,16 @@ libop(const Matrix<M, N, K1, T1>& a, const Attrib<N, K2, T2, libtype, S1>& b) \
 
 #define SHLIB_SPECIAL_RETTYPE_CONST_SCALAR_OP(libtype, libop, librettype, libretsize) \
 template<BindingType K, typename T, bool S> \
-Attrib<libretsize, SH_TEMP, T, librettype, false> \
-libop(const Attrib<1, K, T, libtype, S>& left, double right) \
+Attrib<libretsize, SH_TEMP, typename CommonType<T, float>::type, librettype, false> \
+libop(const Attrib<1, K, T, libtype, S>& left, float right) \
 { \
-  return libop(left, Attrib<1, SH_CONST, T>(right)); \
+  return libop(left, Attrib<1, SH_CONST, float>(right)); \
 } \
 template<BindingType K, typename T, bool S> \
-Attrib<libretsize, SH_TEMP, T, librettype, false> \
-libop(double left, const Attrib<1, K, T, libtype, S>& right) \
+Attrib<libretsize, SH_TEMP, typename CommonType<T, float>::type, librettype, false> \
+libop(float left, const Attrib<1, K, T, libtype, S>& right) \
 { \
-  return libop(Attrib<1, SH_CONST, T>(left), right); \
+  return libop(Attrib<1, SH_CONST, float>(left), right); \
 } 
 
 #define SHLIB_SPECIAL_CONST_SCALAR_OP(libtype, libop) \
@@ -243,10 +243,10 @@ libop(double left, const Attrib<1, K, T, libtype, S>& right) \
 
 #define SHLIB_SPECIAL_RETTYPE_CONST_N_OP_LEFT(libtype, libop, librettype, libretsize) \
 template<int N, BindingType K, typename T, bool S> \
-Attrib<libretsize, SH_TEMP, T, librettype, false> \
-libop(const Attrib<N, K, T, libtype, S>& left, double right) \
+Attrib<libretsize, SH_TEMP, typename CommonType<T, float>::type, librettype, false> \
+libop(const Attrib<N, K, T, libtype, S>& left, float right) \
 { \
-  return libop(left, Attrib<1, SH_CONST, T>(right)); \
+  return libop(left, Attrib<1, SH_CONST, float>(right)); \
 } 
 
 #define SHLIB_SPECIAL_CONST_N_OP_LEFT(libtype, libop) \
@@ -254,10 +254,10 @@ libop(const Attrib<N, K, T, libtype, S>& left, double right) \
 
 #define SHLIB_SPECIAL_RETTYPE_CONST_N_OP_RIGHT(libtype, libop, librettype, libretsize) \
 template<int N, BindingType K, typename T, bool S> \
-Attrib<libretsize, SH_TEMP, T, librettype, false> \
-libop(double left, const Attrib<N, K, T, libtype, S>& right) \
+Attrib<libretsize, SH_TEMP, typename CommonType<T, float>::type, librettype, false> \
+libop(float left, const Attrib<N, K, T, libtype, S>& right) \
 { \
-  return libop(Attrib<1, SH_CONST, T>(left), right); \
+  return libop(Attrib<1, SH_CONST, float>(left), right); \
 } 
 
 #define SHLIB_SPECIAL_CONST_N_OP_RIGHT(libtype, libop) \
