@@ -60,7 +60,7 @@ void evaluate(ShStatement& stmt)
   ShContext::current()->exit();
 }
 
-void evaluate(const ShProgramNodePtr& p)
+void evaluate(const ShProgramNodeCPtr& p)
 {
   ShCtrlGraphNode* node = p->ctrlGraph->entry();
 

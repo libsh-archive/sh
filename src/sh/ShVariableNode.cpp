@@ -27,6 +27,7 @@
 #include "ShVariantFactory.hpp"
 #include "ShProgramNode.hpp"
 #include "ShEvaluate.hpp"
+#include "ShRecord.hpp"
 
 namespace SH {
 
@@ -447,7 +448,13 @@ void ShVariableNode::update()
   if (!m_eval) m_eval = new ShVariableNodeEval;
   if (!m_eval->value) return;
 
-  evaluate(m_eval->value);
+  // Evaluate ourselves (dependent) using the interpretor
+  // Make sure the update occurs as if it were happening outside of a program definition.
+  // Otherwise the program will be evaluated into the currently parsing program if there is one.
+  ShContext::current()->enter(0); {
+    ShRecord record(ShVariable(this));
+    record = m_eval->value;
+  } ShContext::current()->exit();
 }
 
 const ShPointer<ShProgramNode>& ShVariableNode::evaluator() const

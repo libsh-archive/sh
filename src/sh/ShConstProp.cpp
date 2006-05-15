@@ -806,7 +806,9 @@ struct FinishConstProp
     bool broken = false;
     
     ShProgram prg = SH_BEGIN_PROGRAM("uniform") {
-      ShStatement stmt(node, value->op);
+      ShVariable output(node->clone(SH_OUTPUT, 0, SH_VALUETYPE_END, SH_SEMANTICTYPE_END,
+                                    true, false));
+      ShStatement stmt(output, value->op);
 
       for (int i = 0; i < opInfo[value->op].arity; i++) {
         stmt.src[i] = compute(value->src[i]);

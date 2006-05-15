@@ -42,7 +42,7 @@ namespace SH {
 template<int M, int N, typename T> 
 ShGeneric<M, T> cast(const ShGeneric<N, T>& a);
 template<int M> 
-ShGeneric<M, double> cast(double a); // @todo type do a cpp type -> value type map
+ShGeneric<M, float> cast(float a); // @todo type do a cpp type -> value type map
 
 /** Fill Casting.
  * Casts ShGeneric<N, T> to ShGeneric<M, T>.
@@ -52,7 +52,7 @@ ShGeneric<M, double> cast(double a); // @todo type do a cpp type -> value type m
 template<int M, int N, typename T> 
 ShGeneric<M, T> fillcast(const ShGeneric<N, T>& a);
 template<int M> 
-ShGeneric<M, double> fillcast(double a); // @todo type do a cpp type -> value type map
+ShGeneric<M, float> fillcast(float a); // @todo type do a cpp type -> value type map
 
 /** Join two tuples 
  * Creates an M+N tuple with components of a first then b.

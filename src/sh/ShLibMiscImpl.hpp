@@ -50,9 +50,9 @@ ShGeneric<M, T> cast(const ShGeneric<N, T>& a)
 
 template<int M> 
 inline
-ShGeneric<M, double> cast(double a)
+ShGeneric<M, float> cast(float a)
 {
-  return cast<M>(ShAttrib<1, SH_CONST, double>(a));
+  return cast<M>(ShAttrib<1, SH_CONST, float>(a));
 }
 
 template<int M, int N, typename T> 
@@ -66,9 +66,9 @@ ShGeneric<M, T> fillcast(const ShGeneric<N, T>& a)
 
 template<int M> 
 inline
-ShGeneric<M, double> fillcast(double a)
+ShGeneric<M, float> fillcast(float a)
 {
-  return fillcast<M>(ShAttrib<1, SH_CONST, double>(a));
+  return fillcast<M>(ShAttrib<1, SH_CONST, float>(a));
 }
 
 template<int M, int N, typename T1, typename T2> 

@@ -30,6 +30,7 @@
 #include "ShChannelNode.hpp"
 #include "ShStream.hpp"
 #include "ShRecord.hpp"
+#include "ShEvaluate.hpp"
 
 namespace SH {
 
@@ -164,9 +165,27 @@ ShRecord& ShRecord::operator=(const ShProgram& program)
     ShContext::current()->parsing()->tokenizer.blockList()->addBlock(
         new ShCfgBlock(outputMappedProgram, false));
   } else { //immediate mode
-    // @todo range immediate mode program calls should execute the 
-    // ShEval interpreter.
-    SH_DEBUG_PRINT("Should call an interpreter here");
+    // In this branch, evaluating a program with ANY inputs is an error
+    // as we don't support uniform input bindings.
+    
+    evaluate(program.node());
+
+    // Copy outputs to record variables
+    iterator r = begin();
+    ShProgramNode::VarList::const_iterator o = program.begin_outputs();
+    while (o != program.end_outputs() && r != end()) {
+      shASN(*r++, *o++);
+    }
+
+    // Ensure that we got to the end of both lists
+    if (o != program.end_outputs() || r != end()) {
+      std::ostringstream out;
+      out << "Too " << (r != end() ? "many" : "few");
+      out << " return variables for calling an ShProgram." << std::endl;
+      out << "Expected outputs for:" << std::endl;
+      ShProgramNode::print(out, program.node()->outputs);
+      shError(ShException(out.str()));
+    }
   }
   return *this;
 }
