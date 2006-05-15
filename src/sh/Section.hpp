@@ -48,7 +48,7 @@ class SectionNode: public RefCountable {
     /** Constructs an empty section */
     SectionNode();
 
-    typedef std::set<Pointer<SectionNode> > SectionSet;
+    typedef std::set< Pointer<SectionNode> > SectionSet;
     typedef SectionSet::iterator iterator;
     typedef SectionSet::const_iterator const_iterator;
 
@@ -61,7 +61,7 @@ class SectionNode: public RefCountable {
     const_iterator end() const { return children.end(); }
     void addChild(Pointer<SectionNode> child); 
 
-    typedef std::list<CtrlGraphNodePtr> CfgNodeList; 
+    typedef std::list<CtrlGraphNode*> CfgNodeList; 
     typedef CfgNodeList::iterator cfg_iterator;
     typedef CfgNodeList::const_iterator const_cfg_iterator;
 
@@ -77,7 +77,7 @@ class SectionNode: public RefCountable {
     cfg_iterator cfgEnd() { return cfgNodes.end(); }
     const_cfg_iterator cfgBegin() const { return cfgNodes.begin(); }
     const_cfg_iterator cfgEnd() const { return cfgNodes.end(); }
-    void addCfg(const CtrlGraphNodePtr& cfgNode) { cfgNodes.push_back(cfgNode); }
+    void addCfg(CtrlGraphNode* cfgNode) { cfgNodes.push_back(cfgNode); }
 
     /* Returns whether this is the root */
     bool isRoot() const { return !parent; }
@@ -106,11 +106,11 @@ class SectionTree {
     void dfs(F& functor);
      
     /* Retrieves the section containing cfgNode */
-    SectionNodePtr operator[](const CtrlGraphNodePtr& cfgNode);
+    SectionNodePtr operator[](CtrlGraphNode* cfgNode);
 
     /* Returns whether a section node in this tree contains a particular section
      * node. */ 
-    bool contains(const SectionNodePtr& section, const CtrlGraphNodePtr& cfgNode);
+    bool contains(const SectionNodePtr& section, CtrlGraphNode* cfgNode);
 
     /* Graphviz dump */
     std::ostream& dump(std::ostream& out); 
@@ -129,7 +129,7 @@ class SectionTree {
     // adds structural subtree rooted at structNode to the section 
     static void makeSection(const StructuralNodePtr& structNode, SectionNodePtr section);
 
-    typedef std::map<CtrlGraphNodePtr, SectionNodePtr> CfgSectionMap;
+    typedef std::map<CtrlGraphNode*, SectionNodePtr> CfgSectionMap;
     CfgSectionMap cfgSection; 
     void gatherCfgSection(const SectionNodePtr& section); 
 

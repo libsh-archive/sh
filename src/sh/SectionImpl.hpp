@@ -55,14 +55,14 @@ std::ostream& SectionTree::dump(std::ostream& out, F& functor)
 
 template<class F>
 void SectionTree::realDump(std::ostream& out, std::ostream& cfgout, 
-                             const SectionNodePtr& node, F& functor)
+                           const SectionNodePtr& node, F& functor)
 {
   out << "subgraph " << "cluster_" << node.object() << " {" << std::endl; 
     functor(out, node);
     for(SectionNode::cfg_iterator C = node->cfgBegin(); C != node->cfgEnd(); ++C) {
-      CtrlGraphNodePtr c = (*C);
+      CtrlGraphNode* c = (*C);
       
-      out << "\"cfg_" << c.object() << "\""; 
+      out << "\"cfg_" << c << "\""; 
       functor(out, c);
 #if 0
       if(c->block) {
@@ -78,22 +78,22 @@ void SectionTree::realDump(std::ostream& out, std::ostream& cfgout,
       out << ";" << std::endl;
 
       // @todo this is copied from CtrlGraph.cpp...
-      for (CtrlGraphNode::SuccessorList::const_iterator I = c->successors.begin();
-           I != c->successors.end(); ++I) {
+      for (CtrlGraphNode::SuccessorIt I = c->successors_begin();
+           I != c->successors_end(); ++I) {
         std::ostream& curout = contains(node, I->node) ? out : cfgout; 
-        curout << "\"cfg_" << c.object() << "\" ";
+        curout << "\"cfg_" << c << "\" ";
         curout << "-> ";
-        curout << "\"cfg_" << I->node.object() << "\" ";
+        curout << "\"cfg_" << I->node << "\" ";
 
         curout << "[style=dashed, label=\"" << I->cond.name() << "\"]";
         curout << ";" << std::endl;
       }
 
-      if (c->follower) {
-        std::ostream& curout = contains(node, c->follower) ? out : cfgout; 
-        curout << "\"cfg_" << c.object() << "\" ";
+      if (c->follower()) {
+        std::ostream& curout = contains(node, c->follower()) ? out : cfgout; 
+        curout << "\"cfg_" << c << "\" ";
         curout << "-> ";
-        curout << "\"cfg_" << c->follower.object() << "\";" << std::endl;
+        curout << "\"cfg_" << c->follower() << "\";" << std::endl;
       }
     }
 
