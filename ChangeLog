@@ -1,3 +1,8 @@
+2006-05-15  Stefanus Du Toit  <sdt@rapidmind.net>
+
+	* src/sh/CtrlGraph.hpp: Fix return type of successors_size(). Add
+	const iterators.
+
 2006-05-01  Filip Spacek  <filip@rapidmind.net>
 
 	* src/sh/Fraction.hpp: Add extra conversions for 'fb' type.

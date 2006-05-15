@@ -124,10 +124,13 @@ public:
 
   /// Successor types and functions  
   typedef SuccessorList::iterator SuccessorIt;
+  typedef SuccessorList::const_iterator SuccessorConstIt;
 
   SuccessorIt successors_begin() { return m_successors.begin(); }
-  SuccessorIt successors_end()   { return m_successors.end();   }
-  PredecessorList::size_type successors_size() const { return m_successors.size(); }
+  SuccessorIt successors_end() { return m_successors.end();   }
+  SuccessorConstIt successors_begin() const { return m_successors.begin(); }
+  SuccessorConstIt successors_end() const { return m_successors.end();   }
+  SuccessorList::size_type successors_size() const { return m_successors.size(); }
   bool successors_empty() const { return m_successors.empty(); }
 
   /// Erase the given successor, returning a new iterator to the following one
