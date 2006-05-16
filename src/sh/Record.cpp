@@ -189,29 +189,30 @@ Record& Record::operator=(const Program& program)
     // Inputs must ALL be bound to uniforms (ensured above)
     SH_DEBUG_ASSERT(program.uniform_inputs.size() == program.node()->inputs.size());
 
-    // Copy any bound uniforms to any input variables    
-    ProgramNode::VarList::const_iterator i = program.begin_inputs();
-    const_iterator b = program.uniform_inputs.begin();
-    while (i != program.end_inputs() && b != program.uniform_inputs.end()) {
-      (*i)->addVariant();
-      shASN(Variable(*i), *b);
-      ++i;
-      ++b;
+    // Copy any bound uniforms to any input variables
+    ProgramNode::VarList::const_iterator inputs_it = program.begin_inputs();
+    const_iterator bound_it = program.uniform_inputs.begin();
+    while (inputs_it != program.end_inputs() && bound_it != program.uniform_inputs.end()) {
+      (*inputs_it)->addVariant();
+      Variable dest(*inputs_it);
+      shASN(dest, *bound_it);
+      ++inputs_it;
+      ++bound_it;
     }
         
     evaluate(program.node());
 
     // Copy outputs to record variables
-    ProgramNode::VarList::const_iterator o = program.begin_outputs();
-    iterator r = begin();    
-    while (o != program.end_outputs() && r != end()) {
-      shASN(*r++, *o++);
+    ProgramNode::VarList::const_iterator outputs_it = program.begin_outputs();
+    iterator results_it = begin();
+    while (outputs_it != program.end_outputs() && results_it != end()) {
+      shASN(*results_it++, *outputs_it++);
     }
 
     // Ensure that we got to the end of both lists
-    if (o != program.end_outputs() || r != end()) {
+    if (outputs_it != program.end_outputs() || results_it != end()) {
       std::ostringstream out;
-      out << "Too " << (r != end() ? "many" : "few");
+      out << "Too " << (results_it != end() ? "many" : "few");
       out << " return variables for calling an Program." << std::endl;
       out << "Expected outputs for:" << std::endl;
       ProgramNode::print(out, program.node()->outputs);
