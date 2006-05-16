@@ -152,47 +152,47 @@ public:
   Program operator()(const BaseTexture& t0) const;
   Program operator()(const Stream& s0) const;
   Program operator()(const BaseTexture& t0,
-                        const BaseTexture& t1) const;
+                     const BaseTexture& t1) const;
   Program operator()(const Stream& s0,
-                        const Stream& s1) const;
+                     const Stream& s1) const;
   Program operator()(const BaseTexture& t0,
-                        const BaseTexture& t1,
-                        const BaseTexture& t2) const;
+                     const BaseTexture& t1,
+                     const BaseTexture& t2) const;
   Program operator()(const Stream& s0,
-                        const Stream& s1,
-                        const Stream& s2) const;
+                     const Stream& s1,
+                     const Stream& s2) const;
   Program operator()(const BaseTexture& t0,
-                        const BaseTexture& t1,
-                        const BaseTexture& t2,
-                        const BaseTexture& t3) const;
+                     const BaseTexture& t1,
+                     const BaseTexture& t2,
+                     const BaseTexture& t3) const;
   Program operator()(const Stream& s0,
-                        const Stream& s1,
-                        const Stream& s2,
-                        const Stream& s3) const;
+                     const Stream& s1,
+                     const Stream& s2,
+                     const Stream& s3) const;
   Program operator()(const BaseTexture& t0,
-                        const BaseTexture& t1,
-                        const BaseTexture& t2,
-                        const BaseTexture& t3,
-                        const BaseTexture& t4) const;
+                     const BaseTexture& t1,
+                     const BaseTexture& t2,
+                     const BaseTexture& t3,
+                     const BaseTexture& t4) const;
   Program operator()(const Stream& s0,
-                        const Stream& s1,
-                        const Stream& s2,
-                        const Stream& s3,
-                        const Stream& s4) const;
+                     const Stream& s1,
+                     const Stream& s2,
+                     const Stream& s3,
+                     const Stream& s4) const;
   
   // Call operators for records
   // May want to merge these with above in the long term. 
   Program operator()(const Record &rec) const;
   Program operator()(const Variable &v0) const;
   Program operator()(const Variable &v0, 
-                       const Variable &v1) const;
+                     const Variable &v1) const;
   Program operator()(const Variable &v0, 
-                       const Variable &v1, 
-                       const Variable &v2) const;
+                     const Variable &v1, 
+                     const Variable &v2) const;
   Program operator()(const Variable &v0, 
-                       const Variable &v1, 
-                       const Variable &v2, 
-                       const Variable &v3) const;
+                     const Variable &v1, 
+                     const Variable &v2, 
+                     const Variable &v3) const;
 
   enum BindingType {
     STREAM,

@@ -186,14 +186,24 @@ Record& Record::operator=(const Program& program)
     Context::current()->parsing()->tokenizer.blockList()->addBlock(
         new CfgBlock(outputMappedProgram, false));
   } else { //immediate mode
-    // TODO: We can handle uniform bound inputs here by copying them to the
-    // shader inputs, after calling addVariant.
-    
+    // Inputs must ALL be bound to uniforms (ensured above)
+    SH_DEBUG_ASSERT(program.uniform_inputs.size() == program.node()->inputs.size());
+
+    // Copy any bound uniforms to any input variables    
+    ProgramNode::VarList::const_iterator i = program.begin_inputs();
+    const_iterator b = program.uniform_inputs.begin();
+    while (i != program.end_inputs() && b != program.uniform_inputs.end()) {
+      (*i)->addVariant();
+      shASN(Variable(*i), *b);
+      ++i;
+      ++b;
+    }
+        
     evaluate(program.node());
 
     // Copy outputs to record variables
-    iterator r = begin();
     ProgramNode::VarList::const_iterator o = program.begin_outputs();
+    iterator r = begin();    
     while (o != program.end_outputs() && r != end()) {
       shASN(*r++, *o++);
     }
