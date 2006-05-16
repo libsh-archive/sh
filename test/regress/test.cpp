@@ -38,6 +38,7 @@ Test::Test(int argc, char** argv)
          << "will run the addition unit test on the glsl backend." << endl;
     exit(1);
   }
+  SH::init();
   if (m_backend != "host") SH::setBackend(m_backend); 
 }
 
