@@ -79,5 +79,10 @@ test.add_texture(shtest.GenTexture("ArrayRect<Color3f>",
 test.clear_call()
 test.add_call(shtest.Call(shtest.Call.lookup, 'float_array', 1))
 test.add_make_test((32, 32, 32), [(8, 8)], ['i', 'i'])
-
+test.add_make_test((0, 0, 0), [(0, 0)], ['i', 'i'])
+test.add_make_test((3, 3, 3), [(0, 1)], ['i', 'i'])
+test.add_make_test((1, 1, 1), [(1, 0)], ['i', 'i'])
+test.add_make_test((35, 35, 35), [(8, 9)], ['i', 'i'])
+test.add_make_test((29, 29, 29), [(8, 7)], ['i', 'i'])
+    
 test.output(sys.stdout)
