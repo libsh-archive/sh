@@ -60,9 +60,9 @@ void ShSectionTree::realDump(std::ostream& out, std::ostream& cfgout,
   out << "subgraph " << "cluster_" << node.object() << " {" << std::endl; 
     functor(out, node);
     for(ShSectionNode::cfg_iterator C = node->cfgBegin(); C != node->cfgEnd(); ++C) {
-      ShCtrlGraphNodePtr c = (*C);
+      ShCtrlGraphNode* c = (*C);
       
-      out << "\"cfg_" << c.object() << "\""; 
+      out << "\"cfg_" << c << "\""; 
       functor(out, c);
 #if 0
       if(c->block) {
@@ -78,22 +78,22 @@ void ShSectionTree::realDump(std::ostream& out, std::ostream& cfgout,
       out << ";" << std::endl;
 
       // @todo this is copied from CtrlGraph.cpp...
-      for (ShCtrlGraphNode::SuccessorList::const_iterator I = c->successors.begin();
-           I != c->successors.end(); ++I) {
+      for (ShCtrlGraphNode::SuccessorIt I = c->successors_begin();
+           I != c->successors_end(); ++I) {
         std::ostream& curout = contains(node, I->node) ? out : cfgout; 
-        curout << "\"cfg_" << c.object() << "\" ";
+        curout << "\"cfg_" << c << "\" ";
         curout << "-> ";
-        curout << "\"cfg_" << I->node.object() << "\" ";
+        curout << "\"cfg_" << I->node << "\" ";
 
         curout << "[style=dashed, label=\"" << I->cond.name() << "\"]";
         curout << ";" << std::endl;
       }
 
-      if (c->follower) {
-        std::ostream& curout = contains(node, c->follower) ? out : cfgout; 
-        curout << "\"cfg_" << c.object() << "\" ";
+      if (c->follower()) {
+        std::ostream& curout = contains(node, c->follower()) ? out : cfgout; 
+        curout << "\"cfg_" << c << "\" ";
         curout << "-> ";
-        curout << "\"cfg_" << c->follower.object() << "\";" << std::endl;
+        curout << "\"cfg_" << c->follower() << "\";" << std::endl;
       }
     }
 

@@ -24,11 +24,11 @@ namespace {
 using namespace SH;
 
 struct DefaultDumper {
-  void operator()(std::ostream& out, const ShCtrlGraphNodePtr& node)
+  void operator()(std::ostream& out, ShCtrlGraphNode* node)
   {
     out << "[label=\"";
     if(node->block) {
-      node->block->graphvizDump(out);
+      node->block->graphviz_dump(out);
       out << "\", shape=box]";
     } else {
       out << "\", shape=circle, height=0.25]";
@@ -111,7 +111,7 @@ ShSectionTree::ShSectionTree(ShStructural& structural)
   makeSection(structural.head(), root);
 }
 
-ShSectionNodePtr ShSectionTree::operator[](const ShCtrlGraphNodePtr& cfgNode)
+ShSectionNodePtr ShSectionTree::operator[](ShCtrlGraphNode* cfgNode)
 {
   if(cfgSection.empty()) {
     gatherCfgSection(root);
@@ -119,7 +119,7 @@ ShSectionNodePtr ShSectionTree::operator[](const ShCtrlGraphNodePtr& cfgNode)
   return cfgSection[cfgNode];
 }
 
-bool ShSectionTree::contains(const ShSectionNodePtr& section, const ShCtrlGraphNodePtr& cfgNode)
+bool ShSectionTree::contains(const ShSectionNodePtr& section, ShCtrlGraphNode* cfgNode)
 {
   for(ShSectionNodePtr s = cfgSection[cfgNode]; s; s = s->parent) {
     if(s == section) return true;

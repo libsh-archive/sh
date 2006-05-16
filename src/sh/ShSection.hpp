@@ -61,7 +61,7 @@ class ShSectionNode: public ShRefCountable {
     const_iterator end() const { return children.end(); }
     void addChild(ShPointer<ShSectionNode> child); 
 
-    typedef std::list<ShCtrlGraphNodePtr> CfgNodeList; 
+    typedef std::list<ShCtrlGraphNode*> CfgNodeList; 
     typedef CfgNodeList::iterator cfg_iterator;
     typedef CfgNodeList::const_iterator const_cfg_iterator;
 
@@ -77,7 +77,7 @@ class ShSectionNode: public ShRefCountable {
     cfg_iterator cfgEnd() { return cfgNodes.end(); }
     const_cfg_iterator cfgBegin() const { return cfgNodes.begin(); }
     const_cfg_iterator cfgEnd() const { return cfgNodes.end(); }
-    void addCfg(const ShCtrlGraphNodePtr& cfgNode) { cfgNodes.push_back(cfgNode); }
+    void addCfg(ShCtrlGraphNode* cfgNode) { cfgNodes.push_back(cfgNode); }
 
     /* Returns whether this is the root */
     bool isRoot() const { return !parent; }
@@ -106,11 +106,11 @@ class ShSectionTree {
     void dfs(F& functor);
      
     /* Retrieves the section containing cfgNode */
-    ShSectionNodePtr operator[](const ShCtrlGraphNodePtr& cfgNode);
+    ShSectionNodePtr operator[](ShCtrlGraphNode* cfgNode);
 
     /* Returns whether a section node in this tree contains a particular section
      * node. */ 
-    bool contains(const ShSectionNodePtr& section, const ShCtrlGraphNodePtr& cfgNode);
+    bool contains(const ShSectionNodePtr& section, ShCtrlGraphNode* cfgNode);
 
     /* Graphviz dump */
     std::ostream& dump(std::ostream& out); 
@@ -129,7 +129,7 @@ class ShSectionTree {
     // adds structural subtree rooted at structNode to the section 
     static void makeSection(const ShStructuralNodePtr& structNode, ShSectionNodePtr section);
 
-    typedef std::map<ShCtrlGraphNodePtr, ShSectionNodePtr> CfgSectionMap;
+    typedef std::map<ShCtrlGraphNode*, ShSectionNodePtr> CfgSectionMap;
     CfgSectionMap cfgSection; 
     void gatherCfgSection(const ShSectionNodePtr& section); 
 
