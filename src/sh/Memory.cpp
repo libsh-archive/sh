@@ -275,7 +275,8 @@ HostStorage::HostStorage(Memory* memory, std::size_t length, ValueType value_typ
     m_data_unaligned(new char[length + align - 1]),
     m_managed(true)
 {
-  m_data = reinterpret_cast<void *>(((reinterpret_cast<ptrdiff_t>(m_data_unaligned) + align - 1) / align) * align);
+  // Assumes align is a power of two
+  m_data = reinterpret_cast<void *>((reinterpret_cast<ptrdiff_t>(m_data_unaligned) + align - 1) & ~(align - 1));
 }
 
 HostStorage::HostStorage(Memory* memory, std::size_t length, void* data, ValueType value_type)
