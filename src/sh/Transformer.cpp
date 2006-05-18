@@ -849,7 +849,9 @@ struct ExpandDivBase : public TransformerParent
 {
   bool handleStmt(BasicBlock::StmtList::iterator &I, CtrlGraphNode* node)
   { 
-    if (OP_DIV == I->op) {
+    if (OP_DIV == I->op && 
+        !(I->src[0].valueType() & VALUETYPE_TYPE_INT) &&
+        !(I->src[1].valueType() & VALUETYPE_TYPE_INT)) {
       BasicBlock::StmtList new_stmts;
       
       Variable tmp1(allocate_temp(I->src[1]));
