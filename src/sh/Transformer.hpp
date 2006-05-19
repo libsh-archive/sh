@@ -137,7 +137,23 @@ public:
   /** Replace XPD with MUL and MAD
    */
   void expand_xpd();
-
+  
+  /** Replace RND with ADD and FLR
+   */
+  void expand_rnd();
+  
+  /** Replace LRP
+   */
+  void expand_lrp();
+  
+  /** Replace MOD
+   */
+  void expand_mod();
+  
+  /** Replace SGN with SGT and SLT
+   */
+  void expand_sgn();
+  
   void order_dest_swizzles();
 
   // Assumes order_dest_swizzles has already run

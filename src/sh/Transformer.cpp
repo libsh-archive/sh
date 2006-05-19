@@ -905,6 +905,128 @@ void Transformer::expand_xpd()
   m_changed |= ex.transform(m_program);
 }
 
+struct ExpandRndBase : public TransformerParent 
+{
+  bool handleStmt(BasicBlock::StmtList::iterator &I, CtrlGraphNode* node)
+  { 
+    if (OP_RND == I->op) {
+      BasicBlock::StmtList new_stmts;
+      
+      Variable half(allocate_constant(I->src[0], 0.5));
+      Variable temp(allocate_temp(I->dest));
+
+      new_stmts.push_back(Statement(temp, I->src[0], OP_ADD, half));
+      new_stmts.push_back(Statement(I->dest, OP_FLR, temp));
+
+      I = node->block->erase(I);
+      node->block->splice(I, new_stmts);
+      m_changed = true;
+      return true;
+    } else {
+      return false;
+    }
+  }
+};
+
+typedef DefaultTransformer<ExpandRndBase> ExpandRnd;
+void Transformer::expand_rnd()
+{
+  ExpandRnd ex;
+  m_changed |= ex.transform(m_program);
+}
+
+struct ExpandLrpBase : public TransformerParent 
+{
+  bool handleStmt(BasicBlock::StmtList::iterator &I, CtrlGraphNode* node)
+  { 
+    if (OP_LRP == I->op) {
+      BasicBlock::StmtList new_stmts;
+      
+      Variable one(allocate_constant(I->src[0], 1));
+      Variable temp(allocate_temp(I->src[0]));
+
+      new_stmts.push_back(Statement(temp, OP_ADD, one, -I->src[0]));
+      new_stmts.push_back(Statement(temp, OP_MUL, temp, I->src[2]));
+      new_stmts.push_back(Statement(I->dest, OP_MAD, I->src[0], I->src[1], temp));
+
+      I = node->block->erase(I);
+      node->block->splice(I, new_stmts);
+      m_changed = true;
+      return true;
+    } else {
+      return false;
+    }
+  }
+};
+
+typedef DefaultTransformer<ExpandLrpBase> ExpandLrp;
+void Transformer::expand_lrp()
+{
+  ExpandLrp ex;
+  m_changed |= ex.transform(m_program);
+}
+
+struct ExpandModBase : public TransformerParent 
+{
+  bool handleStmt(BasicBlock::StmtList::iterator &I, CtrlGraphNode* node)
+  { 
+    if (OP_MOD == I->op) {
+      BasicBlock::StmtList new_stmts;
+      
+      Variable temp(allocate_temp(I->src[0]));
+
+      new_stmts.push_back(Statement(temp, OP_DIV, I->src[0], I->src[1]));
+      new_stmts.push_back(Statement(temp, OP_FLR, temp));
+      new_stmts.push_back(Statement(I->dest, OP_MAD, temp, -I->src[1], I->src[0]));
+
+      I = node->block->erase(I);
+      node->block->splice(I, new_stmts);
+      m_changed = true;
+      return true;
+    } else {
+      return false;
+    }
+  }
+};
+
+typedef DefaultTransformer<ExpandModBase> ExpandMod;
+void Transformer::expand_mod()
+{
+  ExpandMod ex;
+  m_changed |= ex.transform(m_program);
+}
+
+struct ExpandSgnBase : public TransformerParent 
+{
+  bool handleStmt(BasicBlock::StmtList::iterator &I, CtrlGraphNode* node)
+  { 
+    if (OP_SGN == I->op) {
+      BasicBlock::StmtList new_stmts;
+      
+      Variable zero(allocate_constant(I->src[0], 0));
+      Variable temp(allocate_temp(I->src[0]));
+
+      new_stmts.push_back(Statement(I->dest, OP_SGT, I->src[0], zero));
+      new_stmts.push_back(Statement(temp, OP_SLT, I->src[0], zero));
+      new_stmts.push_back(Statement(I->dest, OP_ADD, I->dest, -temp));
+
+      I = node->block->erase(I);
+      node->block->splice(I, new_stmts);
+      m_changed = true;
+      return true;
+    } else {
+      return false;
+    }
+  }
+};
+
+typedef DefaultTransformer<ExpandSgnBase> ExpandSgn;
+void Transformer::expand_sgn()
+{
+  ExpandSgn ex;
+  m_changed |= ex.transform(m_program);
+}
+
 struct InverseHyperbolicExpanderBase: public TransformerParent 
 {
   bool handleStmt(BasicBlock::StmtList::iterator &I, CtrlGraphNode* node)
