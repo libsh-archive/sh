@@ -29,6 +29,7 @@
 #include <cstdio>
 #include <iostream>
 #include <fstream>
+#include <cerrno>
 
 #include "Cc.hpp" 
 #include "Debug.hpp" 
@@ -475,7 +476,7 @@ bool CcBackendCode::generate(void)
   std::stringstream epilogue;
   epilogue << "}" << std::endl;
 
-#ifdef CC_DEBUG
+#ifdef SH_CC_DEBUG
   SH_CC_DEBUG_PRINT("Outputting generated C++ code to ccstream.cpp");
   std::ofstream dbgout("ccstream.cpp");
   dbgout << prologue.str();
@@ -626,6 +627,21 @@ void CcBackendCode::delete_temporary_files()
   }
 }
 
+struct StorageUpToDate : std::binary_function<StoragePtr, MemoryPtr, bool> {
+  bool operator()(const StoragePtr& storage, const MemoryPtr& memory) const {
+    return (storage->timestamp() == memory->timestamp());
+  }
+};
+struct SecondUpToDateStorage : std::binary_function<StoragePtr, MemoryPtr, bool> {
+  SecondUpToDateStorage() : m_second(false) { }
+  bool operator()(const StoragePtr& storage, const MemoryPtr& memory) const {
+    bool result = (m_second && storage->timestamp() == memory->timestamp());
+    m_second = storage->timestamp() == memory->timestamp() ? true : m_second;
+    return result;
+  }
+  mutable bool m_second;
+};
+
 bool CcBackendCode::execute(const Program& prg, Stream& dest) 
 {
   if (!m_shader_func) {
@@ -655,8 +671,10 @@ bool CcBackendCode::execute(const Program& prg, Stream& dest)
   Record::const_iterator uniform = prg.uniform_inputs.begin();
   for(; I != prg.binding_spec.end(); ++I, ++iidx) {
     if (*I == Program::STREAM) {
-      HostStoragePtr storage = shref_dynamic_cast<HostStorage>(stream->node()->memory(0)->findStorage("host"));
-
+      MemoryPtr mem = stream->node()->memory(0);
+      StoragePtr s = mem->findStorage("host", std::bind2nd(StorageUpToDate(), mem));
+      HostStoragePtr storage = shref_dynamic_cast<HostStorage>(s);
+        
       int datasize = typeInfo(stream->node()->valueType(), MEM)->datasize();
       int stride, count, offset;
       stream->get_stride(&stride, 1);
@@ -666,10 +684,10 @@ bool CcBackendCode::execute(const Program& prg, Stream& dest)
       input_types[iidx] = stream->node()->valueType();
 
       if (!storage) {
+        // We should probably complain here
         storage = new HostStorage(stream->node()->memory(0).object(),
 				  datasize * stream->node()->size() * count, stream->node()->valueType());
       }
-//    storage->dirty();
       inputs[iidx] = reinterpret_cast<char*>(storage->data()) +
                      datasize * stream->node()->size() * offset;
       ++stream;
@@ -703,8 +721,12 @@ bool CcBackendCode::execute(const Program& prg, Stream& dest)
   SH_CC_DEBUG_PRINT("Assigning output channels to arrays");
   for(Stream::NodeList::iterator I = dest.begin()
         ;I != dest.end(); ++I, ++oidx) {
-    HostStoragePtr storage = shref_dynamic_cast<HostStorage>(
-								 I->node()->memory(0)->findStorage("host"));
+    MemoryPtr mem = I->node()->memory(0);
+    StoragePtr s = mem->findStorage("host", std::not1(std::bind2nd(StorageUpToDate(), mem)));
+    if (!s) {
+      s = mem->findStorage("host", std::bind2nd(SecondUpToDateStorage(), mem));
+    }
+    HostStoragePtr storage = shref_dynamic_cast<HostStorage>(s);
 
     int stride, count, offset;
     I->get_stride(&stride, 1);
@@ -716,7 +738,7 @@ bool CcBackendCode::execute(const Program& prg, Stream& dest)
     output_types[oidx] = I->node()->valueType();
 
     if (!storage) {
-      SH_CC_DEBUG_PRINT("  Allocating new storage?");
+      SH_CC_DEBUG_PRINT("  Allocating new storage");
       storage = new HostStorage(I->node()->memory(0).object(),
 				  datasize * I->node()->size() * count, I->node()->valueType());
     }
