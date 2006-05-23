@@ -320,14 +320,14 @@ int GlTextureHostTransfer::cost(const Storage* from, const Storage* to)
   return 1000;
 }
 
-GlTextureGlTextureTransfer::GlTextureGlTextureTransfer()
-  : Transfer("opengl:texture", "opengl:texture")
+GlTextureGlTextureTransfer::GlTextureGlTextureTransfer(const std::string& target)
+  : Transfer("opengl:texture", "opengl:texture"), m_target(target)
 {
-  Program vsh = SH_BEGIN_VERTEX_PROGRAM {
+  Program vsh = SH_BEGIN_PROGRAM(target+":vertex") {
     InOutPosition4f pos;
     InOutTexCoord2f tc;
   } SH_END;
-  Program fsh = SH_BEGIN_FRAGMENT_PROGRAM {
+  Program fsh = SH_BEGIN_PROGRAM(target+":fragment") {
     InputTexCoord2f tc;
     OutputColor4f o = source_texture(tc);
   } SH_END;
@@ -358,8 +358,14 @@ bool GlTextureGlTextureTransfer::transfer(const Storage* from, Storage* to)
     SH_GL_CHECK_ERROR(glViewport(0, 0, dst_tex->width(), dst_tex->height()));
     
     GLint prev_vert, prev_frag;
-    SH_GL_CHECK_ERROR(glGetProgramivARB(GL_VERTEX_PROGRAM_ARB, GL_PROGRAM_BINDING_ARB, &prev_vert));
-    SH_GL_CHECK_ERROR(glGetProgramivARB(GL_FRAGMENT_PROGRAM_ARB, GL_PROGRAM_BINDING_ARB, &prev_frag));
+    GLhandleARB prev_prog;
+    if (m_target == "arb") {
+      SH_GL_CHECK_ERROR(glGetProgramivARB(GL_VERTEX_PROGRAM_ARB, GL_PROGRAM_BINDING_ARB, &prev_vert));
+      SH_GL_CHECK_ERROR(glGetProgramivARB(GL_FRAGMENT_PROGRAM_ARB, GL_PROGRAM_BINDING_ARB, &prev_frag));
+    }
+    else {
+      SH_GL_CHECK_ERROR(prev_prog = glGetHandleARB(GL_PROGRAM_OBJECT_ARB));
+    }
 
     std::ostringstream os;
     os << src_tex->name();
@@ -378,8 +384,13 @@ bool GlTextureGlTextureTransfer::transfer(const Storage* from, Storage* to)
     } glEnd();
     unbind(*render_to_tex_prog);
 
-    SH_GL_CHECK_ERROR(glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, prev_frag));
-    SH_GL_CHECK_ERROR(glBindProgramARB(GL_VERTEX_PROGRAM_ARB, prev_vert));
+    if (m_target == "arb") {
+      SH_GL_CHECK_ERROR(glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, prev_frag));
+      SH_GL_CHECK_ERROR(glBindProgramARB(GL_VERTEX_PROGRAM_ARB, prev_vert));
+    }
+    else {
+      SH_GL_CHECK_ERROR(glUseProgramObjectARB(prev_prog));
+    }
     SH_GL_CHECK_ERROR(glPopAttrib());
     SH_GL_CHECK_ERROR(glDrawBuffer(prevDraw));
     FBOCache::instance()->unbindFramebuffer();

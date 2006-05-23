@@ -104,12 +104,13 @@ public:
 
 class GlTextureGlTextureTransfer : public SH::Transfer {
 public:
-  GlTextureGlTextureTransfer();
+  GlTextureGlTextureTransfer(const std::string& target);
   bool transfer(const SH::Storage* from, SH::Storage* to);
   int cost(const SH::Storage* from, const SH::Storage* to);
   static GlTextureGlTextureTransfer* instance;
 
 private:
+  std::string m_target;
   SH::Array2D<SH::Attrib4f> source_texture;
   SH::ProgramSetPtr render_to_tex_prog;
 };
