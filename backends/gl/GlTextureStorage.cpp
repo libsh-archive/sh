@@ -90,7 +90,7 @@ bool HostGlTextureTransfer::transfer(const Storage* from, Storage* to)
   int height = texture->height();
   int depth = texture->depth();
   int tuplesize = texture->tuplesize();
-    
+
   VariantPtr data_variant;
   int count = 0;
   bool full_copy = false;
@@ -354,8 +354,12 @@ bool GlTextureGlTextureTransfer::transfer(const Storage* from, Storage* to)
     SH_GL_CHECK_ERROR(glGetIntegerv(GL_DRAW_BUFFER, &prevDraw));
     SH_GL_CHECK_ERROR(glDrawBuffer(buffer));
 
-    SH_GL_CHECK_ERROR(glPushAttrib(GL_VIEWPORT_BIT));
+    SH_GL_CHECK_ERROR(glPushAttrib(GL_VIEWPORT_BIT |  GL_ENABLE_BIT));
     SH_GL_CHECK_ERROR(glViewport(0, 0, dst_tex->width(), dst_tex->height()));
+    
+    GLint prev_vert, prev_frag;
+    SH_GL_CHECK_ERROR(glGetProgramivARB(GL_VERTEX_PROGRAM_ARB, GL_PROGRAM_BINDING_ARB, &prev_vert));
+    SH_GL_CHECK_ERROR(glGetProgramivARB(GL_FRAGMENT_PROGRAM_ARB, GL_PROGRAM_BINDING_ARB, &prev_frag));
 
     std::ostringstream os;
     os << src_tex->name();
@@ -373,7 +377,9 @@ bool GlTextureGlTextureTransfer::transfer(const Storage* from, Storage* to)
       glVertex2f(-1, 1);
     } glEnd();
     unbind(*render_to_tex_prog);
-    
+
+    SH_GL_CHECK_ERROR(glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, prev_frag));
+    SH_GL_CHECK_ERROR(glBindProgramARB(GL_VERTEX_PROGRAM_ARB, prev_vert));
     SH_GL_CHECK_ERROR(glPopAttrib());
     SH_GL_CHECK_ERROR(glDrawBuffer(prevDraw));
     FBOCache::instance()->unbindFramebuffer();
@@ -393,7 +399,7 @@ int GlTextureGlTextureTransfer::cost(const Storage* from, const Storage* to)
   const GlTextureStorage* dst_tex = dynamic_cast<const GlTextureStorage*>(to);
   
   if (dst_tex->internalFormatRGB())
-    return 200;
+    return 20;
   else
     return 2000;
 }

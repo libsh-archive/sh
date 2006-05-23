@@ -128,7 +128,12 @@ GLenum FBOCache::bindTexture(GlTextureStoragePtr storage, GLint zoffset)
   
   int attachment = 0;
   for (int i = 0; i < NUM_FBOS && !m_fbo_stack.top(); ++i) {
-    for (attachment = 0; attachment < 16; ++attachment) {
+    // Ideally, we'd look through all the attachments of each framebuffer
+    // but since the program for copying textures is hardcoded to render
+    // into the first color target (there's no way to programatically 
+    // change that) we only look at the first attachment
+    //for (attachment = 0; attachment < 16; ++attachment) {
+    for (attachment = 0; attachment < 1; ++attachment) {
       if (m_fbo[i].m_attachment[attachment] == storage) {
         m_fbo_stack.top() = &m_fbo[i];
         break;
