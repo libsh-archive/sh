@@ -19,6 +19,28 @@
 //////////////////////////////////////////////////////////////////////////////
 #include "BaseTexture.hpp"
 
+namespace {
+
+struct StorageUpToDate : std::binary_function<SH::StoragePtr, SH::MemoryPtr, bool> {
+  bool operator()(const SH::StoragePtr& storage, const SH::MemoryPtr& memory) const {
+    return (storage->timestamp() == memory->timestamp());
+  }
+};
+
+SH::HostStoragePtr find_storage(const SH::MemoryPtr& mem)
+{
+  SH::StoragePtr storage = mem->findStorage("host", std::bind2nd(StorageUpToDate(), mem));
+  if (!storage) {
+    storage = mem->findStorage("host");
+  }
+  if (!storage) {
+    SH::error(SH::Exception("No host storage found"));
+  }
+  return SH::shref_dynamic_cast<SH::HostStorage>(storage);
+}
+
+}
+
 namespace SH {
 
 BaseTexture::BaseTexture(const TextureNodePtr& node)
@@ -93,9 +115,7 @@ void BaseTexture::set_repeat(const int* repeat, int n)
 
 void* BaseTexture::read_data(int n) const
 {
-  StoragePtr storage = m_node->memory(n)->findStorage("host");
-  if (!storage) error(Exception("No host storage found"));
-  HostStoragePtr host_storage = shref_dynamic_cast<HostStorage>(storage);
+  HostStoragePtr host_storage = find_storage(m_node->memory(n));
   SH_DEBUG_ASSERT(host_storage);
   host_storage->sync();
   return host_storage->data();
@@ -103,9 +123,7 @@ void* BaseTexture::read_data(int n) const
 
 void* BaseTexture::write_data(int n)
 {
-  StoragePtr storage = m_node->memory(n)->findStorage("host");
-  if (!storage) error(Exception("No host storage found"));
-  HostStoragePtr host_storage = shref_dynamic_cast<HostStorage>(storage);
+  HostStoragePtr host_storage = find_storage(m_node->memory(n));
   SH_DEBUG_ASSERT(host_storage);
   host_storage->dirty();
   return host_storage->data();
