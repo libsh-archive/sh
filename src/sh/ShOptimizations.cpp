@@ -418,7 +418,8 @@ struct ForwardPlacement {
 
       for (MovableList::iterator J = m_movable.begin(); 
            J != m_movable.end();) {
-        if (inRHS((*J)->dest.node(), *I) || 
+        if ((*J)->dest.node() == I->dest.node() ||
+            inRHS((*J)->dest.node(), *I) || 
             inRHS(I->dest.node(), **J)) {
           block->m_statements.insert(I, **J);
           block->m_statements.erase(*J);
