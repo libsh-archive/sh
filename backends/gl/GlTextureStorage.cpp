@@ -358,7 +358,7 @@ bool GlTextureGlTextureTransfer::transfer(const Storage* from, Storage* to)
     SH_GL_CHECK_ERROR(glViewport(0, 0, dst_tex->width(), dst_tex->height()));
     
     GLint prev_vert, prev_frag;
-    GLhandleARB prev_prog;
+    GLhandleARB prev_prog = 0;
     if (m_target == "arb") {
       SH_GL_CHECK_ERROR(glGetProgramivARB(GL_VERTEX_PROGRAM_ARB, GL_PROGRAM_BINDING_ARB, &prev_vert));
       SH_GL_CHECK_ERROR(glGetProgramivARB(GL_FRAGMENT_PROGRAM_ARB, GL_PROGRAM_BINDING_ARB, &prev_frag));
