@@ -342,6 +342,7 @@ bool Backend::load_library(const string& filename)
     return true; // already loaded
   }
 
+  const char* errormsg = "";
 #if defined(_WIN32)
   LibraryHandle module = LoadLibrary(filename.c_str());
 #elif defined(__APPLE__) && !defined(AUTOTOOLS)
@@ -355,10 +356,14 @@ bool Backend::load_library(const string& filename)
   CFRelease( bundleURL );
 #else
   LibraryHandle module = lt_dlopenext(filename.c_str());
+  errormsg = static_cast<const char*>(lt_dlerror());
 #endif
 
   if (!module) {
     SH_DEBUG_WARN("Could not open " << filename);
+    if (errormsg != "") {
+      SH_DEBUG_WARN("lt_dlerror: " << errormsg);
+    }
     return false;
   }
 
