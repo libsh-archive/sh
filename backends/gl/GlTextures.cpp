@@ -505,7 +505,7 @@ void GlTextures::bindTexture(const TextureNodePtr& node, GLenum target, bool wri
     }
   } else {
     if (!node->memory(0)) {
-      error(Exception("No memory associated with the texture."));
+      error(Exception("No memory associated with the texture " + node->name()));
       return;
     }
 

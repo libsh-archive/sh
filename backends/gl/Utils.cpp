@@ -130,6 +130,10 @@ void StreamCache::generate_programs(ProgramVersion version)
                                                  (*input)->valueType(),
                                                  ArrayTraits(), 1, 1, 1);
             Variable tex(stream->tex[i % 4]);
+            stringstream name;
+            name << "stream.input[" << i << "]";
+            tex.name(name.str());
+            
             if (m_float_extension == ARB_NV_FLOAT_BUFFER) {
               Statement stmt(out, tex, OP_TEXI, streamcoord);
               Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
@@ -206,6 +210,10 @@ void StreamCache::generate_programs(ProgramVersion version)
                                                      (*input)->valueType(),
                                                      ArrayTraits(), 1, 1, 1);
                 Variable tex(stream->tex[i*2+j]);            
+                stringstream name;
+                name << "stream.input[" << i*2+j << "]";
+                tex.name(name.str());
+                
                 if (m_float_extension == ARB_NV_FLOAT_BUFFER) {
                   coord(0,1) *= m_output_stride(3, 3);
                   Statement stmt(out, tex, OP_TEXI, coord(2*j, 2*j+1));
