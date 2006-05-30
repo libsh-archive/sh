@@ -1,6 +1,6 @@
 INCLUDES = -I$(top_srcdir)/src
 AM_CXXFLAGS = -Wall -g -O0
-AM_LDFLAGS = -g -L$(top_builddir)/src/sh -L$(top_builddir)/src/shutil
+AM_LDFLAGS = -g -L$(libdir)
 LDADD = -lsh -lshutil $(GL_LIBS)
 GENERATED_TESTS = \
 	abs add cbrt ceil clamp comparisons cross dec_inc div dot exp \
