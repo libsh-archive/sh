@@ -943,11 +943,12 @@ struct ExpandLrpBase : public TransformerParent
       BasicBlock::StmtList new_stmts;
       
       Variable one(allocate_constant(I->src[0], 1));
-      Variable temp(allocate_temp(I->src[0]));
+      Variable temp1(allocate_temp(I->src[0]));
+      Variable temp2(allocate_temp(I->src[2]));
 
-      new_stmts.push_back(Statement(temp, OP_ADD, one, -I->src[0]));
-      new_stmts.push_back(Statement(temp, OP_MUL, temp, I->src[2]));
-      new_stmts.push_back(Statement(I->dest, OP_MAD, I->src[0], I->src[1], temp));
+      new_stmts.push_back(Statement(temp1, OP_ADD, one, -I->src[0]));
+      new_stmts.push_back(Statement(temp2, OP_MUL, temp1, I->src[2]));
+      new_stmts.push_back(Statement(I->dest, OP_MAD, I->src[0], I->src[1], temp2));
 
       I = node->block->erase(I);
       node->block->splice(I, new_stmts);
