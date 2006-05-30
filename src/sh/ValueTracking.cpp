@@ -647,9 +647,9 @@ void add_value_tracking(Program& p)
 
   for (ReachingDefs::ReachingMap::const_iterator I = r.rchin.begin(); I != r.rchin.end(); ++I) {
     CtrlGraphNode* node = I->first;
-    SH_DEBUG_PRINT(" rchin[" << node.object() << "]: " << I->second);
-    SH_DEBUG_PRINT("   gen[" << node.object() << "]: " << r.gen[I->first]);
-    SH_DEBUG_PRINT("  prsv[" << node.object() << "]: " << r.prsv[I->first]);
+    SH_DEBUG_PRINT(" rchin[" << node << "]: " << I->second);
+    SH_DEBUG_PRINT("   gen[" << node << "]: " << r.gen[I->first]);
+    SH_DEBUG_PRINT("  prsv[" << node << "]: " << r.prsv[I->first]);
     std::cerr << std::endl;
   }
 #endif

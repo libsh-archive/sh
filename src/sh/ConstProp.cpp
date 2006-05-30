@@ -984,23 +984,27 @@ void propagate_constants(Program& p)
       for (ValueTracking::UseDefChain::iterator possdef
              = ut->defs[use->source][use->index].begin();
            possdef != ut->defs[use->source][use->index].end(); ++possdef) {
-        ConstProp* dcp = possdef->stmt->get_info<ConstProp>();
-        if (!dcp) {
+        // Initialize to BOTTOM (in case kind == ValueTracking::Def::SH_INPUT)
+        ConstProp::Cell destcell(ConstProp::Cell::BOTTOM);
+        if (possdef->kind == ValueTracking::Def::STMT) {
+          ConstProp* dcp = possdef->stmt->get_info<ConstProp>();
+          if (!dcp) {
 #ifdef SH_DEBUG_CONSTPROP
-          SH_DEBUG_PRINT("Possible def " << *dcp->stmt << " on worklist does not have CP information?");
+            SH_DEBUG_PRINT("Possible def " << *dcp->stmt << " on worklist does not have CP information?");
 #endif
-          continue;
-        }
+            continue;
+          }
         
-        ConstProp::Cell destcell = dcp->dest[possdef->index];
+          destcell = dcp->dest[possdef->index];
 
-        // If the use is negated, we need to change the cell
-        if (use->stmt->src[use->source].neg()) {
-          if (destcell.state == ConstProp::Cell::CONSTANT) {
-            SH_DEBUG_ASSERT(destcell.value); // @todo type DEBUGGING
-            destcell.value->negate();
-          } else if (destcell.state == ConstProp::Cell::UNIFORM) {
-            destcell.uniform.neg = !destcell.uniform.neg;
+          // If the use is negated, we need to change the cell
+          if (use->stmt->src[use->source].neg()) {
+            if (destcell.state == ConstProp::Cell::CONSTANT) {
+              SH_DEBUG_ASSERT(destcell.value); // @todo type DEBUGGING
+              destcell.value->negate();
+            } else if (destcell.state == ConstProp::Cell::UNIFORM) {
+              destcell.uniform.neg = !destcell.uniform.neg;
+            }
           }
         }
 #ifdef SH_DEBUG_CONSTPROP
