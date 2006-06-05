@@ -53,6 +53,7 @@ struct ProgramVersion {
  */
 class SplitProgram {
 public:
+  virtual ~SplitProgram() {}
   virtual void update_uniforms(const SH::Record& uniforms) = 0;
   virtual void update_channels(const SH::Stream& stream,
                                const SH::BaseTexture& dest_tex) = 0;
@@ -69,18 +70,18 @@ public:
   typedef std::list<SplitProgram*> SplitProgramList;
   typedef SplitProgramList::const_iterator iterator;
 
-  ProgramVersionCache() { }
   ProgramVersionCache(FloatExtension float_extension,
                       int max_outputs,
                       const SH::Program& vertex_program,
                       const ProgramVersion& version,
                       const SH::Program::BindingSpec& binding_spec,
-                      const SH::ProgramNodePtr& program);
+                      SH::ProgramNode* program);
+  ~ProgramVersionCache();
 
   iterator begin() const { return m_split_program.begin(); }
   iterator end() const { return m_split_program.end(); }
 private:
-  void split_program(const SH::ProgramNodePtr& program,
+  void split_program(SH::ProgramNode* program,
                      std::list<SH::ProgramNodePtr>& split_programs,
                      const std::string& target, int chunk_size);
   SplitProgramList m_split_program;
@@ -91,10 +92,10 @@ private:
  */
 class StreamCache : public SH::Info {
 public:
-  StreamCache(SH::ProgramNodePtr stream_program,
+  StreamCache(SH::ProgramNode* stream_program,
               SH::ProgramNodePtr vertex_program,
               int max_outputs, FloatExtension ext);
-  ~StreamCache() {}
+  ~StreamCache();
 
   SH::Info* clone() const;
 
@@ -119,12 +120,12 @@ private:
       return binding_spec < other.binding_spec;
     }
   };
-  typedef std::map<Key, ProgramVersionCache> Cache;
+  typedef std::map<Key, ProgramVersionCache*> Cache;
   Cache m_cache;
 
   int m_max_outputs;
   FloatExtension m_float_extension;
-  SH::ProgramNodePtr m_stream_program;
+  SH::ProgramNode* m_stream_program;
   SH::ProgramNodePtr m_vertex_program;
 };
 

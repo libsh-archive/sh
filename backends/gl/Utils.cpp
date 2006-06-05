@@ -337,7 +337,7 @@ ProgramVersionCache::ProgramVersionCache(FloatExtension float_extension,
                                          const Program& vertex_program,
                                          const ProgramVersion& version,
                                          const Program::BindingSpec& binding_spec,
-                                         const ProgramNodePtr& program)
+                                         ProgramNode* program)
 {
   std::list<ProgramNodePtr> split_programs;
   split_program(program, split_programs,
@@ -363,9 +363,17 @@ ProgramVersionCache::ProgramVersionCache(FloatExtension float_extension,
       assert(!"Stream execution style not implemented yet");
     }
   }
-}  
+}
 
-void ProgramVersionCache::split_program(const ProgramNodePtr& program,
+ProgramVersionCache::~ProgramVersionCache()
+{
+  for(iterator I = m_split_program.begin(); I != m_split_program.end(); ++I) {
+    SH_DEBUG_WARN("remove one");
+    delete *I;
+  }
+}
+
+void ProgramVersionCache::split_program(ProgramNode* program,
                                         std::list<ProgramNodePtr>& split_programs,
                                         const std::string& target, int chunk_size)
 {
@@ -383,7 +391,7 @@ void ProgramVersionCache::split_program(const ProgramNodePtr& program,
   }
 }
 
-StreamCache::StreamCache(ProgramNodePtr stream_program,
+StreamCache::StreamCache(ProgramNode* stream_program,
                          ProgramNodePtr vertex_program,
                          int max_outputs, FloatExtension float_extension)
   : m_stream_program(stream_program),
@@ -393,17 +401,24 @@ StreamCache::StreamCache(ProgramNodePtr stream_program,
 {
 }
 
+StreamCache::~StreamCache()
+{
+  for (Cache::iterator I = m_cache.begin(); I != m_cache.end(); ++I) {
+    delete I->second;
+  }
+}
+
 const ProgramVersionCache& 
 StreamCache::get_program_cache(const ProgramVersion& version, 
                                const SH::Program::BindingSpec& binding_spec)
 {
   Key key(version, binding_spec);
   if (m_cache.find(key) == m_cache.end()) {
-    m_cache[key] = ProgramVersionCache(m_float_extension, m_max_outputs,
-                                       Program(m_vertex_program),
-                                       version, binding_spec, m_stream_program);
+    m_cache[key] = new ProgramVersionCache(m_float_extension, m_max_outputs,
+                                           Program(m_vertex_program),
+                                           version, binding_spec, m_stream_program);
   }
-  return m_cache[key];
+  return *m_cache[key];
 }
 
 Info* StreamCache::clone() const
