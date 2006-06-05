@@ -686,7 +686,7 @@ bool CcBackendCode::execute(const Program& prg, Stream& dest)
       if (!storage) {
         // We should probably complain here
         storage = new HostStorage(stream->node()->memory(0).object(),
-				  datasize * stream->node()->size() * count, stream->node()->valueType());
+				  datasize * stream->node()->size() * stream->node()->width(), stream->node()->valueType());
       }
       inputs[iidx] = reinterpret_cast<char*>(storage->data()) +
                      datasize * stream->node()->size() * offset;
@@ -740,7 +740,7 @@ bool CcBackendCode::execute(const Program& prg, Stream& dest)
     if (!storage) {
       SH_CC_DEBUG_PRINT("  Allocating new storage");
       storage = new HostStorage(I->node()->memory(0).object(),
-				  datasize * I->node()->size() * count, I->node()->valueType());
+				  datasize * I->node()->size() * I->node()->size(), I->node()->valueType());
     }
     storage->dirty();
     outputs[oidx] = reinterpret_cast<char*>(storage->data()) +
