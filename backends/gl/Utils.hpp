@@ -36,87 +36,96 @@ enum FloatExtension {
   ARB_NO_FLOAT_EXT
 };
 
-class StreamCache {
+/**
+ * Description of the version of the program cached
+ */
+struct ProgramVersion {
+  // Dimension of all inputs/outputs
+  unsigned int dimension;
+  // Recalculate incomming index (for offsets/strides)
+  bool index_recalculation;
+  // Render a single output at a time
+  bool single_output;
+};
+
+/**
+ * Cache of a pass of a stream program
+ */
+class SplitProgram {
 public:
-  StreamCache(SH::ProgramNode* stream_program,
-              SH::ProgramNode* vertex_program,
-              SH::Program::BindingSpec binding_spec,
+  virtual void update_uniforms(const SH::Record& uniforms) = 0;
+  virtual void update_channels(const SH::Stream& stream,
+                               const SH::BaseTexture& dest_tex) = 0;
+  virtual SH::ProgramSetPtr program_set() = 0;
+protected:
+  SH::Program epilogue(const SH::ProgramNodePtr& program);
+};
+
+/**
+ * Cache of a single stream program compiled for a given ProgramVersion
+ */
+class ProgramVersionCache {
+public:
+  typedef std::list<SplitProgram*> SplitProgramList;
+  typedef SplitProgramList::const_iterator iterator;
+
+  ProgramVersionCache() { }
+  ProgramVersionCache(FloatExtension float_extension,
+                      int max_outputs,
+                      const SH::Program& vertex_program,
+                      const ProgramVersion& version,
+                      const SH::Program::BindingSpec& binding_spec,
+                      const SH::ProgramNodePtr& program);
+
+  iterator begin() const { return m_split_program.begin(); }
+  iterator end() const { return m_split_program.end(); }
+private:
+  void split_program(const SH::ProgramNodePtr& program,
+                     std::list<SH::ProgramNodePtr>& split_programs,
+                     const std::string& target, int chunk_size);
+  SplitProgramList m_split_program;
+};
+
+/**
+ * Map of ProgramVersionCaches based on ProgramVersion
+ */
+class StreamCache : public SH::Info {
+public:
+  StreamCache(SH::ProgramNodePtr stream_program,
+              SH::ProgramNodePtr vertex_program,
               int max_outputs, FloatExtension ext);
+  ~StreamCache() {}
 
-  typedef int ProgramVersion;
-  static const int OS_NONE_2D           = 0x00;
-  static const int OS_NONE_3D           = 0x01;
-  static const int OS_1D                = 0x02;
-  static const int OS_2D                = 0x03;
-  static const int OS_3D                = 0x04;
-  static const int SINGLE_OUTPUT        = 0x08;
-  static const int NUM_PROGRAM_VERSIONS = 16;
+  SH::Info* clone() const;
 
-  struct set_iterator;
-
-  void generate_programs(ProgramVersion version);
-  void update_uniforms(const set_iterator& program_set,
-                       const SH::Record& input_uniforms);
-  void update_channels(ProgramVersion version, const set_iterator& program_set,
-                       const SH::Stream& stream, const SH::BaseTexture& tex,
-                       int width, int height, int depth);
-
-  set_iterator sets_begin(ProgramVersion version);
-  set_iterator sets_end(ProgramVersion version);
+  const ProgramVersionCache& get_program_cache(const ProgramVersion& version,
+                                               const SH::Program::BindingSpec& binding_spec);
 
 private:
   
-  struct StreamData {
-    SH::TextureNodePtr tex[4];
-    SH::Attrib4f uniform4[2];
-    SH::Attrib4f uniform2[2][2];
+  struct Key {
+    Key(const ProgramVersion& v, const SH::Program::BindingSpec& bs)
+      : version(v), binding_spec(bs) { }
+    ProgramVersion version;
+    SH::Program::BindingSpec binding_spec;
+    bool operator<(const Key& other) const
+    {
+      if (version.dimension != other.version.dimension)
+        return version.dimension < other.version.dimension;
+      if (version.index_recalculation != other.version.index_recalculation)
+        return version.index_recalculation < other.version.index_recalculation;
+      if (version.single_output != other.version.single_output)
+        return version.single_output < other.version.single_output;
+      return binding_spec < other.binding_spec;
+    }
   };
-  typedef std::vector<StreamData> StreamList;
-  typedef std::vector<SH::Variable> UniformList;
-
-  struct SplitProgramData {
-    StreamList streams;
-    UniformList uniforms;
-    SH::ProgramNodePtr program;
-    SH::ProgramSetPtr program_set;
-  };
-  
-  std::list<SplitProgramData> m_split_programs[NUM_PROGRAM_VERSIONS];
-
-  SH::ProgramNode* m_stream_program;
-  SH::ProgramNode* m_vertex_program;
-  SH::Program::BindingSpec m_binding_spec;
+  typedef std::map<Key, ProgramVersionCache> Cache;
+  Cache m_cache;
 
   int m_max_outputs;
   FloatExtension m_float_extension;
-  SH::Attrib4f m_output_offset;
-  SH::Attrib4f m_output_stride;
-
-  StreamCache(const StreamCache& other);
-  StreamCache& operator=(const StreamCache& other);
-
-  void split_program(SH::ProgramNode* program,
-                     std::list<SplitProgramData>& split_data,
-                     const std::string& target, int chunk_size);
-
-public:
-  class set_iterator : public std::list<SplitProgramData>::iterator {
-  public:
-    set_iterator(const std::list<SplitProgramData>::iterator& base)
-      : std::list<SplitProgramData>::iterator(base)
-    { }
-    
-    SH::ProgramSetPtr& operator*() 
-    { return std::list<SplitProgramData>::iterator::operator*().program_set; }
-  };                 
-};
-
-class StreamBindingCache 
-  : public SH::Info, public std::map<SH::Program::BindingSpec, StreamCache*> {
-public:
-  ~StreamBindingCache();
-
-  SH::Info* clone() const;
+  SH::ProgramNodePtr m_stream_program;
+  SH::ProgramNodePtr m_vertex_program;
 };
 
 std::string get_target_backend(const SH::ProgramNodeCPtr& program);

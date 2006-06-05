@@ -177,7 +177,7 @@ static void draw_rectangle(int x, int y, int w, int h,
 }
 
 static void draw_1d_stream(int size, const BaseTexture& tex, bool indexed,
-                           int version, const Stream& inputs)
+                           const ProgramVersion& version, const Stream& inputs)
 {
   int dest_width = size;
   int dest_height = size;
@@ -192,7 +192,7 @@ static void draw_1d_stream(int size, const BaseTexture& tex, bool indexed,
   tex.get_count(&dest_count, 1);
 
   vector<float> coords[3];
-  if ((version & ~StreamCache::SINGLE_OUTPUT) == StreamCache::OS_1D) {
+  if (version.index_recalculation) {
     for (int i = 0; i < 3; ++i) {
       coords[i].reserve(inputs.size());
     }
@@ -359,15 +359,12 @@ static void stream_to_texture(const TextureNodePtr& tex, TextureDims& dims,
 }
 
 
-static int choose_program_version(const Stream& input, const Stream& output)
+static ProgramVersion choose_program_version(const Stream& input, const Stream& output)
 {
-  int os_versions[3] = { StreamCache::OS_1D, 
-                         StreamCache::OS_2D,
-                         StreamCache::OS_3D };
-  
-  // TODO what about 3D?
-  int version = StreamCache::OS_NONE_2D;
-  bool single_output = false;
+  ProgramVersion version;
+  version.dimension = dimension(*output.begin());
+  version.index_recalculation = false;
+  version.single_output = false;
 
   int first_offset[3], first_stride[3], first_count[3];
   output.begin()->get_offset(first_offset, 1);
@@ -383,16 +380,16 @@ static int choose_program_version(const Stream& input, const Stream& output)
         I->node()->height() != output.begin()->node()->height() ||
         I->node()->depth() != output.begin()->node()->depth() ||
         I->node()->size() != output.begin()->node()->size()) {
-      single_output = true;
+      version.single_output = true;
     }
     for (int i = 0; i < dimension(*I); ++i) {
       if (offset[i] != first_offset[i] ||
           stride[i] != first_stride[i] ||
           count[i] != first_count[i]) {
-        single_output = true;
+        version.single_output = true;
       }
       if (offset[i] != 0 || stride[i] != 1) {
-        version = os_versions[dimension(*I)-1];
+        version.index_recalculation = true;
       }
     }
   }
@@ -403,7 +400,7 @@ static int choose_program_version(const Stream& input, const Stream& output)
     I->get_stride(stride, 3);
     for (int i = 0; i < dimension(*I); ++i) {
       if (offset[i] != 0 || stride[i] != 1) {
-        version = os_versions[dimension(*I)-1];
+        version.index_recalculation = true;
       }
     }
     if (I->node()->dims() == SH_TEXTURE_1D) {
@@ -412,15 +409,12 @@ static int choose_program_version(const Stream& input, const Stream& output)
         // will be of different size, so we need to perform the index calculation
         // even if the stride and offset isn't used
         if (I->node()->width() != J->node()->width()) {
-          version = StreamCache::OS_1D;
+          version.index_recalculation = true;
         }
       }
     }
   }
   
-  if (single_output) {
-    version |= StreamCache::SINGLE_OUTPUT;
-  }
   return version;
 }
 
@@ -518,23 +512,20 @@ void FBOStreams::execute(const Program& program,
   SH_GL_CHECK_ERROR(glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS_EXT, &max_outputs));
 
   // --- Set up the fragment programs and such
-  StreamBindingCache* binding_cache = program_node->get_info<StreamBindingCache>();
-  if (!binding_cache) {
-    binding_cache = new StreamBindingCache;
-    program_node->add_info(binding_cache);
-  }
-  StreamCache*& cache = (*binding_cache)[program.binding_spec];
+  StreamCache* cache = program_node->get_info<StreamCache>();
   if (!cache) {
     cache = new StreamCache(program_node.object(), m_vp.node().object(), 
-                            program.binding_spec, max_outputs, m_float_extension);
+                            max_outputs, m_float_extension);
+    program_node->add_info(cache);
   }
     
-  StreamCache::ProgramVersion program_version;
+  ProgramVersion program_version;
   program_version = choose_program_version(program.stream_inputs, dest);
-  if (program_version & StreamCache::SINGLE_OUTPUT)
+  if (program_version.single_output)
     max_outputs = 1;
 
-  cache->generate_programs(program_version);
+  const ProgramVersionCache& program_cache = 
+    cache->get_program_cache(program_version, program.binding_spec);
 
   for (Stream::const_iterator I = program.stream_inputs.begin();
        I != program.stream_inputs.end(); ++I) {
@@ -561,9 +552,9 @@ void FBOStreams::execute(const Program& program,
   FBOCache::instance()->bindFramebuffer();
 
   Stream::iterator dest_iter = dest.begin();
+  ProgramVersionCache::iterator I;
   // Run each fragment program
-  for (StreamCache::set_iterator I = cache->sets_begin(program_version);
-       I != cache->sets_end(program_version); ++I) {
+  for (I = program_cache.begin(); I != program_cache.end(); ++I) {
 
     std::vector<GLuint> draw_buffers;    
     Stream::iterator dest_tex;
@@ -590,9 +581,8 @@ void FBOStreams::execute(const Program& program,
 
     FBOCache::instance()->check();
     
-    cache->update_uniforms(I, program.uniform_inputs);
-    cache->update_channels(program_version, I, program.stream_inputs,
-                           *dest_tex, dest_width, dest_height, dest_depth);
+    (*I)->update_uniforms(program.uniform_inputs);
+    (*I)->update_channels(program.stream_inputs, *dest_tex);
 
 #ifdef SH_DEBUG_FBOS_PRINTFP
     {
@@ -605,7 +595,7 @@ void FBOStreams::execute(const Program& program,
 
     DECLARE_TIMER(binding);
     // Then, bind vertex (pass-through) and fragment program
-    bind(**I);
+    bind(*(*I)->program_set());
     TIMING_RESULT(binding);    
 
     switch (dest_tex->node()->dims()) {
@@ -630,7 +620,7 @@ void FBOStreams::execute(const Program& program,
     }
  
     // Unbind, just to be safe
-    unbind(**I);
+    unbind(*(*I)->program_set());
     
     int gl_error = glGetError();
     if (gl_error != GL_NO_ERROR) {
