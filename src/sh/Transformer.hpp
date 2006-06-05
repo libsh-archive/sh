@@ -150,6 +150,10 @@ public:
    */
   void expand_mod();
   
+  /** Replace POW with EXP and LOG
+   */
+  void expand_pow();
+  
   /** Replace SGN with SGT and SLT
    */
   void expand_sgn();

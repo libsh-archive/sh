@@ -1028,6 +1028,36 @@ void Transformer::expand_sgn()
   m_changed |= ex.transform(m_program);
 }
 
+struct ExpandPowBase : public TransformerParent 
+{
+  bool handleStmt(BasicBlock::StmtList::iterator &I, CtrlGraphNode* node)
+  { 
+    if (OP_POW == I->op) {
+      BasicBlock::StmtList new_stmts;
+      
+      Variable temp(allocate_temp(I->src[0]));
+
+      new_stmts.push_back(Statement(temp, OP_LOG, I->src[0]));
+      new_stmts.push_back(Statement(temp, OP_MUL, temp, I->src[1]));
+      new_stmts.push_back(Statement(I->dest, OP_EXP, temp));
+
+      I = node->block->erase(I);
+      node->block->splice(I, new_stmts);
+      m_changed = true;
+      return true;
+    } else {
+      return false;
+    }
+  }
+};
+
+typedef DefaultTransformer<ExpandPowBase> ExpandPow;
+void Transformer::expand_pow()
+{
+  ExpandPow ex;
+  m_changed |= ex.transform(m_program);
+}
+
 struct InverseHyperbolicExpanderBase: public TransformerParent 
 {
   bool handleStmt(BasicBlock::StmtList::iterator &I, CtrlGraphNode* node)
