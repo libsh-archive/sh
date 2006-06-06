@@ -203,6 +203,14 @@ static void draw_1d_stream(int size, const BaseTexture& tex, bool indexed,
       in->get_repeat(&repeat, 1);
       in->get_count(&count, 1);
 
+      //
+      // What we'd like to do here is have i=(width*y+x)/count as the input to the
+      // fragment shader so that a simple count*frac(i) would give us the integer
+      // position in the stream. frac() however isn't floating point error tolerant
+      // so we have to bias the output by 1.0/(2*count). We remove this bias during
+      // the offset/stride computation in SplitProgram1DRecompute
+      //
+
       // Rasterization is a linear transformation of the form
       //
       // |r|    |a11 a12 a13| |x + bias|
@@ -224,7 +232,7 @@ static void draw_1d_stream(int size, const BaseTexture& tex, bool indexed,
       float bias = 1.0/(2*dest_width); // note that dest_width == dest_height
       float a1 = (float)dest_width / count;
       float a2 = (float)dest_width * dest_height / count;
-      float a3 = -dest_offset/(float)count - (a1 + a2) * bias;
+      float a3 = -dest_offset/(float)count - (a1 + a2) * bias + 1.0/(2*count);
       //
       // The vertices of our triangle are at (0,0), (2,0) and (0,2) hence 
       // the coordinate at the vertices are

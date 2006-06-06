@@ -299,7 +299,7 @@ void SplitProgram1DRecalculate::update_channels(const Stream& input_stream,
         channel_data->tex[2*i+j]->memory(input->node()->memory(0), 0);
           
         // stride and offset calculation
-        uniform4[0][2*i+j] = stride * count / (float)tex_size;
+        uniform4[0][2*i+j] = stride * count / (float)tex_size - stride/(2.0*tex_size);
         uniform4[1][2*i+j] = offset / (float)tex_size;
           
         // 1D -> 2D conversion
