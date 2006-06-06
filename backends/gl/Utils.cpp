@@ -62,17 +62,25 @@ Program SplitProgram::epilogue(const ProgramNodePtr& program)
   return result;
 }
 
+void SplitProgram::update_uniforms(const Record& input_uniforms)
+{
+  Record::const_iterator input = input_uniforms.begin();
+  std::vector<Variable>::iterator uniform = m_uniforms.begin();
+  for(; input != input_uniforms.end(); ++input, ++uniform) {
+    SH_DEBUG_ASSERT(uniform != m_uniforms.end());
+    shASN(*uniform, *input);
+  }
+}
+
 class SplitProgram2D : public SplitProgram {
 public:
   SplitProgram2D(FloatExtension float_extension,
                  const Program::BindingSpec& binding_spec,
                  const Program& vertex_program,
                  const ProgramNodePtr& program);
-  void update_uniforms(const Record& uniforms);
   void update_channels(const Stream& stream, const BaseTexture& dest_tex);
   ProgramSetPtr program_set() { return m_program_set; }
 private:
-  std::vector<Variable> m_uniforms;
   std::vector<TextureNodePtr> m_channels;
   ProgramSetPtr m_program_set;
 };
@@ -137,17 +145,6 @@ SplitProgram2D::SplitProgram2D(FloatExtension float_extension,
   m_program_set = new ProgramSet(vertex_program, fragment_program);
 }
 
-
-void SplitProgram2D::update_uniforms(const Record& input_uniforms)
-{
-  Record::const_iterator input = input_uniforms.begin();
-  std::vector<Variable>::iterator uniform = m_uniforms.begin();
-  for(; input != input_uniforms.end(); ++input, ++uniform) {
-    SH_DEBUG_ASSERT(uniform != m_uniforms.end());
-    shASN(*uniform, *input);
-  }
-}
-
 void SplitProgram2D::update_channels(const Stream& input_stream,
                                      const BaseTexture& dest_tex)
 {
@@ -174,7 +171,6 @@ public:
                             const Program::BindingSpec& binding_spec,
                             const Program& vertex_program,
                             const ProgramNodePtr& program);
-  void update_uniforms(const Record& uniforms);
   void update_channels(const Stream& stream, const BaseTexture& dest_tex);
   ProgramSetPtr program_set() { return m_program_set; }
 private:
@@ -184,7 +180,6 @@ private:
     Attrib4f uniform2[2][2];
   };
   std::vector<ChannelData> m_channels;
-  std::vector<Variable> m_uniforms;
   Attrib2f m_dest_size;
   ProgramSetPtr m_program_set;
 };
@@ -242,7 +237,7 @@ SplitProgram1DRecalculate::SplitProgram1DRecalculate(FloatExtension float_extens
                           channel_data->uniform2[i][1](0,1),
                           coord(1,3));
 
-        for (int j = 0; j < 2 && input != program->end_inputs(); ++j, ++input, ++binding) {
+        for (int j = 0; j < 2 && input != program->end_inputs(); ++input, ++binding) {
           Variable out((*input)->clone(SH_OUTPUT));
           if (*binding == Program::UNIFORM) {
             shASN(out, *uniform);
@@ -266,6 +261,7 @@ SplitProgram1DRecalculate::SplitProgram1DRecalculate(FloatExtension float_extens
               Statement stmt(out, tex, OP_TEX, coord(2*j, 2*j+1));
               Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
             }
+            ++j;
           }
         }
       }
@@ -275,16 +271,6 @@ SplitProgram1DRecalculate::SplitProgram1DRecalculate(FloatExtension float_extens
   Program fragment_program = epilogue(program) << Program(program) << prologue;
   fragment_program.meta("opengl:binding", "generic");  
   m_program_set = new ProgramSet(vertex_program, fragment_program);
-}
-
-void SplitProgram1DRecalculate::update_uniforms(const Record& input_uniforms)
-{
-  Record::const_iterator input = input_uniforms.begin();
-  std::vector<Variable>::iterator uniform = m_uniforms.begin();
-  for(; input != input_uniforms.end(); ++input, ++uniform) {
-    SH_DEBUG_ASSERT(uniform != m_uniforms.end());
-    shASN(*uniform, *input);
-  }
 }
 
 void SplitProgram1DRecalculate::update_channels(const Stream& input_stream,
@@ -332,6 +318,134 @@ void SplitProgram1DRecalculate::update_channels(const Stream& input_stream,
   m_dest_size[1] = dest_tex.node()->height();
 }
 
+class SplitProgram2DRecalculate : public SplitProgram {
+public:
+  SplitProgram2DRecalculate(FloatExtension float_extension,
+                            const Program::BindingSpec& binding_spec,
+                            const Program& vertex_program,
+                            const ProgramNodePtr& program);
+  void update_channels(const Stream& stream, const BaseTexture& dest_tex);
+  ProgramSetPtr program_set() { return m_program_set; }
+private:
+  struct ChannelData {
+    TextureNodePtr tex[2];
+    Attrib4f uniform[2];
+  };
+  std::vector<ChannelData> m_channels;
+  FloatExtension m_float_extension;
+  ProgramSetPtr m_program_set;
+};
+
+SplitProgram2DRecalculate::SplitProgram2DRecalculate(FloatExtension float_extension,
+                                                     const Program::BindingSpec& binding_spec,
+                                                     const Program& vertex_program,
+                                                     const ProgramNodePtr& program)
+ : m_float_extension(float_extension)
+{
+  // Reserve enough data outside the program so that it is uniform
+  Program::BindingSpec::const_iterator binding = binding_spec.begin();
+  ProgramNode::VarList::const_iterator input = program->begin_inputs();
+  for (int channel = 0; binding != binding_spec.end(); ++binding, ++input) {
+    if (*binding == Program::STREAM) {
+      if ((channel % 2) == 0) {
+        m_channels.push_back(ChannelData());
+      }
+      ++channel;
+    }
+    else {
+      m_uniforms.push_back(Variable((*input)->clone(SH_TEMP, 0, VALUETYPE_END, SEMANTICTYPE_END, false, false)));
+    }          
+  }
+
+  TextureDims dims = SH_TEXTURE_2D;
+  if (float_extension == ARB_NV_FLOAT_BUFFER) {
+    dims = SH_TEXTURE_RECT;
+  }
+
+  Program prologue = SH_BEGIN_PROGRAM() {
+    std::vector<ChannelData>::iterator channel_data = m_channels.begin();
+    std::vector<Variable>::iterator uniform = m_uniforms.begin();
+    Program::BindingSpec::const_iterator binding = binding_spec.begin();
+    ProgramNode::VarList::const_iterator input = program->begin_inputs();
+    for (; input != program->end_inputs(); ++channel_data) {
+      InputAttrib4f SH_DECL(input_index);
+      Attrib4f SH_DECL(index);
+
+      // Wrap [0..count)
+      index = frac(input_index);
+      // (index * count * stride + offset) / width
+      index = mad(index, channel_data->uniform[0], channel_data->uniform[1]);
+          
+      for (int i = 0; i < 2 && input != program->end_inputs(); ++input, ++binding) {
+
+        Variable out((*input)->clone(SH_OUTPUT));
+        if (*binding == Program::UNIFORM) {
+          shASN(out, *uniform);
+          ++uniform;
+        }
+        else {
+          channel_data->tex[i] = new TextureNode(dims, (*input)->size(), 
+                                                 (*input)->valueType(),
+                                                 ArrayTraits(), 1, 1, 1);
+          Variable tex(channel_data->tex[i]);
+          stringstream name;
+          name << "stream.input[" << i << "]";
+          tex.name(name.str());
+
+          if (float_extension == ARB_NV_FLOAT_BUFFER) {
+            Statement stmt(out, tex, OP_TEXI, index(2*i, 2*i+1));
+            Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
+          }
+          else {
+            Statement stmt(out, tex, OP_TEX, index(2*i, 2*i+1));
+            Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
+          }
+          ++i;
+        }
+      }
+    }
+  } SH_END_PROGRAM;
+
+  Program fragment_program = epilogue(program) << Program(program) << prologue;
+  fragment_program.meta("opengl:binding", "generic");  
+  m_program_set = new ProgramSet(vertex_program, fragment_program);
+}
+
+void SplitProgram2DRecalculate::update_channels(const Stream& input_stream,
+                                                const BaseTexture& dest_tex)
+{
+  Stream::const_iterator input = input_stream.begin();
+  std::vector<ChannelData>::iterator channel_data = m_channels.begin();
+  for (; input != input_stream.end(); ++channel_data) {
+ 
+    float uniform[2][4];
+    for (int i = 0; i < 2 && input != input_stream.end(); ++i, ++input) {
+
+      int stride[2], repeat[2], offset[2], count[2];
+      input->get_stride(stride, 2);
+      input->get_repeat(repeat, 2);
+      input->get_offset(offset, 2);
+      input->get_count(count, 2);
+
+      channel_data->tex[i]->setTexSize(input->node()->width(), input->node()->height());
+      channel_data->tex[i]->memory(input->node()->memory(0), 0);
+      
+      int width = (m_float_extension == ARB_NV_FLOAT_BUFFER ? 1 : input->node()->width());
+      int height = (m_float_extension == ARB_NV_FLOAT_BUFFER ? 1 : input->node()->height());
+      
+      // stride and offset calculation
+      uniform[0][2*i+0] = stride[0] * count[0] / (float)width;
+      uniform[0][2*i+1] = stride[1] * count[1] / (float)height;
+      uniform[1][2*i+0] = offset[0] / (float)width + 
+        1.0/(2*dest_tex.node()->width()) - stride[0]/(2.0*dest_tex.node()->width());
+      uniform[1][2*i+1] = offset[1] / (float)height +
+        1.0/(2*dest_tex.node()->height()) - stride[1]/(2.0*dest_tex.node()->height());
+    }
+    channel_data->uniform[0].setValues(uniform[0]);
+    channel_data->uniform[1].setValues(uniform[1]);
+  }
+}
+
 ProgramVersionCache::ProgramVersionCache(FloatExtension float_extension,
                                          int max_outputs,
                                          const Program& vertex_program,
@@ -354,11 +468,10 @@ ProgramVersionCache::ProgramVersionCache(FloatExtension float_extension,
       m_split_program.push_back(new SplitProgram1DRecalculate(float_extension, binding_spec,
                                                               vertex_program, *I));
     }
-/*
     else if (version.dimension == 2 && version.index_recalculation) {
-      m_split_program.push_back(new SplitProgram2DRecalculate(*I));
+      m_split_program.push_back(new SplitProgram2DRecalculate(float_extension, binding_spec,
+                                                              vertex_program, *I));
     }
-*/
     else {
       assert(!"Stream execution style not implemented yet");
     }
@@ -368,7 +481,6 @@ ProgramVersionCache::ProgramVersionCache(FloatExtension float_extension,
 ProgramVersionCache::~ProgramVersionCache()
 {
   for(iterator I = m_split_program.begin(); I != m_split_program.end(); ++I) {
-    SH_DEBUG_WARN("remove one");
     delete *I;
   }
 }

@@ -276,27 +276,61 @@ static void draw_1d_stream(int size, const BaseTexture& tex, bool indexed,
   TIMING_RESULT(render);    
 }
 
-static void draw_2d_stream(int width, int height,
-                           const BaseTexture& tex, int indexed)
+static void draw_2d_stream(int dest_width, int dest_height, const BaseTexture& tex,
+                           const ProgramVersion& version, int indexed,
+                           const Stream& inputs)
 {
-  int offset[2], stride[2], count[2];
-  tex.get_offset(offset, 2);
-  tex.get_stride(stride, 2);
-  tex.get_count(count, 2);
-  
-  SH_GL_CHECK_ERROR(glViewport(0, 0, width, height));
-  SH_GL_CHECK_ERROR(glEnable(GL_SCISSOR_TEST));
-  SH_GL_CHECK_ERROR(glScissor(offset[0], offset[1], 
-                              stride[0]*count[0], stride[1]*count[1]));
+  int dest_offset[2], dest_stride[2], dest_count[2];
+  tex.get_offset(dest_offset, 2);
+  tex.get_stride(dest_stride, 2);
+  tex.get_count(dest_count, 2);
 
-  glBegin(GL_TRIANGLES);
-  glVertexAttrib2f(1, 0, 0);
-  glVertex3f(-1.0, -1.0, 0);
-  glVertexAttrib2f(1, indexed ? 2*width : 2, 0);
-  glVertex3f(3.0, -1.0, 0);
-  glVertexAttrib2f(1, 0, indexed ? 2*height : 2);
-  glVertex3f(-1.0, 3.0, 0);
-  glEnd();
+  vector<float> coords[3];
+  if (version.index_recalculation) {
+    for (int i = 0; i < 3; ++i) {
+      coords[i].reserve(2*inputs.size());
+    }
+    for (Stream::const_iterator in = inputs.begin(); in != inputs.end(); ++in) {
+      int count[2];
+      in->get_count(count, 2);
+
+      //
+      // See above about viewing rasterization as a linear transformation
+      //
+      float x_bias = 1.0/(2*dest_width);
+      float x_a1 = (float)dest_width / count[0];
+      float x_a3 = -dest_offset[0]/(float)count[0] - x_a1*x_bias + 1.0/(2*count[0]);
+
+      float y_bias = 1.0/(2*dest_height);
+      float y_a2 = (float)dest_height/ count[1];
+      float y_a3 = -dest_offset[1]/(float)count[1] - y_a2 * y_bias + 1.0/(2*count[1]);
+
+      coords[0].push_back(x_a3);
+      coords[1].push_back(2*x_a1 + x_a3);
+      coords[2].push_back(x_a3);
+      
+      coords[0].push_back(y_a3);
+      coords[1].push_back(y_a3);
+      coords[2].push_back(2*y_a2 + y_a3);
+    }
+  }
+  else {
+    for (int i = 0; i < 3; ++i) {
+      coords[i].reserve(2);
+    }
+    coords[0].push_back(0);
+    coords[0].push_back(0);
+    coords[1].push_back(indexed ? 2*dest_width : 2);
+    coords[1].push_back(0);
+    coords[2].push_back(0);
+    coords[2].push_back(indexed ? 2*dest_height : 2);
+  }
+
+  SH_GL_CHECK_ERROR(glViewport(0, 0, dest_width, dest_height));
+  SH_GL_CHECK_ERROR(glEnable(GL_SCISSOR_TEST));
+
+  draw_rectangle(dest_offset[0], dest_offset[1],
+                 dest_stride[0]*dest_count[0], dest_stride[1]*dest_count[1], coords);
 }
 
 static void check_stream(const Stream& stream, TextureDims dims)
@@ -586,7 +620,7 @@ void FBOStreams::execute(const Program& program,
 
 #ifdef SH_DEBUG_FBOS_PRINTFP
     {
-      ProgramSet::NodeList::const_iterator i = (*I)->begin();
+      ProgramSet::NodeList::const_iterator i = (*I)->program_set()->begin();
       (*i)->code()->print(std::cerr);
       ++i;
       (*i)->code()->print(std::cerr);
@@ -606,8 +640,9 @@ void FBOStreams::execute(const Program& program,
                      program_version, program.stream_inputs);
       break;
     case SH_TEXTURE_2D:
-      draw_2d_stream(dest_width, dest_height, *dest_tex,
-                     m_float_extension == ARB_NV_FLOAT_BUFFER);
+      draw_2d_stream(dest_width, dest_height, *dest_tex, program_version,
+                     m_float_extension == ARB_NV_FLOAT_BUFFER,
+                     program.stream_inputs);
       break;
 /*
     case SH_TEXTURE_3D:

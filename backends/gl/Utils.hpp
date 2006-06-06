@@ -54,12 +54,13 @@ struct ProgramVersion {
 class SplitProgram {
 public:
   virtual ~SplitProgram() {}
-  virtual void update_uniforms(const SH::Record& uniforms) = 0;
+  virtual void update_uniforms(const SH::Record& uniforms);
   virtual void update_channels(const SH::Stream& stream,
                                const SH::BaseTexture& dest_tex) = 0;
   virtual SH::ProgramSetPtr program_set() = 0;
 protected:
   SH::Program epilogue(const SH::ProgramNodePtr& program);
+  std::vector<SH::Variable> m_uniforms;
 };
 
 /**
