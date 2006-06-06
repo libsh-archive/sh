@@ -153,7 +153,6 @@ int main(int argc, char* argv[])
   if (test.output_result<float*>("everything", inputs, 
                      reinterpret_cast<float*>(mem[2]->hostStorage()->data()),
                      expected, 16, 0.001)) errors++;}
-
   // 2D tests
   if (test.backend() != "cc") {
     Array2D<Attrib1f> a2(mem[0], 4, 4), b2(mem[1], 4, 4), c2(mem[2], 4, 4);
@@ -166,7 +165,6 @@ int main(int argc, char* argv[])
                                    reinterpret_cast<float*>(mem[2]->hostStorage()->data()),
                                    expected, 16, 0.001)) errors++;}
     
-#if 0
     {float expected[] = {9,11,2,3, 17,19,6,7, 25,27,10,11, 12,13,14,15};
     reset_memories(mem, 3);
     count(c2, 2, 3) = prg << offset(count(a2, 2, 3), 1, 1)
@@ -184,7 +182,6 @@ int main(int argc, char* argv[])
     if (test.output_result<float*>("2D stride", inputs, 
                                    reinterpret_cast<float*>(mem[2]->hostStorage()->data()),
                                    expected, 16, 0.001)) errors++;}
-#endif
   }
 
   mismatch_test(total_tests, errors);
