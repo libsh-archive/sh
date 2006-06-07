@@ -92,6 +92,50 @@ FBOStreams::~FBOStreams()
 {
 }
 
+void FBOStreams::init()
+{
+  // --- Set up the vertex program
+  if (!m_setup_vp) {
+    const GLubyte* extensions = glGetString(GL_EXTENSIONS);
+    if (extensions) {
+      string extstr(reinterpret_cast<const char*>(extensions));
+
+      if (
+#ifdef ATI_draw_buffers
+          (extstr.find("ATI_draw_buffers") != string::npos) ||
+#endif
+          (extstr.find("ARB_draw_buffers") != string::npos)) {
+#ifdef ATI_draw_buffers
+        if (extstr.find("ATI_draw_buffers") != string::npos) {
+          SH_GL_CHECK_ERROR(glGetIntegerv(GL_MAX_DRAW_BUFFERS_ATI, &m_max_draw_buffers));
+          m_draw_buffers_ext = ATI;
+        } else {
+#endif
+          SH_GL_CHECK_ERROR(glGetIntegerv(GL_MAX_DRAW_BUFFERS_ARB, &m_max_draw_buffers));
+          m_draw_buffers_ext = ARB;
+#ifdef ATI_draw_buffers
+        }
+#endif
+      }
+      if (extstr.find("ATI_texture_float") != string::npos) {
+        m_float_extension = ARB_ATI_PIXEL_FORMAT_FLOAT;
+      }
+      else if (extstr.find("NV_float_buffer") != string::npos) {
+        m_float_extension = ARB_NV_FLOAT_BUFFER;
+      }
+      else {
+        m_float_extension = ARB_NO_FLOAT_EXT;
+      }
+    }
+    // The (trivial) vertex program
+    m_vp = keep<Position4f>() & keep<TexCoord4f>();
+    m_vp.meta("opengl:matching", "generic");
+    m_vp.node()->target() = m_name + ":vertex";
+    compile(m_vp);
+    m_setup_vp = true;
+  }
+}
+
 #ifdef DO_PBUFFER_TIMING
 int indent = 0;
 Timer supertimer;
@@ -502,47 +546,9 @@ void FBOStreams::execute(const Program& program,
 
   DECLARE_TIMER(vpsetup);
 
-  // --- Set up the vertex program
-  if (!m_setup_vp) {
-    const GLubyte* extensions = glGetString(GL_EXTENSIONS);
-    if (extensions) {
-      string extstr(reinterpret_cast<const char*>(extensions));
+  // Setup the vertex program and query relevant extensions
+  init();
 
-      if (
-#ifdef ATI_draw_buffers
-          (extstr.find("ATI_draw_buffers") != string::npos) ||
-#endif
-          (extstr.find("ARB_draw_buffers") != string::npos)) {
-#ifdef ATI_draw_buffers
-        if (extstr.find("ATI_draw_buffers") != string::npos) {
-          SH_GL_CHECK_ERROR(glGetIntegerv(GL_MAX_DRAW_BUFFERS_ATI, &m_max_draw_buffers));
-          m_draw_buffers_ext = ATI;
-        } else {
-#endif
-          SH_GL_CHECK_ERROR(glGetIntegerv(GL_MAX_DRAW_BUFFERS_ARB, &m_max_draw_buffers));
-          m_draw_buffers_ext = ARB;
-#ifdef ATI_draw_buffers
-        }
-#endif
-      }
-      if (extstr.find("ATI_texture_float") != string::npos) {
-        m_float_extension = ARB_ATI_PIXEL_FORMAT_FLOAT;
-      }
-      else if (extstr.find("NV_float_buffer") != string::npos) {
-        m_float_extension = ARB_NV_FLOAT_BUFFER;
-      }
-      else {
-        m_float_extension = ARB_NO_FLOAT_EXT;
-      }
-    }
-    // The (trivial) vertex program
-    m_vp = keep<Position4f>() & keep<TexCoord4f>();
-    m_vp.meta("opengl:matching", "generic");
-    m_vp.node()->target() = get_target_backend(program_node) + "vertex";
-    compile(m_vp);
-    m_setup_vp = true;
-  }
-  
   if (m_float_extension == ARB_NO_FLOAT_EXT) {
     error(FBOStreamException("Cannot execute stream program, floating point texture support not found"));
     return;
@@ -757,6 +763,9 @@ void FBOStreams::gather(const BaseTexture& dest_stream,
     PBufferContextPtr context = factory->get_context(1,1);
     old_handle = context->activate();
   }
+  
+  // Setup the vertex program and query relevant extensions
+  init();
 
   // Convert the index and src stream textures into texture nodes we 
   // can actually use (i.e. 1D -> 2D)  

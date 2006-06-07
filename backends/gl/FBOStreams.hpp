@@ -42,6 +42,8 @@ struct FBOStreams : public StreamStrategy {
   virtual StreamStrategy* create();
 
 private:
+  void init();
+
   std::string m_name;
 
   bool m_setup_vp;
