@@ -40,6 +40,7 @@ const char* nodetypename[] ={
   "BLOCK",
   "SECTION",
   "IF",
+  "ELSE",
   "IFELSE",
   "SELFLOOP",
   "WHILELOOP",
@@ -420,7 +421,7 @@ Structural::Structural(const CtrlGraphPtr& graph)
                 nodeset.erase(nodeset.begin(), S);
                 SH_STR_DEBUG_PRINT("FOUND SECTION of size " << nodeset.size());
                 for (NodeSet::iterator I = nodeset.begin(); I != nodeset.end(); ++I) {
-                  SH_STR_DEBUG_PRINT("  node " << I->object());
+                  SH_STR_DEBUG_PRINT("  node " << *I);
                 }
                 break;
               }
@@ -434,7 +435,7 @@ Structural::Structural(const CtrlGraphPtr& graph)
           if (nodeset.size() >= 2) {
             SH_STR_DEBUG_PRINT("FOUND BLOCK of size " << nodeset.size());
             for (NodeSet::iterator I = nodeset.begin(); I != nodeset.end(); ++I) {
-              SH_STR_DEBUG_PRINT("  node " << I->object());
+              SH_STR_DEBUG_PRINT("  node " << *I);
             }
             //node = n;
             newnode = create_structural_node(StructuralNode::BLOCK);
@@ -474,6 +475,12 @@ Structural::Structural(const CtrlGraphPtr& graph)
           nodeset.push_back(node);
           nodeset.push_back(m);
           newnode = create_structural_node(StructuralNode::IF);
+          newnode->secStart = node->secStart;
+        } else if (n->succs.size() == 1 && n->succs.front().second ==  m) {
+          SH_STR_DEBUG_PRINT("FOUND ELSE");
+          nodeset.push_back(node);
+          nodeset.push_back(n);
+          newnode = create_structural_node(StructuralNode::ELSE);
           newnode->secStart = node->secStart;
         }
       }

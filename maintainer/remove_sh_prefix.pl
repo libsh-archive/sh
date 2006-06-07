@@ -79,7 +79,8 @@ my %special_macros = (
     "DEBUG"    => "SH_DEBUG",
     "DECL"     => "SH_DECL",
     "NAME"     => "SH_NAME",
-    "NAMEDECL" => "SH_NAMEDECL"
+    "NAMEDECL" => "SH_NAMEDECL",
+    "STR"      => "SH_STR"
 );
 
 my %reserved_words = (
