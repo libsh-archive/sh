@@ -975,15 +975,37 @@ void ArbCode::genStructNode(const ShStructuralNodePtr& node)
   else if (node->type == ShStructuralNode::IF) {
     ShStructuralNodePtr header = node->structnodes.front();
     
-    ShStructuralNode::SuccessorList::iterator B = header->succs.begin();
-    ShVariable cond = B->first;
-    ShStructuralNodePtr ifnode = B->second;
+    ShStructuralNode::SuccessorList::iterator B;
+    ShVariable cond;
+    ShStructuralNodePtr ifnode;
+    for (B = header->succs.begin(); B != header->succs.end(); ++B) {
+      if (B->first.node()) {
+        cond = B->first;
+        ifnode = B->second;
+        break;
+      }
+    }
     genStructNode(header);
     push_if(cond, false); {
       genStructNode(ifnode);
     } m_instructions.push_back(ArbInst(SH_ARB_ENDIF, ShVariable()));
   }
-  else if (ShStructuralNode::PROPINT == node->type) {
+  else if (node->type == ShStructuralNode::ELSE) {
+    ShStructuralNodePtr header = node->structnodes.front();
+
+    ShStructuralNode::SuccessorList::iterator B;
+    ShVariable cond;
+    ShStructuralNodePtr elsenode;
+    for (B = header->succs.begin(); B != header->succs.end(); ++B) {
+      if (B->first.node()) cond = B->first;
+      if (!B->first.node()) elsenode = B->second;
+      if (cond.node() && elsenode) break;
+    }
+    genStructNode(header);
+    push_if(cond, true); {
+      genStructNode(elsenode);
+    } m_instructions.push_back(ArbInst(SH_ARB_ENDIF, ShVariable()));
+  }  else if (ShStructuralNode::PROPINT == node->type) {
     float maxloopval = 255.0f;
     ShConstAttrib1f maxloop(maxloopval);
 

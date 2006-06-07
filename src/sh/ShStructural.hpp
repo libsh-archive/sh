@@ -42,6 +42,7 @@ public:
     BLOCK,
     SECTION,
     IF,
+    ELSE,
     IFELSE,
     SELFLOOP,
     WHILELOOP,

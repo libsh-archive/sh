@@ -601,9 +601,16 @@ void GlslCode::gen_structural_node(const ShStructuralNodePtr& node)
   else if (node->type == ShStructuralNode::IF) {
     ShStructuralNodePtr header = node->structnodes.front();
 
-    ShStructuralNode::SuccessorList::iterator B = header->succs.begin();
-    ShVariable cond = B->first;
-    ShStructuralNodePtr ifnode = B->second;
+    ShStructuralNode::SuccessorList::iterator B;
+    ShVariable cond;
+    ShStructuralNodePtr ifnode;
+    for (B = header->succs.begin(); B != header->succs.end(); ++B) {
+      if (B->first.node()) {
+        cond = B->first;
+        ifnode = B->second;
+        break;
+      }
+    }
 
     gen_structural_node(header);
     append_line("if (bool(" + resolve(cond.node()) + ")) {", false);
@@ -612,6 +619,25 @@ void GlslCode::gen_structural_node(const ShStructuralNodePtr& node)
     m_indent--;
     append_line("} // if", false);
   } 
+  else if (node->type == ShStructuralNode::ELSE) {
+    ShStructuralNodePtr header = node->structnodes.front();
+
+    ShStructuralNode::SuccessorList::iterator B;
+    ShVariable cond;
+    ShStructuralNodePtr elsenode;
+    for (B = header->succs.begin(); B != header->succs.end(); ++B) {
+      if (B->first.node()) cond = B->first;
+      if (!B->first.node()) elsenode = B->second;
+      if (cond.node() && elsenode) break;
+    }
+
+    gen_structural_node(header);
+    append_line("if (!(bool(" + resolve(cond.node()) + "))) {", false);
+    m_indent++;
+    gen_structural_node(elsenode);
+    m_indent--;
+    append_line("} // if", false);
+  }
   else if (node->type == ShStructuralNode::WHILELOOP) {
     ShStructuralNodePtr header = node->structnodes.front();
     ShVariable cond = header->succs.front().first;
