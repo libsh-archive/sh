@@ -26,7 +26,7 @@
 #include "ShCtrlGraph.hpp"
 #include "ShDebug.hpp"
 
-#define SH_STRUCTURAL_DEBUG
+//#define SH_STRUCTURAL_DEBUG
 
 #ifdef SH_STRUCTURAL_DEBUG
 #  define SH_STR_DEBUG_PRINT(x) SH_DEBUG_PRINT(x)
