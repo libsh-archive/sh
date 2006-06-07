@@ -740,7 +740,7 @@ bool CcBackendCode::execute(const Program& prg, Stream& dest)
     if (!storage) {
       SH_CC_DEBUG_PRINT("  Allocating new storage");
       storage = new HostStorage(I->node()->memory(0).object(),
-				  datasize * I->node()->size() * I->node()->size(), I->node()->valueType());
+				  datasize * I->node()->size() * I->node()->width(), I->node()->valueType());
     }
     storage->dirty();
     outputs[oidx] = reinterpret_cast<char*>(storage->data()) +
