@@ -63,7 +63,7 @@ AC_CHECK_HEADER([sstream], [], [AC_MSG_ERROR([sh requires <sstream>. Please use 
 # Checks for library functions.
 AC_CHECK_FUNCS([pow sqrt])
 
-required_glext_version=21
+required_glext_version=29
 
 # Mac OSX Tests
 case $host_os in 
