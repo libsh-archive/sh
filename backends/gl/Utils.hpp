@@ -124,10 +124,10 @@ private:
   typedef std::map<Key, ProgramVersionCache*> Cache;
   Cache m_cache;
 
-  int m_max_outputs;
-  FloatExtension m_float_extension;
   SH::ProgramNode* m_stream_program;
   SH::ProgramNodePtr m_vertex_program;
+  int m_max_outputs;
+  FloatExtension m_float_extension;
 };
 
 std::string get_target_backend(const SH::ProgramNodeCPtr& program);
