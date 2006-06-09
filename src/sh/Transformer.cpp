@@ -669,7 +669,7 @@ VariableNodePtr allocate_constant(unsigned int size, float* constants)
 VariableNodePtr allocate_temp(const Variable& dest)
 {
   const VariableNodePtr& dest_node = dest.node();
-  VariableNode* node = new VariableNode(SH_TEMP, dest_node->size(), 
+  VariableNode* node = new VariableNode(SH_TEMP, dest.size(), 
                                             dest_node->valueType(), 
                                             dest_node->specialType());
   VariableNodePtr node_ptr = Pointer<VariableNode>(node);
