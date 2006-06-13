@@ -374,7 +374,7 @@ ShProgram replaceVariable(ShProgram a, const ShVariable& v)
   ShContext::current()->enter(program.node());
 
   // make a new input
-  ShVariableNodePtr newInput(v.node()->clone(SH_INPUT)); 
+  ShVariableNodePtr newInput(v.node()->clone(SH_INPUT, 0, SH_VALUETYPE_END, SH_SEMANTICTYPE_END, true, false)); 
   varMap[v.node()] = newInput;
 
   ShContext::current()->exit();

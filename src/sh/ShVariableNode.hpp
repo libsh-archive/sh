@@ -61,7 +61,10 @@ public:
   // for INPUT/OUTPUT/INOUT types.
   //
   // If keepUniform is set to false, then the new variable  
-  // has m_uniform set to false even if the original m_uniform was true. 
+  // has m_uniform set to false even if the original m_uniform was
+  // true.
+  //
+  // TODO: m_uniform should never be true if newKind != TEMP
   //
   // Arguments that are set to their default values means use the same
   // as the old node.
