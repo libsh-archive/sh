@@ -141,7 +141,7 @@ private:
   void emit(SH::ShCtrlGraphNode* node);
       
 private:
-  const SH::ShProgramNodeCPtr& m_original_program;
+  SH::ShProgramNodeCPtr m_original_program;
   SH::ShProgramNodePtr m_program;
 
   std::map<SH::ShCtrlGraphNode*, int> m_label_map;
