@@ -1138,6 +1138,72 @@ void Transformer::expand_inverse_hyperbolic()
   m_changed |= expander.transform(m_program);
 }
 
+struct HyperbolicExpanderBase: public TransformerParent 
+{
+  bool handleStmt(BasicBlock::StmtList::iterator &I, CtrlGraphNode* node)
+  { 
+    BasicBlock::StmtList new_stmts;
+    switch (I->op) {
+    case OP_COSH:
+      {
+        Variable half(allocate_constant(I->src[0], 0.5));
+        Variable exp_px(allocate_temp(I->src[0]));
+        Variable exp_nx(allocate_temp(I->src[0]));
+        
+        new_stmts.push_back(Statement(exp_px, OP_EXP,  I->src[0]));
+        new_stmts.push_back(Statement(exp_nx, OP_EXP, -I->src[0]));
+        new_stmts.push_back(Statement(I->dest, exp_px, OP_ADD, exp_nx));
+        new_stmts.push_back(Statement(I->dest, I->dest, OP_MUL, half));
+        break;
+      }
+    case OP_SINH:
+      {
+        Variable half(allocate_constant(I->src[0], 0.5));
+        Variable exp_px(allocate_temp(I->src[0]));
+        Variable exp_nx(allocate_temp(I->src[0]));
+        
+        new_stmts.push_back(Statement(exp_px, OP_EXP,  I->src[0]));
+        new_stmts.push_back(Statement(exp_nx, OP_EXP, -I->src[0]));
+        new_stmts.push_back(Statement(I->dest, exp_px, OP_ADD, -exp_nx));
+        new_stmts.push_back(Statement(I->dest, I->dest, OP_MUL, half));
+        break;
+      }
+    case OP_TANH:
+      {
+        Variable two(allocate_constant(I->src[0], 2));
+        Variable one(allocate_constant(I->src[0], 1));
+        Variable tmp(allocate_temp(I->src[0]));
+        Variable tmp2(allocate_temp(I->src[0]));
+        Variable exp_2x(allocate_temp(I->src[0]));
+        
+        new_stmts.push_back(Statement(tmp, I->src[0], OP_MUL, two));
+        new_stmts.push_back(Statement(exp_2x, OP_EXP, tmp));
+        new_stmts.push_back(Statement(tmp, exp_2x, OP_ADD, -one));
+        new_stmts.push_back(Statement(tmp2, exp_2x, OP_ADD, one));
+        new_stmts.push_back(Statement(I->dest, tmp, OP_DIV, tmp2));
+        break;
+      }
+    default:
+      break;
+    }
+
+    if (!new_stmts.empty()) {
+      I = node->block->erase(I);
+      node->block->splice(I, new_stmts);
+      m_changed = true;
+      return true;
+    } else {
+      return false;
+    }
+  }
+};
+
+typedef DefaultTransformer<HyperbolicExpanderBase> HyperbolicExpander;
+void Transformer::expand_hyperbolic()
+{
+  HyperbolicExpander expander;
+  m_changed |= expander.transform(m_program);
+}
 
 bool ordered(const Swizzle& s)
 {
