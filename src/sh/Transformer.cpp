@@ -1068,26 +1068,37 @@ struct InverseHyperbolicExpanderBase: public TransformerParent
       {
         // acosh(x) = ln(x + sqrt(x^2 - 1))
         Variable minus_one(allocate_constant(I->src[0], -1));
+        Variable one(allocate_constant(I->src[0], 1));
+        Variable nan(allocate_constant(I->src[0], NAN));
         Variable tmp(allocate_temp(I->src[0]));
+        Variable tmp2(allocate_temp(I->src[0]));
                 
         new_stmts.push_back(Statement(tmp, I->src[0], OP_MUL, I->src[0]));
         new_stmts.push_back(Statement(tmp, tmp, OP_ADD, minus_one));
         new_stmts.push_back(Statement(tmp, OP_SQRT, tmp));
-        new_stmts.push_back(Statement(tmp, I->src[0], OP_ADD, tmp));
-        new_stmts.push_back(Statement(I->dest, OP_LOG, tmp));
+        new_stmts.push_back(Statement(tmp2, OP_ABS, I->src[0]));
+        new_stmts.push_back(Statement(tmp, tmp2, OP_ADD, tmp));
+        new_stmts.push_back(Statement(tmp, OP_LOG, tmp));
+        new_stmts.push_back(Statement(tmp2, I->src[0], OP_SGE, one));
+        new_stmts.push_back(Statement(I->dest, OP_COND, tmp2, tmp, nan));
         break;
       }
     case OP_ASINH:
       {
         // asinh(x) = ln(x + sqrt(x^2 + 1))
         Variable one(allocate_constant(I->src[0], 1));
+        Variable zero(allocate_constant(I->src[0], 0));
         Variable tmp(allocate_temp(I->src[0]));
+        Variable tmp2(allocate_temp(I->src[0]));
                 
         new_stmts.push_back(Statement(tmp, I->src[0], OP_MUL, I->src[0]));
         new_stmts.push_back(Statement(tmp, tmp, OP_ADD, one));
         new_stmts.push_back(Statement(tmp, OP_SQRT, tmp));
-        new_stmts.push_back(Statement(tmp, I->src[0], OP_ADD, tmp));
-        new_stmts.push_back(Statement(I->dest, OP_LOG, tmp));
+        new_stmts.push_back(Statement(tmp2, OP_ABS, I->src[0]));
+        new_stmts.push_back(Statement(tmp, tmp2, OP_ADD, tmp));
+        new_stmts.push_back(Statement(tmp, OP_LOG, tmp));
+        new_stmts.push_back(Statement(tmp2, I->src[0], OP_SGT, zero));
+        new_stmts.push_back(Statement(I->dest, OP_COND, tmp2, tmp, -tmp));
         break;
       }
     case OP_ATANH:
@@ -1099,8 +1110,7 @@ struct InverseHyperbolicExpanderBase: public TransformerParent
         Variable half(allocate_constant(I->src[0], 0.5));
 
         new_stmts.push_back(Statement(tmp1, one, OP_ADD, I->src[0]));
-        new_stmts.push_back(Statement(tmp2, OP_NEG, I->src[0]));
-        new_stmts.push_back(Statement(tmp2, one, OP_ADD, tmp2));
+        new_stmts.push_back(Statement(tmp2, one, OP_ADD, -I->src[0]));
         new_stmts.push_back(Statement(tmp1, tmp1, OP_DIV, tmp2));
         new_stmts.push_back(Statement(tmp1, OP_LOG, tmp1));
         new_stmts.push_back(Statement(I->dest, half, OP_MUL, tmp1));
