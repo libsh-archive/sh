@@ -117,6 +117,10 @@ public:
   /** Replace atanh, asinh and acosh with a log.
    */
   void expand_inverse_hyperbolic();
+  
+  /** Replace sinh, cosh and tanh with exp
+   */
+  void expand_hyperbolic();
 
   /** Replace TEXD with TEXLOD ops.
    */

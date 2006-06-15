@@ -1069,7 +1069,7 @@ struct InverseHyperbolicExpanderBase: public TransformerParent
         // acosh(x) = ln(x + sqrt(x^2 - 1))
         Variable minus_one(allocate_constant(I->src[0], -1));
         Variable one(allocate_constant(I->src[0], 1));
-        Variable nan(allocate_constant(I->src[0], NAN));
+        Variable nan(allocate_constant(I->src[0], std::numeric_limits<float>::quiet_NaN()));
         Variable tmp(allocate_temp(I->src[0]));
         Variable tmp2(allocate_temp(I->src[0]));
                 
