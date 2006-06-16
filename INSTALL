@@ -2,22 +2,22 @@
 BUILDING ON WINDOWS OR MAC OS X
 ================================
 
-The simplest way to build Sh on Winodws  is to use the Visual Studio .NET
+The simplest way to build Sh on Windows is to use the Visual Studio .NET
 solution file:
-  win32/Sh.sln
+  win32/vc7/Sh.sln or win32/vc8/Sh.sln
 
 More information can be found on the wiki at:
   http://libsh.org/wiki/index.php/Building_Sh_on_Windows
 
-The Mac OS X version of Sh has been tested on Panther and Xcode 1.5.
+The Mac OS X version of Sh has been tested on Tiger and Xcode 2.2. There
+are a few limitations, see README.osx.
 
 To compile Sh on OS X, you will need the following fink packages:
   libpng3
 
 To build Sh, simply open the Xcode project in the "xcode/" directory
-and build it. You can also do:
-  cd xcode
-  xcodebuild -alltargets install
+and build it. You should be able to run the example applications directly
+from the IDE.
 
 ==============================
 BUILDING ON LINUX/UNIX
