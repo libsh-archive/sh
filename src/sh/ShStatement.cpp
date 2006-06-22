@@ -67,7 +67,8 @@ ShStatement::ShStatement(ShVariable dest, ShOperation op, ShVariable src0, ShVar
 
 std::ostream& operator<<(std::ostream& out, const ShStatement& stmt)
 {
-  if(stmt.op == SH_OP_COMMENT) return out;
+  if(stmt.op == SH_OP_COMMENT) 
+    return (out << "# " << stmt.get_info<ShInfoComment>()->comment);
   ShStatement::dumpVar(out, stmt.dest) << " := ";
   if(stmt.op != SH_OP_ASN) out << opInfo[stmt.op].name << " ";
   for(int i = 0; i < opInfo[stmt.op].arity; ++i) {

@@ -586,10 +586,16 @@ void GlslCode::emit_texture(const ShStatement& stmt)
     }
   }
 
-  stringstream line;
-  line << resolve(stmt.dest) << (cg_function ? " = tex" : " = texture");
-
   ShTextureNodePtr texture = shref_dynamic_cast<ShTextureNode>(stmt.src[0].node());
+
+  bool shadow = texture->meta("opengl:textype") == "shadow";
+  if (shadow && texture->dims() != SH_TEXTURE_1D && texture->dims() != SH_TEXTURE_2D) {
+    SH_DEBUG_WARN("Shadow mapping is not supported on this texture type");
+  }
+
+  stringstream line;
+  line << resolve(stmt.dest) << (shadow ? " = shadow" : (cg_function ? " = tex" : " = texture"));
+
   switch (texture->dims()) {
   case SH_TEXTURE_1D:
     line << "1D";
@@ -614,7 +620,7 @@ void GlslCode::emit_texture(const ShStatement& stmt)
     line << "Lod";
   } else if (ati_function) {
     line << "_ATI";
-  }
+  } 
 
   line << "(" << resolve(stmt.src[0]) << ", " << resolve(stmt.src[1]);
 
