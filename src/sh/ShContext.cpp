@@ -22,6 +22,47 @@
 #include "ShTypeInfo.hpp"
 #include "binreloc.h"
 
+
+//
+// Install the handler for the failed new operator. This is provided 
+// for Visual C++ only since it does not throw bad_alloc when a new operator 
+// is failed. 
+// 
+// One problem of this hack is that new(std::nothrow) will also throw 
+// the exception if it fails.
+//
+// {
+#ifdef WIN32
+
+#include <new>
+#include <new.h>
+
+#pragma init_seg(lib) // again Visual C++ only 
+
+int sh_new_handler(size_t) {
+  throw std::bad_alloc();
+  return 0;
+}
+struct sh_new_handler_obj{
+  _PNH old_new_handler;
+  int old_new_mode;
+
+  sh_new_handler_obj() {
+    old_new_mode = _set_new_mode(1);
+    old_new_handler = _set_new_handler(sh_new_handler);
+  }
+  ~sh_new_handler_obj() {
+    _set_new_handler(old_new_handler);
+    _set_new_mode(old_new_mode);
+  }
+};
+
+sh_new_handler_obj g_sh_new_handler_obj;
+
+#endif
+// }
+
+
 namespace SH {
 
 ShContext* ShContext::m_instance = 0;

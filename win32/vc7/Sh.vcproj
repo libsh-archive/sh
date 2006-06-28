@@ -4,6 +4,7 @@
 	Version="7.10"
 	Name="Sh"
 	ProjectGUID="{8D41EF2E-D3A7-4EE9-80ED-9706F482EAA7}"
+	RootNamespace="Sh"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform

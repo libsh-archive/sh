@@ -143,11 +143,12 @@ void ShCtrlGraphNode::mark() const
   m_marked = true;
 }
 
-void ShCtrlGraphNode::clear_marked() const
+void ShCtrlGraphNode::clear_marked(bool descend) const
 {
   if (!marked()) return;
   m_marked = false;
 
+  if (!descend) return;
   if (m_follower) m_follower->clear_marked();
   
   for (SuccessorList::const_iterator I = m_successors.begin();
@@ -469,8 +470,9 @@ void ShCtrlGraph::append(const std::auto_ptr<ShCtrlGraph> cfg)
 std::ostream& ShCtrlGraph::print(std::ostream& out, int indent) const
 {
   if (m_entry) {
-    m_entry->clear_marked();
+    clear_marked();
     m_entry->print(out, indent);
+    clear_marked();
   }
   
   return out;
@@ -481,12 +483,20 @@ std::ostream& ShCtrlGraph::graphviz_dump(std::ostream& out) const
   out << "digraph control {" << std::endl;
   
   if (m_entry) {
-    m_entry->clear_marked();
+    clear_marked();
     m_entry->graphviz_dump(out);
+    clear_marked();
   }
   
   out << "}" << std::endl;
   return out;
+}
+
+void ShCtrlGraph::clear_marked() const
+{
+  for (NodeSet::const_iterator I = m_owned_nodes.begin(); I != m_owned_nodes.end(); ++I) {
+    (*I)->clear_marked();
+  }
 }
 
 ShCtrlGraph * ShCtrlGraph::clone() const

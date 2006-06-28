@@ -184,7 +184,7 @@ public:
   // functions which are const, so we just make the "marked" flag
   // mutable.
   void mark() const;         ///< Set the marked flag
-  void clear_marked() const; ///< Clears the marked flag of this and
+  void clear_marked(bool descend = true) const; ///< Clears the marked flag of this and
                              ///  all successors'/followers flags
   
   template<typename F>
@@ -272,6 +272,8 @@ public:
   /// node is unreferenced (as it might be deleted if allow_delete is true!)  
   void release_owned_node(ShCtrlGraphNode* node, bool allow_delete = true);
 
+  void clear_marked() const;
+
 private:
   ShCtrlGraphNode* m_entry;
   ShCtrlGraphNode* m_exit;
@@ -336,13 +338,17 @@ void ShCtrlGraphNode::dfs(F& functor) const
 template<typename F>
 void ShCtrlGraph::dfs(F& functor)
 {
+  clear_marked();
   m_entry->dfs(functor);
+  clear_marked();
 }
 
 template<typename F>
 void ShCtrlGraph::dfs(F& functor) const
 {
+  clear_marked();
   m_entry->dfs(functor);
+  clear_marked();
 }
 
 }

@@ -83,7 +83,41 @@ std::ostream& ShStatement::dumpVar(std::ostream &out, const ShVariable& var)
   if(var.null()) {
     out << "[null]";
   } else {
-    out << (var.neg() ? "-" : "") << var.name() << var.swizzle();
+    out << (var.neg() ? "-" : "") << var.name() 
+      << "@" << var.node().object()
+      << "[";
+    switch (var.node()->kind()) {
+    case SH_INPUT:
+      out << "i";
+      break;
+    case SH_OUTPUT:
+      out << "o";
+      break;
+    case SH_INOUT:
+      out << "io";
+      break;
+    case SH_TEMP:
+      if (var.node()->uniform()) out << "ut";
+      else out << "t";
+      break;
+    case SH_CONST:
+      out << "c";
+      break;
+    case SH_TEXTURE:
+      out << "tex";
+      break;
+    case SH_STREAM:
+      out << "str";
+      break;
+    case SH_PALETTE:
+      out << "pal";
+      break;
+    default:
+      out << "??";
+    }
+    out << "]";
+
+    out << var.swizzle();
   }
   return out;
 }
