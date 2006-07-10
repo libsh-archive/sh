@@ -38,6 +38,12 @@ using namespace SH;
 
 // Branch instruction insertion/removal
 
+struct OptBraInfo : public ShInfo {
+  OptBraInfo(ShCtrlGraphBranch& b) : branch(b) { }
+  ShInfo* clone() const { return new OptBraInfo(branch); }
+  ShCtrlGraphBranch& branch;
+};
+
 struct BraInstInserter {
   void operator()(ShCtrlGraphNode* node)
   {
@@ -46,7 +52,9 @@ struct BraInstInserter {
     for (ShCtrlGraphNode::SuccessorIt I = node->successors_begin();
          I != node->successors_end(); ++I) {
       if (!node->block) node->block = new ShBasicBlock();
-      node->block->addStatement(ShStatement(I->cond, SH_OP_OPTBRA, I->cond));
+      ShStatement stmt(I->cond, SH_OP_OPTBRA, I->cond);
+      stmt.add_info(new OptBraInfo(*I));
+      node->block->addStatement(stmt);
     }
   }
 };
@@ -60,6 +68,8 @@ struct BraInstRemover {
     
     for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end();) {
       if (I->op == SH_OP_OPTBRA) {
+        OptBraInfo* info = I->get_info<OptBraInfo>();
+        info->branch.cond = I->src[0];
         I = block->erase(I);
         continue;
       }
