@@ -166,8 +166,10 @@ if ((x = reinterpret_cast<PFN ## T ## PROC>(wglGetProcAddress(#x))) == NULL) \
 { \
   std::stringstream msg; \
   msg << "wglGetProcAddress failed (" << GetLastError() << ")"; \
-  shError(ShException(msg.str())); \
 }
+// Disable the exception, so RTT can use some old gpus
+  //shError(ShException(msg.str())); \
+//}
 #endif /* _WIN32 */
 
 SH::ShBackendSetPtr CodeStrategy::generate_set(const SH::ShProgramSet& s)
