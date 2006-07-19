@@ -259,7 +259,7 @@ ShProgram namedConnect(ShProgram pa, ShProgram pb, bool keepExtra)
             << " but output size " << (*I)->size() << " != " << " input size " << (*J)->size() );
         continue;
       }
-      mcm[i] = j;
+      mcm[j] = i;
       aMatch[i] = true;
       bMatch[j] = true;
     }
@@ -267,7 +267,7 @@ ShProgram namedConnect(ShProgram pa, ShProgram pb, bool keepExtra)
 
   std::vector<int> swiz(b->inputs.size(), 0); 
   for(MatchedChannelMap::iterator mcmit = mcm.begin(); mcmit != mcm.end(); ++mcmit) {
-    swiz[mcmit->second] = mcmit->first;
+    swiz[mcmit->first] = mcmit->second;
   }
 
   // swizzle unmatched inputs and make a pass them through properly
