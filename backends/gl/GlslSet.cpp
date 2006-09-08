@@ -20,7 +20,7 @@
 #include "GlslCode.hpp"
 #include <iostream>
 
-#define SH_DEBUG_GLSL_BACKEND
+//#define SH_DEBUG_GLSL_BACKEND
 
 namespace shgl {
 

@@ -1,3 +1,9 @@
+2006-09-08  Hans-Friedrich Pabst  <hfp@users.sf.net>
+
+	* backends/gl/GlslSet.cpp: SH_DEBUG_GLSL_BACKEND disabled; option
+	was defined per file level. Its very slow, it should not be enabled
+	in release code.
+
 2006-05-15  Stefanus Du Toit  <sdt@rapidmind.net>
 
 	* src/sh/CtrlGraph.hpp: Fix return type of successors_size(). Add
