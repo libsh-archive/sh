@@ -197,6 +197,7 @@ void GlslCode::emit(const ShStatement &stmt)
     case SH_OP_TEX:
     case SH_OP_TEXI:
     case SH_OP_TEXLOD:
+    case SH_OP_TEXBIAS:
     case SH_OP_TEXD:
       emit_texture(stmt);
       break;
@@ -559,8 +560,9 @@ void GlslCode::emit_sum(const ShStatement& stmt)
 
 void GlslCode::emit_texture(const ShStatement& stmt)
 {
-  SH_DEBUG_ASSERT((SH_OP_TEX    == stmt.op) || (SH_OP_TEXI == stmt.op) ||
-                  (SH_OP_TEXLOD == stmt.op) || (SH_OP_TEXD == stmt.op));
+  SH_DEBUG_ASSERT((SH_OP_TEX    == stmt.op) || (SH_OP_TEXI    == stmt.op) ||
+                  (SH_OP_TEXLOD == stmt.op) || (SH_OP_TEXBIAS == stmt.op) ||
+                  (SH_OP_TEXD   == stmt.op));
 
   SH::ShOperation op = stmt.op; 
   bool cg_function = false;
@@ -625,6 +627,8 @@ void GlslCode::emit_texture(const ShStatement& stmt)
   line << "(" << resolve(stmt.src[0]) << ", " << resolve(stmt.src[1]);
 
   if (SH_OP_TEXLOD == stmt.op) {
+    line << ", " << resolve(stmt.src[2]);
+  } else if (SH_OP_TEXBIAS == stmt.op) {
     line << ", " << resolve(stmt.src[2]);
   } else if (SH_OP_TEXD == stmt.op) {
     // TODO: Support derivative lookup for 3D and CUBE textures (i.e. float3 derivatives)
