@@ -137,20 +137,6 @@ void ShVariableNode::unlock()
   update_all();
 }
 
-ShValueType ShVariableNode::valueType() const {
-  return m_valueType;
-}
-
-int ShVariableNode::size() const
-{
-  return m_size;
-}
-
-void ShVariableNode::size(int s)
-{
-  SH_DEBUG_ASSERT(!m_variant);
-  m_size = s;
-}
 
 void ShVariableNode::name(const std::string& n)
 {
@@ -262,27 +248,12 @@ ShVariantPtr ShVariableNode::highBoundVariant() const
   return (metaHigh.empty() ? makeHigh() : factory->generate(metaHigh));
 }
 
-ShBindingType ShVariableNode::kind() const
-{
-  return m_kind;
-}
-
-ShSemanticType ShVariableNode::specialType() const
-{
-  return m_specialType;
-}
-
 std::string ShVariableNode::nameOfType() const {
   std::ostringstream os;
   // TODO indicate ValueType properly
   os << "Sh" << bindingTypeName[ m_kind ] << semanticTypeName[ m_specialType ] 
     << m_size << shTypeInfo(m_valueType)->name();
   return os.str();
-}
-
-void ShVariableNode::specialType(ShSemanticType type)
-{
-  m_specialType = type;
 }
 
 // TODO: also have an n-length set value, since updating the uniforms

@@ -153,7 +153,7 @@ ShProgram connect(ShProgram pa, ShProgram pb)
 
   program->collectVariables();
 
-  optimize(program);
+  //optimize(program);
   return program;
 }
 
@@ -191,7 +191,7 @@ ShProgram combine(ShProgram pa, ShProgram pb)
 
   program->collectVariables();
 
-  optimize(program);
+  //optimize(program);
   return program;
 }
 
@@ -382,7 +382,7 @@ ShProgram replaceVariable(ShProgram a, const ShVariable& v)
   ShVariableReplacer replacer(varMap);
   program.node()->ctrlGraph->dfs(replacer);
 
-  optimize(program);
+  //optimize(program);
   return program;
 }
 

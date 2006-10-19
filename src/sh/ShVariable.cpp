@@ -26,26 +26,6 @@
 
 namespace SH {
 
-ShVariable::ShVariable()
-  : ShMetaForwarder(0),
-    m_node(0), m_swizzle(0), m_neg(false)
-{
-}
-
-ShVariable::ShVariable(const ShVariableNodePtr& node)
-  : ShMetaForwarder(node.object()),
-    m_node(node), m_swizzle(node ? node->size() : 0), m_neg(false)
-{
-}
-
-ShVariable::ShVariable(const ShVariableNodePtr& node,
-                       const ShSwizzle& swizzle,
-                       bool neg)
-  : ShMetaForwarder(node.object()),
-    m_node(node), m_swizzle(swizzle), m_neg(neg)
-{
-}
-
 ShVariable& ShVariable::operator=(const ShProgram &prg) {
   // @todo range
   ShRecord rec(*this); 
@@ -63,31 +43,10 @@ void ShVariable::attach(const ShProgram& prgc)
   }
 }
 
-bool ShVariable::null() const
-{
-  return !m_node;
-}
 
-bool ShVariable::uniform() const
-{
-  return m_node->uniform();
-}
 
-bool ShVariable::hasValues() const
-{
-  return m_node->hasValues();
-}
 
-int ShVariable::size() const
-{
-  return m_swizzle.size();
-}
 
-ShValueType ShVariable::valueType() const 
-{
-  if(!m_node) return SH_VALUETYPE_END;
-  return m_node->valueType();
-}
 
 void ShVariable::rangeVariant(const ShVariant* low, const ShVariant* high)
 {
@@ -104,37 +63,6 @@ ShVariantPtr ShVariable::highBoundVariant() const
   return m_node->highBoundVariant()->get(m_neg, m_swizzle);
 }
 
-const ShSwizzle& ShVariable::swizzle() const
-{
-  return m_swizzle;
-}
-
-const ShVariableNodePtr& ShVariable::node() const
-{
-  return m_node;
-}
-
-bool ShVariable::neg() const
-{
-  return m_neg;
-}
-
-bool& ShVariable::neg()
-{
-  return m_neg;
-}
-
-ShVariantPtr ShVariable::getVariant() const
-{
-  return m_node->getVariant()->get(m_neg, m_swizzle);
-}
-
-ShVariantPtr ShVariable::getVariant(int index) const
-{
-  return m_node->getVariant()->get(m_neg, m_swizzle * ShSwizzle(size(), index)); 
-}
-
-
 bool ShVariable::loadVariant(ShVariant *&result) const
 {
   if((!m_neg) && m_swizzle.identity()) {
@@ -149,10 +77,6 @@ bool ShVariable::loadVariant(ShVariant *&result) const
   return true;
 }
 
-void ShVariable::updateVariant() 
-{
-  m_node->update_all();
-}
 
 void ShVariable::setVariant(const ShVariant* other, bool neg, const ShSwizzle &writemask)
 {

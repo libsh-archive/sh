@@ -231,22 +231,24 @@ struct InitRch {
   {
     if (!node) return;
 
-    r.rchin[node] = ShBitSet(r.defsize);
-    r.gen[node] = ShBitSet(r.defsize);
-    r.prsv[node] = ~ShBitSet(r.defsize);
+    r.rchin[node] = r.gen[node] = ShBitSet(r.defsize);
+    //DELME r.prsv[node] = ~r.gen[node];
+    r.prsv[node] = ShBitSet(r.defsize, true);
       
     ShBasicBlockPtr block = node->block;
 
     // Initialize gen
+    ShBitSet& gen_bs = r.gen[node];
     for (unsigned int i = 0; i < r.defs.size(); i++) {
       ReachingDefs::Definition &d = r.defs[i];
       if (d.node == node) {
-        for (int j = 0; j < d.size(); j++) {
+        register int d_size = d.size();
+        for (int j = 0; j < d_size; j++) {
 // @todo range - I think this needs to be fixed for swizzling?
 //               it's been fixed above in isDisabled
          // if (!r.defs[i].disable_mask[j]) {
           if (!d.isDisabled(j)) {
-            r.gen[node][d.off(j)] = true;
+            gen_bs[d.off(j)] = true;
           }
         }
       }
@@ -255,6 +257,7 @@ struct InitRch {
     if(!block) return;
 
     // Initialize prsv
+    ShBitSet& prsv_bs = r.prsv[node];
     for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
       if (I->dest.null() 
           || I->op == SH_OP_KIL
@@ -264,10 +267,11 @@ struct InitRch {
         ReachingDefs::Definition &d = r.defs[i];
         if (d.varnode != I->dest.node()) continue;
 
+        register int d_size = d.size();
         for (int j = 0; j < I->dest.size(); ++j) {
-          for (int k = 0; k < d.size(); ++k) {
+          for (int k = 0; k < d_size; ++k) {
             if (d.index(k) == I->dest.swizzle()[j]) {
-              r.prsv[node][d.off(k)] = false;
+              prsv_bs[d.off(k)] = false;
             }
           }
         }
@@ -349,23 +353,26 @@ struct UdDuBuilder {
     typedef std::set<ValueTracking::Def> DefSet;
     typedef std::map<TupleElement, DefSet> DefMap;
 
+    if (!node) return;
+
     // defs contains all of the possible contributors to the key's
     // definition at the current point.
     DefMap defs;
     
-    if (!node) return;
-    ShBasicBlockPtr block = node->block;
+    ShBasicBlockPtr& block = node->block;
 
     // TODO: Handle "non assigning" statements like KIL
 
     // initialize defs at the start of the block, using the reaching
     // definitions solution.
+    ShBitSet& bs = r.rchin[node];
     for (std::size_t i = 0; i < r.defs.size(); i++) {
-      for (int j = 0; j < r.defs[i].size(); j++) {
-        if (r.rchin[node][r.defs[i].offset + j]) {
-          ValueTracking::Def def(r.defs[i].toDef(j));
-          defs[TupleElement(r.defs[i].varnode,
-                            r.defs[i].index(j))].insert(def);
+      ReachingDefs::Definition& rdef = r.defs[i];
+      int d_size = rdef.size();
+      for (int j = 0; j < d_size; j++) {
+        if (bs[rdef.offset + j]) {
+          ValueTracking::Def def(rdef.toDef(j));
+          defs[TupleElement(rdef.varnode, rdef.index(j))].insert(def);
         }
       }
     }
@@ -375,44 +382,42 @@ struct UdDuBuilder {
       for (ShBasicBlock::ShStmtList::iterator I = block->begin(); I != block->end(); ++I) {
         // Compute the ud chains for the statement's source variables,
         // and contribute to the du chains of the source variables' definitions.
+        ValueTracking* vt = I->get_info<ValueTracking>();
+        if (!vt) {
+          vt = new ValueTracking(&(*I));
+          I->add_info(vt);
+        }
         for (int j = 0; j < opInfo[I->op].arity; j++) {
-          //if (I->src[j].node()->kind() == SH_TEMP) {
-            ValueTracking* vt = I->get_info<ValueTracking>();
-            if (!vt) {
-              vt = new ValueTracking(&(*I));
-              I->add_info(vt);
-            }
-            ShVariableNodePtr srcNode = I->src[j].node();
-            for (int i = 0; i < I->src[j].size(); i++) {
-              const DefSet& ds = defs[TupleElement(srcNode, I->src[j].swizzle()[i])];
+          const ShVariableNodePtr& srcNode = I->src[j].node();
+          for (int i = 0; i < I->src[j].size(); i++) {
+            const DefSet& ds = defs[TupleElement(srcNode, I->src[j].swizzle()[i])];
 
-              vt->defs[j][i] = ds;
-              ValueTracking::Use srcUse(&(*I), j, i);
-              for (DefSet::const_iterator J = ds.begin(); J != ds.end(); J++) {
-                switch(J->kind) {
-                  case ValueTracking::Def::INPUT:
-                    {
-                      ValueTracking::TupleDefUseChain& inputDu = 
-                        intrack->inputUses[srcNode];
-                      if(inputDu.empty()) {
-                        inputDu.resize(srcNode->size());
-                      }
-                      inputDu[J->index].insert(srcUse);
-                      break;
+            vt->defs[j][i] = ds;
+            ValueTracking::Use srcUse(&(*I), j, i);
+            for (DefSet::const_iterator J = ds.begin(); J != ds.end(); J++) {
+              switch(J->kind) {
+                case ValueTracking::Def::INPUT:
+                  {
+                    ValueTracking::TupleDefUseChain& inputDu = 
+                      intrack->inputUses[srcNode];
+                    if(inputDu.empty()) {
+                      inputDu.resize(srcNode->size());
                     }
-                  case ValueTracking::Def::STMT:
-                    {
-                      ValueTracking* ut = J->stmt->get_info<ValueTracking>();
-                      if (!ut) {
-                        ut = new ValueTracking(J->stmt);
-                        J->stmt->add_info(ut);
-                      }
-                      ut->uses[J->index].insert(srcUse);
-                      break;
+                    inputDu[J->index].insert(srcUse);
+                    break;
+                  }
+                case ValueTracking::Def::STMT:
+                  {
+                    ValueTracking* ut = J->stmt->get_info<ValueTracking>();
+                    if (!ut) {
+                      ut = new ValueTracking(J->stmt);
+                      J->stmt->add_info(ut);
                     }
-                }
+                    ut->uses[J->index].insert(srcUse);
+                    break;
+                  }
               }
-            //} 
+            }
           }
         }
         // Now update the defs structure.
@@ -430,8 +435,8 @@ struct UdDuBuilder {
     // to store somewhere if needed
     if(node == m_exit) {
       for(DefMap::iterator D = defs.begin(); D != defs.end(); ++D) {
-        ShVariableNodePtr node = D->first.node;
-        ShBindingType kind = node->kind();
+        const ShVariableNodePtr& node = D->first.node;
+        const ShBindingType& kind = node->kind();
         int index = D->first.index;
 
         if(kind == SH_INOUT || kind == SH_OUTPUT) {
@@ -523,7 +528,8 @@ ValueTracking::ValueTracking(ShStatement* stmt)
   SH_DEBUG_PRINT("Adding value tracking to " << *stmt);
 #endif
   for (int i = 0; i < opInfo[stmt->op].arity; i++) {
-    for (int j = 0; j < (stmt->src[i].node() ? stmt->src[i].size() : 0); j++) {
+    int s = stmt->src[i].node() ? stmt->src[i].size() : 0;
+    for (int j = 0; j < s; j++) {
       defs[i].push_back(std::set<Def>());
     }
   }

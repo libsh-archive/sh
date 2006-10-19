@@ -80,15 +80,16 @@ public:
   bool uniform() const; ///< Is this a uniform (non-shader specific) variable?
   bool hasValues() const; ///< Does this variable have values in the
                           ///host, e.g. for constants and uniforms.
-  int size() const; ///< Get the number of elements in this variable
-
+  ///< Get the number of elements in this variable
+  int size() const { return m_size; }
   // Don't call this on uniforms!
-  void size(int size);
+  void size(int s) { SH_DEBUG_ASSERT(!m_variant); m_size = s; }
 
   void lock(); ///< Do not update bound shaders in subsequent setValue calls
   void unlock(); ///< Update bound shader values, and turn off locking
   
-  ShValueType valueType() const; ///< Returns index of the data type held in this node 
+  ///< Returns index of the data type held in this node 
+  ShValueType valueType() const { return m_valueType; }
 
   // Metadata
   std::string name() const; ///< Get this variable's name
@@ -109,9 +110,9 @@ public:
   /** Generates a new ShVariant holding the upper bound */
   ShVariantPtr highBoundVariant() const;
 
-  ShBindingType kind() const;
-  ShSemanticType specialType() const;
-  void specialType(ShSemanticType);
+  const ShBindingType& kind() const { return m_kind; }
+  const ShSemanticType& specialType() const { return m_specialType; }
+  void specialType(const ShSemanticType& type) { m_specialType = type; }
 
   std::string nameOfType() const; ///< Get a string of this var's specialType, kind, & size
 

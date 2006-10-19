@@ -41,9 +41,15 @@ class ShProgram;
 class 
 SH_DLLEXPORT ShVariable : public ShMetaForwarder {
 public:
-  ShVariable();
-  ShVariable(const ShVariableNodePtr& node);
-  ShVariable(const ShVariableNodePtr& node, const ShSwizzle& swizzle, bool neg);
+  ShVariable() 
+    : ShMetaForwarder(0), m_node(0), m_swizzle(0), m_neg(false) {}
+  ShVariable(const ShVariableNodePtr& node) 
+    : ShMetaForwarder(node.object()), m_node(node)
+    , m_swizzle(node ? node->size() : 0), m_neg(false) {}
+  ShVariable::ShVariable(const ShVariableNodePtr& node,
+                         const ShSwizzle& swizzle, bool neg)
+    : ShMetaForwarder(node.object()), m_node(node)
+    , m_swizzle(swizzle), m_neg(neg) {}
 
   ~ShVariable() {}
 
@@ -57,16 +63,25 @@ public:
   /* Attaches a ShProgram to this variable, making it a dependent uniform. */
   void attach(const ShProgram& prg);
   
-  bool null() const; ///< true iff node is a null pointer.
+  ///< true iff node is a null pointer.
+  bool null() const { return !m_node; }
   
-  bool uniform() const; ///< Is this a uniform (non-shader specific) variable?
-  bool hasValues() const; ///< Does this variable have constant
-                          ///(host-local) values?
+  ///< Is this a uniform (non-shader specific) variable?
+  bool uniform() const { return m_node->uniform(); }
+
+  ///< Does this variable have constant (host-local) values?
+  bool hasValues() const { return m_node->hasValues(); }
+
   
-  int size() const; ///< Get the number of elements in this variable,
-                    /// after swizzling.
+  ///< Get the number of elements in this variable after swizzling.
+  int size() const { return m_swizzle.size(); }
                     
-  ShValueType valueType() const; ///< Returns index of the data type held in this node, or 0 if no node. 
+  ///< Returns index of the data type held in this node, or 0 if no node. 
+  ShValueType valueType() const 
+  {
+    if(!m_node) return SH_VALUETYPE_END;
+    return m_node->valueType();
+  }
 
   /**@name Metadata
    * This data is useful for various things, including asset
@@ -89,21 +104,28 @@ public:
   //@}
   
   /// Obtain the swizzling (if any) applied to this variable.
-  const ShSwizzle& swizzle() const;
+  const ShSwizzle& swizzle() const {  return m_swizzle; }
+
 
   /// Obtain the actual node this variable refers to.
-  const ShVariableNodePtr& node() const;
+  const ShVariableNodePtr& node() const {  return m_node; }
 
   /// Return true if this variable is negated
-  bool neg() const;
-
-  bool& neg();
+  bool neg() const {  return m_neg; }
+  bool& neg() {  return m_neg; }
 
   ///
   
   /// Returns a copy of the variant (with swizzling & proper negation)
-  ShVariantPtr getVariant() const;
-  ShVariantPtr getVariant(int index) const;
+  ShVariantPtr getVariant() const
+  {
+    return m_node->getVariant()->get(m_neg, m_swizzle);
+  }
+
+  ShVariantPtr getVariant(int index) const
+  {
+    return m_node->getVariant()->get(m_neg, m_swizzle * ShSwizzle(size(), index)); 
+  }
 
   /** Sets result to this' variant if possible.
    * Otherwise, if swizzling or negation are required, then 
@@ -121,7 +143,8 @@ public:
    * @{
    */
   bool loadVariant(ShVariant *&result) const;
-  void updateVariant();
+  void updateVariant() { m_node->update_all(); }
+
   // @}
 
   
