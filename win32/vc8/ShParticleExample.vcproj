@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="8,00"
 	Name="ShParticleExample"
 	ProjectGUID="{59DD669E-DB78-42E7-969F-D1EED8448777}"
 	>
@@ -37,7 +37,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\install\vc8\include;..\..\..\glut\include;..\..\..\opengl\include"
+				AdditionalIncludeDirectories="..\..\..\install\include;..\..\..\glut\include;..\..\..\opengl\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;NOMINMAX;_USE_MATH_DEFINES;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -60,7 +60,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="libsh_debug.lib glut32.lib"
 				OutputFile="$(OutDir)/ShParticleExample.exe"
-				AdditionalLibraryDirectories="..\..\..\install\vc8\lib;..\..\..\glut\lib"
+				AdditionalLibraryDirectories="..\..\..\install\lib\vc8;..\..\..\glut\lib"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)\$(TargetName).pdb"
 				SubSystem="1"
@@ -113,7 +113,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\..\install\vc8\include;..\..\..\glut\include;..\..\..\opengl\include"
+				AdditionalIncludeDirectories="..\..\..\install\include;..\..\..\glut\include;..\..\..\opengl\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;NOMINMAX;_USE_MATH_DEFINES;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="2"
 				WarningLevel="3"
@@ -134,7 +134,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="libsh.lib glut32.lib"
 				OutputFile="$(OutDir)/ShParticleExample.exe"
-				AdditionalLibraryDirectories="..\..\..\install\vc8\lib;..\..\..\glut\lib"
+				AdditionalLibraryDirectories="..\..\..\install\lib\vc8;..\..\..\glut\lib"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)\$(TargetName).pdb"
 				SubSystem="1"

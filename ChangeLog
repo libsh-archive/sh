@@ -1,6 +1,15 @@
 2006-10-21  Hans-Friedrich Pabst  <hfp@users.sf.net>
 
-  Merges from branch 0.8:
+	* VS7.1/8.0 (VERSION: 7/8) project files and install scripts
+	updated; structure of the install folder:
+	include\sh
+	include\shutil
+	bin\vcVERSION
+	lib\vcVERSION
+
+2006-10-21  Hans-Friedrich Pabst  <hfp@users.sf.net>
+
+	Merges from branch 0.8:
 
 	* backends/gl/GlBackend.cpp: Disable the throwing exception
 	while getting the gl extension functions.

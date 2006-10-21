@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="8,00"
 	Name="ShTexturesExample"
 	ProjectGUID="{306F5DA5-A049-4ADA-A2F3-A2A964A97879}"
 	RootNamespace="ShTexturesExample"
@@ -38,7 +38,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\install\vc8\include;..\..\..\glut\include;..\..\..\opengl\include"
+				AdditionalIncludeDirectories="..\..\..\install\include;..\..\..\glut\include;..\..\..\opengl\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;NOMINMAX;_USE_MATH_DEFINES;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -62,7 +62,7 @@
 				AdditionalDependencies="libsh_debug.lib libshutil_debug.lib glut32.lib"
 				OutputFile="$(OutDir)/ShTexturesExample.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\..\install\vc8\lib;..\..\..\glut\lib"
+				AdditionalLibraryDirectories="..\..\..\install\lib\vc8;..\..\..\glut\lib"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)\$(TargetName).pdb"
 				SubSystem="1"
@@ -116,7 +116,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\..\install\vc8\include;..\..\..\glut\include;..\..\..\opengl\include"
+				AdditionalIncludeDirectories="..\..\..\install\include;..\..\..\glut\include;..\..\..\opengl\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;NOMINMAX;_USE_MATH_DEFINES;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="2"
 				WarningLevel="3"
@@ -138,7 +138,7 @@
 				AdditionalDependencies="libsh.lib libshutil.lib glut32.lib"
 				OutputFile="$(OutDir)/ShTexturesExample.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\install\vc8\lib;..\..\..\glut\lib"
+				AdditionalLibraryDirectories="..\..\..\install\lib\vc8;..\..\..\glut\lib"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)\$(TargetName).pdb"
 			/>
