@@ -197,6 +197,7 @@ void GlslCode::emit(const Statement &stmt)
     case OP_TEX:
     case OP_TEXI:
     case OP_TEXLOD:
+    case OP_TEXBIAS: // hfp: merge from branch 0.8
     case OP_TEXD:
       emit_texture(stmt);
       break;
@@ -309,8 +310,8 @@ void GlslCode::emit_cond(const Statement& stmt)
     // The Glsl spec requires the first argument to COND to be a scalar
     for (int i=0; i < size; i++) {
       append_line(resolve(stmt.dest, i) + " = (" + resolve(stmt.src[0], i) + " > " + 
-		  resolve_constant(0, stmt.src[0], 1) + ") ? " + resolve(stmt.src[1], i) +
-		  " : " + resolve(stmt.src[2], i));
+      resolve_constant(0, stmt.src[0], 1) + ") ? " + resolve(stmt.src[1], i) +
+      " : " + resolve(stmt.src[2], i));
     }
   }
 }
@@ -399,14 +400,14 @@ void GlslCode::emit_lit(const Statement& stmt)
   append_line(resolve(stmt.dest, 0) + " = " + resolve_constant(1, stmt.dest, 1));
 
   append_line(resolve(stmt.dest, 1) + " = max(" + resolve_constant(0, stmt.dest, 1) +
-	      ", " + resolve(stmt.src[0], 0) + ")");
+        ", " + resolve(stmt.src[0], 0) + ")");
 
   append_line(resolve(stmt.dest, 2) + " = " + resolve(stmt.src[0], 0) + 
-	      " > " + resolve_constant(0, stmt.src[0], 1) + " ? pow(max(" + 
-	      resolve_constant(0, stmt.dest, 1) + ", " + resolve(stmt.src[0], 1) + 
-	      "), clamp(" + resolve(stmt.src[0], 2) + ", " + 
-	      resolve_constant(-128, stmt.dest, 1) + ", " + 
-	      resolve_constant(128, stmt.dest, 1) + ")) : " + resolve_constant(0, stmt.dest, 1));
+        " > " + resolve_constant(0, stmt.src[0], 1) + " ? pow(max(" + 
+        resolve_constant(0, stmt.dest, 1) + ", " + resolve(stmt.src[0], 1) + 
+        "), clamp(" + resolve(stmt.src[0], 2) + ", " + 
+        resolve_constant(-128, stmt.dest, 1) + ", " + 
+        resolve_constant(128, stmt.dest, 1) + ")) : " + resolve_constant(0, stmt.dest, 1));
 
   append_line(resolve(stmt.dest, 3) + " = " + resolve_constant(1, stmt.dest, 1));
 }
@@ -559,8 +560,9 @@ void GlslCode::emit_sum(const Statement& stmt)
 
 void GlslCode::emit_texture(const Statement& stmt)
 {
-  SH_DEBUG_ASSERT((OP_TEX    == stmt.op) || (OP_TEXI == stmt.op) ||
-                  (OP_TEXLOD == stmt.op) || (OP_TEXD == stmt.op));
+  SH_DEBUG_ASSERT((OP_TEX    == stmt.op) || (OP_TEXI    == stmt.op) ||
+                  (OP_TEXLOD == stmt.op) || (OP_TEXBIAS == stmt.op) ||
+                  (OP_TEXD   == stmt.op));
 
   SH::Operation op = stmt.op; 
   bool cg_function = false;
@@ -586,10 +588,16 @@ void GlslCode::emit_texture(const Statement& stmt)
     }
   }
 
-  stringstream line;
-  line << resolve(stmt.dest) << (cg_function ? " = tex" : " = texture");
-
   TextureNodePtr texture = shref_dynamic_cast<TextureNode>(stmt.src[0].node());
+
+  bool shadow = texture->meta("opengl:textype") == "shadow";
+  if (shadow && texture->dims() != SH_TEXTURE_1D && texture->dims() != SH_TEXTURE_2D) {
+    SH_DEBUG_WARN("Shadow mapping is not supported on this texture type");
+  }
+
+  stringstream line;
+  line << resolve(stmt.dest) << (shadow ? " = shadow" : (cg_function ? " = tex" : " = texture"));
+
   switch (texture->dims()) {
   case SH_TEXTURE_1D:
     line << "1D";
@@ -614,11 +622,13 @@ void GlslCode::emit_texture(const Statement& stmt)
     line << "Lod";
   } else if (ati_function) {
     line << "_ATI";
-  }
+  } 
 
   line << "(" << resolve(stmt.src[0]) << ", " << resolve(stmt.src[1]);
 
   if (OP_TEXLOD == stmt.op) {
+    line << ", " << resolve(stmt.src[2]);
+  } else if (OP_TEXBIAS == stmt.op) {
     line << ", " << resolve(stmt.src[2]);
   } else if (OP_TEXD == stmt.op) {
     // TODO: Support derivative lookup for 3D and CUBE textures (i.e. float3 derivatives)
