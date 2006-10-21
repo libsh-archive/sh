@@ -170,12 +170,13 @@ void glCheckError(const char* desc, const char* file, int line)
 }
 
 #ifdef _WIN32
+bool const disable_the_exception_to_use_some_old_gpus = true;
 #define GET_WGL_PROCEDURE(x, T) \
 if ((x = reinterpret_cast<PFN ## T ## PROC>(wglGetProcAddress(#x))) == NULL) \
 { \
   std::stringstream msg; \
   msg << "wglGetProcAddress failed (" << GetLastError() << ")"; \
-  error(Exception(msg.str())); \
+  if(!disable_the_exception_to_use_some_old_gpus) error(Exception(msg.str())); \
 }
 #endif /* _WIN32 */
 
@@ -439,7 +440,7 @@ GlBackend::~GlBackend()
 }
 
 SH::BackendCodePtr GlBackend::generate_code(const std::string& target,
-                                              const SH::ProgramNodeCPtr& shader)
+                                            const SH::ProgramNodeCPtr& shader)
 {
   if (target.find("stream") != target.npos) {
     SH_DEBUG_WARN("Stream programs cannot be compiled on OpenGL backends."
