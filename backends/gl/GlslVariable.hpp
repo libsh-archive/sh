@@ -111,6 +111,7 @@ private:
   std::string m_name;
 
   int m_size;
+  bool m_texture_shadow; /// if m_texture is true, tells whether the texture is a shadow texture
   SH::TextureDims m_dims; // if m_texture == true
   std::size_t m_length; // if m_palette == true
 

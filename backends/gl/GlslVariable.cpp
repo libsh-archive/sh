@@ -115,7 +115,7 @@ const GlslVariable::ArbToGlslEntry arb_to_glsl_table[] = {
 
 GlslVariable::GlslVariable()
   : m_attribute(-1), m_builtin(false), m_texture(false), m_palette(false), 
-    m_uniform(false), m_name(""), m_size(0), m_dims(SH_TEXTURE_1D), m_length(0), 
+    m_uniform(false), m_name(""), m_size(0), m_texture_shadow(false), m_dims(SH_TEXTURE_1D), m_length(0), 
     m_kind(SH_TEMP), m_type(SH_FLOAT), m_semantic_type(SH_ATTRIB), m_values("")
 {
 }
@@ -123,7 +123,7 @@ GlslVariable::GlslVariable()
 GlslVariable::GlslVariable(const GlslVariable& v)
   : m_attribute(v.m_attribute), m_builtin(v.m_builtin), m_texture(v.m_texture),
     m_palette(v.m_palette), m_uniform(v.m_uniform), m_name(v.m_name), 
-    m_size(v.m_size), m_dims(v.m_dims), m_length(v.m_length), m_kind(v.m_kind), 
+    m_size(v.m_size), m_texture_shadow(v.m_texture_shadow), m_dims(v.m_dims), m_length(v.m_length), m_kind(v.m_kind), 
     m_type(v.m_type), m_semantic_type(v.m_semantic_type), m_values(v.m_values)
 {
 }
@@ -151,6 +151,7 @@ GlslVariable::GlslVariable(const VariableNodePtr& v)
   if (m_texture) {
     TextureNodePtr texture = shref_dynamic_cast<TextureNode>(v);
     m_dims = texture->dims();
+    m_texture_shadow = (texture->meta("opengl:textype") == "shadow");
   } else if (m_palette) {
     PaletteNodePtr palette = shref_dynamic_cast<PaletteNode>(v);
     m_length = palette->palette_length();
@@ -274,6 +275,9 @@ string GlslVariable::type_string() const
     case SH_TEXTURE_RECT:
       s << "2DRect";
       break;
+    }
+    if(m_texture_shadow) {
+      s << "Shadow";
     }
     return s.str();
   }
