@@ -1,47 +1,43 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright 2003-2005 Serious Hack Inc.
+// Copyright 2003-2006 Serious Hack Inc.
 // 
-// This software is provided 'as-is', without any express or implied
-// warranty. In no event will the authors be held liable for any damages
-// arising from the use of this software.
-// 
-// Permission is granted to anyone to use this software for any purpose,
-// including commercial applications, and to alter it and redistribute it
-// freely, subject to the following restrictions:
-// 
-// 1. The origin of this software must not be misrepresented; you must
-// not claim that you wrote the original software. If you use this
-// software in a product, an acknowledgment in the product documentation
-// would be appreciated but is not required.
-// 
-// 2. Altered source versions must be plainly marked as such, and must
-// not be misrepresented as being the original software.
-// 
-// 3. This notice may not be removed or altered from any source
-// distribution.
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2.1 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+// MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#ifndef ARBREG_HPP
-#define ARBREG_HPP
+#ifndef SHARBREG_HPP
+#define SHARBREG_HPP
 
 #include <string>
 #include <iosfwd>
 
-#include "ShRefCount.hpp"
+#include "RefCount.hpp"
 
 namespace shgl {
 
 /** Possible register types in the ARB spec.
  */
 enum ArbRegType {
-  SH_ARB_REG_ATTRIB,
-  SH_ARB_REG_PARAM,
-  SH_ARB_REG_TEMP,
-  SH_ARB_REG_HALF_TEMP, // @todo type may want to rethink this
-  SH_ARB_REG_ADDRESS,
-  SH_ARB_REG_OUTPUT,
-  SH_ARB_REG_CONST,
-  SH_ARB_REG_TEXTURE
+  ARB_REG_ATTRIB,
+  ARB_REG_PARAM,
+  ARB_REG_TEMP,
+  ARB_REG_HALF_TEMP, // @todo type may want to rethink this
+  ARB_REG_ADDRESS,
+  ARB_REG_OUTPUT,
+  ARB_REG_CONST,
+  ARB_REG_TEXTURE
 };
 
 /** Possible bindings for a register (see ARB spec).
@@ -49,43 +45,44 @@ enum ArbRegType {
 enum ArbRegBinding {
   // VERTEX and FRAGMENT
   // Parameter
-  SH_ARB_REG_PROGRAMLOC,
-  SH_ARB_REG_PROGRAMENV,
-  SH_ARB_REG_STATE,
+  ARB_REG_PROGRAMLOC,
+  ARB_REG_PROGRAMENV,
+  ARB_REG_STATE,
   // Output
-  SH_ARB_REG_RESULTCOL,
+  ARB_REG_RESULTCOL,
 
   // VERTEX
   // Input
-  SH_ARB_REG_VERTEXPOS,
-  SH_ARB_REG_VERTEXWGT,
-  SH_ARB_REG_VERTEXNRM,
-  SH_ARB_REG_VERTEXCOL,
-  SH_ARB_REG_VERTEXFOG,
-  SH_ARB_REG_VERTEXTEX,
-  SH_ARB_REG_VERTEXMAT,
-  SH_ARB_REG_VERTEXATR,
+  ARB_REG_VERTEXPOS,
+  ARB_REG_VERTEXWGT,
+  ARB_REG_VERTEXNRM,
+  ARB_REG_VERTEXCOL,
+  ARB_REG_VERTEXFOG,
+  ARB_REG_VERTEXTEX,
+  ARB_REG_VERTEXMAT,
+  ARB_REG_VERTEXATR,
   // Output
-  SH_ARB_REG_RESULTPOS,
-  SH_ARB_REG_RESULTFOG,
-  SH_ARB_REG_RESULTPTS, ///< Result point size
-  SH_ARB_REG_RESULTTEX,
+  ARB_REG_RESULTPOS,
+  ARB_REG_RESULTFOG,
+  ARB_REG_RESULTPTS, ///< Result point size
+  ARB_REG_RESULTTEX,
 
   // FRAGMENT
   // Input
-  SH_ARB_REG_FRAGMENTCOL,
-  SH_ARB_REG_FRAGMENTTEX,
-  SH_ARB_REG_FRAGMENTFOG,
-  SH_ARB_REG_FRAGMENTPOS,
+  ARB_REG_FRAGMENTCOL,
+  ARB_REG_FRAGMENTTEX,
+  ARB_REG_FRAGMENTFOG,
+  ARB_REG_FRAGMENTPOS,
   // Output
-  SH_ARB_REG_RESULTDPT,
+  ARB_REG_RESULTDPT,
+  ARB_REG_RESULTCOL_ATI,
 
-  SH_ARB_REG_NONE
+  ARB_REG_NONE
 };
 
 /** An ARB register.
  */
-struct ArbReg : public SH::ShRefCountable {
+struct ArbReg : public SH::RefCountable {
   ArbReg();
   ArbReg(ArbRegType type, int index, std::string name = "");
 
@@ -108,6 +105,9 @@ struct ArbReg : public SH::ShRefCountable {
   
   /// Print a declaration for this register
   std::ostream& printDecl(std::ostream& out) const;
+
+  /// Return the name of the register binding
+  std::string binding_name() const;
 };
 
 

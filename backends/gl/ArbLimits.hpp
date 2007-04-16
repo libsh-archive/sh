@@ -1,29 +1,26 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright 2003-2005 Serious Hack Inc.
+// Copyright 2003-2006 Serious Hack Inc.
 // 
-// This software is provided 'as-is', without any express or implied
-// warranty. In no event will the authors be held liable for any damages
-// arising from the use of this software.
-// 
-// Permission is granted to anyone to use this software for any purpose,
-// including commercial applications, and to alter it and redistribute it
-// freely, subject to the following restrictions:
-// 
-// 1. The origin of this software must not be misrepresented; you must
-// not claim that you wrote the original software. If you use this
-// software in a product, an acknowledgment in the product documentation
-// would be appreciated but is not required.
-// 
-// 2. Altered source versions must be plainly marked as such, and must
-// not be misrepresented as being the original software.
-// 
-// 3. This notice may not be removed or altered from any source
-// distribution.
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2.1 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+// MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#ifndef ARBLIMITS_HPP
-#define ARBLIMITS_HPP
+#ifndef SHARBLIMITS_HPP
+#define SHARBLIMITS_HPP
 
+#include "GlBackend.hpp"
 #include <string>
 
 namespace shgl {
@@ -41,12 +38,12 @@ struct ArbLimits {
   const std::string& target() const { return m_target; }
   
 private:
-  int m_instrs; ///< Maximum number of instructions for each shader target
+  GLint m_instrs; ///< Maximum number of instructions for each shader target
   int m_halftemps; ///< Maximum number of half-float temporaries for each shader target
-  int m_temps; ///< Maximum number of temporaries for each shader target
-  int m_attribs; ///<Maximum number of attributes for each shader target
-  int m_params; ///< Maximum number of parameters for each shader target
-  int m_texs; ///< Maximum number of TEX instructions for each shader target
+  GLint m_temps; ///< Maximum number of temporaries for each shader target
+  GLint m_attribs; ///<Maximum number of attributes for each shader target
+  GLint m_params; ///< Maximum number of parameters for each shader target
+  GLint m_texs; ///< Maximum number of TEX instructions for each shader target
 
   std::string m_target;
 };

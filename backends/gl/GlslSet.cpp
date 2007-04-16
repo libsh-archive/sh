@@ -1,30 +1,26 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright 2003-2005 Serious Hack Inc.
+// Copyright 2003-2006 Serious Hack Inc.
 // 
-// This software is provided 'as-is', without any express or implied
-// warranty. In no event will the authors be held liable for any damages
-// arising from the use of this software.
-// 
-// Permission is granted to anyone to use this software for any purpose,
-// including commercial applications, and to alter it and redistribute it
-// freely, subject to the following restrictions:
-// 
-// 1. The origin of this software must not be misrepresented; you must
-// not claim that you wrote the original software. If you use this
-// software in a product, an acknowledgment in the product documentation
-// would be appreciated but is not required.
-// 
-// 2. Altered source versions must be plainly marked as such, and must
-// not be misrepresented as being the original software.
-// 
-// 3. This notice may not be removed or altered from any source
-// distribution.
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2.1 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+// MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 #include "GlslCode.hpp"
 #include <iostream>
 
-#define SH_DEBUG_GLSL_BACKEND
+//#define SH_DEBUG_GLSL_BACKEND
 
 namespace shgl {
 
@@ -32,33 +28,45 @@ using namespace SH;
 using namespace std;
 
 GlslSet::GlslSet()
-  : m_arb_program(glCreateProgramObjectARB()),
-    m_linked(false), m_bound(false)
+  : m_linked(false)
 {
+  SH_GL_CHECK_ERROR(m_arb_program = glCreateProgramObjectARB());
+  if (!m_arb_program) {
+    error(BackendException("Cannot create a glsl program object. Is glsl supported by your GPU/drivers ?"));
+  }
+
   m_shaders[0] = 0;
   m_shaders[1] = 0;
 }
 
-GlslSet::GlslSet(const SH::ShPointer<GlslCode>& code)
-  : m_arb_program(glCreateProgramObjectARB()),
-    m_linked(false), m_bound(false)
+GlslSet::GlslSet(const SH::Pointer<GlslCode>& code)
+  : m_linked(false)
 {
+  SH_GL_CHECK_ERROR(m_arb_program = glCreateProgramObjectARB());
+  if (!m_arb_program) {
+    error(BackendException("Cannot create a glsl program object. Is glsl supported by your GPU/drivers ?"));
+  }
+
   m_shaders[0] = 0;
   m_shaders[1] = 0;
   attach(code);
 }
 
-GlslSet::GlslSet(const SH::ShProgramSet& s)
-  : m_arb_program(glCreateProgramObjectARB()),
-    m_linked(false), m_bound(false)
+GlslSet::GlslSet(const SH::ProgramSet& s)
+  : m_linked(false)
 {
+  SH_GL_CHECK_ERROR(m_arb_program = glCreateProgramObjectARB());
+  if (!m_arb_program) {
+    error(BackendException("Cannot create a glsl program object. Is glsl supported by your GPU/drivers ?"));
+  }
+
   m_shaders[0] = 0;
   m_shaders[1] = 0;
-  for (ShProgramSet::const_iterator I = s.begin(); I != s.end(); ++I) {
+  for (ProgramSet::const_iterator I = s.begin(); I != s.end(); ++I) {
     // TODO: use the glsl backend
     GlslCodePtr code = shref_dynamic_cast<GlslCode>((*I)->code());
 
-    // TODO: use shError()
+    // TODO: use error()
     SH_DEBUG_ASSERT(code);
     SH_DEBUG_ASSERT(!m_shaders[code->glsl_unit()]);
 
@@ -67,9 +75,13 @@ GlslSet::GlslSet(const SH::ShProgramSet& s)
 }
 
 GlslSet::GlslSet(const GlslSet& other)
-  : m_arb_program(glCreateProgramObjectARB()),
-    m_linked(false), m_bound(false)
+  : m_linked(false)
 {
+  SH_GL_CHECK_ERROR(m_arb_program = glCreateProgramObjectARB());
+  if (!m_arb_program) {
+    error(BackendException("Cannot create a glsl program object. Is glsl supported by your GPU/drivers ?"));
+  }
+
   m_shaders[0] = 0;
   m_shaders[1] = 0;
   attach(other.m_shaders[0]);
@@ -99,25 +111,28 @@ GlslSet::~GlslSet()
   m_arb_program = 0;
 }
 
-void GlslSet::attach(const SH::ShPointer<GlslCode>& code)
+void GlslSet::attach(const SH::Pointer<GlslCode>& code)
 {
+  SH_DEBUG_ASSERT(m_arb_program);
+
   if (!code) return;
   if (m_shaders[code->glsl_unit()] == code) return;
 
+  // Unbind old shader
   unbind();
-  
-  SH_DEBUG_ASSERT(m_arb_program);
   if (m_shaders[code->glsl_unit()]) {
     SH_GL_CHECK_ERROR(glDetachObjectARB(m_arb_program, m_shaders[code->glsl_unit()]->glsl_shader()));
   }
+
+  // Bind new shader
   SH_GL_CHECK_ERROR(glAttachObjectARB(m_arb_program, code->glsl_shader()));
   m_shaders[code->glsl_unit()] = code;
+  code->bind_generic_attributes(m_arb_program);
 
-  // Need to relink
-  m_linked = false;
+  m_linked = false; // will need to relink
 }
 
-void GlslSet::detach(const SH::ShPointer<GlslCode>& code)
+void GlslSet::detach(const SH::Pointer<GlslCode>& code)
 {
   if (!code) return;
   if (m_shaders[code->glsl_unit()] != code) return;
@@ -132,7 +147,7 @@ void GlslSet::detach(const SH::ShPointer<GlslCode>& code)
   m_linked = false;
 }
 
-void GlslSet::replace(const SH::ShPointer<GlslCode>& code)
+void GlslSet::replace(const SH::Pointer<GlslCode>& code)
 {
   SH_DEBUG_ASSERT(code);
   if (m_shaders[code->glsl_unit()] == code && !m_shaders[1 - code->glsl_unit()]) return;
@@ -150,7 +165,7 @@ void GlslSet::link()
   SH_GL_CHECK_ERROR(glLinkProgramARB(m_arb_program));
 
   // Check linking
-  int linked;
+  GLint linked;
   glGetObjectParameterivARB(m_arb_program, GL_OBJECT_LINK_STATUS_ARB, &linked);
   if (linked != GL_TRUE) {
     cout << "Program link status: FAILED" << endl << endl;
@@ -172,16 +187,16 @@ bool GlslSet::empty() const
   return true;
 }
 
+bool GlslSet::bound() const
+{
+  // Query GL to see if we are bound
+  GLhandleARB currently_bound = 0;
+  SH_GL_CHECK_ERROR(currently_bound = glGetHandleARB(GL_PROGRAM_OBJECT_ARB));
+  return (currently_bound == m_arb_program);
+}
+
 void GlslSet::bind()
 {
-  if (m_bound) {
-    for (int i = 0; i < 2; i++) {
-      if (!m_shaders[i]) continue;
-      m_shaders[i]->update();
-    }
-    return;
-  }
-
   if (!m_linked) link();
 
   if (current() && current() != this) current()->unbind();
@@ -191,7 +206,7 @@ void GlslSet::bind()
 #ifdef SH_DEBUG_GLSL_BACKEND
   // This could be slow, it should not be enabled in release code
   glValidateProgramARB(m_arb_program);
-  int validated;
+  GLint validated;
   glGetObjectParameterivARB(m_arb_program, GL_OBJECT_VALIDATE_STATUS_ARB, &validated);
   if (validated != GL_TRUE) {
     cout << "Program validate status: FAILED" << endl;
@@ -210,12 +225,11 @@ void GlslSet::bind()
   }
 
   m_current = this;
-  m_bound = true;
 }
 
 void GlslSet::unbind()
 {
-  if (!m_bound) return;
+  if (!bound()) return;
 
   SH_GL_CHECK_ERROR(glUseProgramObjectARB(0));
 
@@ -224,7 +238,6 @@ void GlslSet::unbind()
     m_shaders[i]->set_bound(0);
   }
   m_current = 0;
-  m_bound = false;
 }
 
 }

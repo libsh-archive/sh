@@ -17,32 +17,48 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SHGLTEXTURES_HPP
-#define SHGLTEXTURES_HPP
+#ifndef SHFBOCACHE_HPP
+#define SHFBOCACHE_HPP
 
-#include "GlBackend.hpp"
+#include "GlTextureStorage.hpp"
 
 namespace shgl {
 
-class GlTextures : public TextureStrategy {
+class FBOCache {
 public:
-  GlTextures(void);
 
-  TextureStrategy* create(void);
-  
-  void bindTexture(const SH::TextureNodePtr& texture,
-                   GLenum target, bool write);
+  static FBOCache *instance();
 
-private:
-  // Utility for setting/maintaining active textures
-  struct ActiveTexture {
-    ActiveTexture(GLenum texture_unit);
-    ~ActiveTexture();
+  void bindFramebuffer();
+  void unbindFramebuffer();
+  void check();
+
+  void bindTexture(GlTextureStoragePtr storage, 
+                   GLenum attachment, GLint zoffset);
+  GLenum bindTexture(GlTextureStoragePtr storage, GLint zoffset);
+
+//private:
+  FBOCache();
+  void updateLRU();
+  void fbTexture(GlTextureStoragePtr storage, GLenum attachment, GLint zoffset);
   
-    GLenum texture_unit;
-    GLenum last_unit;
+  struct FBO {
+    GLuint id;
+    GlTextureStoragePtr m_attachment[16];
+    GLint m_zoffset[16];
+    bool m_used[16];
+    FBO *m_lru_next, *m_lru_prev;
   };
-
+  
+  static const int NUM_FBOS = 8;
+  FBO m_fbo[NUM_FBOS];
+  
+  FBO *m_lru;
+  GLint m_original_fbo;
+  
+  std::stack<FBO *> m_fbo_stack;
+  
+  static FBOCache *m_instance;
 };
 
 }

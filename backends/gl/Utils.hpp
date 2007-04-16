@@ -1,76 +1,136 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright 2003-2005 Serious Hack Inc.
+// Copyright 2003-2006 Serious Hack Inc.
 // 
-// This software is provided 'as-is', without any express or implied
-// warranty. In no event will the authors be held liable for any damages
-// arising from the use of this software.
-// 
-// Permission is granted to anyone to use this software for any purpose,
-// including commercial applications, and to alter it and redistribute it
-// freely, subject to the following restrictions:
-// 
-// 1. The origin of this software must not be misrepresented; you must
-// not claim that you wrote the original software. If you use this
-// software in a product, an acknowledgment in the product documentation
-// would be appreciated but is not required.
-// 
-// 2. Altered source versions must be plainly marked as such, and must
-// not be misrepresented as being the original software.
-// 
-// 3. This notice may not be removed or altered from any source
-// distribution.
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2.1 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+// MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#ifndef UTILS_HPP
-#define UTILS_HPP
+#ifndef SHUTILS_HPP
+#define SHUTILS_HPP
 
 #include <map>
 #include <list>
-#include "ShChannelNode.hpp"
-#include "ShTextureNode.hpp"
-#include "ShCtrlGraph.hpp"
-#include "ShProgramNode.hpp"
+#include "TextureNode.hpp"
+#include "CtrlGraph.hpp"
+#include "ProgramNode.hpp"
+#include "ProgramSet.hpp"
+#include "Attrib.hpp"
 
 namespace shgl {
 
-typedef std::map<SH::ShChannelNodePtr, SH::ShTextureNodePtr> ChannelMap;
-
-// Find all the channels read by a given program. Make textures for them.
-struct ChannelGatherer {
-  ChannelGatherer(ChannelMap& channel_map, SH::ShTextureDims dims)
-    : channel_map(channel_map),
-      dims(dims)
-  {
-  }
-
-  void operator()(const SH::ShCtrlGraphNode* node);
-  
-  ChannelMap& channel_map;
-  SH::ShTextureDims dims;
+enum FloatExtension {
+  ARB_NV_FLOAT_BUFFER,
+  ARB_ATI_PIXEL_FORMAT_FLOAT,
+  ARB_NO_FLOAT_EXT
 };
 
+/**
+ * Description of the version of the program cached
+ */
+struct ProgramVersion {
+  // Dimension of all inputs/outputs
+  unsigned int dimension;
+  // Recalculate incomming index (for offsets/strides)
+  bool index_recalculation;
+  // Render a single output at a time
+  bool single_output;
+};
 
-// Replace FETCH and LOOKUP operations with texture fetches
-// Run this after a pass with channelgatherer.
-class TexFetcher {
+/**
+ * Cache of a pass of a stream program
+ */
+class SplitProgram {
 public:
-  TexFetcher(ChannelMap& channel_map,
-             const SH::ShVariableNodePtr& tc_node,
-             bool indexed,
-             const SH::ShProgramNodePtr& program);
+  virtual ~SplitProgram() {}
+  virtual void update_uniforms(const SH::Record& uniforms);
+  virtual void update_channels(const SH::Stream& stream,
+                               const SH::BaseTexture& dest_tex) = 0;
+  virtual SH::ProgramSetPtr program_set() = 0;
+protected:
+  SH::Program epilogue(const SH::ProgramNodePtr& program);
+  std::vector<SH::Variable> m_uniforms;
+};
 
-  void operator()(SH::ShCtrlGraphNode* node);
+/**
+ * Cache of a single stream program compiled for a given ProgramVersion
+ */
+class ProgramVersionCache {
+public:
+  typedef std::list<SplitProgram*> SplitProgramList;
+  typedef SplitProgramList::const_iterator iterator;
+
+  ProgramVersionCache(FloatExtension float_extension,
+                      int max_outputs,
+                      const SH::Program& vertex_program,
+                      const ProgramVersion& version,
+                      const SH::Program::BindingSpec& binding_spec,
+                      SH::ProgramNode* program);
+  ~ProgramVersionCache();
+
+  iterator begin() const { return m_split_program.begin(); }
+  iterator end() const { return m_split_program.end(); }
+private:
+  void split_program(SH::ProgramNode* program,
+                     std::list<SH::ProgramNodePtr>& split_programs,
+                     const std::string& target, int chunk_size);
+  SplitProgramList m_split_program;
+};
+
+/**
+ * Map of ProgramVersionCaches based on ProgramVersion
+ */
+class StreamCache : public SH::Info {
+public:
+  StreamCache(SH::ProgramNode* stream_program,
+              SH::ProgramNodePtr vertex_program,
+              int max_outputs, FloatExtension ext);
+  ~StreamCache();
+
+  SH::Info* clone() const;
+
+  const ProgramVersionCache& get_program_cache(const ProgramVersion& version,
+                                               const SH::Program::BindingSpec& binding_spec);
 
 private:
-  ChannelMap& channel_map;
-  SH::ShVariableNodePtr tc_node;
-  bool indexed;
-  SH::ShProgramNodePtr program;
+  
+  struct Key {
+    Key(const ProgramVersion& v, const SH::Program::BindingSpec& bs)
+      : version(v), binding_spec(bs) { }
+    ProgramVersion version;
+    SH::Program::BindingSpec binding_spec;
+    bool operator<(const Key& other) const
+    {
+      if (version.dimension != other.version.dimension)
+        return version.dimension < other.version.dimension;
+      if (version.index_recalculation != other.version.index_recalculation)
+        return version.index_recalculation < other.version.index_recalculation;
+      if (version.single_output != other.version.single_output)
+        return version.single_output < other.version.single_output;
+      return binding_spec < other.binding_spec;
+    }
+  };
+  typedef std::map<Key, ProgramVersionCache*> Cache;
+  Cache m_cache;
+
+  SH::ProgramNode* m_stream_program;
+  SH::ProgramNodePtr m_vertex_program;
+  int m_max_outputs;
+  FloatExtension m_float_extension;
 };
 
-void split_program(SH::ShProgramNode* program,
-                   std::list<SH::ShProgramNodePtr>& programs,
-                   const std::string& target);
+std::string get_target_backend(const SH::ProgramNodeCPtr& program);
 
 }
 

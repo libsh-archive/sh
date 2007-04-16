@@ -1,0 +1,4 @@
+alias cc
+: # sources
+	[ glob *.cpp ]
+;

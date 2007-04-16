@@ -1,25 +1,21 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright 2003-2005 Serious Hack Inc.
+// Copyright 2003-2006 Serious Hack Inc.
 // 
-// This software is provided 'as-is', without any express or implied
-// warranty. In no event will the authors be held liable for any damages
-// arising from the use of this software.
-// 
-// Permission is granted to anyone to use this software for any purpose,
-// including commercial applications, and to alter it and redistribute it
-// freely, subject to the following restrictions:
-// 
-// 1. The origin of this software must not be misrepresented; you must
-// not claim that you wrote the original software. If you use this
-// software in a product, an acknowledgment in the product documentation
-// would be appreciated but is not required.
-// 
-// 2. Altered source versions must be plainly marked as such, and must
-// not be misrepresented as being the original software.
-// 
-// 3. This notice may not be removed or altered from any source
-// distribution.
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2.1 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+// MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 #include "GlTextureName.hpp"
 
@@ -29,8 +25,8 @@ using namespace SH;
 
 GlTextureName::GlTextureName(GLenum target)
   : m_target(target),
-    m_params(0, SH::ShTextureTraits::SH_FILTER_NONE,
-             SH::ShTextureTraits::SH_WRAP_CLAMP, SH::ShTextureTraits::SH_CLAMPED),
+    m_params(0, SH::TextureTraits::FILTER_NONE,
+             SH::TextureTraits::WRAP_CLAMP),
     m_managed(true)
 {
   glGenTextures(1, &m_name);
@@ -40,8 +36,8 @@ GlTextureName::GlTextureName(GLenum target)
 GlTextureName::GlTextureName(GLenum target, GLuint name)
   : m_target(target),
     m_name(name),
-    m_params(0, SH::ShTextureTraits::SH_FILTER_NONE,
-             SH::ShTextureTraits::SH_WRAP_CLAMP, SH::ShTextureTraits::SH_CLAMPED),
+    m_params(0, SH::TextureTraits::FILTER_NONE,
+             SH::TextureTraits::WRAP_CLAMP),
     m_managed(false)
 {
   m_names->push_back(this);
@@ -55,17 +51,17 @@ GlTextureName::~GlTextureName()
   }
 }
 
-void GlTextureName::addStorage(SH::ShStorage* storage)
+void GlTextureName::addStorage(SH::Storage* storage)
 {
   m_storages.push_back(storage);
 }
 
-void GlTextureName::removeStorage(SH::ShStorage* storage)
+void GlTextureName::removeStorage(SH::Storage* storage)
 {
   m_storages.erase(std::remove(m_storages.begin(), m_storages.end(), storage));
 }
 
-void GlTextureName::params(const SH::ShTextureTraits& params)
+void GlTextureName::params(const SH::TextureTraits& params)
 {
   Binding binding(this);
 
@@ -76,27 +72,39 @@ void GlTextureName::params(const SH::ShTextureTraits& params)
     SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
     SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
   }
-  if (params.wrapping() == SH::ShTextureTraits::SH_WRAP_CLAMP) {
+  if (params.wrapping() == SH::TextureTraits::WRAP_CLAMP) {
     SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_WRAP_S, GL_CLAMP));
     SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_WRAP_T, GL_CLAMP));
     SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_WRAP_R, GL_CLAMP));
-  } else if (params.wrapping() == SH::ShTextureTraits::SH_WRAP_CLAMP_TO_EDGE) {
+  } else if (params.wrapping() == SH::TextureTraits::WRAP_CLAMP_TO_EDGE) {
     SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
     SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
     SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE));
-  } else if (params.wrapping() == SH::ShTextureTraits::SH_WRAP_REPEAT) {
+  } else if (params.wrapping() == SH::TextureTraits::WRAP_REPEAT) {
     SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_WRAP_S, GL_REPEAT));
     SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_WRAP_T, GL_REPEAT));
     SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_WRAP_R, GL_REPEAT));
   }
-  // TODO: SH_FILTER (Mipmapping)
+  if (params.filtering() == SH::TextureTraits::FILTER_MIPMAP_LINEAR) {
+    if (0 == params.interpolation()) {
+      SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR));
+    } else {
+      SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
+    }
+  } else if (params.filtering() == SH::TextureTraits::FILTER_MIPMAP_NEAREST) {
+    if (0 == params.interpolation()) {
+      SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST));
+    } else {
+      SH_GL_CHECK_ERROR(glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST));
+    }
+  }
   
   m_params = params;
 }
 
 GlTextureName::NameList* GlTextureName::m_names = new GlTextureName::NameList();
 
-GlTextureName::Binding::Binding(const ShPointer<const GlTextureName>& name)
+GlTextureName::Binding::Binding(const Pointer<const GlTextureName>& name)
 {
   target = name->target();
   

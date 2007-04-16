@@ -1,0 +1,29 @@
+import os ;
+if [ os.on-unix ] {
+  alias pbuffer-context : GLXPBufferContext.cpp PBufferContext.cpp ;
+}
+else {
+  alias pbuffer-context : WGLPBufferContext.cpp PBufferContext.cpp ;
+}
+
+
+alias gl
+: # sources
+  pbuffer-context
+  [ glob GlTexture*.cpp ]
+  [ glob FBO*.cpp ]
+  GlBackend.cpp
+  Utils.cpp
+;
+
+
+alias arb
+: # sources
+  [ glob Arb*.cpp ]
+;
+
+
+alias glsl
+: # sources
+  [ glob Glsl*.cpp ]
+;

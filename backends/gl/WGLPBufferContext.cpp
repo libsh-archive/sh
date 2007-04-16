@@ -1,28 +1,24 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright 2003-2005 Serious Hack Inc.
+// Copyright 2003-2006 Serious Hack Inc.
 // 
-// This software is provided 'as-is', without any express or implied
-// warranty. In no event will the authors be held liable for any damages
-// arising from the use of this software.
-// 
-// Permission is granted to anyone to use this software for any purpose,
-// including commercial applications, and to alter it and redistribute it
-// freely, subject to the following restrictions:
-// 
-// 1. The origin of this software must not be misrepresented; you must
-// not claim that you wrote the original software. If you use this
-// software in a product, an acknowledgment in the product documentation
-// would be appreciated but is not required.
-// 
-// 2. Altered source versions must be plainly marked as such, and must
-// not be misrepresented as being the original software.
-// 
-// 3. This notice may not be removed or altered from any source
-// distribution.
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2.1 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+// MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 #include "WGLPBufferContext.hpp"
-#include "ShError.hpp"
+#include "Error.hpp"
 
 namespace shgl {
 
@@ -46,7 +42,7 @@ WGLPBufferHandle::~WGLPBufferHandle()
 void WGLPBufferHandle::restore()
 {
   if (!wglMakeCurrent(m_dc, m_hglrc)) {
-    shError(ShException("Restoring WGL Context failed"));
+    error(Exception("Restoring WGL Context failed"));
   }
 }
 
@@ -76,7 +72,7 @@ PBufferHandlePtr WGLPBufferContext::activate()
   HGLRC old_hglrc = wglGetCurrentContext();
 
   if (!wglMakeCurrent(m_dc, m_hglrc)) {
-    shError(ShException("Activating WGLPBufferContext failed!"));
+    error(Exception("Activating WGLPBufferContext failed!"));
   }
 
   if (old_dc && old_hglrc) {
@@ -93,7 +89,7 @@ PBufferHandlePtr WGLPBufferContext::activate()
 WGLPBufferFactory::WGLPBufferFactory()
   : m_dc(0),
     m_format(0),
-    m_extension(SH_ARB_NO_FLOAT_EXT)
+    m_extension(ARB_NO_FLOAT_EXT)
 {
 }
 
@@ -117,7 +113,7 @@ void WGLPBufferFactory::init_dc()
     m_dc = CreateDC("DISPLAY", NULL, NULL, NULL);
   }
   if (!m_dc) {
-    shError(ShException("Could create device context"));
+    error(Exception("Could create device context"));
   }
 }
 
@@ -136,6 +132,19 @@ void WGLPBufferFactory::init_config()
   fb_base_attribs.push_back(WGL_SUPPORT_OPENGL_ARB); fb_base_attribs.push_back(true);
   fb_base_attribs.push_back(WGL_STENCIL_BITS_ARB); fb_base_attribs.push_back(1);
 
+  // Try ATI
+  if (!m_format) {
+    std::vector<int> fb_attribs(fb_base_attribs);
+    fb_attribs.push_back(WGL_PIXEL_TYPE_ARB); fb_attribs.push_back(WGL_TYPE_RGBA_FLOAT_ATI);
+    fb_attribs.push_back(0);
+    
+    unsigned int items = 0;
+    if (wglChoosePixelFormatARB(m_dc, &fb_attribs[0], NULL, 1, &m_format, &items)
+	&& items > 0) {
+      m_extension = ARB_ATI_PIXEL_FORMAT_FLOAT;
+    }
+  }
+
   // Try NVIDIA
   if (!m_format) {
     std::vector<int> fb_attribs(fb_base_attribs);
@@ -146,31 +155,18 @@ void WGLPBufferFactory::init_config()
     unsigned int items = 0;
     if (wglChoosePixelFormatARB(m_dc, &fb_attribs[0], NULL, 1, &m_format, &items)
 	&& items > 0) {
-      m_extension = SH_ARB_NV_FLOAT_BUFFER;
-    }
-  }
-
-  // Try ATI
-  if (!m_format) {
-    std::vector<int> fb_attribs(fb_base_attribs);
-    fb_attribs.push_back(WGL_PIXEL_TYPE_ARB); fb_attribs.push_back(WGL_TYPE_RGBA_FLOAT_ATI);
-    fb_attribs.push_back(0);
-    
-    unsigned int items = 0;
-    if (wglChoosePixelFormatARB(m_dc, &fb_attribs[0], NULL, 1, &m_format, &items)
-	&& items > 0) {
-      m_extension = SH_ARB_ATI_PIXEL_FORMAT_FLOAT;
+      m_extension = ARB_NV_FLOAT_BUFFER;
     }
   }
 
   if (!m_format) {
-    shError(ShException("Could not get WGL Pixelformat!\n"
+    error(Exception("Could not get WGL Pixelformat!\n"
 			"Your card may not support the appropriate extensions."));
   }
 
-  if (m_extension == SH_ARB_NO_FLOAT_EXT) {
+  if (m_extension == ARB_NO_FLOAT_EXT) {
     m_format = 0;
-    shError(ShException("Could not choose a floating-point extension!\n"
+    error(Exception("Could not choose a floating-point extension!\n"
                         "Your card may not support the appropriate extensions."));
   }
 }
@@ -207,7 +203,7 @@ WGLPBufferContextPtr WGLPBufferFactory::create_context(int width, int height,
 
   HPBUFFERARB pbuffer = wglCreatePbufferARB(m_dc, m_format, width, height, pbuffer_attribs);
   if (!pbuffer) {
-    shError(ShException("Could not make pbuffer!"));
+    error(Exception("Could not make pbuffer!"));
     return 0;
   }
 

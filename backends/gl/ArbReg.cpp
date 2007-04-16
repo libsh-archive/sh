@@ -1,29 +1,26 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright 2003-2005 Serious Hack Inc.
+// Copyright 2003-2006 Serious Hack Inc.
 // 
-// This software is provided 'as-is', without any express or implied
-// warranty. In no event will the authors be held liable for any damages
-// arising from the use of this software.
-// 
-// Permission is granted to anyone to use this software for any purpose,
-// including commercial applications, and to alter it and redistribute it
-// freely, subject to the following restrictions:
-// 
-// 1. The origin of this software must not be misrepresented; you must
-// not claim that you wrote the original software. If you use this
-// software in a product, an acknowledgment in the product documentation
-// would be appreciated but is not required.
-// 
-// 2. Altered source versions must be plainly marked as such, and must
-// not be misrepresented as being the original software.
-// 
-// 3. This notice may not be removed or altered from any source
-// distribution.
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2.1 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+// MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 #include "ArbReg.hpp"
 #include <iostream>
 #include <string>
+#include <iomanip>
 #include "Arb.hpp"
 
 namespace shgl {
@@ -51,37 +48,38 @@ static struct {
   char* name;
   bool indexed;
 } arbRegBindingInfo[] = {
-  {SH_ARB_REG_PARAM, "program.local", true},
-  {SH_ARB_REG_PARAM, "program.env", true},
-  {SH_ARB_REG_PARAM, "<nil>", true},
-  {SH_ARB_REG_OUTPUT, "result.color", false}, // TODO: Special case?
+  {ARB_REG_PARAM, "program.local", true},
+  {ARB_REG_PARAM, "program.env", true},
+  {ARB_REG_PARAM, "<nil>", true},
+  {ARB_REG_OUTPUT, "result.color", false}, // TODO: Special case?
   
-  {SH_ARB_REG_ATTRIB, "vertex.position", false},
-  {SH_ARB_REG_ATTRIB, "vertex.weight", true},
-  {SH_ARB_REG_ATTRIB, "vertex.normal", false},
-  {SH_ARB_REG_ATTRIB, "vertex.color", false}, // TODO: Special case?
-  {SH_ARB_REG_ATTRIB, "vertex.fogcoord", false},
-  {SH_ARB_REG_ATTRIB, "vertex.texcoord", true},
-  {SH_ARB_REG_ATTRIB, "vertex.matrixindex", true},
-  {SH_ARB_REG_ATTRIB, "vertex.attrib", true},
-  {SH_ARB_REG_OUTPUT, "result.position", false},
-  {SH_ARB_REG_OUTPUT, "result.fogcoord", false},
-  {SH_ARB_REG_OUTPUT, "result.pointsize", false},
-  {SH_ARB_REG_OUTPUT, "result.texcoord", true},
+  {ARB_REG_ATTRIB, "vertex.position", false},
+  {ARB_REG_ATTRIB, "vertex.weight", true},
+  {ARB_REG_ATTRIB, "vertex.normal", false},
+  {ARB_REG_ATTRIB, "vertex.color", false}, // TODO: Special case?
+  {ARB_REG_ATTRIB, "vertex.fogcoord", false},
+  {ARB_REG_ATTRIB, "vertex.texcoord", true},
+  {ARB_REG_ATTRIB, "vertex.matrixindex", true},
+  {ARB_REG_ATTRIB, "vertex.attrib", true},
+  {ARB_REG_OUTPUT, "result.position", false},
+  {ARB_REG_OUTPUT, "result.fogcoord", false},
+  {ARB_REG_OUTPUT, "result.pointsize", false},
+  {ARB_REG_OUTPUT, "result.texcoord", true},
 
-  {SH_ARB_REG_ATTRIB, "fragment.color", false}, // TODO: Special case?
-  {SH_ARB_REG_ATTRIB, "fragment.texcoord", true},
-  {SH_ARB_REG_ATTRIB, "fragment.fogcoord", false},
-  {SH_ARB_REG_ATTRIB, "fragment.position", false},
-  {SH_ARB_REG_OUTPUT, "result.depth", false},
+  {ARB_REG_ATTRIB, "fragment.color", false}, // TODO: Special case?
+  {ARB_REG_ATTRIB, "fragment.texcoord", true},
+  {ARB_REG_ATTRIB, "fragment.fogcoord", false},
+  {ARB_REG_ATTRIB, "fragment.position", false},
+  {ARB_REG_OUTPUT, "result.depth", false},
+  {ARB_REG_OUTPUT, "result.color", true}, // Needs ATI_draw_buffers extension
 
-  {SH_ARB_REG_ATTRIB, "<nil>", false},
+  {ARB_REG_ATTRIB, "<nil>", false},
 };
 
 ArbReg::ArbReg()
-  : type(SH_ARB_REG_TEMP), index(-1), preset(false), name("")
+  : type(ARB_REG_TEMP), index(-1), preset(false), name("")
 {
-    binding.type = SH_ARB_REG_NONE;
+    binding.type = ARB_REG_NONE;
     binding.index = -1;
     binding.count = 1;
 }
@@ -89,7 +87,7 @@ ArbReg::ArbReg()
 ArbReg::ArbReg(ArbRegType type, int index, std::string name)
   : type(type), index(index), preset(false), name(name)
 {
-    binding.type = SH_ARB_REG_NONE;
+    binding.type = ARB_REG_NONE;
     binding.index = -1;
     binding.count = 1;
 }
@@ -98,15 +96,19 @@ ArbReg::ArbReg(ArbRegType type, int index, std::string name)
 std::ostream& ArbReg::printDecl(std::ostream& out) const
 {
   out << arbRegTypeInfo[type].name << " " << *this;
-  if (type == SH_ARB_REG_CONST) {
+  if (type == ARB_REG_CONST) {
     out << " = " << "{";
     for (int i = 0; i < 4; i++) {
       if (i) out << ", ";
+      std::streamsize prec = out.precision();
+//      out.precision(std::numeric_limits<float>::digits10);
+      out.precision(20);
       out << binding.values[i];
+      out.precision(prec);
     }
     out << "}";
-  } else if (binding.type != SH_ARB_REG_NONE) {
-  if (binding.type == SH_ARB_REG_STATE)
+  } else if (binding.type != ARB_REG_NONE) {
+  if (binding.type == ARB_REG_STATE)
     {
     out << " = " << binding.name;
     }
@@ -129,7 +131,7 @@ std::ostream& ArbReg::printDecl(std::ostream& out) const
     }
   }
   out << ";"; 
-  if(!name.empty() && type != SH_ARB_REG_CONST) out << " # " << name;
+  if(!name.empty() && type != ARB_REG_CONST) out << " # " << name;
   return out;
 }
 
@@ -139,6 +141,11 @@ std::ostream& operator<<(std::ostream& out, const ArbReg& reg)
 {
   out << arbRegTypeInfo[reg.type].estName << reg.index;
   return out;
+}
+
+std::string ArbReg::binding_name() const
+{
+  return arbRegBindingInfo[binding.type].name;
 }
 
 }

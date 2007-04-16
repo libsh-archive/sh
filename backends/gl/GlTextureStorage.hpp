@@ -1,45 +1,45 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright 2003-2005 Serious Hack Inc.
+// Copyright 2003-2006 Serious Hack Inc.
 // 
-// This software is provided 'as-is', without any express or implied
-// warranty. In no event will the authors be held liable for any damages
-// arising from the use of this software.
-// 
-// Permission is granted to anyone to use this software for any purpose,
-// including commercial applications, and to alter it and redistribute it
-// freely, subject to the following restrictions:
-// 
-// 1. The origin of this software must not be misrepresented; you must
-// not claim that you wrote the original software. If you use this
-// software in a product, an acknowledgment in the product documentation
-// would be appreciated but is not required.
-// 
-// 2. Altered source versions must be plainly marked as such, and must
-// not be misrepresented as being the original software.
-// 
-// 3. This notice may not be removed or altered from any source
-// distribution.
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2.1 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+// MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SH_GLTEXTURESTORAGE_HPP
-#define SH_GLTEXTURESTORAGE_HPP
+#ifndef SHGLTEXTURESTORAGE_HPP
+#define SHGLTEXTURESTORAGE_HPP
 
-#include "ShVariableType.hpp"
-#include "ShMemory.hpp"
+#include "VariableType.hpp"
+#include "Memory.hpp"
 #include "GlBackend.hpp"
 #include "GlTextureName.hpp"
+#include <sh.hpp>
 
 namespace shgl {
 
-class GlTextureStorage : public SH::ShStorage {
+class GlTextureStorage : public SH::Storage {
 public:
-  GlTextureStorage(SH::ShMemory* memory, GLenum target,
+  GlTextureStorage(SH::Memory* memory, GLenum target,
                    GLenum format, GLint internalFormat,
-                   SH::ShValueType valueType, 
+                   SH::ValueType valueType, 
                    int width, int height, int depth, int tuplesize,
-                   int count, GlTextureNamePtr name);
+                   GlTextureNamePtr name, 
+                   GLint mipmap_level, bool internalRGB);
   
   ~GlTextureStorage();
+  
+  void initTexture();
   
   std::string id() const { return "opengl:texture"; }
   
@@ -48,13 +48,15 @@ public:
   GLenum target() const { return m_target; }
   GLenum format() const { return m_format; }
   GLint internalFormat() const { return m_internalFormat; }
-  SH::ShValueType valueType() const { return m_valueType; }
+  bool internalFormatRGB() const { return m_internalFormatRGB; }
   int width() const { return m_width; }
   int height() const { return m_height; }
   int depth() const { return m_depth; }
   int tuplesize() const { return m_tuplesize; }
-  int count() const { return (m_count != -1) ? m_count : m_width * m_height * m_depth; }
+  GLint mipmap_level() const { return m_mipmap_level; }
   
+  bool write() const { return m_write; }
+  void write(bool w) { m_write = w; }
 private:
   GlTextureNamePtr m_name;
 
@@ -63,18 +65,55 @@ private:
   GLenum m_format;
   GLint m_internalFormat;
 
-  SH::ShValueType m_valueType; // type index expected of data on host
-  int m_width, m_height, m_depth, m_tuplesize, m_count;
+  int m_width, m_height, m_depth, m_tuplesize;
   
   unsigned int m_params;
+  
+  // True if the storage is currently being written to
+  bool m_write;
+  // True if the internal storage format is a form of RGB or RGBA
+  bool m_internalFormatRGB;
 
   GlTextureStorage(const GlTextureStorage&);
   GlTextureStorage& operator=(const GlTextureStorage&);
   
-  // TODO: Mipmapping?
+  GLint m_mipmap_level;
 };
 
-typedef SH::ShPointer<GlTextureStorage> GlTextureStoragePtr;
+
+typedef SH::Pointer<GlTextureStorage> GlTextureStoragePtr;
+typedef SH::Pointer<const GlTextureStorage> GlTextureStorageCPtr;
+
+std::ostream& operator<<(std::ostream &out, const GlTextureStorage& storage);
+
+class HostGlTextureTransfer : public SH::Transfer {
+public:
+  HostGlTextureTransfer();
+  bool transfer(const SH::Storage* from, SH::Storage* to);
+  int cost(const SH::Storage* from, const SH::Storage* to);
+  static HostGlTextureTransfer* instance;
+};
+
+class GlTextureHostTransfer : public SH::Transfer {
+public:
+  GlTextureHostTransfer();
+  bool transfer(const SH::Storage* from, SH::Storage* to);
+  int cost(const SH::Storage* from, const SH::Storage* to);
+  static GlTextureHostTransfer* instance;
+};
+
+class GlTextureGlTextureTransfer : public SH::Transfer {
+public:
+  GlTextureGlTextureTransfer(const std::string& target);
+  bool transfer(const SH::Storage* from, SH::Storage* to);
+  int cost(const SH::Storage* from, const SH::Storage* to);
+  static GlTextureGlTextureTransfer* instance;
+
+private:
+  std::string m_target;
+  SH::Array2D<SH::Attrib4f> source_texture;
+  SH::ProgramSetPtr render_to_tex_prog;
+};
 
 }
 

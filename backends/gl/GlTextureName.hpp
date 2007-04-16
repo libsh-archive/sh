@@ -1,36 +1,32 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright 2003-2005 Serious Hack Inc.
+// Copyright 2003-2006 Serious Hack Inc.
 // 
-// This software is provided 'as-is', without any express or implied
-// warranty. In no event will the authors be held liable for any damages
-// arising from the use of this software.
-// 
-// Permission is granted to anyone to use this software for any purpose,
-// including commercial applications, and to alter it and redistribute it
-// freely, subject to the following restrictions:
-// 
-// 1. The origin of this software must not be misrepresented; you must
-// not claim that you wrote the original software. If you use this
-// software in a product, an acknowledgment in the product documentation
-// would be appreciated but is not required.
-// 
-// 2. Altered source versions must be plainly marked as such, and must
-// not be misrepresented as being the original software.
-// 
-// 3. This notice may not be removed or altered from any source
-// distribution.
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2.1 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+// MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
-#ifndef SH_GLTEXTURENAME_HPP
-#define SH_GLTEXTURENAME_HPP
+#ifndef SHGLTEXTURENAME_HPP
+#define SHGLTEXTURENAME_HPP
 
 #include "GlBackend.hpp"
-#include "ShMemory.hpp"
+#include "Memory.hpp"
 
 
 namespace shgl {
 
-class GlTextureName : public SH::ShRefCountable {
+class GlTextureName : public SH::RefCountable {
 public:
   GlTextureName(GLenum target);
   // Create an unmanaged texture name, i.e. one that is not allocated
@@ -41,13 +37,13 @@ public:
 
   GLuint value() const { return m_name; }
   GLenum target() const { return m_target; }
-  const SH::ShTextureTraits& params() const { return m_params; }
-  void params(const SH::ShTextureTraits& params);
+  const SH::TextureTraits& params() const { return m_params; }
+  void params(const SH::TextureTraits& params);
 
-  void addStorage(SH::ShStorage* storage);
-  void removeStorage(SH::ShStorage* storage);
+  void addStorage(SH::Storage* storage);
+  void removeStorage(SH::Storage* storage);
 
-  typedef std::list<SH::ShStorage*> StorageList;
+  typedef std::list<SH::Storage*> StorageList;
   StorageList::const_iterator beginStorages() const { return m_storages.begin(); }
   StorageList::const_iterator endStorages() const { return m_storages.end(); }
 
@@ -57,7 +53,7 @@ public:
 
   // Utility class to bind texture temporarily
   struct Binding {
-    Binding(const SH::ShPointer<const GlTextureName>& name);
+    Binding(const SH::Pointer<const GlTextureName>& name);
     ~Binding();
   
     GLenum target;
@@ -69,12 +65,12 @@ private:
   GLuint m_name;
   StorageList m_storages;
   static NameList* m_names;
-  SH::ShTextureTraits m_params;
+  SH::TextureTraits m_params;
 
   bool m_managed; // True if we generated our own name
 };
 
-typedef SH::ShPointer<GlTextureName> GlTextureNamePtr;
+typedef SH::Pointer<GlTextureName> GlTextureNamePtr;
 
 }
 
