@@ -1,6 +1,0 @@
-// -*- C++ -*-
-ShProgram shader = SH_BEGIN_FRAGMENT_PROGRAM {
-  ShAttrib2f x;
-  ShAttrib3f y;
-  x * y;
-} SH_END_PROGRAM;

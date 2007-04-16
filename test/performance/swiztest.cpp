@@ -1,25 +1,21 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright 2003-2005 Serious Hack Inc.
+// Copyright 2003-2006 Serious Hack Inc.
 // 
-// This software is provided 'as-is', without any express or implied
-// warranty. In no event will the authors be held liable for any damages
-// arising from the use of this software.
-// 
-// Permission is granted to anyone to use this software for any purpose,
-// including commercial applications, and to alter it and redistribute it
-// freely, subject to the following restrictions:
-// 
-// 1. The origin of this software must not be misrepresented; you must
-// not claim that you wrote the original software. If you use this
-// software in a product, an acknowledgment in the product documentation
-// would be appreciated but is not required.
-// 
-// 2. Altered source versions must be plainly marked as such, and must
-// not be misrepresented as being the original software.
-// 
-// 3. This notice may not be removed or altered from any source
-// distribution.
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2.1 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+// MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 #include <iostream>
 #include <sh.hpp>
@@ -30,15 +26,15 @@ using namespace std;
 int main() 
 {
   try {
-  ShSwizzle a;
-  ShSwizzle b(1);
-  ShSwizzle c(4);
-  ShSwizzle d(5);
-  ShSwizzle e(1, 0);
-  ShSwizzle f(2, 1, 0);
-  ShSwizzle g(2, 0, 1);
-  ShSwizzle h(3, 0, 2, 1);
-  ShSwizzle i(4, 0, 1, 3, 2);
+  Swizzle a;
+  Swizzle b(1);
+  Swizzle c(4);
+  Swizzle d(5);
+  Swizzle e(1, 0);
+  Swizzle f(2, 1, 0);
+  Swizzle g(2, 0, 1);
+  Swizzle h(3, 0, 2, 1);
+  Swizzle i(4, 0, 1, 3, 2);
 
   std::cout << a << std::endl;
   std::cout << b << std::endl;
@@ -54,7 +50,7 @@ int main()
   std::cout << h << std::endl;
   h *= h;
   std::cout << h << std::endl;
-  } catch(const ShException  &e) {
+  } catch(const Exception  &e) {
     std::cout << e.message() << std::endl;
   }
 

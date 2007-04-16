@@ -1,0 +1,93 @@
+import project ;
+
+
+project.initialize $(__name__) ;
+project opengl ;
+
+
+rule init ( prefix ? )
+{
+  import errors ;
+
+  local include-subdir = include ;
+
+  if ! $(prefix) # prefix not given
+  {
+    prefix = [ modules.peek : OPENGL_PATH ] ;
+
+    if ! $(prefix) # env var not found
+    {
+      prefix = [ path.glob-in-parents . : opengl ] ;
+
+      if ! $(prefix) # default path doesn't exist
+      {
+        echo "opengl: Try to use compiler default header (no prefix given, OPENGL_PATH empty)" ;
+      }
+    }
+  }
+
+  if $(.initialized)
+  {
+    if $(prefix) != $(.prefix)
+    {
+      errors.error "opengl: Reinitialized with different prefix" ;
+    }
+  }
+  else {
+    .initialized = true ;
+    .prefix = $(prefix) ;
+
+    local usage-requirements =
+      <include>$(.prefix)/$(include-subdir)
+      <library-path>$(.prefix)/lib
+      #<dll-path>$(.prefix)/lib
+    ;
+
+    import os ;
+    if [ os.on-unix ]
+    {
+      lib libgl
+      : # sources
+      : # requirements
+        <name>GL
+      : # default-build
+      : # usage-requirements
+        $(usage-requirements)
+      ;
+
+      lib libglu
+      : # sources
+      : # requirements
+        <name>GLU
+      : # default-build
+      : # usage-requirements
+        $(usage-requirements)
+      ;
+    }
+    else {
+      lib user32 : : <name>user32 ;
+      lib gdi32 : : <name>gdi32 ;
+      local sources = user32 gdi32 ;
+
+      lib libgl
+      : # sources
+        $(sources)
+      : # requirements
+        <name>opengl32
+      : # default-build
+      : # usage-requirements
+        $(usage-requirements)
+      ;
+
+      lib libglu
+      : # sources
+        $(sources)
+      : # requirements
+        <name>glu32
+      : # default-build
+      : # usage-requirements
+        $(usage-requirements)
+      ;
+    }
+  }
+}

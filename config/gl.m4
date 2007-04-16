@@ -36,8 +36,15 @@ AC_DEFUN([GL_CHECK_GL_HEADERS], [
       [#if HAVE_GL_GL_H
       #include <GL/gl.h>
     #endif])
-    GL_LIBS="-lGL"
-    GLUT_LIBS="-lglut"
+    case $host_os in
+    cygwin*)
+    	GL_LIBS="-lglu32"
+    	GLUT_LIBS="-lglut32"
+    ;;
+    *)
+	GL_LIBS="-lGL"
+	GLUT_LIBS="-lglut"
+    esac
     ;;
   esac
 

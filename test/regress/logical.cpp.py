@@ -58,12 +58,42 @@ def insert_into1(test):
     test.add_test(cond((-0.3,), (1.0,), (0.0,)))
     test.add_test(cond((-3000,), (1.0,), (0.0,)))
 
-    # cond(4, 4, 4)
+    test.add_test(cond((10,), (7.0,), (145.0,)))
+    test.add_test(cond((1.0,), (7.0,), (145.0,)))
+    test.add_test(cond((0.5,), (7.0,), (145.0,)))
+    test.add_test(cond((0,), (7.0,), (145.0,)))
+    test.add_test(cond((-0.3,), (7.0,), (145.0,)))
+    test.add_test(cond((-3000,), (7.0,), (145.0,)))
+
+    test.add_test(cond((10,), (1.0,), (0.0,), ['i']))
+    test.add_test(cond((1.0,), (1.0,), (0.0,), ['i']))
+    test.add_test(cond((0,), (1.0,), (0.0,), ['i']))
+    test.add_test(cond((-1.0,), (1.0,), (0.0,), ['i']))
+    test.add_test(cond((-3000,), (1.0,), (0.0,), ['i']))
+
+    test.add_test(cond((10,), (7.0,), (145.0,), ['i']))
+    test.add_test(cond((1.0,), (7.0,), (145.0,), ['i']))
+    test.add_test(cond((0,), (7.0,), (145.0,), ['i']))
+    test.add_test(cond((-1.0,), (7.0,), (145.0,), ['i']))
+    test.add_test(cond((-3000,), (7.0,), (145.0,), ['i']))
+
+    # cond(N, N, N)
     test.add_test(cond((1.4, 0.0, -45.0, 1024), (1.0, 2.0, 3.0, 4.0), (0.0, -1.0, -2.0, -45.8)))
+    test.add_test(cond((0.0, 20.0, -1.0), (28.1, 0.3, 0.045), (0.0, -1.0, -45.8)))
+    test.add_test(cond((1.4, 0.0), (-0.4, 2.2), (0.0, -1.1)))
+
+    test.add_test(cond((1.0, 0.0, -45.0, 1024), (1.0, 2.0, 3.0, 4.0), (0.0, -1.0, -2.0, -45.0), ['i', 'i', 'i', 'i']))
+    test.add_test(cond((0.0, 20.0, -1.0), (28.0, 1.0, 45.0), (0.0, -1.0, -48), ['i', 'i', 'i']))
+    test.add_test(cond((14.0, 0.0), (-4.0, 2.0), (5.0, -17.0), ['i', 'i']))
 
     # cond(1, N, N)
     test.add_test(cond(1.4, (1.0, 2.0, 3.0, 4.0), (0.0, -1.0, -2.0, -45.8)))
     test.add_test(cond(0.0, (1.0, 2.0, 3.0, 4.0), (0.0, -1.0, -2.0, -45.8)))
+    test.add_test(cond(-0.1, (1.0, 2.0, 3.0, 4.0), (0.0, -1.0, -2.0, -45.8)))
+
+    test.add_test(cond(14.0, (11.0, 12.0, 13.0, 14.0), (10.0, -15.0, -25.0, -45.0), ['i', 'i', 'i', 'i']))
+    test.add_test(cond(0.0, (31.0, 32.0, 33.0, 34.0), (50.0, -51.0, -52.0, -545.0), ['i', 'i', 'i', 'i']))
+    test.add_test(cond(-1.0, (41.0, 42.0, 43.0, 44.0), (60.0, -61.0, -62.0, -645.0), ['i', 'i', 'i', 'i']))
 
 # for any(), all() and !
 def insert_into2(test, func):
@@ -78,15 +108,36 @@ def insert_into2(test, func):
     test.add_test(func((-1, 0, 0)))
     test.add_test(func((-1000, 0, 1000)))
 
+    test.add_test(func((0, 0, 0, 0), ['i', 'i', 'i', 'i']))
+    test.add_test(func((0, 0, 0, 1), ['i', 'i', 'i', 'i']))
+    test.add_test(func((1, 0, 0, 0), ['i', 'i', 'i', 'i']))
+    test.add_test(func((15, 1, 5, 12), ['i', 'i', 'i', 'i']))
+    test.add_test(func((0, 1, 0), ['i', 'i', 'i']))
+    test.add_test(func((10,), ['i']))
+    test.add_test(func((0,), ['i']))
+    test.add_test(func((-1, -5, -5000, -2), ['i', 'i', 'i', 'i']))
+    test.add_test(func((-1, 0, 0), ['i', 'i', 'i']))
+    test.add_test(func((-1000, 0, 1000), ['i', 'i', 'i']))
+
 # for && and ||
 def insert_into3(test, func):
     test.add_test(func((0, 0, 0), (0, 0, 0)))
     test.add_test(func((0, 0, 0), (1, 0, -1)))
     test.add_test(func((1, 0, 0.4, -1), (1, 0, 0.4, -1)))
     test.add_test(func((0.1, 0.2, 0.3), (-0.1, -0.2, -0.3)))
+    test.add_test(func((0.1, 0.2, 0.3), (0.1, -0.2, 0.3)))
     test.add_test(func((0.1,), (-0.1,)))
     test.add_test(func((0.1,), (0,)))
     test.add_test(func((0,), (-1000,)))
+
+    test.add_test(func((0, 0, 0), (0, 0, 0), ['i', 'i', 'i']))
+    test.add_test(func((0, 0, 0), (1, 0, -1), ['i', 'i', 'i']))
+    test.add_test(func((1, 0, 4, -1), (1, 0, 4, -1), ['i', 'i', 'i']))
+    test.add_test(func((1, 2, 3), (-1, -2, -3), ['i', 'i', 'i']))
+    test.add_test(func((1, 2, 3), (1, -2, 3), ['i', 'i', 'i']))
+    test.add_test(func((1,), (-1,), ['i', 'i']))
+    test.add_test(func((1,), (0,), ['i']))
+    test.add_test(func((0,), (-1000,), ['i']))
 
 # Test the conditional operator in stream programs
 test = shtest.StreamTest('cond', 3)

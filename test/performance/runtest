@@ -45,7 +45,7 @@ PROSPECT=`which prospect`
 for ((i=1; $i <= $RUNS; ++i)); do
 	echo "Run $i"
 	if [ x"$PROSPECT" == "x" ] ; then
-		time $PROG > $PROG\_$i.out	
+		time $PROG
 	else
 		prospect -H 100000 -o prospect.temp $PROG > $PROG\_$i.out
 		c++filt < prospect.temp > $PROG\_$i.prof

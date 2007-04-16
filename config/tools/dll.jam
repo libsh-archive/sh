@@ -1,0 +1,71 @@
+##
+# Export/import symbols into/from a DLL without the need of a top-level header.
+# Can defines the uppercase name of the library itself as symbol (automatically).
+# It can replace the builtin 'lib' rule (same name, no changes).
+#
+# Such a (typical) top-level header is now (logically) moved into the build system.
+# Exporting becomes naturally a 'requirement' and importing will be an
+# 'usage-requirement'.
+#
+# This 'dll.lib' rule provides the standard to use the target name (uppercase) as
+# symbol for the preprocessor and define it automatically with dllexport, dllimport
+# or nothing (link static). The target name should always unique per component.
+# Everything that needs to be exported/imported is named (tagged) naturally with
+# the component name, i.e: class LIBMYCOMPONENT my_type { ... };
+#
+# In case of more than one component per main-projects, esp. DLLs with inter-dependencies,
+# importing and(!) exporting symbols for a single component is required. In that case
+# you can't have a simple header that says 'dllexport' or(!) 'dllimport'. It's needed
+# to tag each component with an own (unique) symbol. Now you have dllexport/dllimport
+# per component.
+#
+# The 'dll.lib' rule use the original 'lib' rule and provides the same arguments
+# and argument order. If you need a symbol name thats not derived from the target name,
+# you can use the optional 6'th argument to define your own symbol.
+#
+# EXAMPLE
+# If you hold this tool (jamfile) in a 'build' directory you only need one statement
+# import build/tools/dll : lib ;
+# in your top-level jamfile ("the project") before any targed definition.
+#
+# The 'lib' option after the colon prevents you from writing:
+# dll.lib ...
+# Now you can use an unqualified dll.lib (without dll):
+# lib ...
+# This is like a replacement of the built-in 'lib' rule.
+# if you don't like automagically things -- use another name simply use 'dll.lib' or
+# import build/tools/dll : lib : xlib ;
+#
+## 2005/06/20, hfp@users.sf.net
+#
+rule lib ( names + : sources * : requirements * : default-build * : usage-requirements * : symbol ? )
+{
+  if ! $(symbol)
+  {
+    # By default use the uppercase name
+    symbol = $(names:U) ;
+  }
+
+  import os ;
+  if [ os.on-windows ]
+  {
+    echo $(names)": define macro" $(symbol) "to export symbols" ;
+
+    requirements +=
+      <link>shared:<define>$(symbol)=__declspec(dllexport)
+      <link>static:<define>$(symbol)= ;
+
+    usage-requirements +=
+      <link>shared:<define>$(symbol)=__declspec(dllimport)
+      <link>static:<define>$(symbol)= ;
+  }
+  else {
+    echo $(names)": remove macro" $(symbol) "on unix" ;
+
+    requirements += <define>$(symbol)= ;
+    usage-requirements += <define>$(symbol)= ;
+  }
+
+  import builtin : lib : builtin.lib ;
+  builtin.lib $(names) : $(sources) : $(requirements) : $(default-build) : $(usage-requirements) ;
+}

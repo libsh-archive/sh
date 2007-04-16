@@ -13,20 +13,24 @@ def mod(p, q, types=[]):
     return shtest.make_test(result, [p, q], types)
 
 def insert_into(test, modifying=False):
-    test.add_test(mod((3, 3, 3), (4, 3, 2), ['i', 'i', 'i']))
+    test.add_test(mod((3, 3), (4, 2), ['i', 'i']))
     test.add_test(mod((-3, -3, -3), (4, 3, 2), ['i', 'i', 'i']))
     test.add_test(mod((3, 3, 3), (-4, -3, -2), ['i', 'i', 'i']))
-    test.add_test(mod((-3, -3, -3), (-4, -3, -2), ['i', 'i', 'i']))
+    test.add_test(mod((-3, -3), (-4, -2), ['i', 'i']))
     
-    test.add_test(mod((3.0, 3.0, 3.0), (4.0, 3.0, 2.0), ['f', 'f', 'f']))
+    test.add_test(mod((3.0, 3.0), (4.0, 2.0), ['f', 'f']))
     test.add_test(mod((-3.0, -3.0, -3.0), (4.0, 3.0, 2.0), ['f', 'f', 'f']))
     test.add_test(mod((3.0, 3.0, 3.0), (-4.0, -3.0, -2.0), ['f', 'f', 'f']))
-    test.add_test(mod((-3.0, -3.0, -3.0), (-4.0, -3.0, -2.0), ['f', 'f', 'f']))
+    test.add_test(mod((-3.0, -3.0), (-4.0, -2.0), ['f', 'f']))
 
     test.add_test(mod((3.1, 3.5, 3.9), (4.0, 3.0, 2.0), ['f', 'f', 'f']))
     test.add_test(mod((-3.1, -3.5, -3.9), (4.0, 3.0, 2.0), ['f', 'f', 'f']))
     test.add_test(mod((3.1, 3.5, 3.9), (-4.0, -3.0, -2.0), ['f', 'f', 'f']))
     test.add_test(mod((-3.1, -3.5, -3.9), (-4.0, -3.0, -2.0), ['f', 'f', 'f']))
+
+    #test.add_test(mod((10, -10), (10, -10), ['f', 'f'])) # Broken on old ATI cards
+    test.add_test(mod((2, -2, 0.5, -0.5), (2, -2, 0.5, -0.5), ['f', 'f', 'f', 'f']))
+    test.add_test(mod((64, -64), (64, -64), ['i', 'i']))
 
     test.add_test(mod((1.0, 5.0, 2.4), 0.5))
     test.add_test(mod((1.0, 5.0, 2.4), -0.5))

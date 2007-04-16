@@ -1,35 +1,50 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright 2003-2005 Serious Hack Inc.
+// Copyright 2003-2006 Serious Hack Inc.
 // 
-// This software is provided 'as-is', without any express or implied
-// warranty. In no event will the authors be held liable for any damages
-// arising from the use of this software.
-// 
-// Permission is granted to anyone to use this software for any purpose,
-// including commercial applications, and to alter it and redistribute it
-// freely, subject to the following restrictions:
-// 
-// 1. The origin of this software must not be misrepresented; you must
-// not claim that you wrote the original software. If you use this
-// software in a product, an acknowledgment in the product documentation
-// would be appreciated but is not required.
-// 
-// 2. Altered source versions must be plainly marked as such, and must
-// not be misrepresented as being the original software.
-// 
-// 3. This notice may not be removed or altered from any source
-// distribution.
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2.1 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+// MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 #include "test.hpp"
 
+using namespace std;
+
 Test::Test(int argc, char** argv)
 {
-  m_backend = "cc";
+  m_backend = "";
   char *env_var = getenv("SH_REGRESS_BACKEND");
   if (env_var != NULL) m_backend = env_var;
   if (argc >= 2) m_backend = argv[1];
-  if (m_backend != "host") SH::shSetBackend(m_backend);
+
+  if ("" == m_backend) {
+    cerr << "You must specify the backend to test through the SH_REGRESS_BACKEND"
+         << " environment variable or by passing an argument to a unit test "
+         << "program. For example:" << endl << endl
+         << "  SH_REGRESS_BACKEND=arb make check" << endl << endl
+         << "will run all tests on the arb backend, and:" << endl << endl
+         << "  test/regress/add glsl" << endl << endl
+         << "will run the addition unit test on the glsl backend." << endl;
+    exit(1);
+  }
+  SH::init();
+  if (m_backend != "host") SH::setBackend(m_backend); 
+}
+
+void Test::ignore_backend(string backend)
+{
+  if (m_backend == backend) exit(77);
 }
 
 void Test::print_values(const char* varname, const std::string& values)
@@ -41,11 +56,11 @@ void Test::print_values(const char* varname, const std::string& values)
 
 void Test::print_fail(std::string name)
 {
-    std::cout << COLOR_YELLOW << "Test: " << COLOR_NORMAL
+    std::cout << SH_COLOR_YELLOW << "Test: " << SH_COLOR_NORMAL
               << std::setiosflags(std::ios::left) << std::setw(50) << name 
-              << COLOR_RED
+              << SH_COLOR_RED
               << " FAILED"
-              << COLOR_NORMAL
+              << SH_COLOR_NORMAL
               << " [" << m_backend << "]"
               << std::endl;
   
@@ -53,11 +68,11 @@ void Test::print_fail(std::string name)
 
 void Test::print_pass(std::string name)
 {
-    std::cout << COLOR_YELLOW << "Test: " << COLOR_NORMAL
+    std::cout << SH_COLOR_YELLOW << "Test: " << SH_COLOR_NORMAL
               << std::setiosflags(std::ios::left) << std::setw(50) << name 
-              << COLOR_GREEN
+              << SH_COLOR_GREEN
               << " PASSED"
-              << COLOR_NORMAL
+              << SH_COLOR_NORMAL
               << " [" << m_backend << "]"
-              << COLOR_NORMAL << std::endl;
+              << SH_COLOR_NORMAL << std::endl;
 }

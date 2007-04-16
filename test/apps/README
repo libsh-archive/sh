@@ -1,0 +1,4 @@
+Here are some stand-alone Sh applications used to test specific functionality.
+
+To compile and run them:
+  make && ./main
