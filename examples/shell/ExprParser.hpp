@@ -79,6 +79,8 @@ class  ExprParser {
      */
     void parse(std::string stmtlist);
 
+    SH::ShVariable parse_expr(std::string expr); 
+
   private:
     typedef std::map<std::string, SH::ShVariable> VarMap;
     VarMap m_vars; // user defined variables

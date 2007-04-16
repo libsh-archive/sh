@@ -1,28 +1,26 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright 2003-2005 Serious Hack Inc.
+// Copyright 2003-2006 Serious Hack Inc.
 // 
-// This software is provided 'as-is', without any express or implied
-// warranty. In no event will the authors be held liable for any damages
-// arising from the use of this software.
-// 
-// Permission is granted to anyone to use this software for any purpose,
-// including commercial applications, and to alter it and redistribute it
-// freely, subject to the following restrictions:
-// 
-// 1. The origin of this software must not be misrepresented; you must
-// not claim that you wrote the original software. If you use this
-// software in a product, an acknowledgment in the product documentation
-// would be appreciated but is not required.
-// 
-// 2. Altered source versions must be plainly marked as such, and must
-// not be misrepresented as being the original software.
-// 
-// 3. This notice may not be removed or altered from any source
-// distribution.
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2.1 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+// MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 #include <sh/sh.hpp>
+#include <shutil/shutil.hpp>
 #ifdef __APPLE__
+# include <CoreFoundation/CoreFoundation.h>
 # include <GLUT/glut.h>
 # include <OpenGL/glext.h>
 # include <OpenGL/glu.h>
@@ -33,17 +31,18 @@
 #endif
 #include "Camera.hpp"
 #include <iostream>
+#include <cstdio>
 
 using namespace SH;
 using namespace std;
 
-ShMatrix4x4f mv, mvd;
-ShPoint3f lightPos;
+Matrix4x4f mv, mvd;
+Point3f lightPos;
 Camera camera;
-ShProgramSet* shaders;
+ProgramSet* shaders;
 
-ShClamped<ShTexture2D<ShColor3f> > kd(512, 512);
-ShClamped<ShTexture2D<ShColor3f> > ks(513, 512);
+MIPFilter<Texture2D<Color3fub> > kd(512, 512);
+NoMIPFilter<Texture2D<Color3fub> > ks(512, 512);
 
 int gprintf(int x, int y, char* fmt, ...);
 
@@ -53,81 +52,94 @@ int cur_x, cur_y;
 
 bool show_help = false;
 
-ShImage kd_images[2];
-ShImage ks_images[2];
+const int MIPMAP_LEVELS = 10;
+
+TypedImage<FracUByte> kd_images[MIPMAP_LEVELS + 1];
+TypedImage<FracUByte> ks_images[2];
 
 void rustTexture()
 {
-  kd.memory(kd_images[0].memory());
-  ks.memory(ks_images[0].memory());
+  kd.memory(kd_images[0].memory(), 0);
+  kd.build_mipmaps();
+  ks.memory(ks_images[0].memory(), 0);
 }
 
 void xTexture()
 {
-  kd.memory(kd_images[1].memory());
-  ks.memory(ks_images[1].memory());
+  for (int i=0; i < MIPMAP_LEVELS; i++) {
+    kd.memory(kd_images[1 + i].memory(), i);
+  }
+  ks.memory(ks_images[1].memory(), 0);
 }
 
 void initShaders()
 {
-  ShProgram vsh = SH_BEGIN_VERTEX_PROGRAM {
-    ShInOutTexCoord2f u;
-    ShInOutPosition4f pos;
-    ShInOutNormal3f normal;
-    ShOutputVector3f lightv;
+  Program vsh = SH_BEGIN_VERTEX_PROGRAM {
+    InOutTexCoord2f u;
+    InOutPosition4f pos;
+    InOutNormal3f normal;
+    OutputVector3f lightv;
 
-    ShOutputPoint3f posv = (mv | pos)(0,1,2); // Compute viewspace position
+    OutputPoint3f posv = (mv | pos)(0,1,2); // Compute viewspace position
     lightv = lightPos - posv; // Compute light direction
     
     pos = mvd | pos; // Project position
     normal = mv | normal; // Project normal
   } SH_END;
 
-  ShColor3f SH_DECL(diffusecolor) = ShColor3f(0.2, 0.2, 0.2);
-  ShAttrib1f exponent(30.0);
+  Color3f SH_DECL(diffusecolor) = Color3f(0.2, 0.2, 0.2);
+  Attrib1f exponent(30.0);
 
-  ShProgram fsh = SH_BEGIN_FRAGMENT_PROGRAM {
-    ShInputTexCoord2f u;
-    ShInputPosition4f position;
-    ShInputNormal3f normal;
-    ShInputVector3f lightv;
-    ShInputPoint3f posv;
+  Program fsh = SH_BEGIN_FRAGMENT_PROGRAM {
+    InputTexCoord2f u;
+    InputPosition4f position;
+    InputNormal3f normal;
+    InputVector3f lightv;
+    InputPoint3f posv;
 
-    ShOutputColor3f color;
+    OutputColor3f color;
 
     normal = normalize(normal);
     lightv = normalize(lightv);
 
     color = (normal | lightv) * diffusecolor;
 
-    ShVector3f vv = normalize(-posv);
-    ShVector3f hv = normalize(lightv + vv);
-    ShNormal3f nv = normal;
+    Vector3f vv = normalize(-posv);
+    Vector3f hv = normalize(lightv + vv);
+    Normal3f nv = normal;
     color += color*kd(u) + ks(u)*pow(pos(hv | nv), exponent);
   } SH_END;
 
-  shaders = new ShProgramSet(vsh, fsh);
+  shaders = new ProgramSet(vsh, fsh);
+
+#if 0
+  cout << "Vertex Unit:" << endl;
+  vsh.node()->code()->print(cout);
+  cout << "--" << endl;
+  cout << "Fragment Unit:" << endl;
+  fsh.node()->code()->print(cout);
+  cout << "--" << endl;
+#endif
 }
 
 void display()
 {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  shBind(*shaders);
+  bind(*shaders);
   
   glFrontFace(GL_CW);
   glutSolidTeapot(2.5);
   glFrontFace(GL_CCW);
 
-  shUnbind(*shaders);
+  unbind(*shaders);
   
   // Help information
   if (show_help) {
     gprintf(30, 100, "Sh Texture Example Help");
     gprintf(30, 80,  "  '1' - Default texture");
     gprintf(30, 65,  "  '2' - Rusty texture");
-    gprintf(30, 50,  "  'U' - Invoke shUpdate()");
-    gprintf(30, 30,  "  'Q' - Quit");
+    gprintf(30, 10,  "  'Q' - Quit");
   } else {
     gprintf(10, 10, "'H' for help...");
   }
@@ -137,8 +149,8 @@ void display()
 
 void setupView()
 {
-  mv = camera.shModelView();
-  mvd = camera.shModelViewProjection(ShMatrix4x4f());
+  mv = camera.modelView();
+  mvd = camera.modelViewProjection(Matrix4x4f());
 }
 
 void reshape(int width, int height)
@@ -195,10 +207,6 @@ void keyboard(unsigned char k, int x, int y)
   case 'q':
   case 'Q':
     exit(0);
-    break;
-  case 'u':
-  case 'U':
-    shUpdate();
     break;
   case 'h':
   case 'H':
@@ -264,27 +272,83 @@ int main(int argc, char** argv)
   glutMouseFunc(mouse);
   glutMotionFunc(motion);
   glutKeyboardFunc(keyboard);
-    
-  std::string backend_name("arb");
-  if (argc > 1) {
-    backend_name = argv[1];
-  }
-  
-  shSetBackend(backend_name);
 
-  initShaders();
+  if (argc > 1) {
+    useBackend(argv[1]);
+  }
 
   try {
-    kd_images[0].loadPng("rustkd.png");
-    ks_images[0].loadPng("rustks.png");
-    kd_images[1].loadPng("kd.png");
-    ks_images[1].loadPng("ks.png");
-  } 
-  catch (const ShException& e) {
-    std::cerr << e.message() << std::endl;
-    throw e;
-  }
+#ifdef __APPLE__
+    CFBundleRef mainBundle = CFBundleGetMainBundle();
+    CFStringRef s;
+    char* filename;
+    
+    s = CFURLCopyFileSystemPath(CFBundleCopyResourceURL(mainBundle, CFSTR("rustkd"), CFSTR("png"), NULL),
+                                kCFURLPOSIXPathStyle);
+    filename = new char[CFStringGetLength(s) + 1];
+    CFStringGetCString(s, filename, CFStringGetLength(s) + 1, kCFStringEncodingASCII);
+    Util::load_PNG(kd_images[0], filename);
+    delete [] filename;
 
+    s = CFURLCopyFileSystemPath(CFBundleCopyResourceURL(mainBundle, CFSTR("rustks"), CFSTR("png"), NULL),
+                                kCFURLPOSIXPathStyle);
+    filename = new char[CFStringGetLength(s) + 1];
+    CFStringGetCString(s, filename, CFStringGetLength(s) + 1, kCFStringEncodingASCII);
+    Util::load_PNG(ks_images[0], filename);
+    delete [] filename;
+
+    s = CFURLCopyFileSystemPath(CFBundleCopyResourceURL(mainBundle, CFSTR("kd"), CFSTR("png"), NULL),
+                                kCFURLPOSIXPathStyle);
+    filename = new char[CFStringGetLength(s) + 1];
+    CFStringGetCString(s, filename, CFStringGetLength(s) + 1, kCFStringEncodingASCII);
+    Util::load_PNG(kd_images[1], filename);
+    delete [] filename;
+    
+    s = CFURLCopyFileSystemPath(CFBundleCopyResourceURL(mainBundle, CFSTR("ks"), CFSTR("png"), NULL),
+                                kCFURLPOSIXPathStyle);
+    filename = new char[CFStringGetLength(s) + 1];
+    CFStringGetCString(s, filename, CFStringGetLength(s) + 1, kCFStringEncodingASCII);
+    Util::load_PNG(ks_images[1], filename);
+    delete [] filename;
+#else
+    ShUtil::load_PNG(kd_images[0], "tex_rustkd.png");
+    ShUtil::load_PNG(ks_images[0], "tex_rustks.png");
+    ShUtil::load_PNG(kd_images[1], "tex_kd.png");
+    ShUtil::load_PNG(ks_images[1], "tex_ks.png");
+
+    for (int i=1; i < MIPMAP_LEVELS; i++) {
+      stringstream s;
+      s << "tex_kd" << i << ".png";
+      ShUtil::load_PNG(kd_images[1 + i], s.str());
+    }
+#endif
+  }
+  catch (const Exception& e) {
+#ifdef __APPLE__
+    CFStringRef s = CFStringCreateWithCString(kCFAllocatorDefault, e.message().c_str(), kCFStringEncodingASCII);
+    CFOptionFlags flags;
+    CFUserNotificationDisplayAlert(0, kCFUserNotificationStopAlertLevel,
+                                  NULL, NULL, NULL, CFSTR("Error loading images"),
+                                  s, NULL, NULL, NULL, &flags);
+    CFRelease(s);
+#else
+    std::cerr << e.message() << std::endl;
+#endif
+    exit(1);
+  } catch (const std::exception& e) {
+#ifdef __APPLE__
+    CFStringRef s = CFStringCreateWithCString(kCFAllocatorDefault, e.what(), kCFStringEncodingASCII);
+    CFOptionFlags flags;
+    CFUserNotificationDisplayAlert(0, kCFUserNotificationStopAlertLevel,
+                                   NULL, NULL, NULL, CFSTR("Error loading images"),
+                                   s, NULL, NULL, NULL, &flags);
+    CFRelease(s);
+#else
+    std::cerr << e.what() << std::endl;
+#endif
+    exit(1);
+  }
+  
   glEnable(GL_DEPTH_TEST);
   glClearColor(0.0, 0.0, 0.0, 1.0);
   setupView();
@@ -293,23 +357,14 @@ int main(int argc, char** argv)
   camera.move(0.0, 0.0, -15.0);
 
   // Set up the light position
-  lightPos = ShPoint3f(5.0, 5.0, 5.0);
+  lightPos = Point3f(5.0, 5.0, 5.0);
   
   initShaders();
 
   // Set the initial texture
   xTexture();
   
-  shBind(*shaders);
-  
-#if 0
-  cout << "Vertex Unit:" << endl;
-  vsh.node()->code()->print(cout);
-  cout << "--" << endl;
-  cout << "Fragment Unit:" << endl;
-  fsh.node()->code()->print(cout);
-  cout << "--" << endl;
-#endif
+  bind(*shaders);
   
   glutMainLoop();
 

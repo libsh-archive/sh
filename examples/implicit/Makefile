@@ -9,7 +9,7 @@ LIBS = -lglut -lGL -lGLU -lsh -lshutil -lpthread
 LDFLAGS = -L$(SH_INSTALL_DIR)/lib $(LIBS)
 INCLUDES = -I$(SH_INSTALL_DIR)/include
 CPPFLAGS = $(INCLUDES) 
-CXXFLAGS = $(CPPFLAGS) -Wall -g
+CXXFLAGS = $(CPPFLAGS) -Wall -g -O2
 CXX = g++
 MAIN = shimpl 
 
@@ -18,7 +18,7 @@ all: $(MAIN)
 depend: $(DEPENDS)
 
 clean:
-	rm -f -- *.o *.d $(MAIN) *.png *.vars *.ps *.dot
+	rm -f -- *.o *.d $(MAIN) *.png *.vars *.ps *.dot *.csv *0x*
 
 $(MAIN): $(OBJECTS)
 	libtool --mode=link $(CXX) -o $@ $(OBJECTS) $(LDFLAGS)

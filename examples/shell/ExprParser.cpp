@@ -6,7 +6,7 @@
 using namespace SH;
 using namespace std;
 
-bool DBG = false;
+bool DBG =  false;
 
 #define DOUT(s) { if(DBG) { std::cout << setw(m_indent) << " " << s << endl; } }
 
@@ -16,6 +16,7 @@ ShVariable ExprParser::registerVar(std::string name, ShVariable var) {
     m_streams.erase(name);
   } 
   m_vars[name] = var;
+  var.name(name);
   std::cerr << "Registered variable " << var.node()->nameOfType() << " " << name << endl;
   return var;
 }
@@ -58,6 +59,7 @@ SH::ShStream ExprParser::getStream(std::string name) {
 void ExprParser::registerFunc(std::string name, ShProgram func) {
   func.name(name);
   m_funcs[name] = func;
+  func.name(name);
 }
 
 ShProgram& ExprParser::operator[](std::string name) {
@@ -89,6 +91,14 @@ void ExprParser::parse(std::string stmtlist) {
   m_end = stmtlist.length();
   m_indent = 0;
   parse_stmtlist();
+}
+
+SH::ShVariable ExprParser::parse_expr(std::string expr) {
+  m_stmtlist = expr; 
+  m_cur = 0;
+  m_end = expr.length(); 
+  m_indent = 0;
+  return parse_expr();
 }
 
 void ExprParser::parse_stmtlist() { 
@@ -183,6 +193,7 @@ ShVariable ExprParser::parse_expr() {
     debugExit();
     return lhs;
   }
+  DOUT("operator " << next);
   eatChar('=');
   ShVariable rhs = parse_expr();
   SH_DEBUG_ASSERT(lhs.size() == rhs.size());
@@ -202,6 +213,7 @@ ShVariable ExprParser::parse_expr0() {
     debugExit();
     return lhs;
   }
+  DOUT("operator " << next);
   eatChar('|');
   ShVariable rhs = parse_expr0();
   ShValueType rvt = lhs.valueType();
@@ -215,21 +227,24 @@ ShVariable ExprParser::parse_expr0() {
 
 ShVariable ExprParser::parse_expr1() { 
   debugEnter("expr +-");
-  ShVariable lhs = parse_expr2();
-  eatWs();
-  char next = peek();
-  if(next != '+' && next != '-') {
-    debugExit();
-    return lhs;
-  }
-  ++m_cur;
-  ShVariable rhs = parse_expr1();
-  int rsize = max(lhs.size(), rhs.size());
-  ShValueType rvt = lhs.valueType();
-  ShVariable result(new ShVariableNode(SH_TEMP, rsize, rvt));
-  switch(next) {
-    case '+': shADD(result, lhs, rhs); break;
-    case '-': shADD(result, lhs, -rhs); break;
+  ShVariable result = parse_expr2();
+  while(true) {
+    eatWs();
+    char next = peek();
+    if(next != '+' && next != '-') {
+      break;
+    }
+    DOUT("operator " << next);
+    ++m_cur;
+    ShVariable rhs = parse_expr2();
+    int rsize = max(result.size(), rhs.size());
+    ShValueType rvt = result.valueType();
+    ShVariable temp(new ShVariableNode(SH_TEMP, rsize, rvt));
+    switch(next) {
+      case '+': shADD(temp, result, rhs); break;
+      case '-': shADD(temp, result, -rhs); break;
+    }
+    result = temp;
   }
   DOUT("expr1 = " << result);
   debugExit();
@@ -238,22 +253,25 @@ ShVariable ExprParser::parse_expr1() {
 
 ShVariable ExprParser::parse_expr2() { 
   debugEnter("expr2 */%");
-  ShVariable lhs = parse_expr3();
-  eatWs();
-  char next = peek();
-  if(next != '*' && next != '/' && next != '%') {
-    debugExit();
-    return lhs;
-  }
-  ++m_cur;
-  ShVariable rhs = parse_expr2();
-  int rsize = max(lhs.size(), rhs.size());
-  ShValueType rvt = lhs.valueType();
-  ShVariable result(new ShVariableNode(SH_TEMP, rsize, rvt));
-  switch(next) {
-    case '*': shMUL(result, lhs, rhs); break;
-    case '/': shDIV(result, lhs, rhs); break;
-    case '%': shMOD(result, lhs, rhs); break;
+  ShVariable result = parse_expr3();
+  while(true) {
+    eatWs();
+    char next = peek();
+    if(next != '*' && next != '/' && next != '%') {
+      break;
+    }
+    DOUT("operator " << next);
+    ++m_cur;
+    ShVariable rhs = parse_expr3();
+    int rsize = max(result.size(), rhs.size());
+    ShValueType rvt = result.valueType();
+    ShVariable temp(new ShVariableNode(SH_TEMP, rsize, rvt));
+    switch(next) {
+      case '*': shMUL(temp, result, rhs); break;
+      case '/': shDIV(temp, result, rhs); break;
+      case '%': shMOD(temp, result, rhs); break;
+    }
+    result = temp;
   }
   DOUT("expr2 = " << result);
   debugExit();
@@ -534,8 +552,11 @@ ShVariable ExprParser::makeVar(string shtype) {
       } else if(foo == "InOut" || foo == "IO") { kind = SH_INOUT;
       } else if(foo == "Const") { kind = SH_CONST;
 
+      } else if(foo == "d") { vt = SH_DOUBLE; 
       } else if(foo == "f") { vt = SH_FLOAT; 
       } else if(foo == "i") { vt = SH_INT; 
+      } else if(foo == "i_d") { vt = SH_I_DOUBLE; 
+      } else if(foo == "a_d") { vt = SH_A_DOUBLE; 
       } else if(foo == "i_f") { vt = SH_I_FLOAT; 
       } else if(foo == "a_f") { vt = SH_A_FLOAT; 
       } else if(!isdigit(foo[0])) {

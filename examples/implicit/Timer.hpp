@@ -27,18 +27,18 @@
 #include <sys/time.h>
 #endif /* WIN32 */
 
-class ShTimer{
+class Timer{
 public:
-  ShTimer(void);
-  ~ShTimer(void);
+  Timer(void);
+  ~Timer(void);
   
   float value(void);
   
-  static ShTimer now(void);
-  static ShTimer zero(void);
+  static Timer now(void);
+  static Timer zero(void);
   
-  friend ShTimer operator-(const ShTimer& a, const ShTimer& b);
-  friend ShTimer operator+(const ShTimer& a, const ShTimer& b);
+  friend Timer operator-(const Timer& a, const Timer& b);
+  friend Timer operator+(const Timer& a, const Timer& b);
   
 private:
 #ifdef WIN32

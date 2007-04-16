@@ -1,25 +1,21 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright 2003-2005 Serious Hack Inc.
+// Copyright 2003-2006 Serious Hack Inc.
 // 
-// This software is provided 'as-is', without any express or implied
-// warranty. In no event will the authors be held liable for any damages
-// arising from the use of this software.
-// 
-// Permission is granted to anyone to use this software for any purpose,
-// including commercial applications, and to alter it and redistribute it
-// freely, subject to the following restrictions:
-// 
-// 1. The origin of this software must not be misrepresented; you must
-// not claim that you wrote the original software. If you use this
-// software in a product, an acknowledgment in the product documentation
-// would be appreciated but is not required.
-// 
-// 2. Altered source versions must be plainly marked as such, and must
-// not be misrepresented as being the original software.
-// 
-// 3. This notice may not be removed or altered from any source
-// distribution.
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2.1 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+// MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 #include <sh/sh.hpp>
 #ifdef __APPLE__
@@ -34,16 +30,18 @@
 #endif
 #include "Camera.hpp"
 #include <iostream>
+#include <cstdio>
 
 using namespace SH;
 using namespace std;
 
-ShMatrix4x4f mv, mvd;
-ShPoint3f lightPos;
+Matrix4x4f mv, mvd;
+Point3f lightPos;
 Camera camera;
-ShProgramSet* shaders;
+Program vsh, fsh;
+ProgramSetPtr shaders;
 
-ShColor3f diffusecolor;
+Color3f diffusecolor;
 
 // Glut data
 int buttons[5] = {GLUT_UP, GLUT_UP, GLUT_UP, GLUT_UP, GLUT_UP};
@@ -55,54 +53,49 @@ bool show_help = false;
 
 void initShaders()
 {
-  ShProgram vsh = SH_BEGIN_VERTEX_PROGRAM {
-    ShInOutPosition4f pos;
-    ShInOutNormal3f normal;
-    ShOutputVector3f lightv;
+  vsh = SH_BEGIN_VERTEX_PROGRAM {
+    InOutPosition4f pos;
+    InOutNormal3f normal;
+    OutputVector3f lightv;
 
-    ShPoint3f posv = (mv | pos)(0,1,2); // Compute viewspace position
+    Point3f posv = (mv | pos)(0,1,2); // Compute viewspace position
     lightv = lightPos - posv; // Compute light direction
     
     pos = mvd | pos; // Project position
     normal = mv | normal; // Project normal
   } SH_END;
 
-  ShProgram fsh = SH_BEGIN_FRAGMENT_PROGRAM {
-    ShInputPosition4f pos;
-    ShInputNormal3f normal;
-    ShInputVector3f lightv;
+  fsh = SH_BEGIN_FRAGMENT_PROGRAM {
+    InputColor3f SH_DECL(kd); 
+    InputPosition4f pos;
+    InputNormal3f normal;
+    InputVector3f lightv;
 
-    ShOutputColor3f color;
+    OutputColor3f color;
 
     normal = normalize(normal);
     lightv = normalize(lightv);
     
-    color = (normal | lightv) * diffusecolor;
+    color = (normal | lightv) * kd; 
   } SH_END;
+  fsh = fsh << diffusecolor;
+  lock_in_uniforms(fsh);
+  cout << fsh.describe_binding_spec() << endl;
 
-  shaders = new ShProgramSet(vsh, fsh);
-
-#if 0
-  cout << "Vertex Unit:" << endl;
-  vsh.node()->code()->print(cout);
-  cout << "--" << endl;
-  cout << "Fragment Unit:" << endl;
-  fsh.node()->code()->print(cout);
-  cout << "--" << endl;
-#endif
+  shaders = new ProgramSet(vsh, fsh);
 }
 
 void display()
 {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  shBind(*shaders);
+  bind(*shaders);
 
   glFrontFace(GL_CW);
   glutSolidTeapot(2.5);
   glFrontFace(GL_CCW);
 
-  shUnbind(*shaders);
+  unbind(*shaders);
   
   // Help information
   if (show_help) {
@@ -121,8 +114,8 @@ void display()
 
 void setupView()
 {
-  mv = camera.shModelView();
-  mvd = camera.shModelViewProjection(ShMatrix4x4f());
+  mv = camera.modelView();
+  mvd = camera.modelViewProjection(Matrix4x4f());
 }
 
 void reshape(int width, int height)
@@ -171,16 +164,16 @@ void keyboard(unsigned char k, int x, int y)
 {
   switch(k) {
   case '1':
-    diffusecolor = ShColor3f(0.5, 0.1, 0.2);
+    diffusecolor = Color3f(0.5, 0.1, 0.2);
     break;
   case '2':
-    diffusecolor = ShColor3f(0.5, 0.7, 0.9);
+    diffusecolor = Color3f(0.5, 0.7, 0.9);
     break;
   case '3':
-    lightPos = ShPoint3f(5.0, 5.0, 5.0);
+    lightPos = Point3f(5.0, 5.0, 5.0);
     break;
   case '4':
-    lightPos = ShPoint3f(20.0, 20.0, 20.0);
+    lightPos = Point3f(20.0, 20.0, 20.0);
     break;
   case 'h':
   case 'H':
@@ -251,12 +244,9 @@ int main(int argc, char** argv)
   glutMotionFunc(motion);
   glutKeyboardFunc(keyboard);
 
-  std::string backend_name("arb");
   if (argc > 1) {
-    backend_name = argv[1];
+    useBackend(argv[1]);
   }
-  
-  shSetBackend(backend_name);
 
   glEnable(GL_DEPTH_TEST);
   glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -264,14 +254,29 @@ int main(int argc, char** argv)
 
   // Initial values for the uniforms
   camera.move(0.0, 0.0, -15.0);
-  lightPos = ShPoint3f(5.0, 5.0, 5.0);
-  diffusecolor = ShColor3f(0.5, 0.1, 0.2);
+  lightPos = Point3f(5.0, 5.0, 5.0);
+  diffusecolor = Color3f(0.5, 0.1, 0.2);
 
-  initShaders();
+  try {
+    initShaders();
+    bind(*shaders);
+  }
+  catch (const std::exception &e) {
+    cerr << e.what() << endl;
+#ifdef _WIN32
+    system("pause");
+#endif
+    return 1;
+  }
 
-  shBind(*shaders);
+#if 1
+  cout << "Vertex Unit:" << endl;
+  vsh.node()->code()->print(cout);
+  cout << "--" << endl;
+  cout << "Fragment Unit:" << endl;
+  fsh.node()->code()->print(cout);
+  cout << "--" << endl;
+#endif
 
   glutMainLoop();
-
-  delete shaders;
 }

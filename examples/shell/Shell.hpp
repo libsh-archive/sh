@@ -37,6 +37,9 @@ typedef std::vector<std::string> vecs;
  * meta "name" "key" "value"
  *    Sets metadata on a program
  *
+ * flag "name" "value"
+ *    Sets a flag in the context (either true or false)
+ *
  * print ("random_string" |  "var")
  *    Prints stuff (if token matches variable name, prints the variable, else
  *    echoes) 
@@ -69,12 +72,19 @@ typedef std::vector<std::string> vecs;
  * $1 $2 ... $n are replaced with argn in a file
  *
  */
+#define EXPECT(N) if(toks.size() < N) { cerr << "Expected " << N << " args " << endl; }
+
+class Shell;
+struct CommandProcessor {
+  inline virtual ~CommandProcessor() {}
+  virtual bool handle(Shell&, const vecs& toks) = 0;
+  virtual std::ostream& help(std::ostream& out) = 0;// print out a help message
+};
 class  Shell {
   public:
     // consume input
-    std::istream& start(std::istream& in, vecs args, bool prompt = true);
+    std::istream& start(std::istream& in, const vecs& args, CommandProcessor* comproc, bool prompt = true);
 
-  private:
     ExprParser ep;
 };
 

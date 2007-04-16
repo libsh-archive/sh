@@ -2,11 +2,12 @@
 #include <fstream>
 #include <string>
 #include <sh/sh.hpp>
-#include <sh/shutil.hpp>
+#include <shutil/shutil.hpp>
 #include <GL/glut.h>
 #include <GL/glext.h>
 #include <GL/glu.h>
 #include "Camera.hpp"
+#include "ColorFinder.hpp"
 
 using namespace std;
 using namespace SH;
@@ -15,7 +16,7 @@ using namespace ShUtil;
 int gprintf(int x, int y, char* fmt, ...);
 
 // replace with an RPN parser soon
-enum Graph {
+enum GraphMode {
   GR_PLANE, // just a plane with slope (MUL) 
   GR_POLY, // polynomial (tests MAD, ADD, MUL)
   GR_CAMEL, // six hump camel
@@ -29,10 +30,10 @@ enum Graph {
   GR_FLR, // floor (FLR)
   GR_FRAC, // frac
   GR_NORM, // norm
-*/
   GR_NOISE, // 1 octave 2D perlin noise 
   GR_TEX, // texture lookup (1D)
   GR_TEXI, // texture lookup (RECT)
+*/
   GR_LRP  // lerp between EXP and LOG (LRP, EXP, LOG)
 };
 const int NUMGRAPHS = (int)(GR_LRP) + 1;
@@ -40,7 +41,7 @@ const int NUMGRAPHS = (int)(GR_LRP) + 1;
 const int RES = 200;
 const int WIDTH = 2;
 
-const char* GraphName[] = {
+const char* GraphModeName[] = {
   "plane",
   "poly",
   "camel",
@@ -54,10 +55,10 @@ const char* GraphName[] = {
   "floor",
   "frac",
   "norm",
-  */
   "noise",
   "tex",
   "texi",
+  */
   "lrp"
 };
 
@@ -69,26 +70,26 @@ const char* LevelName[] = {
 };
 const int NUMLEVELS = 4;
 
-ShAttrib1f rangeWidth;
-ShAttrib1f gridWidth;
-ShAttrib1f eps;
-ShAttrib2f offset;
-ShAttrib1f myscale;
-ShAttrib1f depthScale;
-ShProgram vsh[NUMGRAPHS][NUMLEVELS], fsh;
-ShColor4f levelColor[NUMLEVELS];
+Attrib1f rangeWidth;
+Attrib1f gridWidth;
+Attrib1f eps;
+Attrib2f myoffset;
+Attrib1f myscale;
+Attrib1f depthScale;
+Program vsh[NUMGRAPHS][NUMLEVELS], fsh;
+Color4f levelColor[NUMLEVELS];
 //#define DBG_MODE
-Graph mode = GR_PLANE; 
+GraphMode mode = GR_PLANE; 
 Camera camera;
-ShMatrix4x4f mv, mvp;
+Matrix4x4f mv, mvp;
 
 
-ShAttrib<2, SH_TEMP, float> coeff[4]; 
+Attrib<2, SH_TEMP, float> coeff[4]; 
 
 const size_t TEX_SIZE = 128;
 // @todo range cannot deal with interpolation yet
-ShInterp<0, ShUnclamped<ShTexture2D<ShColor1f> > > tex(TEX_SIZE, TEX_SIZE);
-//ShUnclamped<ShTexture2D<ShColor1f> > tex(TEX_SIZE, TEX_SIZE);
+//Interp<0, Unclamped<Texture2D<Color1f> > > tex(TEX_SIZE, TEX_SIZE);
+//Unclamped<Texture2D<Color1f> > tex(TEX_SIZE, TEX_SIZE);
 
 // Glut data
 int buttons[5] = {GLUT_UP, GLUT_UP, GLUT_UP, GLUT_UP, GLUT_UP};
@@ -104,10 +105,10 @@ int cur_x, cur_y;
 struct PlotFunction {
   string m_name;
   PlotFunction(string name) : m_name(name) {}
-  ShProgram func(Graph g) {
-    ShProgram result = SH_BEGIN_PROGRAM() {
-        ShInputAttrib2f SH_NAMEDECL(t, m_name);
-        ShOutputAttrib1f SH_DECL(value);
+  Program func(GraphMode g) {
+    Program result = SH_BEGIN_PROGRAM() {
+        InputAttrib2f SH_NAMEDECL(t, m_name);
+        OutputAttrib1f SH_DECL(value);
 
         switch(g) {
           case GR_PLANE:
@@ -142,7 +143,6 @@ struct PlotFunction {
             value = frac(t); break;
           case GR_NORM:
             value = normalize(t); break;
-#endif
           case GR_NOISE:
             {
               value = perlin<1>(t); break;
@@ -157,6 +157,7 @@ struct PlotFunction {
             {
               value = tex[t]; break; 
             }
+#endif
 
           case GR_LRP:
             value = lerp(coeff[0](0), exp(t(0)), log(t(0))); break;
@@ -169,7 +170,7 @@ struct PlotFunction {
 };
 
 void initShaders() {
-    ShMatrix4x4f id;
+    Matrix4x4f id;
 
     rangeWidth.name("rangeWidth");
     rangeWidth = 0.1f; 
@@ -180,8 +181,8 @@ void initShaders() {
     eps.name("epsilon");
     eps = 0.01f; 
 
-    offset.name("offset");
-    offset = ShConstAttrib2f(0.0f, 0.0f);
+    myoffset.name("myoffset");
+    myoffset = ConstAttrib2f(0.0f, 0.0f);
     
     myscale.name("myscale");
     myscale = 1.0f; 
@@ -191,112 +192,112 @@ void initShaders() {
 
     for(int i = 0; i < 4; ++i) coeff[i].name("coeff");
 
-    ShColor4f SH_DECL(gridColor) = ShConstAttrib4f(0,0,0,1);
+    Color4f SH_DECL(gridColor) = ConstAttrib4f(0,0,0,1);
 
-    levelColor[0] = ShConstAttrib4f(0.5, 0.5, 0.5f, 0.0f); 
-    levelColor[1] = ShConstAttrib4f(1,1,1,1); 
-    levelColor[2] = ShConstAttrib4f(1,0,0,0.5f); 
-    levelColor[3] = ShConstAttrib4f(0,1,0,0.5f); 
+    for(int i = 0; i < 4; ++i) {
+      levelColor[i](0, 1, 2) = ColorFinder::color(ColorFinder::Set2, 4, i);
+      levelColor[i](3) = 1;
+    }
 
     PlotFunction plotfunc("texcoord");
 
     fsh = SH_BEGIN_PROGRAM("gpu:fragment") {
-      ShInputPosition4f SH_DECL(posh);
-      ShInOutColor4f SH_DECL(color);
+      InputPosition4f SH_DECL(posh);
+      InOutColor4f SH_DECL(color);
     } SH_END;
 
     for(int i = GR_PLANE; i <= GR_LRP; ++i) {
 #ifdef DBG_MODE // debugging
       if(i != mode) continue;
 #endif
-      ShProgram func = plotfunc.func(static_cast<Graph>(i));
-      ShProgram ifunc = inclusion(func);
+      Program func = plotfunc.func(static_cast<GraphMode>(i));
+      Program ifunc = inclusion(func);
 
-      func.node()->dump(std::string("func_") + GraphName[i]); 
-      ifunc.node()->dump(std::string("ifunc_") + GraphName[i]); 
+      func.node()->dump(std::string("func_") + GraphModeName[i]); 
+      ifunc.node()->dump(std::string("ifunc_") + GraphModeName[i]); 
 
-      ShProgram afunc = affine_inclusion_syms(func);
-      afunc.node()->dump(std::string("afunc_") + GraphName[i]); 
+      Program afunc = affine_inclusion_syms(func);
+      afunc.node()->dump(std::string("afunc_") + GraphModeName[i]); 
 
 
       for(int j = 0; j < NUMLEVELS; ++j) {
         vsh[i][j] = SH_BEGIN_PROGRAM() {
-          ShInOutPosition4f SH_DECL(posm);
-          ShInOutTexCoord2f SH_DECL(texcoord);
-          ShOutputColor4f SH_DECL(color);
+          InOutPosition4f SH_DECL(posm);
+          InOutTexCoord2f SH_DECL(texcoord);
+          OutputColor4f SH_DECL(color);
 
-          // map to actual texcoord based on offset and scale 
-          texcoord = mad(texcoord, myscale, offset);
+          // map to actual texcoord based on myoffset and scale 
+          texcoord = mad(texcoord, myscale, myoffset);
 
 
-          ShAttrib1f SH_DECL(posm_offset);
+          Attrib1f SH_DECL(posm_myoffset);
           switch(j) {
             case 0:
               {
-                posm_offset = ShConstAttrib1f(0.0f);
+                posm_myoffset = ConstAttrib1f(0.0f);
                 break;
               }
             case 1:
               {
-                ShAttrib1f SH_DECL(val) = func(texcoord);  // evaluate function 
-                posm_offset = val;  
+                Attrib1f SH_DECL(val) = func(texcoord);  // evaluate function 
+                posm_myoffset = val;  
                 break;
               }
             case 2:
             case 3:
               {
-                ShAttrib2f start = floor(texcoord / rangeWidth) * rangeWidth; 
-                ShAttrib2f end = ceil(texcoord / rangeWidth) * rangeWidth; 
+                Attrib2f start = floor(texcoord / rangeWidth) * rangeWidth; 
+                Attrib2f end = ceil(texcoord / rangeWidth) * rangeWidth; 
 
 #if 1
-                ShAttrib2a_f SH_DECL(range) = make_interval(start, end);
-                ShAttrib2f SH_DECL(center) = range_center(range);
+                Attrib2a_f SH_DECL(range) = make_interval(start, end);
+                Attrib2f SH_DECL(center) = range_center(range);
 
-                ShAttrib1a_f SH_DECL(result_range) = afunc(range);
-                ShAttrib1f SH_DECL(result_center) = range_center(result_range);
+                Attrib1a_f SH_DECL(result_range) = afunc(range);
+                Attrib1f SH_DECL(result_center) = range_center(result_range);
 
-                ShAttrib2f SH_DECL(result_inerr);
+                Attrib2f SH_DECL(result_inerr);
                 result_inerr(0) = affine_lasterr(result_range, range(0));
                 result_inerr(1) = affine_lasterr(result_range, range(1));
                 
-                ShAttrib1f SH_DECL(result_radius) = range_radius(result_range);
-                ShAttrib1f SH_DECL(result_other) = result_radius - sum(abs(result_inerr));
+                Attrib1f SH_DECL(result_radius) = range_radius(result_range);
+                Attrib1f SH_DECL(result_other) = result_radius - sum(abs(result_inerr));
 
                 // get high and low points at this texcoord
-                ShAttrib1f SH_DECL(approx_center) = result_center + (((texcoord - center) * rcp(range_radius(range))) | result_inerr);
+                Attrib1f SH_DECL(approx_center) = result_center + (((texcoord - center) * rcp(range_radius(range))) | result_inerr);
                 if(j == 2) {
-                  posm_offset = approx_center + result_other;
+                  posm_myoffset = approx_center + result_other;
                 } else {
-                  posm_offset = approx_center - result_other;
+                  posm_myoffset = approx_center - result_other;
                 }
 #else // IA 
-                ShAttrib2i_f SH_DECL(range) = make_interval(start, end);
-                ShAttrib1i_f SH_DECL(result_rangei) = ifunc(range);
+                Attrib2i_f SH_DECL(range) = make_interval(start, end);
+                Attrib1i_f SH_DECL(result_rangei) = ifunc(range);
                 if(j == 2) {
-                  posm_offset = range_hi(result_rangei);
+                  posm_myoffset = range_hi(result_rangei);
                 } else {
-                  posm_offset = range_lo(result_rangei);
+                  posm_myoffset = range_lo(result_rangei);
                 }
 #endif
                 break;
               }
           }
-          posm(2) += posm_offset * depthScale;
+          posm(2) += posm_myoffset * depthScale;
 
           // check if in grid
-          ShAttrib2f diff = abs(texcoord - gridWidth * floor(texcoord * rcp(gridWidth))); 
-          ShAttrib1f inGrid = (diff(0) < eps) + (diff(1) < eps) > 0.0f; 
+          Attrib2f diff = abs(texcoord - gridWidth * floor(texcoord * rcp(gridWidth))); 
+          Attrib1f inGrid = (diff(0) < eps) + (diff(1) < eps) > 0.0f; 
 
           color = lerp(inGrid, gridColor, levelColor[j]); 
         } SH_END;
-        vsh[i][j] = namedConnect(vsh[i][j], ShKernelLib::shVsh(mv, mvp), true);//
+        vsh[i][j] = namedConnect(vsh[i][j], KernelLib::vsh(mv, mvp), true);//
 
         // @todo debug
-        //vsh[i][j] = ShKernelLib::shVsh(mv, mvp);
+        //vsh[i][j] = KernelLib::vsh(mv, mvp);
 
-        vsh[i][j] = vsh[i][j] << shExtract("lightPos") << ShConstAttrib3f(0, 0, 0);
+        vsh[i][j] = vsh[i][j] << extract("lightPos") << ConstAttrib3f(0, 0, 0);
         vsh[i][j] = namedAlign(vsh[i][j], fsh);
-        vsh[i][j].node()->dump(std::string("vsh") + GraphName[i] + LevelName[j]);
+        vsh[i][j].node()->dump(std::string("vsh") + GraphModeName[i] + LevelName[j]);
       }
     }
 }
@@ -311,20 +312,20 @@ void display()
     // @todo debug
     //for(int i = 0; i < 2; ++i) {
     for(int i = 0; i < NUMLEVELS; ++i) {
-      shBind(vsh[mode][i]);
+      bind(vsh[mode][i]);
       glCallList(displayList);
     }
-  } catch(const ShException &e) {
+  } catch(const Exception &e) {
     cout << "Error: " << e.message() << endl;
   } catch(...) {
     cout << "Caught unknown error: " << endl;
   }
 
-  gprintf(30, 120, "Sh Graph Info");
-  gprintf(30, 100, "Mode - %s", GraphName[mode]);
+  gprintf(30, 120, "Sh GraphMode Info");
+  gprintf(30, 100, "Mode - %s", GraphModeName[mode]);
   gprintf(30, 80, "Width - %f", rangeWidth.getValue(0));
   gprintf(30, 60, "Scale - %f", myscale.getValue(0)); 
-  gprintf(30, 40, "Offset - (%f, %f)", offset.getValue(0), offset.getValue(1));
+  gprintf(30, 40, "Offset - (%f, %f)", myoffset.getValue(0), myoffset.getValue(1));
   gprintf(30, 20, "Depth Scale - %f", depthScale.getValue(0)); 
   gprintf(30, 0, "Grid Width - %f", gridWidth.getValue(0)); 
 
@@ -355,7 +356,8 @@ void setup()
   }
   glEndList();
 
-  ShHostMemoryPtr texmem = new ShHostMemory(TEX_SIZE * TEX_SIZE * sizeof(float));
+/*
+  HostMemoryPtr texmem = new HostMemory(TEX_SIZE * TEX_SIZE * sizeof(float));
   float* data = reinterpret_cast<float*>(texmem->hostStorage()->data());
   for(size_t i = 0; i < TEX_SIZE; ++i) {
     for(size_t j = 0; j < TEX_SIZE; ++j) {
@@ -365,12 +367,13 @@ void setup()
   }
 
   tex.memory(texmem);
+*/
 }
 
 void setupView()
 {
-  mv = camera.shModelView();
-  mvp = camera.shModelViewProjection(ShMatrix4x4f());
+  mv = camera.modelView();
+  mvp = camera.modelViewProjection(Matrix4x4f());
 }
 
 void reshape(int width, int height)
@@ -386,8 +389,8 @@ void motion(int x, int y)
   bool changed = false;
   
   if (buttons[GLUT_LEFT_BUTTON] == GLUT_DOWN) {
-    offset(0) -= (x - cur_x) / factor * myscale;
-    offset(1) += (y - cur_y) / factor * myscale;
+    myoffset(0) -= (x - cur_x) / factor * myscale;
+    myoffset(1) += (y - cur_y) / factor * myscale;
     changed = true;
   }
   if (buttons[GLUT_MIDDLE_BUTTON] == GLUT_DOWN) {
@@ -463,10 +466,10 @@ void keyboard(unsigned char k, int x, int y)
       case '(': coeff[2](1) += 0.1f; break;
 
       case '+': if(mode == GR_LRP) mode = GR_PLANE; 
-                else mode = static_cast<Graph>(mode + 1);
+                else mode = static_cast<GraphMode>(mode + 1);
                 break;
       case '-': if(mode == GR_PLANE) mode = GR_LRP; 
-                else mode = static_cast<Graph>(mode - 1);
+                else mode = static_cast<GraphMode>(mode - 1);
                 break;
     }
   glutPostRedisplay();
@@ -474,7 +477,7 @@ void keyboard(unsigned char k, int x, int y)
 
 int main(int argc, char** argv)
 {
-  for(int i = 0; i < 4; ++i) coeff[i] = ShConstAttrib2f(1.0f, 1.0f);
+  for(int i = 0; i < 4; ++i) coeff[i] = ConstAttrib2f(1.0f, 1.0f);
 
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
@@ -486,7 +489,7 @@ int main(int argc, char** argv)
   glutMotionFunc(motion);
   glutKeyboardFunc(keyboard);
   
-  shSetBackend("arb");
+  setBackend("arb");
 
   glEnable(GL_DEPTH_TEST);
   std::cout << gluErrorString(glGetError()) << std::endl;
@@ -494,7 +497,7 @@ int main(int argc, char** argv)
   std::cout << gluErrorString(glGetError()) << std::endl;
   glEnable(GL_FRAGMENT_PROGRAM_ARB);
   std::cout << gluErrorString(glGetError()) << std::endl;
-  glClearColor(0.0, 0.0, 1.0, 1.0);
+  glClearColor(0.75, 0.75, 0.75, 1.0);
   std::cout << gluErrorString(glGetError()) << std::endl;
   setup();
   std::cout << gluErrorString(glGetError()) << std::endl;
@@ -505,8 +508,8 @@ int main(int argc, char** argv)
 
   try {
     initShaders();
-    shBind(fsh);
-  } catch(const ShException &e) {
+    bind(fsh);
+  } catch(const Exception &e) {
     cout << "Error: " << e.message() << endl;
   } catch(...) {
     cout << "Caught unknown error: " << endl;

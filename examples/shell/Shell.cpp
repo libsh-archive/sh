@@ -1,3 +1,4 @@
+#include <iomanip>
 #include <sstream>
 #include <fstream>
 #include <ctype.h>
@@ -39,9 +40,45 @@ void runit(string cmd, string arg) {
   }
 }
 
-#define EXPECT(N) if(toks.size() < N) { cerr << "Expected " << N << " args " << endl; }
+std::ostream& help(std::ostream& out) {
+  out << "Expressions:" << endl;
+  out << "Anything that does not match a command parses as a global expression" << endl << endl;
 
-std::istream& Shell::start(std::istream& in, vecs args, bool prompt) {
+  out << "Expression Syntax: " << endl;
+  out << left << setw(40) << "  Var Names:" << "Any [A-Za-z_]+" << endl;
+  out << left << setw(40) << "  Declarations:" << "@Attrib1f x = expr; (initializer optional)" << endl;
+  out << left << setw(40) << "  Constants:" << "@Attrib1i_f ( -1.0, 1.0 ) or 5.0" << endl;
+  out << left << setw(40) << "  Func Call:" << "f(a, b, c)" << endl;
+  out << left << setw(40) << "  Swizzle:" << "a(1, 2, 0)" << endl;
+  out << left << setw(40) << "  Operators:" << "= | + - * / %" << endl;
+
+  out << "Argument replacement:" << endl;
+  out << "$1 $2 ... $n are replaced with argn in a file" << endl << endl;
+
+  out << "Commands:" << endl;
+  out << left << setw(40) << "p \"name\"" <<  "Starts expr parser to specify a program (use line containing only \"p\" to end)" <<endl;
+  out << left << setw(40) << "c" << "Starts immediate mode computation" << endl;
+  out << left << setw(40) << "dot \"name\"" << "Dumps dot graph of \"name\"" << endl;
+  out << left << setw(40) << "incl \"func\" \"ifunc\"" << "Interval inclusion of func" << endl;
+  out << left << setw(40) << "aincl \"func\" \"afunc\"" << "Affine inclusion of func" << endl;
+  out << left << setw(40) << "conv \"func\" \"cfunc\"" << "IA, AA to float conversion " << endl;
+  out << left << setw(40) << "meta \"name\" \"key\" \"value\"" << "Sets metadata on a program" << endl;
+  out << left << setw(40) << "flag \"name\" \"value\"" << "Sets flag in the context (true or false)" << endl;
+  out << left << setw(40) << "print expression" << "Prints expression" << endl; 
+  out << left << setw(40) << "stream \"name\" \"var1\" \"var2\" ... " << "Makes a single-element stream using the given float variables as channels. " << endl;
+  out << left << setw(40) << "apply \"out_stream\" \"func\" \"in_stream\"" << endl; 
+  out << left << setw(40) << "r \"filename\" arg1 arg2 ..." << "Executes commands in filename" << endl;
+  out << left << setw(40) << "b \"backend\"" << "Executes shSetBackend(\"backend\")" << endl;
+  out << left << setw(40) << "dump" << "Dumps current expression parser state" << endl;
+  out << left << setw(40) << "// or #" <<  "comments (note that to disambiguate, # must be followed by a space)" << endl;
+  out << left << setw(40) << "q" << "Quits" << endl;
+
+
+
+  return out;
+}
+
+std::istream& Shell::start(std::istream& in, const vecs& args, CommandProcessor* comproc, bool prompt) {
 #define BUFLEN 1000
   char buf[BUFLEN];
   enum State {
@@ -110,10 +147,15 @@ std::istream& Shell::start(std::istream& in, vecs args, bool prompt) {
         try {
 
           if(toks.size() > 0) {
-            if(toks[0] == "p") { EXPECT(2); 
+            if (toks[0] == "help") {
+              help(std::cerr);
+              if(comproc) comproc->help(std::cerr);
+            } else if(toks[0] == "p") { EXPECT(2); 
               name = toks[1];
+              prog = "";
               s = INPROG;
             } else if (toks[0] == "c") {
+              prog = "";
               s = INCODE;
             } else if (toks[0] == "dot") { EXPECT(2);
               name = toks[1];
@@ -150,17 +192,20 @@ std::istream& Shell::start(std::istream& in, vecs args, bool prompt) {
 
             } else if (toks[0] == "meta") { EXPECT(4);
               std::cerr << toks[1] << ".meta(" << toks[2] << ") = " << toks[3] << endl;
-              ep[toks[1]].meta(toks[2], toks[3]);
+              ShProgram p = ep[toks[1]];
+              p.meta(toks[2], toks[3]);
+              std::cerr << toks[2] << ":" << p.meta(toks[2]) << endl;
 
+            } else if (toks[0] == "flag") { EXPECT(3);
+              std::cerr << "set_flag(" << toks[1] << "," << toks[2]  << ")" << endl; 
+              ShContext::current()->set_flag(toks[1], toks[2] == "true");
             } else if (toks[0] == "print") { EXPECT(2);
+              string expr;
               for(size_t i = 1; i < toks.size(); ++i) {
-                if(ep.hasVar(toks[i])) {
-                  std::cout << ep.getVar(toks[i]) << " ";
-                } else {
-                  std::cout << toks[i] << " ";
-                }
+                expr += toks[i] + " ";
               }
-              std::cout << endl;
+              std::cout << ep.parse_expr(expr) << endl;
+
             } else if (toks[0] == "stream") { EXPECT(3);
               name = toks[1];
               ShStream result; 
@@ -192,7 +237,7 @@ std::istream& Shell::start(std::istream& in, vecs args, bool prompt) {
               for(size_t i = 2; i < toks.size(); ++i) {
                 args.push_back(toks[i]);
               }
-              start(fin, args, false);
+              start(fin, args, comproc, false);
 
             } else if (toks[0] == "b") { EXPECT(2);
               shSetBackend(toks[1]);
@@ -214,6 +259,8 @@ std::istream& Shell::start(std::istream& in, vecs args, bool prompt) {
             } else if (toks[0] == "q") {
               cout << endl << "Quitting" << endl;
               exit(EXIT_SUCCESS);
+            } else if (comproc && comproc->handle(*this, toks)) {
+              std::cerr << "comproc handler" << endl;
             } else {
               prog = buf;
               prog += ";";

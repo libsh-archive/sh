@@ -9,7 +9,7 @@
 /* Reverse Polish notation parser executes Sh statements using the given 
  * variables in the symbol table when it encounters strings
  * and generating constants when it encounters floats.
- * (If execute is called within a ShProgram definition, then 
+ * (If execute is called within a Program definition, then 
  * the ops are collected into the program)
  *
  * Currently supported operators:
@@ -23,23 +23,23 @@ class RPN {
   public:
     RPN();
 
-    void addDecl(std::string name, SH::ShVariable var); 
+    void addDecl(std::string name, SH::Variable var); 
     void execute(std::string code);
 
   private:
-    typedef std::map<std::string, SH::ShVariable> SymbolTable; 
+    typedef std::map<std::string, SH::Variable> SymbolTable; 
     SymbolTable symtab;
 
-    typedef std::stack<SH::ShVariable> VarStack;
+    typedef std::stack<SH::Variable> VarStack;
     VarStack stk;
 
-    SH::ShVariable pop();
-    void push(SH::ShVariable v);
+    SH::Variable pop();
+    void push(SH::Variable v);
     void clear();
 
     // binary operation that pushes result as a temp onto stack
-    void tempBinaryOp(SH::ShOperation op, int destSize = 0);
-    void tempUnaryOp(SH::ShOperation op);
+    void tempBinaryOp(SH::Operation op, int destSize = 0);
+    void tempUnaryOp(SH::Operation op);
 };
 
 #endif

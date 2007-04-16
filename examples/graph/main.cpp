@@ -2,11 +2,12 @@
 #include <fstream>
 #include <string>
 #include <sh/sh.hpp>
-#include <sh/shutil.hpp>
+#include <shutil/shutil.hpp>
 #include <GL/glut.h>
 #include <GL/glext.h>
 #include <GL/glu.h>
 #include "Camera.hpp"
+#include "ColorFinder.hpp"
 
 using namespace std;
 using namespace SH;
@@ -17,8 +18,10 @@ using namespace ShUtil;
 
 int gprintf(int x, int y, char* fmt, ...);
 
+//#define DBG_MODE
+
 // replace with an RPN parser soon
-enum Graph {
+enum GraphMode {
   GR_LINE, // just a line with slope (MUL) 
   GR_POLY, // polynomial (tests MAD, ADD, MUL)
   GR_RATPOLY, // rational polynomial (MAD, ADD, MUL, RCP, DIV)
@@ -30,17 +33,19 @@ enum Graph {
   GR_FLR, // floor (FLR)
   GR_FRAC, // frac
   GR_NORM, // norm
+  /*
   GR_NOISE, // perlin noise
   GR_TEX, // texture lookup (1D)
   GR_TEXI, // texture lookup (RECT)
+  */
   GR_POS, // positive of a polynomial 
   GR_MAX, // max of EXP and LOG 
   GR_MIN, // min of EXP and LOG 
   GR_LRP  // lerp between EXP and LOG (LRP, EXP, LOG)
-};
+} mode = GR_POLY;
 const int NUMGRAPHS = (int)(GR_LRP) + 1;
 
-const char* GraphName[] = {
+const char* GraphModeName[] = {
   "line",
   "poly",
   "ratpoly",
@@ -52,33 +57,33 @@ const char* GraphName[] = {
   "floor",
   "frac",
   "norm",
+  /*
   "noise",
   "tex",
   "texi",
+  */
   "pos",
   "max",
   "min",
   "lrp"
 };
 
-ShAttrib1f rangeWidth;
-ShAttrib1f eps;
-ShAttrib2f offset;
-ShAttrib1f myscale;
-ShAttrib1f myscale2;
-ShAttrib1f edge;
-ShAttrib1f edge2;
-ShAttrib1f edge3;
-ShProgram vsh, fsh[NUMGRAPHS];
-//#define DBG_MODE
-Graph mode = GR_POLY; 
+Attrib1f rangeWidth;
+Attrib1f eps;
+Attrib2f myoffset;
+Attrib1f myscale;
+Attrib1f myscale2;
+Attrib1f edge;
+Attrib1f edge2;
+Attrib1f edge3;
+Program vsh, fsh[NUMGRAPHS];
 
-ShAttrib<5, SH_TEMP, float> coeff;
-ShAttrib<3, SH_TEMP, float> denom;
+Attrib<5, SH_TEMP, float> coeff;
+Attrib<3, SH_TEMP, float> denom;
 
-const size_t TEX_SIZE = 128;
+//const size_t TEX_SIZE = 128;
 // @todo range cannot deal with interpolation yet
-ShInterp<0, ShUnclamped<ShTexture1D<ShColor1f> > > tex(TEX_SIZE);
+//Interp<0, Unclamped<Texture1D<Color1f> > > tex(TEX_SIZE);
 
 // Glut data
 int buttons[5] = {GLUT_UP, GLUT_UP, GLUT_UP, GLUT_UP, GLUT_UP};
@@ -94,10 +99,10 @@ int cur_x, cur_y;
 struct PlotFunction {
   string m_name;
   PlotFunction(string name) : m_name(name) {}
-  ShProgram func(Graph g) {
-    ShProgram result = SH_BEGIN_PROGRAM() {
-        ShInputAttrib1f SH_NAMEDECL(t, m_name);
-        ShOutputAttrib1f SH_DECL(value);
+  Program func(GraphMode g) {
+    Program result = SH_BEGIN_PROGRAM() {
+        InputAttrib1f SH_NAMEDECL(t, m_name);
+        OutputAttrib1f SH_DECL(value);
 
         switch(g) {
           case GR_LINE:
@@ -129,6 +134,7 @@ struct PlotFunction {
           case GR_NORM:
             value = normalize(t); break;
 
+/*
           case GR_NOISE:
             value = perlin<1>(t); break;
 
@@ -141,6 +147,7 @@ struct PlotFunction {
             {
               value = tex[t]; break; 
             }
+*/
           case GR_POS:
             {
               value = pos(t * mad(t, mad(t, coeff(3), coeff(2)), coeff(1)) + coeff(0)); break; 
@@ -162,9 +169,9 @@ struct PlotFunction {
 };
 
 void initShaders() {
-    ShMatrix4x4f id;
-    vsh = ShKernelLib::shVsh(id, id);
-    vsh = vsh << shExtract("lightPos") << ShConstAttrib3f(0, 0, 0);
+    Matrix4x4f id;
+    vsh = KernelLib::vsh(id, id);
+    vsh = vsh << extract("lightPos") << ConstAttrib3f(0, 0, 0);
 
     rangeWidth.name("rangeWidth");
     rangeWidth = 0.1f; 
@@ -172,8 +179,8 @@ void initShaders() {
     eps.name("epsilon");
     eps = 0.005f; 
 
-    offset.name("offset");
-    offset = ShConstAttrib2f(0.0f, 0.0f);
+    myoffset.name("myoffset");
+    myoffset = ConstAttrib2f(0.0f, 0.0f);
     
     myscale.name("myscale");
     myscale = 5.0f; 
@@ -182,82 +189,85 @@ void initShaders() {
     myscale2 = 20.0; 
 
     edge.name("edge");
-    edge = 0.1;
+    edge = 0.01;
 
-    edge2.name("edge");
+    edge2.name("edge2");
     edge2 = 0.01;
 
-    edge3.name("edge");
+    edge3.name("edge3");
     edge3 = 0.01;
 
     coeff.name("coeff");
     denom.name("denom");
 
-    ShColor3f SH_DECL(funcColor) = ShConstAttrib3f(0, 0, 0);
-    ShColor3f SH_DECL(bkgdColor) = ShConstAttrib3f(1, 1, 1);
-    ShColor3f SH_DECL(gridColor) = ShConstAttrib3f(0, 0, 1);
-    ShColor3f SH_DECL(inrangeColor) = ShConstAttrib3f(0, 0, 0);
-    ShColor3f SH_DECL(edgeColor) = ShConstAttrib3f(0.5,0.5,0.5);
+    Color3f SH_DECL(funcColor) = ConstAttrib3f(0, 0, 0);
+    Color3f SH_DECL(bkgdColor) = ConstAttrib3f(1, 1, 1);
+    Color3f SH_DECL(gridColor) = ConstAttrib3f(.25, .25, .25);
+    Color3f SH_DECL(inrangeColor) = ConstAttrib3f(0, 0, 0);
+    Color3f SH_DECL(edgeColor) = ConstAttrib3f(0.5,0.5,0.5);
 
-    ShColor3f SH_DECL(aaColor) = ShConstAttrib3f(1, 0.75, 0.25); 
-    ShColor3f SH_DECL(iaColor) = ShConstAttrib3f(0.5, 0.25, 1);
+    Color3f SH_DECL(aaColor) = ColorFinder::color(ColorFinder::Dark2, 3, 0); 
+    Color3f SH_DECL(iaColor) = ColorFinder::color(ColorFinder::Dark2, 3, 1); 
+    cout << aaColor << endl << iaColor << endl;
 
     // take plot function, find if there's an intersection,
     // kill if no isct
     // or use the gradient function to get a normal if there is an isct. 
     PlotFunction plotfunc("texcoord");
 
+    Context::current()->set_flag("aa_enable_um", false); // disabling unique merging
+    //Context::current()->optimization(0);
     for(int i = GR_LINE; i <= GR_LRP; i = i + 1) {
 #ifdef DBG_MODE // debugging
       if(i != mode) continue;
 #endif
-      ShProgram func = plotfunc.func(static_cast<Graph>(i));
-      ShProgram ifunc = inclusion(func);
+      Program func = plotfunc.func(static_cast<GraphMode>(i));
+      Program ifunc = inclusion(func);
 
-      func.node()->dump(std::string("func_") + GraphName[i]); 
-      ifunc.node()->dump(std::string("ifunc_") + GraphName[i]); 
+      func.node()->dump(std::string("func_") + GraphModeName[i]); 
+      ifunc.node()->dump(std::string("ifunc_") + GraphModeName[i]); 
 
-      ShProgram afunc = affine_inclusion_syms(func);
-      afunc.node()->dump(std::string("afunc_") + GraphName[i]); 
+      Program afunc = affine_inclusion_syms(func);
+      afunc.node()->dump(std::string("afunc_") + GraphModeName[i]); 
 
-      // if programs could take ShProgram parameters, we wouldn't have to do this 
+      // if programs could take Program parameters, we wouldn't have to do this 
       // (although this could be factored out in C++ too...)
       fsh[i] = SH_BEGIN_FRAGMENT_PROGRAM {
-        ShInputTexCoord2f SH_DECL(texcoord);
-        ShInputPosition4f SH_DECL(posh);
+        InputTexCoord2f SH_DECL(texcoord);
+        InputPosition4f SH_DECL(posh);
 
-        ShOutputColor3f SH_DECL(color);
+        OutputColor3f SH_DECL(color);
 
-        ShPoint2f pos = texcoord * myscale + offset;
+        Point2f pos = texcoord * myscale + myoffset;
 
-        ShAttrib1f scaled_eps = eps * myscale;
-        ShAttrib1f SH_DECL(inGrid) = 0.0f;
-        ShAttrib1f SH_DECL(inEdge) = 0.0f;
-        ShAttrib1f SH_DECL(inCurve) = 0.0f; 
-        ShAttrib1f SH_DECL(inRange) = 0.0f;
-        ShColor3f rangeColor = inrangeColor; 
+        Attrib1f scaled_eps = eps * myscale;
+        Attrib1f SH_DECL(inGrid) = 0.0f;
+        Attrib1f SH_DECL(inEdge) = 0.0f;
+        Attrib1f SH_DECL(inCurve) = 0.0f; 
+        Attrib1f SH_DECL(inRange) = 0.0f;
+        Color3f rangeColor = inrangeColor; 
 
         // check if in curve
-        ShAttrib1f SH_DECL(val) = func(pos(0));  // evaluate function 
-        ShAttrib1f deriv = abs(dx(val));
+        Attrib1f SH_DECL(val) = func(pos(0));  // evaluate function 
+        Attrib1f deriv = abs(dx(val));
         inCurve = abs(val - pos(1)) < scaled_eps * myscale2 * deriv; 
 
         // check if in range
 
-        ShAttrib1f start = floor(pos(0) / rangeWidth) * rangeWidth; 
-        ShAttrib1f end = ceil(pos(0) / rangeWidth) * rangeWidth; 
-        ShAttrib1a_f SH_DECL(range) = make_interval(start, end);
-        ShAttrib1f SH_DECL(center) = range_center(range);
+        Attrib1f start = floor(pos(0) / rangeWidth) * rangeWidth; 
+        Attrib1f end = ceil(pos(0) / rangeWidth) * rangeWidth; 
+        Attrib1a_f SH_DECL(range) = make_interval(start, end);
+        Attrib1f SH_DECL(center) = range_center(range);
 
         // check if in affine range
 #if SHOWAA
-        ShAttrib1a_f SH_DECL(result_range) = afunc(range);
-        ShAttrib1f SH_DECL(result_center) = range_center(result_range);
-        ShAttrib1f SH_DECL(result_inerr) = affine_lasterr(result_range, range);
-        ShAttrib1f SH_DECL(result_radius) = range_radius(result_range);
-        ShAttrib1f SH_DECL(result_other) = result_radius - abs(result_inerr);
+        Attrib1a_f SH_DECL(result_range) = afunc(range);
+        Attrib1f SH_DECL(result_center) = range_center(result_range);
+        Attrib1f SH_DECL(result_inerr) = affine_lasterr(result_range, range);
+        Attrib1f SH_DECL(result_radius) = range_radius(result_range);
+        Attrib1f SH_DECL(result_other) = result_radius - abs(result_inerr);
 
-        ShAttrib1f errValue = (pos(0) - center) / range_radius(range);
+        Attrib1f errValue = (pos(0) - center) / range_radius(range);
         
         inRange = abs(errValue * result_inerr + result_center - pos(1)) < result_other;
         rangeColor = cond(inRange, aaColor, rangeColor);
@@ -279,13 +289,13 @@ void initShaders() {
 
         // check if in IA range
 #if SHOWIA 
-        ShAttrib1i_f SH_DECL(rangei) = make_interval(start, end); 
-        ShAttrib1i_f SH_DECL(result_rangei) = ifunc(rangei);
+        Attrib1i_f SH_DECL(rangei) = make_interval(start, end); 
+        Attrib1i_f SH_DECL(result_rangei) = ifunc(rangei);
 
-        ShAttrib1f SH_DECL(inRangei);
+        Attrib1f SH_DECL(inRangei);
         inRangei = range_lo(range_contains(result_rangei, pos(1)));
         rangeColor = cond(inRangei && !inRange, iaColor, aaColor);
-        //rangeColor(1) = lerp(inRange, ShConstAttrib1f(0.0f), inRangei); 
+        //rangeColor(1) = lerp(inRange, ConstAttrib1f(0.0f), inRangei); 
         inRange = inRange || inRangei;
 
         inEdge = inEdge || (inRangei && 
@@ -305,11 +315,12 @@ void initShaders() {
         //color=pos(0,1,0);
         //color = abs(dx(val))(0, 0, 0) * myscale2;
         //color = inCurve(0,0,0);
+        Context::current()->parsing()->name(std::string("initial_fsh_") + GraphModeName[i]);
       } SH_END;
 
-      fsh[i].node()->dump(std::string("fsh_") + GraphName[i]);
-      fsh[i].name(std::string("fsh_") + GraphName[i]);
-      fsh[i].meta("aa_disable_uniqmerge", "true"); // disabling unique merging
+      fsh[i].name(string("fsh_") + GraphModeName[i]);
+      placeAaSyms(fsh[i].node(), true);
+      fsh[i].node()->dump(std::string("fsh_") + GraphModeName[i]);
     }
     vsh = namedAlign(vsh, fsh[mode]);
     vsh.name("vsh");
@@ -324,8 +335,8 @@ void display()
 
   glCallList(displayList);
 
-  gprintf(30, 100, "Sh Graph Info");
-  gprintf(30, 80, "Mode - %s", GraphName[mode]);
+  gprintf(30, 100, "Sh GraphMode Info");
+  gprintf(30, 80, "Mode - %s", GraphModeName[mode]);
   gprintf(30, 60, "Width - %f", rangeWidth.getValue(0));
 
   glutSwapBuffers();
@@ -354,13 +365,15 @@ void setup()
     glEnd();
   glEndList();
 
-  ShHostMemoryPtr texmem = new ShHostMemory(TEX_SIZE * sizeof(float));
+/*
+  HostMemoryPtr texmem = new HostMemory(TEX_SIZE * sizeof(float));
   float* data = reinterpret_cast<float*>(texmem->hostStorage()->data());
   for(size_t i = 0; i < TEX_SIZE; ++i) {
     data[i] = 0.5 + 0.5 * sin(M_PI * 2.0 * i / float(TEX_SIZE));   
   }
 
   tex.memory(texmem);
+*/
 }
 
 void reshape(int width, int height)
@@ -375,8 +388,8 @@ void motion(int x, int y)
   bool changed = false;
   
   if (buttons[GLUT_LEFT_BUTTON] == GLUT_DOWN) {
-    offset(0) -= (x - cur_x) / factor * myscale;
-    offset(1) += (y - cur_y) / factor * myscale;
+    myoffset(0) -= (x - cur_x) / factor * myscale;
+    myoffset(1) += (y - cur_y) / factor * myscale;
     changed = true;
   }
   if (buttons[GLUT_MIDDLE_BUTTON] == GLUT_DOWN) {
@@ -437,11 +450,11 @@ void keyboard(unsigned char k, int x, int y)
       case '(': denom(2) += 0.1f; break;
 
       case '+': if(mode == GR_LRP) mode = GR_LINE; 
-                else mode = static_cast<Graph>(mode + 1);
-                shBind(fsh[mode]); break;
+                else mode = static_cast<GraphMode>(mode + 1);
+                bind(fsh[mode]); break;
       case '-': if(mode == GR_LINE) mode = GR_LRP; 
-                else mode = static_cast<Graph>(mode - 1);
-                shBind(fsh[mode]); break;
+                else mode = static_cast<GraphMode>(mode - 1);
+                bind(fsh[mode]); break;
 
       case 'a': myscale2 *= 1.05f; break;
       case 'z': myscale2 /= 1.05f; break; 
@@ -475,7 +488,7 @@ int main(int argc, char** argv)
   glutMotionFunc(motion);
   glutKeyboardFunc(keyboard);
   
-  shSetBackend("arb");
+  setBackend("arb");
 
   glEnable(GL_DEPTH_TEST);
   std::cout << gluErrorString(glGetError()) << std::endl;
@@ -490,9 +503,9 @@ int main(int argc, char** argv)
 
   try {
     initShaders();
-    shBind(vsh);
-    shBind(fsh[mode]);
-  } catch(const ShException &e) {
+    bind(vsh);
+    bind(fsh[mode]);
+  } catch(const Exception &e) {
     cout << "Error: " << e.message() << endl;
   } catch(...) {
     cout << "Caught unknown error: " << endl;

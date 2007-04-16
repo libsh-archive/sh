@@ -1,12 +1,12 @@
 #include <sstream>
-#include <sh/ShEvaluate.hpp>
-#include <sh/ShEval.hpp>
+#include <sh/Evaluate.hpp>
+#include <sh/Eval.hpp>
 #include "RPN.hpp"
 
 using namespace std;
 using namespace SH;
 
-void RPN::addDecl(std::string name, ShVariable var) {
+void RPN::addDecl(std::string name, Variable var) {
   symtab[name] = var;
 }
 
@@ -37,39 +37,39 @@ void RPN::execute(std::string code) {
         switch(name[0]) {
           case '=':
             {
-              ShVariable a, b;
+              Variable a, b;
               a = pop();
               b = pop();
               shASN(a, b);
               push(a);
               break;
             }
-          case '*': tempBinaryOp(SH_OP_MUL); break;
-          case '/': tempBinaryOp(SH_OP_DIV); break;
-          case '+': tempBinaryOp(SH_OP_ADD); break;
+          case '*': tempBinaryOp(OP_MUL); break;
+          case '/': tempBinaryOp(OP_DIV); break;
+          case '+': tempBinaryOp(OP_ADD); break;
           case '-': 
             {
-              ShVariable a = pop();
-              ShVariable b = pop();
+              Variable a = pop();
+              Variable b = pop();
               push(-b); push(a);
-              tempBinaryOp(SH_OP_ADD); break;
+              tempBinaryOp(OP_ADD); break;
             }
         }
       }
     } else {
       std::cout << "Read float " << val;
-      push(ShConstAttrib1f(val));
+      push(ConstAttrib1f(val));
     }
   }
 }
 
-ShVariable RPN::pop() {
-  ShVariable result = stk.top();
+Variable RPN::pop() {
+  Variable result = stk.top();
   stk.pop();
   return result;
 }
 
-void RPN::push(ShVariable v) {
+void RPN::push(Variable v) {
   stk.push(v);
 }
 
@@ -77,41 +77,41 @@ void RPN::clear() {
   for(;!stk.empty(); stk.pop());
 }
 
-void RPN::tempBinaryOp(SH::ShOperation op, int destSize)
+void RPN::tempBinaryOp(SH::Operation op, int destSize)
 {
-  ShVariable a = pop();
-  ShVariable b = pop();
+  Variable a = pop();
+  Variable b = pop();
   // figure out type of result
-  const ShEvalOpInfo* info = ShEval::instance()->getEvalOpInfo(op, SH_VALUETYPE_END,
+  const EvalOpInfo* info = Eval::instance()->getEvalOpInfo(op, VALUETYPE_END,
       a.valueType(), b.valueType());
   if(destSize == 0) {
-    if(opInfo[op].result_source != ShOperationInfo::LINEAR) {
+    if(opInfo[op].result_source != OperationInfo::LINEAR) {
       std::cout << "Person who wrote RPN.cpp made an error." << endl;
     }
     destSize = std::max(a.size(), b.size());
   } 
-  ShVariable dest(a.node()->clone(SH_TEMP, destSize, info->m_dest, SH_SEMANTICTYPE_END, false, false));
-  ShStatement stmt(dest, a, op, b);
-  if(!ShContext::current()->parsing()) {
+  Variable dest(a.node()->clone(SH_TEMP, destSize, info->m_dest, SEMANTICTYPE_END, false, false));
+  Statement stmt(dest, a, op, b);
+  if(!Context::current()->parsing()) {
     evaluate(stmt);
   } else {
-    ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
+    Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
   }
   push(dest);
 }
 
-void RPN::tempUnaryOp(SH::ShOperation op)
+void RPN::tempUnaryOp(SH::Operation op)
 {
-  ShVariable a = pop();
+  Variable a = pop();
   // figure out type of result
-  const ShEvalOpInfo* info = ShEval::instance()->getEvalOpInfo(op, SH_VALUETYPE_END,
+  const EvalOpInfo* info = Eval::instance()->getEvalOpInfo(op, VALUETYPE_END,
       a.valueType());
-  ShVariable dest(a.node()->clone(SH_TEMP, 0, info->m_dest, SH_SEMANTICTYPE_END, false, false));
-  ShStatement stmt(dest, op, a); 
-  if(!ShContext::current()->parsing()) {
+  Variable dest(a.node()->clone(SH_TEMP, 0, info->m_dest, SEMANTICTYPE_END, false, false));
+  Statement stmt(dest, op, a); 
+  if(!Context::current()->parsing()) {
     evaluate(stmt);
   } else {
-    ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
+    Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
   }
   push(dest);
 }

@@ -1,47 +1,43 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright 2003-2005 Serious Hack Inc.
+// Copyright 2003-2006 Serious Hack Inc.
 // 
-// This software is provided 'as-is', without any express or implied
-// warranty. In no event will the authors be held liable for any damages
-// arising from the use of this software.
-// 
-// Permission is granted to anyone to use this software for any purpose,
-// including commercial applications, and to alter it and redistribute it
-// freely, subject to the following restrictions:
-// 
-// 1. The origin of this software must not be misrepresented; you must
-// not claim that you wrote the original software. If you use this
-// software in a product, an acknowledgment in the product documentation
-// would be appreciated but is not required.
-// 
-// 2. Altered source versions must be plainly marked as such, and must
-// not be misrepresented as being the original software.
-// 
-// 3. This notice may not be removed or altered from any source
-// distribution.
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2.1 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+// MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 #ifdef WIN32
 #include <windows.h>
 #endif /* WIN32 */
 
 #ifdef __APPLE__
-#include <OpenGL/gl.h>
+# include <OpenGL/gl.h>
 #else
-#include <GL/gl.h>
+# include <GL/gl.h>
 #endif
 
 #include "Camera.hpp"
-#include "ShTrackball.hpp"
+#include "Trackball.hpp"
 
 using namespace SH;
 
 Camera::Camera()
 {
-  proj = perspective(45, 1, .1, 100);
+  proj = perspective(45, 1, (double).1f, 100);
 }
 
-void printMatrix(std::ostream& out, const ShMatrix4x4f& mat)
+void printMatrix(std::ostream& out, const Matrix4x4f& mat)
 {
   for (int i = 0; i < 4; ++i) {
     for (int j = 0; j < 4; ++j) {
@@ -82,25 +78,25 @@ void Camera::glModelView()
 
 void Camera::glProjection(float aspect)
 {
-  proj = perspective(45, aspect, .1, 100);
+  proj = perspective(45, aspect, .1f, 100);
   float values[16];
   for (int i = 0; i < 16; i++) proj[i%4](i/4).getValues(&values[i]);
   glMultMatrixf(values);
 }
 
-ShMatrix4x4f Camera::shModelView()
+Matrix4x4f Camera::modelView()
 {
   return (trans | rots);
 }
 
-ShMatrix4x4f Camera::shModelViewProjection(ShMatrix4x4f viewport)
+Matrix4x4f Camera::modelViewProjection(Matrix4x4f viewport)
 {
   return (viewport | (proj | (trans | rots)));
 }
 
 void Camera::move(float x, float y, float z)
 {
-  ShMatrix4x4f m;
+  Matrix4x4f m;
   m[0](3) = x;
   m[1](3) = y;
   m[2](3) = z;
@@ -112,7 +108,7 @@ void Camera::rotate(float a, float x, float y, float z)
 {
   float cosa = cos((M_PI/180)*a);
   float sina = sin((M_PI/180)*a);
-  ShMatrix4x4f m;
+  Matrix4x4f m;
     
   m[0](0) = x*x*(1-cosa) +   cosa;
   m[0](1) = x*y*(1-cosa) - z*sina;
@@ -131,12 +127,12 @@ void Camera::rotate(float a, float x, float y, float z)
 
 void Camera::orbit(int sx, int sy, int x, int y, int w, int h)
 {
-  ShTrackball t;
+  Trackball t;
   t.resize(w, h);
   rots = (t.rotate(sx, sy, x, y) | rots);
 }
 
-ShMatrix4x4f Camera::perspective(float fov, float aspect, float znear, float zfar)
+Matrix4x4f Camera::perspective(float fov, float aspect, float znear, float zfar)
 {
   float zmin = znear;
   float zmax = zfar;
@@ -145,7 +141,7 @@ ShMatrix4x4f Camera::perspective(float fov, float aspect, float znear, float zfa
   float xmin = ymin*aspect;
   float xmax = ymax*aspect;
 
-  ShMatrix4x4f ret;
+  Matrix4x4f ret;
 
   ret[0](0) = 2.0*zmin/(xmax-xmin);
   ret[0](1) = 0.0;

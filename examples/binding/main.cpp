@@ -1,25 +1,21 @@
 // Sh: A GPU metaprogramming language.
 //
-// Copyright 2003-2005 Serious Hack Inc.
+// Copyright 2003-2006 Serious Hack Inc.
 // 
-// This software is provided 'as-is', without any express or implied
-// warranty. In no event will the authors be held liable for any damages
-// arising from the use of this software.
-// 
-// Permission is granted to anyone to use this software for any purpose,
-// including commercial applications, and to alter it and redistribute it
-// freely, subject to the following restrictions:
-// 
-// 1. The origin of this software must not be misrepresented; you must
-// not claim that you wrote the original software. If you use this
-// software in a product, an acknowledgment in the product documentation
-// would be appreciated but is not required.
-// 
-// 2. Altered source versions must be plainly marked as such, and must
-// not be misrepresented as being the original software.
-// 
-// 3. This notice may not be removed or altered from any source
-// distribution.
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2.1 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+// MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 #ifdef WIN32
 #include <windows.h>
@@ -39,6 +35,7 @@
 
 #include <sh/sh.hpp>
 #include <iostream>
+#include <cstdio>
 
 using namespace SH;
 using namespace std;
@@ -48,11 +45,12 @@ int gprintf(int x, int y, char* fmt, ...);
 // Animation data
 float angle = 0;
 
-ShProgram vsh;
-ShProgram fsh;
+Program vsh;
+Program fsh;
+ProgramSetPtr shader;
 
 void display()
-  {
+{
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
   // setup the model view matrix with an initial
@@ -64,8 +62,7 @@ void display()
   
   // turn off vertex and fragment programs, this
   // effectively turns off Sh
-  shUnbind(vsh);
-  shUnbind(fsh);
+  unbind(*shader);
 
   // push modelview matrix and load the rotation
   // for the point light
@@ -89,8 +86,7 @@ void display()
   
   // turn vertex and fragment programs back on 
   // bind programs
-  shBind(vsh);
-  shBind(fsh);
+  bind(*shader);
 
   // setup the modelview matrix with the rotation
   // for the dodecahedron and draw it
@@ -99,80 +95,76 @@ void display()
   glutSolidDodecahedron();
   glPopMatrix();
 
-  shUnbind();
+  unbind();
   
   gprintf(10, 10, "Space - Toggle animation");
   gprintf(10, 24, "    c - Change color");
 
   glutSwapBuffers();
-  }
+}
 
 void reshape(int width, int height)
-  {
+{
   glViewport(0, 0, width, height);
   
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   gluPerspective(45, (float)width/(float)height, .1, 100);
-  }
+}
 
 void idle(void)
-  {
+{
   // while idling advance the rotation angle 
   angle += .1;
   glutPostRedisplay();
-  }
+}
 
 void keyboard(unsigned char k, int x, int y)
-  {
-  switch(k)
+{
+  switch(k) {
+  case 'q':
+    // quit
+    exit(0);
+    break;
+  case 'c':
+    // change the color using the standard
+    // OpenGL material model
+    float col[4];
+    col[0] = 0.4*((float)rand()/(RAND_MAX-1));
+    col[1] = 0.4*((float)rand()/(RAND_MAX-1));
+    col[2] = 0.4*((float)rand()/(RAND_MAX-1));
+    col[3] = 1;
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, col);
+    break;
+  case ' ':
     {
-    case 'q':
-      // quit
-      exit(0);
-      break;
-    case 'c':
-      // change the color using the standard
-      // OpenGL material model
-      float col[4];
-      col[0] = 0.4*((float)rand()/(RAND_MAX-1));
-      col[1] = 0.4*((float)rand()/(RAND_MAX-1));
-      col[2] = 0.4*((float)rand()/(RAND_MAX-1));
-      col[3] = 1;
-      glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, col);
-      break;
-    case ' ':
-      {
       // toggle animation
       static bool idling = false;
       if (idling) glutIdleFunc(NULL);
       else glutIdleFunc(idle);
       idling = !idling;
       break;
-      }
     }
-
-  glutPostRedisplay();
   }
 
+  glutPostRedisplay();
+}
+
 void init_gl(void)
-  {
+{
   glEnable(GL_DEPTH_TEST);
   glClearColor(0.0, 0.0, 0.0, 1.0);
   glPointSize(5);
-  }
+}
 
 void init_sh()
-  {
-  // set OpenGL backend
-  shSetBackend("arb");
-
+{
   // Sh data
-  ShMatrix4x4f mv;
-  ShMatrix4x4f mvp;
-  ShPoint3f lightp;
-  ShColor3f diffuse;
-  ShColor3f ambient;
+  Matrix4x4f mv;
+  Matrix4x4f mvp;
+  Point3f lightp;
+  Color3f diffuse;
+  Color3f ambient;
 
   // setup OpenGL bindings
   mv.meta("opengl:state", "state.matrix.modelview");
@@ -188,12 +180,12 @@ void init_sh()
   
   // construct vertex program
   vsh = SH_BEGIN_VERTEX_PROGRAM {
-    ShInputPosition4f ipos;
-    ShInputNormal3f inrm;
+    InputPosition4f ipos;
+    InputNormal3f inrm;
 
-    ShOutputPosition4f opos;
-    ShOutputNormal3f onrm;
-    ShOutputVector3f olightv;
+    OutputPosition4f opos;
+    OutputNormal3f onrm;
+    OutputVector3f olightv;
 
     // transform position and normal and
     // generate the light vector
@@ -204,11 +196,11 @@ void init_sh()
 
   // construct fragment program
   fsh = SH_BEGIN_FRAGMENT_PROGRAM {
-    ShInputPosition4f ipos;
-    ShInputNormal3f inrm;
-    ShInputVector3f ilightv;
+    InputPosition4f ipos;
+    InputNormal3f inrm;
+    InputVector3f ilightv;
 
-    ShOutputColor3f oclr;
+    OutputColor3f oclr;
 
     inrm = normalize(inrm);
     ilightv = normalize(ilightv);
@@ -217,44 +209,57 @@ void init_sh()
     oclr = pos(inrm|ilightv)*diffuse + ambient;
   } SH_END;
 
-  }
+  shader = new ProgramSet(vsh, fsh);
+
+#if 0
+  cout << "Vertex Unit:" << endl;
+  vsh.node()->code()->print(cout);
+  cout << "--" << endl;
+  cout << "Fragment Unit:" << endl;
+  fsh.node()->code()->print(cout);
+  cout << "--" << endl;
+#endif
+}
 
 int main(int argc, char** argv)
-  {
-    try {
-  // initialize GLUT
-  glutInit(&argc, argv);
-  glutInitDisplayMode(GLUT_RGB|GLUT_DOUBLE|GLUT_DEPTH);
-  glutInitWindowSize(512, 512);
-  glutCreateWindow("Sh Binding Example");
+{
+  try {
+    // initialize GLUT
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_RGB|GLUT_DOUBLE|GLUT_DEPTH);
+    glutInitWindowSize(512, 512);
+    glutCreateWindow("Sh Binding Example");
 
-  glutDisplayFunc(display);
-  glutReshapeFunc(reshape);
-  glutKeyboardFunc(keyboard);
+    glutDisplayFunc(display);
+    glutReshapeFunc(reshape);
+    glutKeyboardFunc(keyboard);
   
-  // initialize OpenGL
-  init_gl();
+    // initialize OpenGL
+    init_gl();
 
-  // initialize Sh
-  init_sh();
-  
-  glutMainLoop();
-
-    } catch (const ShException& e) {
-      std::cerr << "Sh error: " << e.message() << std::endl;
-      return 1;
-    } catch (const std::exception& e) {
-      std::cerr << "C++ error: " << e.what() << std::endl;
-      return 1;
-    } catch (...) {
-      std::cerr << "Unknown error." << std::endl;
-      throw;
-      return 1;
+    // initialize Sh
+    if (argc > 1) {
+      setBackend(argv[1]);
     }
+    init_sh();
+  
+    glutMainLoop();
+
+  } catch (const Exception& e) {
+    std::cerr << "Sh error: " << e.message() << std::endl;
+    return 1;
+  } catch (const std::exception& e) {
+    std::cerr << "C++ error: " << e.what() << std::endl;
+    return 1;
+  } catch (...) {
+    std::cerr << "Unknown error." << std::endl;
+    throw;
+    return 1;
   }
+}
 
 int gprintf(int x, int y, char* fmt, ...)
-  {
+{
   char temp[1024];
   va_list va;
   va_start(va, fmt);
@@ -282,11 +287,10 @@ int gprintf(int x, int y, char* fmt, ...)
   // render the character through glut
   char* p = temp;
   glRasterPos2f(x, y);
-  while(*p)
-    {
+  while(*p) {
     glutBitmapCharacter(GLUT_BITMAP_8_BY_13, (*p));
     p++;
-    }
+  }
 
   // reset OpenGL to what is was
   // before we started
@@ -297,4 +301,4 @@ int gprintf(int x, int y, char* fmt, ...)
   glPopMatrix();
 
   return p-temp;
-  }
+}

@@ -7,8 +7,8 @@ using namespace SH;
 
 template<int N, typename T>
 struct ScalarStack {
-  ShAttrib<N, SH_TEMP, T> m_stack;
-  ShAttrib1f m_count;
+  Attrib<N, SH_TEMP, T> m_stack;
+  Attrib1f m_count;
   int *incSwiz; // swizzle 1, 2, 3, .., N, 0 - used for both pop/push
 
   ScalarStack() 
@@ -21,7 +21,7 @@ struct ScalarStack {
   }
 
   template<typename T2>
-  void push(const ShGeneric<1, T2> &value) {
+  void push(const Generic<1, T2> &value) {
     m_count += 1;
     m_stack.template swiz<N>(incSwiz) = m_stack;
     m_stack(0) = value;
@@ -34,28 +34,28 @@ struct ScalarStack {
 
   // stack must not be empty
   template<typename T2>
-  void settop(const ShGeneric<1, T2> &value) {
+  void settop(const Generic<1, T2> &value) {
     m_stack(0) = value;
   }
 
-  ShGeneric<1, T> top() {
+  Generic<1, T> top() {
     return m_stack(0);
   }
 
 
-  ShGeneric<1, T> operator[](int i) {
+  Generic<1, T> operator[](int i) {
     return m_stack[i];
   }
 
-  ShGeneric<1, float> full() {
+  Generic<1, float> full() {
     return m_count >= N; 
   }
 
-  ShGeneric<1, float> empty() {
+  Generic<1, float> empty() {
     return m_count <= 0;
   }
 
-  ShGeneric<1, float> count() {
+  Generic<1, float> count() {
     return m_count;
   }
 };

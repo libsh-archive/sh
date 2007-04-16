@@ -1,3 +1,4 @@
+#include <cassert>
 #include <complex>
 #include <vector>
 #include <iostream>
@@ -5,14 +6,15 @@
 #include <fstream>
 #include <string>
 #include <sh/sh.hpp>
-#include <sh/ShOptimizations.hpp>
-#include <sh/shutil.hpp>
+#include <sh/Optimizations.hpp>
+#include <shutil/shutil.hpp>
 #include <GL/glut.h>
 #include <GL/glext.h>
 #include <GL/glu.h>
 #include "Camera.hpp"
 #include "Timer.hpp"
 #include "ScalarStack.hpp"
+#include "ColorFinder.hpp"
 
 // Hit space while the program is running to get a help message 
 
@@ -23,34 +25,37 @@
 // Just keep start, mid, end and move mid closer to start by half
 // if there is potentially a hit in [start,mid], else continue on [mid,end]
 #define USE_STACK false 
+#define DUMP_SYMS false 
 
 using namespace std;
 using namespace SH;
-using namespace ShUtil;
+using namespace ShUtil; 
 
 bool shiftOn;
 bool ctrlOn;
-ShMatrix4x4f mv, inv_mv, mvd;
-ShPoint3f lightPos;
-ShPoint3f eyeposm;
-ShAttrib1f level;
-ShAttrib1f eps;
-ShAttrib1f traceEps;
-ShConstAttrib1f singularityScale = 10; // Use singularityScale * eps to remove 1/0 singularities in the implicit function 
-ShAttrib1f traceDiff;
-ShAttrib1f cutoff;
+Matrix4x4f mv, inv_mv, mvd;
+Point3f lightPos;
+Point3f eyeposm;
+Attrib1f level;
+Attrib1f eps;
+Attrib1f traceEps;
+ConstAttrib1f singularityScale = 10; // Use singularityScale * eps to remove 1/0 singularities in the implicit function 
+Attrib1f traceDiff;
+Attrib1f cutoff;
 Camera camera;
-ShProgram vsh, fsh;
-ShAttrib1f sphereRadius = 8.0;
+Program vsh, fsh;
+Attrib1f sphereRadius = 8.0;
 bool showTiming = true;
+bool showAaDebug = false;
+string defaultBackend = "arb";
 
-ShTimer timer;
+Timer timer;
 
 enum RangeMode {
   AA,
   AA_NOUC,
   IA
-} rangeMode = AA;
+} rangeMode = IA;
 
 const char* RangeModeName[] = {
   "Affine Arithmetic",
@@ -87,21 +92,30 @@ int cur_x, cur_y;
 
 //#define DBGIMPL 
 
-void dump(ShProgram &foo, string desc) {
+void dump(Program &foo, string desc) {
   foo.node()->dump(desc);
 }
 
+void printAll(const string& message, Program& foo) {
+  cout << message << endl;
+  cout << "Interface:" << endl;
+  cout << foo.describe_interface() << endl;
+  cout << "Binding spec:" << endl;
+  cout << foo.describe_binding_spec() << endl;
+  assert(foo.binding_spec.size() == foo.stream_inputs.size() + foo.uniform_inputs.size());
+}
+
 void startTimer(string msg) {
-  timer = ShTimer::now();
+  timer = Timer::now();
   if(showTiming) {
-    std::cout << "Starting Timer " << msg << endl;
+    std::cout << "Timer " << msg << " "; 
   }
 }
 
 void printElapsed(string msg) {
-  double elapsed = (ShTimer::now() - timer).value() / 1000; 
+  double elapsed = (Timer::now() - timer).value() / 1000; 
   if(showTiming) {
-    cout << "  Timer Elapsed " << msg << " " << elapsed << endl;
+    cout << " elapsed " << msg << " " << elapsed << " = " << (1.0 / elapsed) << "Hz" << endl;
   }
 }
 
@@ -109,77 +123,77 @@ void printElapsed(string msg) {
  * It would not be needed if we had built-in automatic differentiatin, 
  * but right now it's just a bit of extra cruft.
  */
-struct PlotFunc: public ShRefCountable {
+struct PlotFunc: public RefCountable {
   PlotFunc(string name): m_name(name) {}
   virtual ~PlotFunc() {}
 
   string name() { return m_name; }
 
-  ShProgram funcProgram(string inName="in", string outName="out") {
-    ShProgram result = SH_BEGIN_PROGRAM() {
-      ShInputPoint3f SH_NAMEDECL(in, inName);
-      ShOutputAttrib1f SH_NAMEDECL(out, outName);
+  Program funcProgram(string inName="in", string outName="out") {
+    Program result = SH_BEGIN_PROGRAM() {
+      InputPoint3f SH_NAMEDECL(in, inName);
+      OutputAttrib1f SH_NAMEDECL(out, outName);
       out = func(in);
     } SH_END;
     return result;
   }
 
-  ShProgram gradProgram(string inName="in", string outName="out") {
-    ShProgram result = SH_BEGIN_PROGRAM() {
-      ShInputPoint3f SH_NAMEDECL(in, inName);
-      ShOutputAttrib3f SH_NAMEDECL(out, outName);
+  Program gradProgram(string inName="in", string outName="out") {
+    Program result = SH_BEGIN_PROGRAM() {
+      InputPoint3f SH_NAMEDECL(in, inName);
+      OutputAttrib3f SH_NAMEDECL(out, outName);
       out = grad(in);
     } SH_END;
     return result;
   }
 
-  ShProgram colorProgram(string inName="in", string outName="out") {
-    ShProgram result = SH_BEGIN_PROGRAM() {
-      ShInputPoint3f SH_NAMEDECL(in, inName);
-      ShOutputColor3f SH_NAMEDECL(out, outName);
+  Program colorProgram(string inName="in", string outName="out") {
+    Program result = SH_BEGIN_PROGRAM() {
+      InputPoint3f SH_NAMEDECL(in, inName);
+      OutputColor3f SH_NAMEDECL(out, outName);
       out = color(in);
     } SH_END;
     return result;
   }
 
-  virtual ShAttrib1f func(ShPoint3f p) = 0; 
-  virtual ShAttrib3f grad(ShPoint3f p) = 0; 
-  virtual ShColor3f color(ShPoint3f p) = 0; 
+  virtual Attrib1f func(Point3f p) = 0; 
+  virtual Attrib3f grad(Point3f p) = 0; 
+  virtual Color3f color(Point3f p) = 0; 
 
   protected:
     string m_name;
 };
-typedef ShPointer<PlotFunc> PlotFuncPtr;
+typedef Pointer<PlotFunc> PlotFuncPtr;
 
 /* Unit Sphere generator v = x^2 + y^2 + z^2 */
 struct Dist2SpherePF: PlotFunc {
-  ShColor3f &m_color;
-  Dist2SpherePF(ShColor3f& color): PlotFunc("dist2_sphere"), m_color(color) {}
-  ShAttrib1f func(ShPoint3f point) { return point | point/* + singularityScale * eps*/; }
-  ShAttrib3f grad(ShPoint3f point) { return 2 * point; }
-  ShColor3f color(ShPoint3f point) { return m_color; }
+  Color3f &m_color;
+  Dist2SpherePF(Color3f& color): PlotFunc("dist2_sphere"), m_color(color) {}
+  Attrib1f func(Point3f point) { return point | point/* + singularityScale * eps*/; }
+  Attrib3f grad(Point3f point) { return 2 * point; }
+  Color3f color(Point3f point) { return m_color; }
 };
 
 /* (1-r^2)^n function that mike mentioned  
  * Look up the proper source for this distance function */
 #if 0
 struct MikeSpherePF: PlotFunc {
-  MikeSpherePF(ShAttrib1f &n): PlotFunc("mike_sphere"), m_n(n) {}
-  ShAttrib1f func(ShPoint3f point) {
-    ShAttrib1f oneMinusR = 1 - point | point;
+  MikeSpherePF(Attrib1f &n): PlotFunc("mike_sphere"), m_n(n) {}
+  Attrib1f func(Point3f point) {
+    Attrib1f oneMinusR = 1 - point | point;
     // @todo range 
     // hard coded n = 3... for now until we have pow working
     return oneMinusR * oneMinusR * oneMinusR; 
   }
 
-  ShAttrib3f grad(ShPoint3f point) { 
-    ShAttrib3f r2 = point * point;
-    ShAttrib3f oneMinusR = ShConstAttrib3f(1, 1, 1) - r2; 
+  Attrib3f grad(Point3f point) { 
+    Attrib3f r2 = point * point;
+    Attrib3f oneMinusR = ConstAttrib3f(1, 1, 1) - r2; 
     return 2 * oneMinusR * oneMinusR * -2 * r2; 
   }
 
   protected:
-    ShAttrib1f &m_n;
+    Attrib1f &m_n;
 };
 #endif
 
@@ -190,16 +204,16 @@ struct MikeSpherePF: PlotFunc {
  * @todo this is really slow and doesn't really work...
  */
 struct JuliaPF: PlotFunc {
-  JuliaPF(ShAttrib1f &maxlvl, ShAttrib1f &julia_max, ShAttrib2f &c, ShColor3f &color): 
+  JuliaPF(Attrib1f &maxlvl, Attrib1f &julia_max, Attrib2f &c, Color3f &color): 
     PlotFunc("julia"), m_maxlvl(maxlvl), m_julia_max(julia_max), m_c(c), m_color(color) {}
 
   /* some complex julia set code taken from shrike */ 
-  ShAttrib1f func(ShPoint3f point) {
-    ShAttrib2f SH_DECL(z) = point(0,1);
-    //ShAttrib1f SH_DECL(count) = 0.0f;
+  Attrib1f func(Point3f point) {
+    Attrib2f SH_DECL(z) = point(0,1);
+    //Attrib1f SH_DECL(count) = 0.0f;
     //SH_DO {
     for(int i = 0; i < 5; ++i) {
-      ShAttrib2f zp;
+      Attrib2f zp;
       zp(0) = z(0) * z(0) - z(1) * z(1); 
       zp(1) = 2 * z(0) * z(1);
       z = zp + m_c;
@@ -209,59 +223,61 @@ struct JuliaPF: PlotFunc {
     return z | z; 
   }
 
-  ShAttrib3f grad(ShPoint3f point) { 
-    return ShConstAttrib3f(1,0,0);
+  Attrib3f grad(Point3f point) { 
+    return ConstAttrib3f(1,0,0);
   }
-  ShColor3f color(ShPoint3f point) {
+  Color3f color(Point3f point) {
     return m_color; 
   }
 
   protected:
-    ShAttrib1f &m_maxlvl;
-    ShAttrib1f &m_julia_max;
-    ShAttrib2f &m_c;
-    ShColor3f &m_color;
+    Attrib1f &m_maxlvl;
+    Attrib1f &m_julia_max;
+    Attrib2f &m_c;
+    Color3f &m_color;
 };
 
 /* Euclidean Distance from textured square 
  *
  * (Wow this is damned simple...) */
+/*
 struct HeightFieldPF: PlotFunc {
-  ShColor3f &m_color;
+  Color3f &m_color;
   // given a filename to a black and white image
-  HeightFieldPF(string filename, ShColor3f &color): PlotFunc("heightfield"), m_color(color) { 
-    ShImage img;
+  HeightFieldPF(string filename, Color3f &color): PlotFunc("heightfield"), m_color(color) { 
+    Image img;
     img.loadPng(filename);
     size = img.width();
     m_tex.size(img.width(), img.height());
     m_tex.memory(img.memory());
   }
 
-  ShAttrib1f func(ShPoint3f point) {
-    ShTexCoord2f tc = (size * 0.25) *  (point(0,1) + ShConstAttrib2f(0.5f, 0.5f));
+  Attrib1f func(Point3f point) {
+    TexCoord2f tc = (size * 0.25) *  (point(0,1) + ConstAttrib2f(0.5f, 0.5f));
     return m_tex[tc] - point(2);
   }
 
-  ShAttrib3f grad(ShPoint3f point) {
-    ShAttrib3f grad;
-    ShTexCoord2f tc = (size * 0.25) *  (point(0,1) + ShConstAttrib2f(0.5f, 0.5f));
+  Attrib3f grad(Point3f point) {
+    Attrib3f grad;
+    TexCoord2f tc = (size * 0.25) *  (point(0,1) + ConstAttrib2f(0.5f, 0.5f));
 
     // @todo instead of just putting 512 here use the height and stuff
-    ShAttrib1f val = m_tex[tc];
-    grad(0) = (size * 0.25) * (val - m_tex[tc + ShConstAttrib2f(1, 0)]);
-    grad(1) = (size * 0.25) * (val - m_tex[tc + ShConstAttrib2f(0, 1)]); 
-    grad(2) = ShConstAttrib1f(1.0);
+    Attrib1f val = m_tex[tc];
+    grad(0) = (size * 0.25) * (val - m_tex[tc + ConstAttrib2f(1, 0)]);
+    grad(1) = (size * 0.25) * (val - m_tex[tc + ConstAttrib2f(0, 1)]); 
+    grad(2) = ConstAttrib1f(1.0);
     // @todo
     return grad;
   }
-  ShColor3f color(ShPoint3f point) { 
-    return m_color * point(2); 
+  Color3f color(Point3f point) { 
+    return m_color; 
   }
 
   private:
-    ShInterp<0, ShTextureRect<ShColor1f> > m_tex;
+    Interp<0, TextureRect<Color1f> > m_tex;
     double size;
 };
+*/
 
 
 /* Could add in some other typical metaball generators:
@@ -279,15 +295,15 @@ struct HeightFieldPF: PlotFunc {
 
 /* Unit Cylinder Generator (Infinite length) v = x^2 + y^2 */ 
 struct Dist2CylinderPF: PlotFunc {
-  ShColor3f &m_color;
-  Dist2CylinderPF(ShColor3f& color) : PlotFunc("cylinder"), m_color(color) {}
-  ShAttrib1f func(ShPoint3f point) { return point(0,1) | point(0,1)/* + singularityScale * eps*/;  }
-  ShAttrib3f grad(ShPoint3f point) { 
-    ShAttrib3f result = ShConstAttrib3f(0,0,0);
+  Color3f &m_color;
+  Dist2CylinderPF(Color3f& color) : PlotFunc("cylinder"), m_color(color) {}
+  Attrib1f func(Point3f point) { return point(0,1) | point(0,1)/* + singularityScale * eps*/;  }
+  Attrib3f grad(Point3f point) { 
+    Attrib3f result = ConstAttrib3f(0,0,0);
     result(0,1) = 2 * point(0,1); 
     return result;
   }
-  ShColor3f color(ShPoint3f point) { return m_color; } 
+  Color3f color(Point3f point) { return m_color; } 
 };
 
 /* Torus Generator 
@@ -295,49 +311,49 @@ struct Dist2CylinderPF: PlotFunc {
  * inner/outer radii) */ 
 struct Dist2TorusPF: PlotFunc {
   static const float radiusSquared = 1.61803399; // golden ratio...huzzah!
-  ShColor3f &m_color;
-  Dist2TorusPF(ShColor3f& color) : PlotFunc("torus"), m_color(color) {}
-  ShAttrib1f func(ShPoint3f point) { 
-    ShAttrib1f pp = point | point;
-    ShAttrib1f ppPlusRadius = pp + radiusSquared; 
-    ShAttrib1f ppxy = point(0,1) | point(0,1);
+  Color3f &m_color;
+  Dist2TorusPF(Color3f& color) : PlotFunc("torus"), m_color(color) {}
+  Attrib1f func(Point3f point) { 
+    Attrib1f pp = point | point;
+    Attrib1f ppPlusRadius = pp + radiusSquared; 
+    Attrib1f ppxy = point(0,1) | point(0,1);
     return ppPlusRadius * ppPlusRadius - 4.0f * radiusSquared * ppxy; 
     //return point | point + radius * radius - 4.0f * radius * sqrt(point(1,2) | point(0,2)) + eps; 
   }
 
-  ShAttrib3f grad(ShPoint3f point) { 
-    ShAttrib1f pp = point | point;
-    ShAttrib1f ppPlusRadius = pp + radiusSquared; 
-    ShAttrib3f result = 4 * ppPlusRadius * point;
+  Attrib3f grad(Point3f point) { 
+    Attrib1f pp = point | point;
+    Attrib1f ppPlusRadius = pp + radiusSquared; 
+    Attrib3f result = 4 * ppPlusRadius * point;
     result(0,1) -= 8 * radiusSquared * point(0,1);
     return result;
   }
-  ShColor3f color(ShPoint3f point) { return m_color; } 
+  Color3f color(Point3f point) { return m_color; } 
 };
 
 /* Plane Generator (Infinite) v = y */
 struct DistPlanePF: PlotFunc {
-  ShColor3f &m_color;
-  DistPlanePF(ShColor3f& color) : PlotFunc("plane"), m_color(color) {}
-  ShAttrib1f func(ShPoint3f point) { return point(2); }
-  ShAttrib3f grad(ShPoint3f point) { return ShConstAttrib3f(0,0,1); }
-  ShColor3f color(ShPoint3f point) { return m_color; } 
+  Color3f &m_color;
+  DistPlanePF(Color3f& color) : PlotFunc("plane"), m_color(color) {}
+  Attrib1f func(Point3f point) { return point(2); }
+  Attrib3f grad(Point3f point) { return ConstAttrib3f(0,0,1); }
+  Color3f color(Point3f point) { return m_color; } 
 };
 
 /* Inverts any other generator */
 struct InvPF: PlotFunc {
   InvPF(PlotFuncPtr pf): PlotFunc("inv_" + pf->name()), m_pf(pf) {}
-  ShAttrib1f func(ShPoint3f point) { return rcp(m_pf->func(point)); }
+  Attrib1f func(Point3f point) { return rcp(m_pf->func(point)); }
 
   /* Use quotient rule (f/g)' = (g'f - f'g) / g^2 
    * Here f = 1 */ 
-  ShAttrib3f grad(ShPoint3f point) { 
-    ShAttrib1f invg = func(point);
-    ShAttrib3f gp = m_pf->grad(point);
+  Attrib3f grad(Point3f point) { 
+    Attrib1f invg = func(point);
+    Attrib3f gp = m_pf->grad(point);
     return gp * invg * invg; 
   }
 
-  ShColor3f color(ShPoint3f point) { return m_pf->color(point); }
+  Color3f color(Point3f point) { return m_pf->color(point); }
   protected:
     PlotFuncPtr m_pf;
 };
@@ -345,44 +361,44 @@ struct InvPF: PlotFunc {
 /* should just allow arbitrary matrices */
 /* Translates any other generator */
 struct TranslatePF: PlotFunc {
-  TranslatePF(PlotFuncPtr pf, ShVector3f& trans)  
+  TranslatePF(PlotFuncPtr pf, Vector3f& trans)  
     : PlotFunc("trans_" + pf->name()), m_pf(pf), m_trans(trans) {}
-  ShAttrib1f func(ShPoint3f point) { return m_pf->func(point - m_trans); } 
-  ShAttrib3f grad(ShPoint3f point) { return m_pf->grad(point - m_trans); } 
-  ShColor3f color(ShPoint3f point) { return m_pf->color(point - m_trans); }
+  Attrib1f func(Point3f point) { return m_pf->func(point - m_trans); } 
+  Attrib3f grad(Point3f point) { return m_pf->grad(point - m_trans); } 
+  Color3f color(Point3f point) { return m_pf->color(point - m_trans); }
   protected:
     PlotFuncPtr m_pf;
-    ShVector3f &m_trans;
+    Vector3f &m_trans;
 };
 
 struct ScalePF: PlotFunc {
-  ScalePF(PlotFuncPtr pf, ShAttrib3f& scl)  
+  ScalePF(PlotFuncPtr pf, Attrib3f& scl)  
     : PlotFunc("scl_" + pf->name()), m_pf(pf), m_scl(scl) {}
-  ShAttrib1f func(ShPoint3f point) { return m_pf->func(point * m_scl); } 
-  ShAttrib3f grad(ShPoint3f point) { return m_pf->grad(point * m_scl); } 
-  ShColor3f color(ShPoint3f point) { return m_pf->color(point * m_scl); }
+  Attrib1f func(Point3f point) { return m_pf->func(point * m_scl); } 
+  Attrib3f grad(Point3f point) { return m_pf->grad(point * m_scl); } 
+  Color3f color(Point3f point) { return m_pf->color(point * m_scl); }
   protected:
     PlotFuncPtr m_pf;
-    ShAttrib3f &m_scl;
+    Attrib3f &m_scl;
 };
 
 struct FuncScalePF: PlotFunc {
-  FuncScalePF(PlotFuncPtr pf, ShAttrib1f& scl)  
+  FuncScalePF(PlotFuncPtr pf, Attrib1f& scl)  
     : PlotFunc("funcscl_" + pf->name()), m_pf(pf), m_scl(scl) {}
-  ShAttrib1f func(ShPoint3f point) { return m_scl * m_pf->func(point); } 
-  ShAttrib3f grad(ShPoint3f point) { return m_scl * m_pf->grad(point); } 
-  ShColor3f color(ShPoint3f point) { return m_pf->color(point); }
+  Attrib1f func(Point3f point) { return m_scl * m_pf->func(point); } 
+  Attrib3f grad(Point3f point) { return m_scl * m_pf->grad(point); } 
+  Color3f color(Point3f point) { return m_pf->color(point); }
   protected:
     PlotFuncPtr m_pf;
-    ShAttrib1f &m_scl;
+    Attrib1f &m_scl;
 };
 
 /* Sums up a set of plot functions */
 struct SumPF: PlotFunc {
   SumPF(): PlotFunc("sum") {}
 
-  ShAttrib1f func(ShPoint3f point) {
-    ShAttrib1f result; 
+  Attrib1f func(Point3f point) {
+    Attrib1f result; 
     for(PfVec::iterator I = m_pfvec.begin(); I != m_pfvec.end(); ++I) {
       if(I == m_pfvec.begin()) {
         result = (*I)->func(point);
@@ -393,8 +409,8 @@ struct SumPF: PlotFunc {
     return result;
   }
 
-  ShAttrib3f grad(ShPoint3f point) {
-    ShAttrib3f result; 
+  Attrib3f grad(Point3f point) {
+    Attrib3f result; 
     for(PfVec::iterator I = m_pfvec.begin(); I != m_pfvec.end(); ++I) {
       if(I == m_pfvec.begin()) {
         result = (*I)->grad(point);
@@ -405,9 +421,9 @@ struct SumPF: PlotFunc {
     return result;
   }
 
-  ShColor3f color(ShPoint3f point) {
-    ShColor3f result;
-    ShConstAttrib1f ONE(1.0f);
+  Color3f color(Point3f point) {
+    Color3f result;
+    ConstAttrib1f ONE(1.0f);
 
     for(PfVec::iterator I = m_pfvec.begin(); I != m_pfvec.end(); ++I) {
       if(I == m_pfvec.begin()) {
@@ -431,18 +447,20 @@ struct SumPF: PlotFunc {
     typedef std::vector<PlotFuncPtr> PfVec;
     PfVec m_pfvec;
 };
-typedef ShPointer<SumPF> SumPFPtr;
+typedef Pointer<SumPF> SumPFPtr;
 
-// given an interval program that computes some (reasonably nice) function g: ShAttrib1i_f -> ShAttrib1i_f,
+// given an interval program that computes some (reasonably nice) function g: Attrib1i_f -> Attrib1i_f,
 // this computes a root and sets hasroot to true if there is a root in the part of the domain  
-ShProgram trace(ShProgram func) {
-  ShProgram result = SH_BEGIN_PROGRAM() {
-    ShInputPoint3f SH_DECL(origin);
-    ShInputVector3f SH_DECL(dir);
-    ShInputAttrib1f SH_DECL(t);
-    ShOutputAttrib1f SH_DECL(value);
-    value = func(mad(t, dir, origin));
+Program trace(const Program& func) {
+  Program result = SH_BEGIN_PROGRAM() {
+    InputPoint3f SH_DECL(origin);
+    InputVector3f SH_DECL(dir);
+    InputAttrib1f SH_DECL(t);
+    OutputAttrib1f SH_DECL(value);
+    Attrib3f SH_DECL(p) = mad(t, dir, origin);
+    value = func(p);
   } SH_END;
+  result.node()->collectAll();
   return result;
 }
 
@@ -462,8 +480,8 @@ ShProgram trace(ShProgram func) {
  * same order as the usual stack based alg with a small constant)
  * (TODO define "well behaved")
  */ 
-ShProgram firsthit(ShProgram tracer, bool use_aa) {
-  ShProgram i_tracer; 
+Program firsthit(Program tracer, bool use_aa) {
+  Program i_tracer; 
   if(use_aa) {
     i_tracer = affine_inclusion(tracer);
     i_tracer.name("i_tracer_aa");
@@ -473,19 +491,34 @@ ShProgram firsthit(ShProgram tracer, bool use_aa) {
     i_tracer.name("i_tracer_ia");
     dump(i_tracer, "i_tracer_ia");
   }
+  if(DUMP_SYMS) {
+    AaVarSymsMap empty;
+    ostringstream sout;
+    switch(rangeMode) {
+        case IA: sout << "IA_"; break;
+        case AA: sout << "AA_"; break;
+        case AA_NOUC: sout << "AA-nouc_"; break;
+    }
+    sout << DebugModeName[debugMode] << "_";
+    sout << "symfile.csv";
+    i_tracer.meta("aa_symfile", sout.str());
+    cout << "dumping symfile " << sout.str() << endl;
+    placeAaSyms(i_tracer.node(), empty, true);
+    cout << "done dumping symfile" << endl;
+  }
 
-  ShContext::current()->disable_optimization("propagation");
-  ShProgram result = SH_BEGIN_PROGRAM() {
-    ShInputAttrib1i_f SH_DECL(range); // range to search
+  Context::current()->disable_optimization("propagation");
+  Program result = SH_BEGIN_PROGRAM() {
+    InputAttrib1i_f SH_DECL(range); // range to search
 
-    ShOutputAttrib1f SH_DECL(hashit); // bool to indicate if there was a hit
-    ShOutputAttrib1f SH_DECL(hit); // hit location
+    OutputAttrib1f SH_DECL(hashit); // bool to indicate if there was a hit
+    OutputAttrib1f SH_DECL(hit); // hit location
 
-    ShAttrib1f SH_DECL(start) = range_lo(range);
-    ShAttrib1f SH_DECL(end) = range_hi(range);
-    ShAttrib1f SH_DECL(mid) = lerp(0.5f, start, end); 
+    Attrib1f SH_DECL(start) = range_lo(range);
+    Attrib1f SH_DECL(end) = range_hi(range);
+    Attrib1f SH_DECL(mid) = lerp(0.5f, start, end); 
 
-    ShAttrib1f SH_DECL(count) = 0.0f;
+    Attrib1f SH_DECL(count) = 0.0f;
 
     // double up the loops so that in the GPU case, we can break the 255 loop
     // limit
@@ -507,22 +540,28 @@ ShProgram firsthit(ShProgram tracer, bool use_aa) {
     SH_WHILE(mid - start > eps && end - mid > eps) { 
 #endif
       count += 1.0f;
-      ShAttrib1i_f SH_DECL(traceRange) = make_interval(start, mid);
-      ShAttrib1i_f SH_DECL(traceResult);
+      Attrib1i_f SH_DECL(traceRange) = make_interval(start, mid);
+      Attrib1i_f SH_DECL(traceResult);
       traceResult = i_tracer(traceRange);
 
       // If there's a potential hit, subdivide [start,mid], 
       // else discard and continue with [mid,end]
-      // ShAttrib1f hitcond = range_lo(range_contains(traceResult, 0));
-      ShAttrib1f hitcond = range_lo(traceResult) < traceEps && -traceEps < range_hi(traceResult);
+      // Attrib1f hitcond = range_lo(range_contains(traceResult, 0));
+      Attrib1f hitcond = range_lo(traceResult) < traceEps && -traceEps < range_hi(traceResult);
 #if USE_STACK
       SH_IF(hitcond) {
         stack.push(lerp(0.5f, start, mid));
         stack.push(start);
       } SH_ENDIF; 
 #else
-      start = lerp(hitcond, start, mid);
-      mid = lerp(0.5f, mid, lerp(hitcond, start, end)); 
+      SH_IF(hitcond) {
+        mid = lerp(0.5f, start, mid);
+      } SH_ELSE {
+        start = mid;
+        mid = lerp(0.5f, mid, end);
+      } SH_ENDIF;
+      //start = lerp(hitcond, start, mid);
+      //mid = lerp(0.5f, mid, lerp(hitcond, start, end)); 
 #endif
       if(debugMode == CUTOFF) {
 
@@ -548,7 +587,7 @@ ShProgram firsthit(ShProgram tracer, bool use_aa) {
     } else {
     }
   } SH_END;
-  ShContext::current()->enable_optimization("propagation");
+  Context::current()->enable_optimization("propagation");
   dump(result, "firsthit");
   std::cout << "Optimizing firsthit" << endl;
   optimize(result);
@@ -556,10 +595,10 @@ ShProgram firsthit(ShProgram tracer, bool use_aa) {
   return result;
 }
 
-ShColor3f color[9];
-ShVector3f trans[9];
-ShAttrib3f scl[9];
-ShAttrib1f fscl[9];
+Color3f color[9];
+Vector3f trans[9];
+Attrib3f scl[9];
+Attrib1f fscl[9];
 PlotFuncPtr pfs[9];
 int selected=0; // 0 = no selection (mouse interacts with view), 1-9 means selected object i-1
 
@@ -570,25 +609,27 @@ void initShaders() {
 
     startTimer("Building Shaders");
 
-    vsh = ShKernelLib::shVsh(mv, mvd);
-    vsh = vsh << shExtract("lightPos") << lightPos;
+    vsh = KernelLib::vsh(mv, mvd);
+    lightPos.name("lightPos");
+    vsh = vsh << extract("lightPos") << lightPos;
 
     printElapsed("Build vsh");
 
-    ShColor3f SH_DECL(ks) = ShColor3f(0.3, 0.3, 0.3);
-    ShAttrib1f SH_DECL(specexp) = 64.0f;
+    Color3f SH_DECL(ks) = Color3f(0.3, 0.3, 0.3);
+    Attrib1f SH_DECL(specexp) = 64.0f;
 
     // set up some desaturated colors 
     // @todo better colors? different color space for nicer blending?
-    color[0] = ShColor3f(0.9, 0.25, 0.25);
-    color[1] = ShColor3f(0.25, 0.9, 0.25);
-    color[2] = ShColor3f(0.25, 0.25, 0.9);
-    color[3] = ShColor3f(0.7, 0.7, 0.25);
-    color[4] = ShColor3f(0.25, 0.7, 0.7);
-    color[5] = ShColor3f(0.7, 0.25, 0.7);
     srand48(time(NULL));
-    for(int i = 6; i < 9; ++i) {
-      color[i] = ShColor3f(drand48(), drand48(), drand48());
+    for(int i = 0; i < 9; ++i) {
+      color[i] = ColorFinder::color(ColorFinder::Set1, 9, i); 
+    }
+
+    /* Set flags */
+    switch(rangeMode) {
+      case AA: Context::current()->set_flag("aa_enable_um", true); break; 
+      case AA_NOUC: Context::current()->set_flag("aa_enable_um", false); break; 
+      case IA: Context::current()->set_flag("aa_enable_um", true); break; 
     }
 
     // Build the plot function 
@@ -599,67 +640,69 @@ void initShaders() {
       }
     }
 
-    ShProgram func = plotfunc->funcProgram("posm");
-    ShProgram gradient = plotfunc->gradProgram("posm");
-    ShProgram colorFunc = plotfunc->colorProgram("posm");
+    Program func = plotfunc->funcProgram("posm");
+    Program gradient = plotfunc->gradProgram("posm");
+    Program colorFunc = plotfunc->colorProgram("posm");
 
     printElapsed("Build plot functions (function, gradient, color)");
 
-    ShColor3f SH_DECL(lightColor) = ShConstAttrib3f(0.75, .75, .75);
+    Color3f SH_DECL(lightColor) = ConstAttrib3f(0.75, .75, .75);
 
     fsh = SH_BEGIN_FRAGMENT_PROGRAM {
-      ShInputPoint3f SH_DECL(posm);
-      ShInputVector3f SH_DECL(viewVec);
-      ShInputPosition4f SH_DECL(posh);
+      InputPoint3f SH_DECL(posm);
+      InputVector3f SH_DECL(viewVec);
+      InputPosition4f SH_DECL(posh);
 
-      ShVector3f SH_DECL(dir) = posm - eyeposm;
-      ShAttrib1f SH_DECL(dist) = length(dir);
+      Vector3f SH_DECL(dir) = posm - eyeposm;
+      Attrib1f SH_DECL(dist) = length(dir);
       dir = normalize(dir);
 
-      ShProgram tracer = trace(func)(eyeposm, dir); 
-      tracer = add<ShAttrib1f>() << -level << tracer;
-      dump(tracer, "tracer");
-      ShProgram hitter = firsthit(tracer, use_aa);
+      cout << "Building tracer" << endl;
+      Program tracer = trace(func)(eyeposm, dir);
+      tracer = add<Attrib1f>() << -level << tracer;
 
-      ShAttrib1f SH_DECL(trace_start); 
-      ShAttrib1f SH_DECL(trace_end) = dist + 2.0  * (dir | -posm) + traceDiff;
+      cout << "Building firsthit" << endl;
+      Program hitter = firsthit(tracer, use_aa);
+
+      Attrib1f SH_DECL(trace_start); 
+      Attrib1f SH_DECL(trace_end) = dist + 2.0  * (dir | -posm) + traceDiff;
 
       // handle if we're inside the sphere
       trace_start = SH::min(dist, trace_end);
       trace_end = SH::max(dist, trace_end);
 
-      ShAttrib1i_f SH_DECL(range) = make_interval(trace_start, trace_end);  // @todo figure out where it exits the sphere
-      ShAttrib1f SH_DECL(hashit);
-      ShAttrib1f SH_DECL(hit);
+      Attrib1i_f SH_DECL(range) = make_interval(trace_start, trace_end);  // @todo figure out where it exits the sphere
+      Attrib1f SH_DECL(hashit);
+      Attrib1f SH_DECL(hit);
       if(debugMode != FUNC) {
         (hashit & hit) = hitter(range);
       }
 
       if(debugMode == NORMAL) {
         kill(!hashit);
-        ShPoint3f SH_DECL(hitp) = mad(hit, dir, eyeposm);
+        Point3f SH_DECL(hitp) = mad(hit, dir, eyeposm);
 
-        ShOutputNormal3f SH_DECL(normal);
-        ShOutputVector3f SH_DECL(lightVec);
-        ShOutputVector3f SH_DECL(halfVec);
+        OutputNormal3f SH_DECL(normal);
+        OutputVector3f SH_DECL(lightVec);
+        OutputVector3f SH_DECL(halfVec);
         normal = gradient(hitp);
         normal = mv | normal;
         lightVec = mv | (lightPos - hitp); 
         halfVec = normalize(lightVec + viewVec);
 
-        ShConstAttrib1f ONE(1.0f);
+        ConstAttrib1f ONE(1.0f);
         normal *= lerp((normal | viewVec) < 0.0f, -ONE, ONE); 
 
-        ShOutputColor3f SH_DECL(kd) = colorFunc(hitp);
+        OutputColor3f SH_DECL(kd) = colorFunc(hitp);
       } else {
-        ShOutputColor3f SH_DECL(color);
+        OutputColor3f SH_DECL(color);
         switch(debugMode) {
           case FUNC:
             {
-              ShAttrib1f SH_DECL(le) = length(eyeposm);
-              ShAttrib1f SH_DECL(t) = le * le / (dir | -eyeposm);
-              ShAttrib1f SH_DECL(funcval);
-              ShPoint3f SH_DECL(pos) = mad(t, dir, eyeposm);
+              Attrib1f SH_DECL(le) = length(eyeposm);
+              Attrib1f SH_DECL(t) = le * le / (dir | -eyeposm);
+              Attrib1f SH_DECL(funcval);
+              Point3f SH_DECL(pos) = mad(t, dir, eyeposm);
               funcval = tracer(t);
               color = colorFunc(pos); 
               color *= funcval;
@@ -668,7 +711,7 @@ void initShaders() {
           case GRAD:
             {
               kill(!hashit);
-              ShPoint3f SH_DECL(hitp) = mad(hit, dir, eyeposm);
+              Point3f SH_DECL(hitp) = mad(hit, dir, eyeposm);
               color = gradient(hitp);
             }
             break;
@@ -689,24 +732,24 @@ void initShaders() {
         }
       }
     } SH_END;
-    std::cout << "OptimizationLevel: " << ShContext::current()->optimization() << std::endl;
+    fsh.name("fsh");
+    std::cout << "OptimizationLevel: " << Context::current()->optimization() << std::endl;
 
     if(debugMode == NORMAL) {
-      ShProgram light = ShKernelLight::pointLight<ShColor3f>() << lightColor; 
+      std::cout << "foo! lightColor" << endl;
+      Program light = KernelLight::pointLight<Color3f>() << lightColor; 
 
       // kd comes from fsh, pass in the rest of the phong params
-      ShProgram lightNShade = ShKernelSurface::phong<ShColor3f>() << shSwizzle("ks", "specExp", "irrad", "kd", "normal", "halfVec", "lightVec", "posh") << ks << specexp << light;
+      Program lightNShade = KernelSurface::phong<Color3f>() << swizzle("ks", "specExp", "irrad", "kd", "normal", "halfVec", "lightVec", "posh") << ks << specexp << light;
+      lightNShade.name("lightnshade");
       dump(lightNShade, "lightnshade");
 
       fsh = namedConnect(fsh, lightNShade); 
     }
 
     switch(rangeMode) {
-      case AA: fsh.name("fsh_aa"); 
-               break;
-      case AA_NOUC: fsh.name("fsh_aa_nouc"); 
-                    fsh.meta("aa_disable_uniqmerge", "true");
-                    break;
+      case AA: fsh.name("fsh_aa"); break;
+      case AA_NOUC: fsh.name("fsh_aa_nouc"); break;
       case IA: fsh.name("fsh_ia"); break;
     }
     printElapsed("Build fsh");
@@ -717,11 +760,12 @@ void initShaders() {
     vsh.name("vsh");
 
     startTimer("Binding Shaders");
-    shBind(vsh);
-    printElapsed("Bind vsh");
-    shBind(fsh);
-    printElapsed("Bind fsh");
-  } catch(const ShException &e) {
+    lock_in_uniforms(vsh);
+    lock_in_uniforms(fsh);
+    ProgramSetPtr ps = new ProgramSet(vsh, fsh);
+    bind(*ps);
+    printElapsed("Bind vsh, fsh");
+  } catch(const Exception &e) {
     cout << "Error: " << e.message() << endl;
   } catch(...) {
     cout << "Caught unknown error: " << endl;
@@ -749,13 +793,13 @@ void display()
 
 void setupView()
 {
-  mv = camera.shModelView();
+  mv = camera.modelView();
   inv_mv = inverse(mv);
-  eyeposm = inv_mv | ShConstPoint3f(0.0f, 0.0f, 0.0f); 
-  mvd = camera.shModelViewProjection(ShMatrix4x4f());
+  eyeposm = inv_mv | ConstPoint3f(0.0f, 0.0f, 0.0f); 
+  mvd = camera.modelViewProjection(Matrix4x4f());
 }
 
-void init()
+void myinit()
 {
   /*
   displayList = glGenLists(1);
@@ -769,11 +813,12 @@ void init()
   float side = 1.51;
   //pfs[0] = new InvPF(new Dist2TorusPF(color[0]));
   pfs[0] = new InvPF(new Dist2SpherePF(color[0]));
-  trans[0] = ShVector3f(-side, -side * 0.5 * sqrt(3), 0);
+  trans[0] = Vector3f(-side, -side * 0.5 * sqrt(3), 0);
   pfs[1] = new InvPF(new Dist2SpherePF(color[1]));
-  trans[1] = ShVector3f(side, -side * 0.5 * sqrt(3), 0);
+  trans[1] = Vector3f(side, -side * 0.5 * sqrt(3), 0);
   pfs[2] = new InvPF(new Dist2SpherePF(color[2]));
-  trans[2] = ShVector3f(0, side * 0.5 * sqrt(3), 0);
+  trans[2] = Vector3f(0, side * 0.5 * sqrt(3), 0);
+
   /*
   for(int i = 0; i < 3; ++i) {
     pfs[i] = new InvPF(new Dist2SpherePF(color[i]));
@@ -790,12 +835,12 @@ void init()
     ostringstream out2;
     out2 << "scl_" << (i+1);
     scl[i].name(out2.str());
-    scl[i] = ShConstAttrib3f(1,1,1);
+    scl[i] = ConstAttrib3f(1,1,1);
 
     ostringstream out3;
     out2 << "fscl_" << (i+1);
     fscl[i].name(out3.str());
-    fscl[i] = ShConstAttrib1f(1);
+    fscl[i] = ConstAttrib1f(1);
   }
 
 
@@ -979,6 +1024,7 @@ void keyboard(unsigned char k, int x, int y)
      if(selected > 0) {
        int idx = selected - 1;
        pfs[idx] = new InvPF(new Dist2TorusPF(color[idx])); 
+       //pfs[idx] = new Dist2TorusPF(color[idx]); 
        reinit = true;
      }
      break;
@@ -995,14 +1041,15 @@ void keyboard(unsigned char k, int x, int y)
      if(selected > 0) {
        int idx = selected - 1;
        // some constants taken from shrike;
-       ShAttrib1f maxlvl=5;
-       ShAttrib1f julia_max = 2.0;
-       ShAttrib2f c(0.54,-0.51);
+       Attrib1f maxlvl=5;
+       Attrib1f julia_max = 2.0;
+       Attrib2f c(0.54,-0.51);
        pfs[idx] = new JuliaPF(maxlvl, julia_max, c, color[idx]);
        reinit = true;
      }
      break;
 
+/*
     case 'h':
      if(selected > 0) {
        int idx = selected - 1;
@@ -1010,6 +1057,7 @@ void keyboard(unsigned char k, int x, int y)
        reinit = true;
      }
      break;
+     */
 
     case 'n':
      if(selected > 0) {
@@ -1064,6 +1112,11 @@ void keyboard(unsigned char k, int x, int y)
      showTiming = !showTiming;
      break;
 
+    case 'w':
+      showAaDebug = !showAaDebug;
+      Context::current()->set_flag("aa_disable_debug", !showAaDebug);
+      break;
+
     default:
      // print out help
      cout << "Available Interaction:" << endl;
@@ -1076,6 +1129,7 @@ void keyboard(unsigned char k, int x, int y)
      cout << "  e/E           Change epsilon (determines when to end tracing iterations)" << endl;
      cout << "  f/F           Change trace epsilon (determines how close to level set value roots must be)" << endl; 
      cout << "  l/L           Change loop count cutoff in Loop Cutoff mode" << endl; 
+     cout << "  w             Show debug" << endl;
      cout << "  x             Show timings" << endl;
      cout << "  y             Reset view" << endl;
      cout << "  0             Change to view mode (deselect object)" << endl;
@@ -1091,7 +1145,7 @@ void keyboard(unsigned char k, int x, int y)
      cout << "  c             Make object a cylinder (line generator)" << endl;
      cout << "  t             Make object a torus (circle generator)" << endl;
      cout << "  p             Make object a plane (plane generator)" << endl;
-     cout << "  h             Make object a texture mapped heightfield (SLOW)" << endl;
+     //cout << "  h             Make object a texture mapped heightfield (SLOW)" << endl;
      cout << "  a             Make object a julia fractal (SLOW!!)" << endl;
      cout << "  n             Make object empty" << endl;
      cout << "  r/R, g/G, b/B Change object color" << endl;
@@ -1137,7 +1191,7 @@ int main(int argc, char** argv)
   glutKeyboardFunc(keyboard);
   glutKeyboardUpFunc(keyboardUp);
   
-  shSetBackend("arb");
+  setBackend(defaultBackend);
 
 
   
@@ -1157,10 +1211,11 @@ int main(int argc, char** argv)
   camera.move(0.0, 0.0, -15.0);
 
   // Set up the light position
-  lightPos = ShPoint3f(5.0, 5.0, 5.0);
+  lightPos = Point3f(5.0, 5.0, 5.0);
   
-  init();
+  myinit();
   initShaders();
+  Context::current()->set_flag("aa_disable_debug", !showAaDebug);
   
   glutMainLoop();
 }

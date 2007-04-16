@@ -35,5 +35,5 @@ int main(int argc, char** argv)
   for(int i = 1; i < argc; ++i) {
     args.push_back(argv[i]);
   }
-  s.start(cin, args, true);
+  s.start(cin, args, 0, true);
 }

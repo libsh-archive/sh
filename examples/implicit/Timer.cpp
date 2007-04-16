@@ -20,87 +20,87 @@
 #include "Timer.hpp"
 
 #ifdef WIN32
-ShTimer::ShTimer(void)
+Timer::Timer(void)
 {
   t.QuadPart = 0;
 }
 
-ShTimer::~ShTimer(void)
+Timer::~Timer(void)
 {
 }
 
-float ShTimer::value(void)
+float Timer::value(void)
 {
   LARGE_INTEGER freq;
   QueryPerformanceFrequency(&freq);
   return ((float)t.QuadPart)/((float)freq.QuadPart/1000.0);
 }
 
-ShTimer ShTimer::now(void)
+Timer Timer::now(void)
 {
-  ShTimer ret;
+  Timer ret;
   QueryPerformanceCounter(&ret.t);
   return ret;
 }
 
-ShTimer ShTimer::zero(void)
+Timer Timer::zero(void)
 {
-  ShTimer ret;
+  Timer ret;
   ret.t.QuadPart = 0;
   return ret;
 }
 
-ShTimer operator-(const ShTimer& a, const ShTimer& b)
+Timer operator-(const Timer& a, const Timer& b)
 {
-  ShTimer ret;
+  Timer ret;
   ret.t.QuadPart = a.t.QuadPart + b.t.QuadPart;
   return ret;
 }
 
-ShTimer operator+(const ShTimer& a, const ShTimer& b)
+Timer operator+(const Timer& a, const Timer& b)
 {
-  ShTimer ret;
+  Timer ret;
   ret.t.QuadPart = a.t.QuadPart - b.t.QuadPart;
   return ret;
 }
 
 #else
 
-ShTimer::ShTimer(void)
+Timer::Timer(void)
 {
   t.tv_sec = 0;
   t.tv_usec = 0;
 }
 
-ShTimer::~ShTimer(void)
+Timer::~Timer(void)
 {
 }
 
-float ShTimer::value(void)
+float Timer::value(void)
 {
   float sec = (float)t.tv_sec*1000;
   float msec = (float)t.tv_usec/1000;
   return (sec + msec);
 }
 
-ShTimer ShTimer::now(void)
+Timer Timer::now(void)
 {
-  ShTimer ret;
+  Timer ret;
   gettimeofday(&ret.t, 0);
   return ret;
 }
 
-ShTimer ShTimer::zero(void)
+Timer Timer::zero(void)
 {
-  ShTimer ret;
+  Timer ret;
   ret.t.tv_sec = 0;
   ret.t.tv_usec = 0;
   return ret;
 }
 
-ShTimer operator-(const ShTimer& a, const ShTimer& b)
+Timer operator-(const Timer& a, const Timer& b)
 {
-  ShTimer ret;
+  Timer ret;
   
   ret.t.tv_sec = a.t.tv_sec - b.t.tv_sec;
   ret.t.tv_usec = a.t.tv_usec - b.t.tv_usec;
@@ -120,9 +120,9 @@ ShTimer operator-(const ShTimer& a, const ShTimer& b)
   return ret;
 }
 
-ShTimer operator+(const ShTimer& a, const ShTimer& b)
+Timer operator+(const Timer& a, const Timer& b)
 {
-  ShTimer ret;
+  Timer ret;
   
   ret.t.tv_sec = a.t.tv_sec + b.t.tv_sec;
   ret.t.tv_usec = a.t.tv_usec + b.t.tv_usec;
