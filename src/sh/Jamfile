@@ -1,0 +1,12 @@
+import set ;
+
+
+alias headers
+: # sources
+	[ glob *.hpp ]
+;
+alias sources
+: # sources
+	[ set.difference [ glob *.cpp ] : Generic.cpp DomTree.cpp Section.cpp ]
+	[ glob *.c ]
+;
