@@ -1,42 +1,122 @@
-REQUIREMENTS
+================================
+BUILDING ON WINDOWS OR MAC OS X
+================================
 
- - g++ > 3.0.0, >= 3.2 is recommended.
+The simplest way to build Sh on Windows is to use the Visual Studio .NET
+solution file:
+  win32/vc7/Sh.sln or win32/vc8/Sh.sln
+
+More information can be found on the wiki at:
+  http://libsh.org/wiki/index.php/Building_Sh_on_Windows
+
+The Mac OS X version of Sh has been tested on Tiger and Xcode 2.2. There
+are a few limitations, see README.osx.
+
+To compile Sh on OS X, you will need the following fink packages:
+  libpng3
+
+To build Sh, simply open the Xcode project in the "xcode/" directory
+and build it. You should be able to run the example applications directly
+from the IDE.
+
+==============================
+BUILDING ON LINUX/UNIX
+==============================
+
+Requirements:
+ - g++ > 3.0.0, >= 4.0 is recommended.
  - libpng
  - for the ARB backend, a recent glext.h as well as GL drivers and headers
    You can obtain the latest glext.h from the SGI OpenGL Registry at
    http://oss.sgi.com/projects/ogl-sample/registry/
- - for the SM backend, an installed version of SM (use configure --with-sm=DIR
-   to specify the installation directory of SM)
+ - for the ARB or GLSL backends, you need a GPU that supports shaders: at 
+   least a GeForce 5200FX or a Radeon 9600
 
-Currently Sh has only been tested on GNU/Linux, but we are planning to
-suppot more platforms soon.
+On Debian GNU/Linux:
+  apt-get install automake1.9, autoconf, g++, python, libltdl3-dev, libwxgtk2.6-dev
 
-INSTALLING
-
-Quick compile and installation:
-./configure
-make
-make install
-[optional] make check
+------------------------------
+COMPILATION AND INSTALLATION
+------------------------------
+Quick installation:
+  ./configure
+  make
+  make install
 
 ./configure --help will present you with possible options to configure.
 
 For a local installation, the following is useful:
 
-./configure --prefix=$HOME/install/sh
+  ./configure --prefix=$HOME/install/sh
 
 which will install it under the specified directory (absolute path
 is required).
 
-DEVELOPMENT
+------------------------------
+OUT-OF-SOURCE BUILDING
+------------------------------
+The recommended way to build Sh is to create a new empty directory and run
+the configure script from there.
 
-If compiling from CVS, first run:
-$ ./bootstrap
+For example if sh has been uncompressed in ~/src/sh/:
+
+  cd $HOME/src/
+  mkdir sh-debug
+  cd sh-debug
+  ../sh/configure --prefix=$HOME/install/sh
+
+The main advantage of this way of building Sh is that you can have two
+different versions of Sh with only one copy of the source code.  For
+example:
+
+  cd $HOME/src/
+  mkdir sh-debug
+  cd sh-debug
+  ../sh/configure --prefix=$HOME/install/sh --enable-debug
+
+  cd $HOME/src/
+  mkdir sh-release
+  cd sh-release
+  ../sh/configure --prefix=$HOME/install/sh --disable-debug
+
+------------------------------
+DEVELOPMENT
+------------------------------
+If compiling from SVN, first run:
+  ./bootstrap
 (also run this if you change any Makefile.am or the configure.ac)
+
 You will need recent versions of autoconf, automake, libtool and
 libltdl.
+
 Ignore the message about needing to run aclocal.
 
-MORE HELP
+------------------------------
+REGRESSION TESTS
+------------------------------
+Extra requirement: Python
 
-See the homepage at http://libsh.org/ for mailing list info, etc.
+To run the test suite on the arb backend:
+
+  make install
+  SH_REGRESS_BACKEND=arb make regress
+
+To run it on all backends:
+  make regressall
+
+Note that "make regress" will use the currently installed version of
+Sh.  If you wish to test a new version before installing it, you
+can install it to a temporary location with a custom prefix:
+
+  ./configure --prefix=/tmp/sh-test
+
+and then run "make regress" on it.
+
+==============================
+MORE HELP
+==============================
+
+See the homepage at
+  http://libsh.org/
+and the wiki at 
+  http://www.libsh.org/wiki/

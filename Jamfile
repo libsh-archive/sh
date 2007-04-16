@@ -1,0 +1,180 @@
+################################################################################
+# imports
+################################################################################
+
+import config/tools/dll : lib : xlib ;
+import package ;
+import stage ;
+
+
+################################################################################
+# requirements
+################################################################################
+
+local requirements =
+  <toolset>msvc:<define>_USE_MATH_DEFINES
+  <toolset>msvc:<define>_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1
+  <toolset>msvc:<define>_CRT_SECURE_NO_DEPRECATE
+  <toolset>msvc:<define>_SCL_SECURE_NO_DEPRECATE
+  <define>'SH_INSTALL_PREFIX=\"\"'
+  <rtti>on
+;
+
+
+################################################################################
+# usage-requirements
+################################################################################
+
+local usage-requirements =
+  <include>src
+  <define>SHDLLEXPORT_HPP # no export header needed
+  <toolset>msvc:<define>NOMINMAX
+  <variant>debug:<define>SH_DEBUG
+;
+
+
+################################################################################
+# project
+################################################################################
+
+project sh
+: requirements
+  $(requirements)
+: default-build
+  release
+  debug
+: usage-requirements
+  $(usage-requirements)
+;
+
+
+################################################################################
+# libraries
+################################################################################
+
+xlib libsh
+: # sources
+  src/sh//sources
+  /ltdl//libltdl
+: # requirements
+  <tag>@stage.add-variant-and-compiler
+: # default-build
+: # usage-requirements
+: # symbol
+  SH_DLLEXPORT
+;
+
+
+lib libshutil
+: # sources
+  src/shutil//sources
+  /libpng//libpng
+: # requirements
+  <tag>@stage.add-variant-and-compiler
+  <dependency>libsh/<link>shared
+  <link>static
+: # default-build
+: # usage-requirements
+  <library>libsh/<link>shared
+;
+
+
+################################################################################
+# backends
+################################################################################
+
+rule add-backend-tag ( name : type ? : property-set )
+{
+  import type ;
+  if [ type.is-derived $(type) LIB ]
+  {            
+    local properties = [ $(property-set).raw ] ;
+    if <variant>debug in $(properties) { name = $(name)_debug ; }
+
+    import virtual-target ;
+    return [ virtual-target.add-prefix-and-suffix $(name) : $(type) : $(property-set) ] ;
+  }
+}
+
+
+lib libshgl
+: # sources
+  backends/gl//gl
+  /opengl//libgl
+: # requirements
+  <tag>@stage.add-variant-and-compiler
+  <dependency>libsh/<link>shared
+  <include>src/sh
+  <link>static
+: # default-build
+: # usage-requirements
+  <library>libsh/<link>shared
+  <include>src/sh
+  <include>backends/gl
+;
+
+
+lib libsharb
+: # sources
+  backends/gl//arb
+  libshgl
+: # requirements
+  <tag>@add-backend-tag
+: # default-build
+: # usage-requirements
+;
+
+
+lib libshglsl
+: # sources
+  backends/gl//glsl
+  libshgl
+: # requirements
+  <tag>@add-backend-tag
+: # default-build
+: # usage-requirements
+;
+
+
+lib libshcc
+: # sources
+  backends/cc//cc
+  libsh
+: # requirements
+  <tag>@add-backend-tag
+  <include>src/sh
+: # default-build
+: # usage-requirements
+  <include>src/sh
+;
+
+
+################################################################################
+# install
+################################################################################
+
+alias binaries ;
+explicit binaries ;
+
+
+alias libraries : libsh libsharb libshglsl libshcc libshutil ;
+explicit libraries ;
+
+
+alias headers : src//headers ;
+explicit headers ;
+
+
+alias all : binaries libraries headers ;
+
+
+package.install sh
+: # properties
+  <install-source-root>src
+: binaries
+: libraries
+: headers
+;
+
+alias install-sh : sh ;
+explicit install-sh ;

@@ -1,0 +1,2957 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 42;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		3E2E62C7089589A8009505E4 /* Sh.icns in Resources */ = {isa = PBXBuildFile; fileRef = 3E2E62C6089589A8009505E4 /* Sh.icns */; };
+		3E3EA9EB087A1A8B00A1405F /* Camera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3E3EA9E2087A1A8B00A1405F /* Camera.cpp */; };
+		3E3EA9ED087A1A8B00A1405F /* kd.png in Resources */ = {isa = PBXBuildFile; fileRef = 3E3EA9E4087A1A8B00A1405F /* kd.png */; };
+		3E3EA9EE087A1A8B00A1405F /* ks.png in Resources */ = {isa = PBXBuildFile; fileRef = 3E3EA9E5087A1A8B00A1405F /* ks.png */; };
+		3E3EA9EF087A1A8B00A1405F /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3E3EA9E6087A1A8B00A1405F /* main.cpp */; };
+		3E3EA9F0087A1A8B00A1405F /* rustkd.png in Resources */ = {isa = PBXBuildFile; fileRef = 3E3EA9E7087A1A8B00A1405F /* rustkd.png */; };
+		3E3EA9F1087A1A8B00A1405F /* rustks.png in Resources */ = {isa = PBXBuildFile; fileRef = 3E3EA9E8087A1A8B00A1405F /* rustks.png */; };
+		3E3EA9F2087A1A8B00A1405F /* ShTrackball.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3E3EA9E9087A1A8B00A1405F /* ShTrackball.cpp */; };
+		3E5FD04E0899DCD700A1BAFF /* ShLibNoise.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3E5FD0490899DCD700A1BAFF /* ShLibNoise.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3E5FD04F0899DCD700A1BAFF /* ShLibNoiseImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3E5FD04A0899DCD700A1BAFF /* ShLibNoiseImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3E5FD0500899DCD700A1BAFF /* ShLibWorley.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3E5FD04B0899DCD700A1BAFF /* ShLibWorley.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3E5FD0510899DCD700A1BAFF /* ShLibWorleyImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3E5FD04C0899DCD700A1BAFF /* ShLibWorleyImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3E5FD0520899DCD700A1BAFF /* ShMIPFilter.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3E5FD04D0899DCD700A1BAFF /* ShMIPFilter.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3E60CEC4087A18AA0078BC55 /* Camera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3E60CEBF087A18AA0078BC55 /* Camera.cpp */; };
+		3E60CEC5087A18AA0078BC55 /* Camera.hpp in Resources */ = {isa = PBXBuildFile; fileRef = 3E60CEC0087A18AA0078BC55 /* Camera.hpp */; };
+		3E60CEC7087A18AA0078BC55 /* ShTrackball.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3E60CEC2087A18AA0078BC55 /* ShTrackball.cpp */; };
+		3E60CEC8087A18AA0078BC55 /* ShTrackball.hpp in Resources */ = {isa = PBXBuildFile; fileRef = 3E60CEC3087A18AA0078BC55 /* ShTrackball.hpp */; };
+		3E7CF7CD092C1AFC0080FDD2 /* Glsl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3E7CF7C1092C1AFC0080FDD2 /* Glsl.cpp */; };
+		3E7CF7CE092C1AFC0080FDD2 /* GlslBackend.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3E7CF7C3092C1AFC0080FDD2 /* GlslBackend.cpp */; };
+		3E7CF7CF092C1AFC0080FDD2 /* GlslCode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3E7CF7C4092C1AFC0080FDD2 /* GlslCode.cpp */; };
+		3E7CF7D0092C1AFC0080FDD2 /* GlslEmit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3E7CF7C6092C1AFC0080FDD2 /* GlslEmit.cpp */; };
+		3E7CF7D1092C1AFC0080FDD2 /* GlslSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3E7CF7C7092C1AFC0080FDD2 /* GlslSet.cpp */; };
+		3E7CF7D2092C1AFC0080FDD2 /* GlslVariable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3E7CF7C9092C1AFC0080FDD2 /* GlslVariable.cpp */; };
+		3E7CF7D3092C1AFC0080FDD2 /* GlslVariableMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3E7CF7CB092C1AFC0080FDD2 /* GlslVariableMap.cpp */; };
+		3E7CF7D4092C1B1E0080FDD2 /* GlBackend.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EF90F600878A0F900A31AD9 /* GlBackend.cpp */; };
+		3E7CF7D6092C1B1E0080FDD2 /* GlTextureName.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EF90F620878A0F900A31AD9 /* GlTextureName.cpp */; };
+		3E7CF7D8092C1B1E0080FDD2 /* GlTextures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EF90F640878A0F900A31AD9 /* GlTextures.cpp */; };
+		3E7CF7DA092C1B1E0080FDD2 /* GlTextureStorage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EF90F660878A0F900A31AD9 /* GlTextureStorage.cpp */; };
+		3EB30B5308787D7700729309 /* sh.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30A8D08787D7600729309 /* sh.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B5408787D7700729309 /* ShAlgebra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30A8E08787D7600729309 /* ShAlgebra.cpp */; };
+		3EB30B5508787D7700729309 /* ShAlgebra.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30A8F08787D7600729309 /* ShAlgebra.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B5608787D7700729309 /* ShArray.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30A9008787D7600729309 /* ShArray.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B5708787D7700729309 /* ShAttrib.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30A9108787D7600729309 /* ShAttrib.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B5808787D7700729309 /* ShAttribImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30A9208787D7600729309 /* ShAttribImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B5908787D7700729309 /* ShBackend.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30A9308787D7600729309 /* ShBackend.cpp */; };
+		3EB30B5A08787D7700729309 /* ShBackend.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30A9408787D7600729309 /* ShBackend.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B5B08787D7700729309 /* ShBaseTexture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30A9508787D7600729309 /* ShBaseTexture.cpp */; };
+		3EB30B5C08787D7700729309 /* ShBaseTexture.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30A9608787D7600729309 /* ShBaseTexture.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B5D08787D7700729309 /* ShBaseTextureImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30A9708787D7600729309 /* ShBaseTextureImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B5E08787D7700729309 /* ShBasicBlock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30A9808787D7600729309 /* ShBasicBlock.cpp */; };
+		3EB30B5F08787D7700729309 /* ShBasicBlock.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30A9908787D7600729309 /* ShBasicBlock.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B6008787D7700729309 /* ShBitSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30A9A08787D7600729309 /* ShBitSet.cpp */; };
+		3EB30B6108787D7700729309 /* ShBitSet.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30A9B08787D7600729309 /* ShBitSet.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B6208787D7700729309 /* ShBlock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30A9C08787D7600729309 /* ShBlock.cpp */; };
+		3EB30B6308787D7700729309 /* ShBlock.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30A9D08787D7600729309 /* ShBlock.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B6408787D7700729309 /* ShCastManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30A9E08787D7600729309 /* ShCastManager.cpp */; };
+		3EB30B6508787D7700729309 /* ShCastManager.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30A9F08787D7600729309 /* ShCastManager.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B6608787D7700729309 /* ShCfgBlock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30AA008787D7600729309 /* ShCfgBlock.cpp */; };
+		3EB30B6708787D7700729309 /* ShCfgBlock.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AA108787D7600729309 /* ShCfgBlock.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B6808787D7700729309 /* ShChannel.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AA208787D7600729309 /* ShChannel.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B6908787D7700729309 /* ShChannelImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AA308787D7600729309 /* ShChannelImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B6A08787D7700729309 /* ShChannelNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30AA408787D7600729309 /* ShChannelNode.cpp */; };
+		3EB30B6B08787D7700729309 /* ShChannelNode.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AA508787D7600729309 /* ShChannelNode.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B6C08787D7700729309 /* ShColor.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AA608787D7600729309 /* ShColor.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B6D08787D7700729309 /* ShConcreteCTypeOp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30AA708787D7600729309 /* ShConcreteCTypeOp.cpp */; };
+		3EB30B6E08787D7700729309 /* ShConcreteCTypeOpImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AA808787D7600729309 /* ShConcreteCTypeOpImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B6F08787D7700729309 /* ShConcreteRegularOpImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AA908787D7600729309 /* ShConcreteRegularOpImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B7008787D7700729309 /* ShConstProp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30AAA08787D7600729309 /* ShConstProp.cpp */; };
+		3EB30B7108787D7700729309 /* ShContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30AAB08787D7600729309 /* ShContext.cpp */; };
+		3EB30B7208787D7700729309 /* ShContext.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AAC08787D7600729309 /* ShContext.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B7308787D7700729309 /* ShCtrlGraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30AAD08787D7600729309 /* ShCtrlGraph.cpp */; };
+		3EB30B7408787D7700729309 /* ShCtrlGraph.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AAE08787D7600729309 /* ShCtrlGraph.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B7508787D7700729309 /* ShDataType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30AAF08787D7600729309 /* ShDataType.cpp */; };
+		3EB30B7608787D7700729309 /* ShDataType.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AB008787D7600729309 /* ShDataType.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B7708787D7700729309 /* ShDataTypeImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AB108787D7600729309 /* ShDataTypeImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B7808787D7700729309 /* ShDebug.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AB208787D7600729309 /* ShDebug.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B7908787D7700729309 /* ShDllExport.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AB308787D7600729309 /* ShDllExport.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B7C08787D7700729309 /* ShError.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30AB608787D7600729309 /* ShError.cpp */; };
+		3EB30B7D08787D7700729309 /* ShError.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AB708787D7600729309 /* ShError.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B7E08787D7700729309 /* ShEval.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30AB808787D7600729309 /* ShEval.cpp */; };
+		3EB30B7F08787D7700729309 /* ShEval.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AB908787D7600729309 /* ShEval.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B8008787D7700729309 /* ShEvalImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30ABA08787D7600729309 /* ShEvalImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B8108787D7700729309 /* ShEvaluate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30ABB08787D7600729309 /* ShEvaluate.cpp */; };
+		3EB30B8208787D7700729309 /* ShEvaluate.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30ABC08787D7600729309 /* ShEvaluate.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B8308787D7700729309 /* ShException.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30ABD08787D7600729309 /* ShException.cpp */; };
+		3EB30B8408787D7700729309 /* ShException.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30ABE08787D7600729309 /* ShException.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B8508787D7700729309 /* ShFixedManipulator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30ABF08787D7600729309 /* ShFixedManipulator.cpp */; };
+		3EB30B8608787D7700729309 /* ShFixedManipulator.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AC008787D7600729309 /* ShFixedManipulator.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B8708787D7700729309 /* ShFraction.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AC108787D7600729309 /* ShFraction.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B8808787D7700729309 /* ShFractionImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AC208787D7600729309 /* ShFractionImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B8A08787D7700729309 /* ShGeneric.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AC408787D7600729309 /* ShGeneric.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B8B08787D7700729309 /* ShGenericImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AC508787D7600729309 /* ShGenericImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B8C08787D7700729309 /* ShGraph.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AC608787D7600729309 /* ShGraph.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B8D08787D7700729309 /* ShGraphImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AC708787D7600729309 /* ShGraphImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B8E08787D7700729309 /* ShHalf.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AC808787D7600729309 /* ShHalf.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B8F08787D7700729309 /* ShHalfImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AC908787D7600729309 /* ShHalfImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B9008787D7700729309 /* ShHashMap.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30ACA08787D7600729309 /* ShHashMap.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B9108787D7700729309 /* ShTexDataImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30ACB08787D7600729309 /* ShTexDataImpl.hpp */; };
+		3EB30B9208787D7700729309 /* ShImage.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30ACC08787D7600729309 /* ShImage.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B9308787D7700729309 /* ShImage3D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30ACD08787D7600729309 /* ShImage3D.cpp */; };
+		3EB30B9408787D7700729309 /* ShImage3D.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30ACE08787D7600729309 /* ShImage3D.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B9508787D7700729309 /* ShInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30ACF08787D7600729309 /* ShInfo.cpp */; };
+		3EB30B9608787D7700729309 /* ShInfo.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AD008787D7600729309 /* ShInfo.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B9708787D7700729309 /* ShInfoImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AD108787D7600729309 /* ShInfoImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B9808787D7700729309 /* ShInstructions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30AD208787D7600729309 /* ShInstructions.cpp */; };
+		3EB30B9908787D7700729309 /* ShInstructions.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AD308787D7600729309 /* ShInstructions.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B9A08787D7700729309 /* ShInternals.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30AD408787D7600729309 /* ShInternals.cpp */; };
+		3EB30B9B08787D7700729309 /* ShInternals.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AD508787D7600729309 /* ShInternals.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B9C08787D7700729309 /* ShInterp.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AD608787D7600729309 /* ShInterp.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B9D08787D7700729309 /* ShLib.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AD708787D7600729309 /* ShLib.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B9E08787D7700729309 /* ShLibArith.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AD808787D7600729309 /* ShLibArith.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30B9F08787D7700729309 /* ShLibArithImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AD908787D7600729309 /* ShLibArithImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BA008787D7700729309 /* ShLibAttrib.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30ADA08787D7600729309 /* ShLibAttrib.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BA108787D7700729309 /* ShLibBoolean.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30ADB08787D7600729309 /* ShLibBoolean.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BA208787D7700729309 /* ShLibBooleanImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30ADC08787D7600729309 /* ShLibBooleanImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BA308787D7700729309 /* ShLibClamp.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30ADD08787D7600729309 /* ShLibClamp.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BA408787D7700729309 /* ShLibClampImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30ADE08787D7600729309 /* ShLibClampImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BA508787D7700729309 /* ShLibColor.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30ADF08787D7600729309 /* ShLibColor.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BA608787D7700729309 /* ShLibDeriv.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AE008787D7600729309 /* ShLibDeriv.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BA708787D7700729309 /* ShLibDerivImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AE108787D7600729309 /* ShLibDerivImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BA808787D7700729309 /* ShLibGeometry.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AE208787D7600729309 /* ShLibGeometry.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BA908787D7700729309 /* ShLibGeometryImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AE308787D7600729309 /* ShLibGeometryImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BAA08787D7700729309 /* ShLibMatrix.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AE408787D7600729309 /* ShLibMatrix.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BAB08787D7700729309 /* ShLibMatrixImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AE508787D7600729309 /* ShLibMatrixImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BAC08787D7700729309 /* ShLibSplines.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AE608787D7600729309 /* ShLibSplines.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BAD08787D7700729309 /* ShLibSplinesImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AE708787D7600729309 /* ShLibSplinesImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BAE08787D7700729309 /* ShLibNormal.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AE808787D7600729309 /* ShLibNormal.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BAF08787D7700729309 /* ShLibPlane.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AE908787D7600729309 /* ShLibPlane.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BB008787D7700729309 /* ShLibPoint.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AEA08787D7600729309 /* ShLibPoint.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BB108787D7700729309 /* ShLibPosition.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AEB08787D7600729309 /* ShLibPosition.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BB208787D7700729309 /* ShLibTexCoord.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AEC08787D7600729309 /* ShLibTexCoord.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BB308787D7700729309 /* ShLibTrig.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AED08787D7600729309 /* ShLibTrig.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BB408787D7700729309 /* ShLibTrigImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AEE08787D7600729309 /* ShLibTrigImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BB508787D7700729309 /* ShLibVector.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AEF08787D7600729309 /* ShLibVector.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BB608787D7700729309 /* ShLinearAllocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30AF008787D7600729309 /* ShLinearAllocator.cpp */; };
+		3EB30BB708787D7700729309 /* ShLinearAllocator.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AF108787D7600729309 /* ShLinearAllocator.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BB808787D7700729309 /* ShManipulator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30AF208787D7600729309 /* ShManipulator.cpp */; };
+		3EB30BB908787D7700729309 /* ShManipulator.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AF308787D7600729309 /* ShManipulator.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BBA08787D7700729309 /* ShManipulatorImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AF408787D7600729309 /* ShManipulatorImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BBB08787D7700729309 /* ShMath.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AF508787D7600729309 /* ShMath.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BBC08787D7700729309 /* ShMatrix.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AF608787D7600729309 /* ShMatrix.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BBD08787D7700729309 /* ShMatrixImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AF708787D7600729309 /* ShMatrixImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BBE08787D7700729309 /* ShMemory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30AF808787D7600729309 /* ShMemory.cpp */; };
+		3EB30BBF08787D7700729309 /* ShMemory.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AF908787D7600729309 /* ShMemory.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BC008787D7700729309 /* ShMemoryDep.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AFA08787D7600729309 /* ShMemoryDep.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BC108787D7700729309 /* ShMeta.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AFB08787D7600729309 /* ShMeta.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BC208787D7700729309 /* ShMetaForwarder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30AFC08787D7600729309 /* ShMetaForwarder.cpp */; };
+		3EB30BC308787D7700729309 /* ShMetaForwarder.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AFD08787D7600729309 /* ShMetaForwarder.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BC408787D7700729309 /* ShMetaImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AFE08787D7600729309 /* ShMetaImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BC508787D7700729309 /* ShNibbles.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30AFF08787D7600729309 /* ShNibbles.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BC608787D7700729309 /* ShNibblesImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B0008787D7600729309 /* ShNibblesImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BC708787D7700729309 /* ShNormal.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B0108787D7600729309 /* ShNormal.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BC808787D7700729309 /* ShOperation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30B0208787D7600729309 /* ShOperation.cpp */; };
+		3EB30BC908787D7700729309 /* ShOperation.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B0308787D7600729309 /* ShOperation.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BCA08787D7700729309 /* ShOptimizations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30B0408787D7600729309 /* ShOptimizations.cpp */; };
+		3EB30BCB08787D7700729309 /* ShOptimizations.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B0508787D7600729309 /* ShOptimizations.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BCC08787D7700729309 /* ShPalette.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B0608787D7600729309 /* ShPalette.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BCD08787D7700729309 /* ShPaletteImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B0708787D7600729309 /* ShPaletteImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BCE08787D7700729309 /* ShPaletteNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30B0808787D7600729309 /* ShPaletteNode.cpp */; };
+		3EB30BCF08787D7700729309 /* ShPaletteNode.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B0908787D7600729309 /* ShPaletteNode.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BD008787D7700729309 /* ShParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30B0A08787D7600729309 /* ShParser.cpp */; };
+		3EB30BD108787D7700729309 /* ShParser.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B0B08787D7600729309 /* ShParser.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BD208787D7700729309 /* ShPlane.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B0C08787D7600729309 /* ShPlane.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BD308787D7700729309 /* ShPoint.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B0D08787D7600729309 /* ShPoint.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BD408787D7700729309 /* ShPool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30B0E08787D7600729309 /* ShPool.cpp */; };
+		3EB30BD508787D7700729309 /* ShPool.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B0F08787D7600729309 /* ShPool.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BD608787D7700729309 /* ShPosition.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B1008787D7600729309 /* ShPosition.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BD708787D7700729309 /* ShProgram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30B1108787D7600729309 /* ShProgram.cpp */; };
+		3EB30BD808787D7700729309 /* ShProgram.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B1208787D7600729309 /* ShProgram.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BD908787D7700729309 /* ShProgramNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30B1308787D7600729309 /* ShProgramNode.cpp */; };
+		3EB30BDA08787D7700729309 /* ShProgramNode.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B1408787D7600729309 /* ShProgramNode.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BDB08787D7700729309 /* ShProgramSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30B1508787D7600729309 /* ShProgramSet.cpp */; };
+		3EB30BDC08787D7700729309 /* ShProgramSet.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B1608787D7600729309 /* ShProgramSet.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BDD08787D7700729309 /* ShQuaternion.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B1708787D7600729309 /* ShQuaternion.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BDE08787D7700729309 /* ShQuaternionImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B1808787D7600729309 /* ShQuaternionImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BDF08787D7700729309 /* ShRecord.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30B1908787D7600729309 /* ShRecord.cpp */; };
+		3EB30BE008787D7700729309 /* ShRecord.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B1A08787D7600729309 /* ShRecord.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BE108787D7700729309 /* ShRefCount.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B1B08787D7600729309 /* ShRefCount.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BE208787D7700729309 /* ShRefCountImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B1C08787D7600729309 /* ShRefCountImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BE308787D7700729309 /* ShSection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30B1D08787D7600729309 /* ShSection.cpp */; };
+		3EB30BE408787D7700729309 /* ShSection.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B1E08787D7600729309 /* ShSection.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BE508787D7700729309 /* ShSectionImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B1F08787D7600729309 /* ShSectionImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BE608787D7700729309 /* ShStatement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30B2008787D7600729309 /* ShStatement.cpp */; };
+		3EB30BE708787D7700729309 /* ShStatement.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B2108787D7600729309 /* ShStatement.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BE808787D7700729309 /* ShStorageType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30B2208787D7600729309 /* ShStorageType.cpp */; };
+		3EB30BE908787D7700729309 /* ShStorageType.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B2308787D7600729309 /* ShStorageType.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BEA08787D7700729309 /* ShStorageTypeImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B2408787D7600729309 /* ShStorageTypeImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BEB08787D7700729309 /* ShStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30B2508787D7600729309 /* ShStream.cpp */; };
+		3EB30BEC08787D7700729309 /* ShStream.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B2608787D7600729309 /* ShStream.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BED08787D7700729309 /* ShStreamImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B2708787D7600729309 /* ShStreamImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BEE08787D7700729309 /* ShStructural.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30B2808787D7600729309 /* ShStructural.cpp */; };
+		3EB30BEF08787D7700729309 /* ShStructural.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B2908787D7600729309 /* ShStructural.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BF008787D7700729309 /* ShSwizzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30B2A08787D7600729309 /* ShSwizzle.cpp */; };
+		3EB30BF108787D7700729309 /* ShSwizzle.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B2B08787D7600729309 /* ShSwizzle.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BF208787D7700729309 /* ShSwizzleImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B2C08787D7600729309 /* ShSwizzleImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BF308787D7700729309 /* ShSyntax.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30B2D08787D7600729309 /* ShSyntax.cpp */; };
+		3EB30BF408787D7700729309 /* ShSyntax.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B2E08787D7600729309 /* ShSyntax.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BF508787D7700729309 /* ShTable.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B2F08787D7600729309 /* ShTable.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BF608787D7700729309 /* ShTexCoord.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B3008787D7600729309 /* ShTexCoord.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BF708787D7700729309 /* ShTexture.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B3108787D7600729309 /* ShTexture.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BF808787D7700729309 /* ShTextureNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30B3208787D7600729309 /* ShTextureNode.cpp */; };
+		3EB30BF908787D7700729309 /* ShTextureNode.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B3308787D7600729309 /* ShTextureNode.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BFA08787D7700729309 /* ShToken.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30B3408787D7600729309 /* ShToken.cpp */; };
+		3EB30BFB08787D7700729309 /* ShToken.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B3508787D7600729309 /* ShToken.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BFC08787D7700729309 /* ShTokenizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30B3608787D7600729309 /* ShTokenizer.cpp */; };
+		3EB30BFD08787D7700729309 /* ShTokenizer.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B3708787D7600729309 /* ShTokenizer.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30BFE08787D7700729309 /* ShTransformer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30B3808787D7600729309 /* ShTransformer.cpp */; };
+		3EB30BFF08787D7700729309 /* ShTransformer.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B3908787D7600729309 /* ShTransformer.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30C0008787D7700729309 /* ShTransformerImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B3A08787D7600729309 /* ShTransformerImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30C0108787D7700729309 /* ShTypeConvertTransformer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30B3B08787D7600729309 /* ShTypeConvertTransformer.cpp */; };
+		3EB30C0208787D7700729309 /* ShTypeInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30B3C08787D7600729309 /* ShTypeInfo.cpp */; };
+		3EB30C0308787D7700729309 /* ShTypeInfo.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B3D08787D7600729309 /* ShTypeInfo.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30C0408787D7700729309 /* ShTypeInfoCasts.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30B3E08787D7600729309 /* ShTypeInfoCasts.cpp */; };
+		3EB30C0508787D7700729309 /* ShTypeInfoImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B3F08787D7600729309 /* ShTypeInfoImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30C0608787D7700729309 /* ShTypeInfoOps.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30B4008787D7600729309 /* ShTypeInfoOps.cpp */; };
+		3EB30C0708787D7700729309 /* ShUtility.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30B4108787D7600729309 /* ShUtility.cpp */; };
+		3EB30C0808787D7700729309 /* ShUtility.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B4208787D7600729309 /* ShUtility.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30C0908787D7700729309 /* ShValueTracking.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30B4308787D7600729309 /* ShValueTracking.cpp */; };
+		3EB30C0A08787D7700729309 /* ShVariable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30B4408787D7600729309 /* ShVariable.cpp */; };
+		3EB30C0B08787D7700729309 /* ShVariable.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B4508787D7600729309 /* ShVariable.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30C0C08787D7700729309 /* ShVariableNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30B4608787D7600729309 /* ShVariableNode.cpp */; };
+		3EB30C0D08787D7700729309 /* ShVariableNode.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B4708787D7600729309 /* ShVariableNode.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30C0E08787D7700729309 /* ShVariableType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30B4808787D7600729309 /* ShVariableType.cpp */; };
+		3EB30C0F08787D7700729309 /* ShVariableType.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B4908787D7700729309 /* ShVariableType.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30C1008787D7700729309 /* ShVariant.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30B4A08787D7700729309 /* ShVariant.cpp */; };
+		3EB30C1108787D7700729309 /* ShVariant.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B4B08787D7700729309 /* ShVariant.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30C1208787D7700729309 /* ShVariantCast.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B4C08787D7700729309 /* ShVariantCast.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30C1308787D7700729309 /* ShVariantCastImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B4D08787D7700729309 /* ShVariantCastImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30C1408787D7700729309 /* ShVariantFactory.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B4E08787D7700729309 /* ShVariantFactory.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30C1508787D7700729309 /* ShVariantFactoryImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B4F08787D7700729309 /* ShVariantFactoryImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30C1608787D7700729309 /* ShVariantImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B5008787D7700729309 /* ShVariantImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30C1708787D7700729309 /* ShVector.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B5108787D7700729309 /* ShVector.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30C1808787D7700729309 /* ShWrap.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EB30B5208787D7700729309 /* ShWrap.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EB30C3408787F4800729309 /* Cc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30C2F08787F4800729309 /* Cc.cpp */; };
+		3EB30C3508787F4800729309 /* Cc.hpp in Resources */ = {isa = PBXBuildFile; fileRef = 3EB30C3008787F4800729309 /* Cc.hpp */; };
+		3EB30C3608787F4800729309 /* CcEmit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EB30C3108787F4800729309 /* CcEmit.cpp */; };
+		3EB30C3708787F4800729309 /* CcTextures.hpp in Resources */ = {isa = PBXBuildFile; fileRef = 3EB30C3208787F4800729309 /* CcTextures.hpp */; };
+		3EB30C3808787F4800729309 /* CcTexturesString.hpp in Resources */ = {isa = PBXBuildFile; fileRef = 3EB30C3308787F4800729309 /* CcTexturesString.hpp */; };
+		3EBE965B087EC9CA00DA8A69 /* ShFunc.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EBE9644087EC9CA00DA8A69 /* ShFunc.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EBE965C087EC9CA00DA8A69 /* ShFuncImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EBE9645087EC9CA00DA8A69 /* ShFuncImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EBE965D087EC9CA00DA8A69 /* ShKernelLib.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EBE9646087EC9CA00DA8A69 /* ShKernelLib.cpp */; };
+		3EBE965E087EC9CA00DA8A69 /* ShKernelLib.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EBE9647087EC9CA00DA8A69 /* ShKernelLib.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EBE965F087EC9CA00DA8A69 /* ShKernelLibImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EBE9648087EC9CA00DA8A69 /* ShKernelLibImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EBE9660087EC9CA00DA8A69 /* ShKernelLight.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EBE9649087EC9CA00DA8A69 /* ShKernelLight.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EBE9661087EC9CA00DA8A69 /* ShKernelLightImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EBE964A087EC9CA00DA8A69 /* ShKernelLightImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EBE9662087EC9CA00DA8A69 /* ShKernelPost.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EBE964B087EC9CA00DA8A69 /* ShKernelPost.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EBE9663087EC9CA00DA8A69 /* ShKernelPostImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EBE964C087EC9CA00DA8A69 /* ShKernelPostImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EBE9664087EC9CA00DA8A69 /* ShKernelSurface.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EBE964D087EC9CA00DA8A69 /* ShKernelSurface.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EBE9665087EC9CA00DA8A69 /* ShKernelSurfaceImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EBE964E087EC9CA00DA8A69 /* ShKernelSurfaceImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EBE9666087EC9CA00DA8A69 /* ShKernelSurfMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EBE964F087EC9CA00DA8A69 /* ShKernelSurfMap.cpp */; };
+		3EBE9667087EC9CA00DA8A69 /* ShKernelSurfMap.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EBE9650087EC9CA00DA8A69 /* ShKernelSurfMap.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EBE9668087EC9CA00DA8A69 /* ShMesh.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EBE9651087EC9CA00DA8A69 /* ShMesh.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EBE9669087EC9CA00DA8A69 /* ShMeshImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EBE9652087EC9CA00DA8A69 /* ShMeshImpl.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EBE966C087EC9CA00DA8A69 /* ShObjMesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EBE9655087EC9CA00DA8A69 /* ShObjMesh.cpp */; };
+		3EBE966D087EC9CA00DA8A69 /* ShObjMesh.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EBE9656087EC9CA00DA8A69 /* ShObjMesh.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EBE966E087EC9CA00DA8A69 /* shutil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EBE9657087EC9CA00DA8A69 /* shutil.cpp */; };
+		3EBE966F087EC9CA00DA8A69 /* shutil.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EBE9658087EC9CA00DA8A69 /* shutil.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		3EC22E040899D80700EB5F51 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EC22E030899D80700EB5F51 /* main.cpp */; };
+		3EF90ED20878939E00A31AD9 /* Camera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EF90ECD0878939E00A31AD9 /* Camera.cpp */; };
+		3EF90ED30878939E00A31AD9 /* Camera.hpp in Resources */ = {isa = PBXBuildFile; fileRef = 3EF90ECE0878939E00A31AD9 /* Camera.hpp */; };
+		3EF90ED40878939E00A31AD9 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EF90ECF0878939E00A31AD9 /* main.cpp */; };
+		3EF90ED50878939E00A31AD9 /* ShTrackball.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EF90ED00878939E00A31AD9 /* ShTrackball.cpp */; };
+		3EF90ED60878939E00A31AD9 /* ShTrackball.hpp in Resources */ = {isa = PBXBuildFile; fileRef = 3EF90ED10878939E00A31AD9 /* ShTrackball.hpp */; };
+		3EF90F6C0878A0F900A31AD9 /* Arb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EF90F540878A0F900A31AD9 /* Arb.cpp */; };
+		3EF90F6D0878A0F900A31AD9 /* Arb.hpp in Resources */ = {isa = PBXBuildFile; fileRef = 3EF90F550878A0F900A31AD9 /* Arb.hpp */; };
+		3EF90F6E0878A0F900A31AD9 /* ArbBackend.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EF90F560878A0F900A31AD9 /* ArbBackend.cpp */; };
+		3EF90F6F0878A0F900A31AD9 /* ArbCode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EF90F570878A0F900A31AD9 /* ArbCode.cpp */; };
+		3EF90F700878A0F900A31AD9 /* ArbCode.hpp in Resources */ = {isa = PBXBuildFile; fileRef = 3EF90F580878A0F900A31AD9 /* ArbCode.hpp */; };
+		3EF90F710878A0F900A31AD9 /* ArbEmit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EF90F590878A0F900A31AD9 /* ArbEmit.cpp */; };
+		3EF90F720878A0F900A31AD9 /* ArbInst.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EF90F5A0878A0F900A31AD9 /* ArbInst.cpp */; };
+		3EF90F730878A0F900A31AD9 /* ArbInst.hpp in Resources */ = {isa = PBXBuildFile; fileRef = 3EF90F5B0878A0F900A31AD9 /* ArbInst.hpp */; };
+		3EF90F740878A0F900A31AD9 /* ArbLimits.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EF90F5C0878A0F900A31AD9 /* ArbLimits.cpp */; };
+		3EF90F750878A0F900A31AD9 /* ArbLimits.hpp in Resources */ = {isa = PBXBuildFile; fileRef = 3EF90F5D0878A0F900A31AD9 /* ArbLimits.hpp */; };
+		3EF90F760878A0F900A31AD9 /* ArbReg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EF90F5E0878A0F900A31AD9 /* ArbReg.cpp */; };
+		3EF90F770878A0F900A31AD9 /* ArbReg.hpp in Resources */ = {isa = PBXBuildFile; fileRef = 3EF90F5F0878A0F900A31AD9 /* ArbReg.hpp */; };
+		3EF90F780878A0F900A31AD9 /* GlBackend.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EF90F600878A0F900A31AD9 /* GlBackend.cpp */; };
+		3EF90F790878A0F900A31AD9 /* GlBackend.hpp in Resources */ = {isa = PBXBuildFile; fileRef = 3EF90F610878A0F900A31AD9 /* GlBackend.hpp */; };
+		3EF90F7A0878A0F900A31AD9 /* GlTextureName.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EF90F620878A0F900A31AD9 /* GlTextureName.cpp */; };
+		3EF90F7B0878A0F900A31AD9 /* GlTextureName.hpp in Resources */ = {isa = PBXBuildFile; fileRef = 3EF90F630878A0F900A31AD9 /* GlTextureName.hpp */; };
+		3EF90F7C0878A0F900A31AD9 /* GlTextures.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EF90F640878A0F900A31AD9 /* GlTextures.cpp */; };
+		3EF90F7D0878A0F900A31AD9 /* GlTextures.hpp in Resources */ = {isa = PBXBuildFile; fileRef = 3EF90F650878A0F900A31AD9 /* GlTextures.hpp */; };
+		3EF90F7E0878A0F900A31AD9 /* GlTextureStorage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EF90F660878A0F900A31AD9 /* GlTextureStorage.cpp */; };
+		3EF90F7F0878A0F900A31AD9 /* GlTextureStorage.hpp in Resources */ = {isa = PBXBuildFile; fileRef = 3EF90F670878A0F900A31AD9 /* GlTextureStorage.hpp */; };
+		3EF9A645099A15B4009470BA /* ShPngImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3EF9A642099A15B4009470BA /* ShPngImage.cpp */; };
+		3EF9A646099A15B4009470BA /* ShPngImage.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EF9A643099A15B4009470BA /* ShPngImage.hpp */; };
+		3EF9A647099A15B4009470BA /* ShPngImageImpl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 3EF9A644099A15B4009470BA /* ShPngImageImpl.hpp */; };
+		8D07F2C00486CC7A007CD1D0 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C1666FE841158C02AAC07 /* InfoPlist.strings */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXBuildStyle section */
+		4F0BB7EC011F40E904CA0E50 /* Development */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				DEBUGGING_SYMBOLS = YES;
+				FRAMEWORK_VERSION = 8;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_GROUP = admin;
+				INSTALL_MODE_FLAG = "a-w,a+rX,gu+rw";
+				INSTALL_OWNER = root;
+				OPTIMIZATION_CFLAGS = "-O0";
+				REZ_PREPROCESSOR_DEFINITIONS = SH_DEBUG;
+				ZERO_LINK = NO;
+			};
+			name = Development;
+		};
+		4F0BB7ED011F40E904CA0E50 /* Deployment */ = {
+			isa = PBXBuildStyle;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				FRAMEWORK_VERSION = 7;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				INSTALL_GROUP = admin;
+				INSTALL_MODE_FLAG = "a-w,a+rX,gu+rw";
+				INSTALL_OWNER = root;
+				ZERO_LINK = NO;
+			};
+			name = Deployment;
+		};
+/* End PBXBuildStyle section */
+
+/* Begin PBXContainerItemProxy section */
+		3E3EA9D5087A1A4200A1405F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8D07F2BC0486CC7A007CD1D0;
+			remoteInfo = Sh;
+		};
+		3E3EA9D7087A1A4200A1405F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3EF90F440878A05000A31AD9;
+			remoteInfo = ArbBackend;
+		};
+		3E60CEB0087A187C0078BC55 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8D07F2BC0486CC7A007CD1D0;
+			remoteInfo = Sh;
+		};
+		3E60CEB2087A187C0078BC55 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3EB30C2A08787EE200729309;
+			remoteInfo = CcBackend;
+		};
+		3E60CEB4087A187C0078BC55 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3EF90F440878A05000A31AD9;
+			remoteInfo = ArbBackend;
+		};
+		3E7CF7AB092C1A4C0080FDD2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3EF90F440878A05000A31AD9;
+			remoteInfo = ArbBackend;
+		};
+		3E7CF811092C1E880080FDD2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8D07F2BC0486CC7A007CD1D0;
+			remoteInfo = Sh;
+		};
+		3EBE9672087EC9FF00DA8A69 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8D07F2BC0486CC7A007CD1D0;
+			remoteInfo = Sh;
+		};
+		3EF90F2308789BC700A31AD9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8D07F2BC0486CC7A007CD1D0;
+			remoteInfo = Sh;
+		};
+		3EF90F2708789BD400A31AD9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8D07F2BC0486CC7A007CD1D0;
+			remoteInfo = Sh;
+		};
+		3EF90F500878A0C500A31AD9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8D07F2BC0486CC7A007CD1D0;
+			remoteInfo = Sh;
+		};
+		3EF9A66A099A16FD009470BA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3EBE960D087EC91B00DA8A69 /* ShUtil */;
+			remoteInfo = ShUtil;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		089C1667FE841158C02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		3E2E62C6089589A8009505E4 /* Sh.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Sh.icns; sourceTree = SOURCE_ROOT; };
+		3E3EA9D2087A19DA00A1405F /* TexturesExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TexturesExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3E3EA9D4087A19DA00A1405F /* TexturesExample-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "TexturesExample-Info.plist"; sourceTree = SOURCE_ROOT; };
+		3E3EA9E2087A1A8B00A1405F /* Camera.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Camera.cpp; path = ../examples/textures/Camera.cpp; sourceTree = SOURCE_ROOT; };
+		3E3EA9E3087A1A8B00A1405F /* Camera.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = Camera.hpp; path = ../examples/textures/Camera.hpp; sourceTree = SOURCE_ROOT; };
+		3E3EA9E4087A1A8B00A1405F /* kd.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = kd.png; path = ../examples/textures/kd.png; sourceTree = SOURCE_ROOT; };
+		3E3EA9E5087A1A8B00A1405F /* ks.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = ks.png; path = ../examples/textures/ks.png; sourceTree = SOURCE_ROOT; };
+		3E3EA9E6087A1A8B00A1405F /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../examples/textures/main.cpp; sourceTree = SOURCE_ROOT; };
+		3E3EA9E7087A1A8B00A1405F /* rustkd.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = rustkd.png; path = ../examples/textures/rustkd.png; sourceTree = SOURCE_ROOT; };
+		3E3EA9E8087A1A8B00A1405F /* rustks.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = rustks.png; path = ../examples/textures/rustks.png; sourceTree = SOURCE_ROOT; };
+		3E3EA9E9087A1A8B00A1405F /* ShTrackball.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShTrackball.cpp; path = ../examples/textures/ShTrackball.cpp; sourceTree = SOURCE_ROOT; };
+		3E3EA9EA087A1A8B00A1405F /* ShTrackball.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShTrackball.hpp; path = ../examples/textures/ShTrackball.hpp; sourceTree = SOURCE_ROOT; };
+		3E442EF9099A12D30045676A /* ChangeLog */ = {isa = PBXFileReference; fileEncoding = 30; indentWidth = 8; lastKnownFileType = text; name = ChangeLog; path = ../ChangeLog; sourceTree = SOURCE_ROOT; usesTabs = 1; };
+		3E5FD0490899DCD700A1BAFF /* ShLibNoise.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShLibNoise.hpp; path = ../src/sh/ShLibNoise.hpp; sourceTree = SOURCE_ROOT; };
+		3E5FD04A0899DCD700A1BAFF /* ShLibNoiseImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShLibNoiseImpl.hpp; path = ../src/sh/ShLibNoiseImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3E5FD04B0899DCD700A1BAFF /* ShLibWorley.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShLibWorley.hpp; path = ../src/sh/ShLibWorley.hpp; sourceTree = SOURCE_ROOT; };
+		3E5FD04C0899DCD700A1BAFF /* ShLibWorleyImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShLibWorleyImpl.hpp; path = ../src/sh/ShLibWorleyImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3E5FD04D0899DCD700A1BAFF /* ShMIPFilter.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShMIPFilter.hpp; path = ../src/sh/ShMIPFilter.hpp; sourceTree = SOURCE_ROOT; };
+		3E60CEAD087A18320078BC55 /* Particles.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Particles.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3E60CEAF087A18320078BC55 /* Particles-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Particles-Info.plist"; sourceTree = SOURCE_ROOT; };
+		3E60CEBF087A18AA0078BC55 /* Camera.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Camera.cpp; path = ../examples/particle/Camera.cpp; sourceTree = SOURCE_ROOT; };
+		3E60CEC0087A18AA0078BC55 /* Camera.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = Camera.hpp; path = ../examples/particle/Camera.hpp; sourceTree = SOURCE_ROOT; };
+		3E60CEC2087A18AA0078BC55 /* ShTrackball.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShTrackball.cpp; path = ../examples/particle/ShTrackball.cpp; sourceTree = SOURCE_ROOT; };
+		3E60CEC3087A18AA0078BC55 /* ShTrackball.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShTrackball.hpp; path = ../examples/particle/ShTrackball.hpp; sourceTree = SOURCE_ROOT; };
+		3E7CF7B6092C1AB90080FDD2 /* libshglsl.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = libshglsl.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		3E7CF7B7092C1AB90080FDD2 /* GlslBackend-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "GlslBackend-Info.plist"; sourceTree = "<group>"; };
+		3E7CF7C1092C1AFC0080FDD2 /* Glsl.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Glsl.cpp; path = ../backends/gl/Glsl.cpp; sourceTree = SOURCE_ROOT; };
+		3E7CF7C2092C1AFC0080FDD2 /* Glsl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = Glsl.hpp; path = ../backends/gl/Glsl.hpp; sourceTree = SOURCE_ROOT; };
+		3E7CF7C3092C1AFC0080FDD2 /* GlslBackend.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = GlslBackend.cpp; path = ../backends/gl/GlslBackend.cpp; sourceTree = SOURCE_ROOT; };
+		3E7CF7C4092C1AFC0080FDD2 /* GlslCode.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = GlslCode.cpp; path = ../backends/gl/GlslCode.cpp; sourceTree = SOURCE_ROOT; };
+		3E7CF7C5092C1AFC0080FDD2 /* GlslCode.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = GlslCode.hpp; path = ../backends/gl/GlslCode.hpp; sourceTree = SOURCE_ROOT; };
+		3E7CF7C6092C1AFC0080FDD2 /* GlslEmit.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = GlslEmit.cpp; path = ../backends/gl/GlslEmit.cpp; sourceTree = SOURCE_ROOT; };
+		3E7CF7C7092C1AFC0080FDD2 /* GlslSet.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = GlslSet.cpp; path = ../backends/gl/GlslSet.cpp; sourceTree = SOURCE_ROOT; };
+		3E7CF7C8092C1AFC0080FDD2 /* GlslSet.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = GlslSet.hpp; path = ../backends/gl/GlslSet.hpp; sourceTree = SOURCE_ROOT; };
+		3E7CF7C9092C1AFC0080FDD2 /* GlslVariable.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = GlslVariable.cpp; path = ../backends/gl/GlslVariable.cpp; sourceTree = SOURCE_ROOT; };
+		3E7CF7CA092C1AFC0080FDD2 /* GlslVariable.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = GlslVariable.hpp; path = ../backends/gl/GlslVariable.hpp; sourceTree = SOURCE_ROOT; };
+		3E7CF7CB092C1AFC0080FDD2 /* GlslVariableMap.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = GlslVariableMap.cpp; path = ../backends/gl/GlslVariableMap.cpp; sourceTree = SOURCE_ROOT; };
+		3E7CF7CC092C1AFC0080FDD2 /* GlslVariableMap.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = GlslVariableMap.hpp; path = ../backends/gl/GlslVariableMap.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30A8D08787D7600729309 /* sh.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = sh.hpp; path = ../src/sh/sh.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30A8E08787D7600729309 /* ShAlgebra.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShAlgebra.cpp; path = ../src/sh/ShAlgebra.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30A8F08787D7600729309 /* ShAlgebra.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShAlgebra.hpp; path = ../src/sh/ShAlgebra.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30A9008787D7600729309 /* ShArray.hpp */ = {isa = PBXFileReference; fileEncoding = 30; indentWidth = 2; lastKnownFileType = sourcecode.cpp.h; name = ShArray.hpp; path = ../src/sh/ShArray.hpp; sourceTree = SOURCE_ROOT; tabWidth = 8; usesTabs = 0; };
+		3EB30A9108787D7600729309 /* ShAttrib.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShAttrib.hpp; path = ../src/sh/ShAttrib.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30A9208787D7600729309 /* ShAttribImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShAttribImpl.hpp; path = ../src/sh/ShAttribImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30A9308787D7600729309 /* ShBackend.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShBackend.cpp; path = ../src/sh/ShBackend.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30A9408787D7600729309 /* ShBackend.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShBackend.hpp; path = ../src/sh/ShBackend.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30A9508787D7600729309 /* ShBaseTexture.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShBaseTexture.cpp; path = ../src/sh/ShBaseTexture.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30A9608787D7600729309 /* ShBaseTexture.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShBaseTexture.hpp; path = ../src/sh/ShBaseTexture.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30A9708787D7600729309 /* ShBaseTextureImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShBaseTextureImpl.hpp; path = ../src/sh/ShBaseTextureImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30A9808787D7600729309 /* ShBasicBlock.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShBasicBlock.cpp; path = ../src/sh/ShBasicBlock.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30A9908787D7600729309 /* ShBasicBlock.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShBasicBlock.hpp; path = ../src/sh/ShBasicBlock.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30A9A08787D7600729309 /* ShBitSet.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShBitSet.cpp; path = ../src/sh/ShBitSet.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30A9B08787D7600729309 /* ShBitSet.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShBitSet.hpp; path = ../src/sh/ShBitSet.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30A9C08787D7600729309 /* ShBlock.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShBlock.cpp; path = ../src/sh/ShBlock.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30A9D08787D7600729309 /* ShBlock.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShBlock.hpp; path = ../src/sh/ShBlock.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30A9E08787D7600729309 /* ShCastManager.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShCastManager.cpp; path = ../src/sh/ShCastManager.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30A9F08787D7600729309 /* ShCastManager.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShCastManager.hpp; path = ../src/sh/ShCastManager.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AA008787D7600729309 /* ShCfgBlock.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShCfgBlock.cpp; path = ../src/sh/ShCfgBlock.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30AA108787D7600729309 /* ShCfgBlock.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShCfgBlock.hpp; path = ../src/sh/ShCfgBlock.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AA208787D7600729309 /* ShChannel.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShChannel.hpp; path = ../src/sh/ShChannel.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AA308787D7600729309 /* ShChannelImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShChannelImpl.hpp; path = ../src/sh/ShChannelImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AA408787D7600729309 /* ShChannelNode.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShChannelNode.cpp; path = ../src/sh/ShChannelNode.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30AA508787D7600729309 /* ShChannelNode.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShChannelNode.hpp; path = ../src/sh/ShChannelNode.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AA608787D7600729309 /* ShColor.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShColor.hpp; path = ../src/sh/ShColor.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AA708787D7600729309 /* ShConcreteCTypeOp.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShConcreteCTypeOp.cpp; path = ../src/sh/ShConcreteCTypeOp.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30AA808787D7600729309 /* ShConcreteCTypeOpImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShConcreteCTypeOpImpl.hpp; path = ../src/sh/ShConcreteCTypeOpImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AA908787D7600729309 /* ShConcreteRegularOpImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShConcreteRegularOpImpl.hpp; path = ../src/sh/ShConcreteRegularOpImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AAA08787D7600729309 /* ShConstProp.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShConstProp.cpp; path = ../src/sh/ShConstProp.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30AAB08787D7600729309 /* ShContext.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShContext.cpp; path = ../src/sh/ShContext.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30AAC08787D7600729309 /* ShContext.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShContext.hpp; path = ../src/sh/ShContext.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AAD08787D7600729309 /* ShCtrlGraph.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShCtrlGraph.cpp; path = ../src/sh/ShCtrlGraph.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30AAE08787D7600729309 /* ShCtrlGraph.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShCtrlGraph.hpp; path = ../src/sh/ShCtrlGraph.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AAF08787D7600729309 /* ShDataType.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShDataType.cpp; path = ../src/sh/ShDataType.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30AB008787D7600729309 /* ShDataType.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShDataType.hpp; path = ../src/sh/ShDataType.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AB108787D7600729309 /* ShDataTypeImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShDataTypeImpl.hpp; path = ../src/sh/ShDataTypeImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AB208787D7600729309 /* ShDebug.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShDebug.hpp; path = ../src/sh/ShDebug.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AB308787D7600729309 /* ShDllExport.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShDllExport.hpp; path = ../src/sh/ShDllExport.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AB608787D7600729309 /* ShError.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShError.cpp; path = ../src/sh/ShError.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30AB708787D7600729309 /* ShError.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShError.hpp; path = ../src/sh/ShError.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AB808787D7600729309 /* ShEval.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShEval.cpp; path = ../src/sh/ShEval.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30AB908787D7600729309 /* ShEval.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShEval.hpp; path = ../src/sh/ShEval.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30ABA08787D7600729309 /* ShEvalImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShEvalImpl.hpp; path = ../src/sh/ShEvalImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30ABB08787D7600729309 /* ShEvaluate.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShEvaluate.cpp; path = ../src/sh/ShEvaluate.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30ABC08787D7600729309 /* ShEvaluate.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShEvaluate.hpp; path = ../src/sh/ShEvaluate.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30ABD08787D7600729309 /* ShException.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShException.cpp; path = ../src/sh/ShException.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30ABE08787D7600729309 /* ShException.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShException.hpp; path = ../src/sh/ShException.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30ABF08787D7600729309 /* ShFixedManipulator.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShFixedManipulator.cpp; path = ../src/sh/ShFixedManipulator.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30AC008787D7600729309 /* ShFixedManipulator.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShFixedManipulator.hpp; path = ../src/sh/ShFixedManipulator.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AC108787D7600729309 /* ShFraction.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShFraction.hpp; path = ../src/sh/ShFraction.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AC208787D7600729309 /* ShFractionImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShFractionImpl.hpp; path = ../src/sh/ShFractionImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AC408787D7600729309 /* ShGeneric.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShGeneric.hpp; path = ../src/sh/ShGeneric.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AC508787D7600729309 /* ShGenericImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShGenericImpl.hpp; path = ../src/sh/ShGenericImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AC608787D7600729309 /* ShGraph.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShGraph.hpp; path = ../src/sh/ShGraph.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AC708787D7600729309 /* ShGraphImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShGraphImpl.hpp; path = ../src/sh/ShGraphImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AC808787D7600729309 /* ShHalf.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShHalf.hpp; path = ../src/sh/ShHalf.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AC908787D7600729309 /* ShHalfImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShHalfImpl.hpp; path = ../src/sh/ShHalfImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30ACA08787D7600729309 /* ShHashMap.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShHashMap.hpp; path = ../src/sh/ShHashMap.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30ACB08787D7600729309 /* ShTexDataImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShTexDataImpl.hpp; path = ../src/sh/ShTexDataImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30ACC08787D7600729309 /* ShImage.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShImage.hpp; path = ../src/sh/ShImage.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30ACD08787D7600729309 /* ShImage3D.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShImage3D.cpp; path = ../src/sh/ShImage3D.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30ACE08787D7600729309 /* ShImage3D.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShImage3D.hpp; path = ../src/sh/ShImage3D.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30ACF08787D7600729309 /* ShInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShInfo.cpp; path = ../src/sh/ShInfo.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30AD008787D7600729309 /* ShInfo.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShInfo.hpp; path = ../src/sh/ShInfo.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AD108787D7600729309 /* ShInfoImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShInfoImpl.hpp; path = ../src/sh/ShInfoImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AD208787D7600729309 /* ShInstructions.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShInstructions.cpp; path = ../src/sh/ShInstructions.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30AD308787D7600729309 /* ShInstructions.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShInstructions.hpp; path = ../src/sh/ShInstructions.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AD408787D7600729309 /* ShInternals.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShInternals.cpp; path = ../src/sh/ShInternals.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30AD508787D7600729309 /* ShInternals.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShInternals.hpp; path = ../src/sh/ShInternals.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AD608787D7600729309 /* ShInterp.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShInterp.hpp; path = ../src/sh/ShInterp.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AD708787D7600729309 /* ShLib.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShLib.hpp; path = ../src/sh/ShLib.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AD808787D7600729309 /* ShLibArith.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShLibArith.hpp; path = ../src/sh/ShLibArith.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AD908787D7600729309 /* ShLibArithImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShLibArithImpl.hpp; path = ../src/sh/ShLibArithImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30ADA08787D7600729309 /* ShLibAttrib.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShLibAttrib.hpp; path = ../src/sh/ShLibAttrib.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30ADB08787D7600729309 /* ShLibBoolean.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShLibBoolean.hpp; path = ../src/sh/ShLibBoolean.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30ADC08787D7600729309 /* ShLibBooleanImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShLibBooleanImpl.hpp; path = ../src/sh/ShLibBooleanImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30ADD08787D7600729309 /* ShLibClamp.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShLibClamp.hpp; path = ../src/sh/ShLibClamp.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30ADE08787D7600729309 /* ShLibClampImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShLibClampImpl.hpp; path = ../src/sh/ShLibClampImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30ADF08787D7600729309 /* ShLibColor.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShLibColor.hpp; path = ../src/sh/ShLibColor.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AE008787D7600729309 /* ShLibDeriv.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShLibDeriv.hpp; path = ../src/sh/ShLibDeriv.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AE108787D7600729309 /* ShLibDerivImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShLibDerivImpl.hpp; path = ../src/sh/ShLibDerivImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AE208787D7600729309 /* ShLibGeometry.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShLibGeometry.hpp; path = ../src/sh/ShLibGeometry.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AE308787D7600729309 /* ShLibGeometryImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShLibGeometryImpl.hpp; path = ../src/sh/ShLibGeometryImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AE408787D7600729309 /* ShLibMatrix.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShLibMatrix.hpp; path = ../src/sh/ShLibMatrix.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AE508787D7600729309 /* ShLibMatrixImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShLibMatrixImpl.hpp; path = ../src/sh/ShLibMatrixImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AE608787D7600729309 /* ShLibSplines.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShLibSplines.hpp; path = ../src/sh/ShLibSplines.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AE708787D7600729309 /* ShLibSplinesImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShLibSplinesImpl.hpp; path = ../src/sh/ShLibSplinesImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AE808787D7600729309 /* ShLibNormal.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShLibNormal.hpp; path = ../src/sh/ShLibNormal.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AE908787D7600729309 /* ShLibPlane.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShLibPlane.hpp; path = ../src/sh/ShLibPlane.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AEA08787D7600729309 /* ShLibPoint.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShLibPoint.hpp; path = ../src/sh/ShLibPoint.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AEB08787D7600729309 /* ShLibPosition.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShLibPosition.hpp; path = ../src/sh/ShLibPosition.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AEC08787D7600729309 /* ShLibTexCoord.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShLibTexCoord.hpp; path = ../src/sh/ShLibTexCoord.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AED08787D7600729309 /* ShLibTrig.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShLibTrig.hpp; path = ../src/sh/ShLibTrig.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AEE08787D7600729309 /* ShLibTrigImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShLibTrigImpl.hpp; path = ../src/sh/ShLibTrigImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AEF08787D7600729309 /* ShLibVector.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShLibVector.hpp; path = ../src/sh/ShLibVector.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AF008787D7600729309 /* ShLinearAllocator.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShLinearAllocator.cpp; path = ../src/sh/ShLinearAllocator.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30AF108787D7600729309 /* ShLinearAllocator.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShLinearAllocator.hpp; path = ../src/sh/ShLinearAllocator.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AF208787D7600729309 /* ShManipulator.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShManipulator.cpp; path = ../src/sh/ShManipulator.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30AF308787D7600729309 /* ShManipulator.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShManipulator.hpp; path = ../src/sh/ShManipulator.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AF408787D7600729309 /* ShManipulatorImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShManipulatorImpl.hpp; path = ../src/sh/ShManipulatorImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AF508787D7600729309 /* ShMath.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShMath.hpp; path = ../src/sh/ShMath.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AF608787D7600729309 /* ShMatrix.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShMatrix.hpp; path = ../src/sh/ShMatrix.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AF708787D7600729309 /* ShMatrixImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShMatrixImpl.hpp; path = ../src/sh/ShMatrixImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AF808787D7600729309 /* ShMemory.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShMemory.cpp; path = ../src/sh/ShMemory.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30AF908787D7600729309 /* ShMemory.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShMemory.hpp; path = ../src/sh/ShMemory.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AFA08787D7600729309 /* ShMemoryDep.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShMemoryDep.hpp; path = ../src/sh/ShMemoryDep.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AFB08787D7600729309 /* ShMeta.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShMeta.hpp; path = ../src/sh/ShMeta.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AFC08787D7600729309 /* ShMetaForwarder.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShMetaForwarder.cpp; path = ../src/sh/ShMetaForwarder.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30AFD08787D7600729309 /* ShMetaForwarder.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShMetaForwarder.hpp; path = ../src/sh/ShMetaForwarder.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AFE08787D7600729309 /* ShMetaImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShMetaImpl.hpp; path = ../src/sh/ShMetaImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30AFF08787D7600729309 /* ShNibbles.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShNibbles.hpp; path = ../src/sh/ShNibbles.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B0008787D7600729309 /* ShNibblesImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShNibblesImpl.hpp; path = ../src/sh/ShNibblesImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B0108787D7600729309 /* ShNormal.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShNormal.hpp; path = ../src/sh/ShNormal.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B0208787D7600729309 /* ShOperation.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShOperation.cpp; path = ../src/sh/ShOperation.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30B0308787D7600729309 /* ShOperation.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShOperation.hpp; path = ../src/sh/ShOperation.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B0408787D7600729309 /* ShOptimizations.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShOptimizations.cpp; path = ../src/sh/ShOptimizations.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30B0508787D7600729309 /* ShOptimizations.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShOptimizations.hpp; path = ../src/sh/ShOptimizations.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B0608787D7600729309 /* ShPalette.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShPalette.hpp; path = ../src/sh/ShPalette.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B0708787D7600729309 /* ShPaletteImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShPaletteImpl.hpp; path = ../src/sh/ShPaletteImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B0808787D7600729309 /* ShPaletteNode.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShPaletteNode.cpp; path = ../src/sh/ShPaletteNode.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30B0908787D7600729309 /* ShPaletteNode.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShPaletteNode.hpp; path = ../src/sh/ShPaletteNode.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B0A08787D7600729309 /* ShParser.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShParser.cpp; path = ../src/sh/ShParser.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30B0B08787D7600729309 /* ShParser.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShParser.hpp; path = ../src/sh/ShParser.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B0C08787D7600729309 /* ShPlane.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShPlane.hpp; path = ../src/sh/ShPlane.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B0D08787D7600729309 /* ShPoint.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShPoint.hpp; path = ../src/sh/ShPoint.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B0E08787D7600729309 /* ShPool.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShPool.cpp; path = ../src/sh/ShPool.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30B0F08787D7600729309 /* ShPool.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShPool.hpp; path = ../src/sh/ShPool.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B1008787D7600729309 /* ShPosition.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShPosition.hpp; path = ../src/sh/ShPosition.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B1108787D7600729309 /* ShProgram.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShProgram.cpp; path = ../src/sh/ShProgram.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30B1208787D7600729309 /* ShProgram.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShProgram.hpp; path = ../src/sh/ShProgram.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B1308787D7600729309 /* ShProgramNode.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShProgramNode.cpp; path = ../src/sh/ShProgramNode.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30B1408787D7600729309 /* ShProgramNode.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShProgramNode.hpp; path = ../src/sh/ShProgramNode.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B1508787D7600729309 /* ShProgramSet.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShProgramSet.cpp; path = ../src/sh/ShProgramSet.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30B1608787D7600729309 /* ShProgramSet.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShProgramSet.hpp; path = ../src/sh/ShProgramSet.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B1708787D7600729309 /* ShQuaternion.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShQuaternion.hpp; path = ../src/sh/ShQuaternion.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B1808787D7600729309 /* ShQuaternionImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShQuaternionImpl.hpp; path = ../src/sh/ShQuaternionImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B1908787D7600729309 /* ShRecord.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShRecord.cpp; path = ../src/sh/ShRecord.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30B1A08787D7600729309 /* ShRecord.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShRecord.hpp; path = ../src/sh/ShRecord.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B1B08787D7600729309 /* ShRefCount.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShRefCount.hpp; path = ../src/sh/ShRefCount.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B1C08787D7600729309 /* ShRefCountImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShRefCountImpl.hpp; path = ../src/sh/ShRefCountImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B1D08787D7600729309 /* ShSection.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShSection.cpp; path = ../src/sh/ShSection.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30B1E08787D7600729309 /* ShSection.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShSection.hpp; path = ../src/sh/ShSection.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B1F08787D7600729309 /* ShSectionImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShSectionImpl.hpp; path = ../src/sh/ShSectionImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B2008787D7600729309 /* ShStatement.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShStatement.cpp; path = ../src/sh/ShStatement.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30B2108787D7600729309 /* ShStatement.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShStatement.hpp; path = ../src/sh/ShStatement.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B2208787D7600729309 /* ShStorageType.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShStorageType.cpp; path = ../src/sh/ShStorageType.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30B2308787D7600729309 /* ShStorageType.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShStorageType.hpp; path = ../src/sh/ShStorageType.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B2408787D7600729309 /* ShStorageTypeImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShStorageTypeImpl.hpp; path = ../src/sh/ShStorageTypeImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B2508787D7600729309 /* ShStream.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShStream.cpp; path = ../src/sh/ShStream.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30B2608787D7600729309 /* ShStream.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShStream.hpp; path = ../src/sh/ShStream.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B2708787D7600729309 /* ShStreamImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShStreamImpl.hpp; path = ../src/sh/ShStreamImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B2808787D7600729309 /* ShStructural.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShStructural.cpp; path = ../src/sh/ShStructural.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30B2908787D7600729309 /* ShStructural.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShStructural.hpp; path = ../src/sh/ShStructural.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B2A08787D7600729309 /* ShSwizzle.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShSwizzle.cpp; path = ../src/sh/ShSwizzle.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30B2B08787D7600729309 /* ShSwizzle.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShSwizzle.hpp; path = ../src/sh/ShSwizzle.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B2C08787D7600729309 /* ShSwizzleImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShSwizzleImpl.hpp; path = ../src/sh/ShSwizzleImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B2D08787D7600729309 /* ShSyntax.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShSyntax.cpp; path = ../src/sh/ShSyntax.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30B2E08787D7600729309 /* ShSyntax.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShSyntax.hpp; path = ../src/sh/ShSyntax.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B2F08787D7600729309 /* ShTable.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShTable.hpp; path = ../src/sh/ShTable.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B3008787D7600729309 /* ShTexCoord.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShTexCoord.hpp; path = ../src/sh/ShTexCoord.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B3108787D7600729309 /* ShTexture.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShTexture.hpp; path = ../src/sh/ShTexture.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B3208787D7600729309 /* ShTextureNode.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShTextureNode.cpp; path = ../src/sh/ShTextureNode.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30B3308787D7600729309 /* ShTextureNode.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShTextureNode.hpp; path = ../src/sh/ShTextureNode.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B3408787D7600729309 /* ShToken.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShToken.cpp; path = ../src/sh/ShToken.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30B3508787D7600729309 /* ShToken.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShToken.hpp; path = ../src/sh/ShToken.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B3608787D7600729309 /* ShTokenizer.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShTokenizer.cpp; path = ../src/sh/ShTokenizer.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30B3708787D7600729309 /* ShTokenizer.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShTokenizer.hpp; path = ../src/sh/ShTokenizer.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B3808787D7600729309 /* ShTransformer.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShTransformer.cpp; path = ../src/sh/ShTransformer.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30B3908787D7600729309 /* ShTransformer.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShTransformer.hpp; path = ../src/sh/ShTransformer.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B3A08787D7600729309 /* ShTransformerImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShTransformerImpl.hpp; path = ../src/sh/ShTransformerImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B3B08787D7600729309 /* ShTypeConvertTransformer.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShTypeConvertTransformer.cpp; path = ../src/sh/ShTypeConvertTransformer.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30B3C08787D7600729309 /* ShTypeInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShTypeInfo.cpp; path = ../src/sh/ShTypeInfo.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30B3D08787D7600729309 /* ShTypeInfo.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShTypeInfo.hpp; path = ../src/sh/ShTypeInfo.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B3E08787D7600729309 /* ShTypeInfoCasts.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShTypeInfoCasts.cpp; path = ../src/sh/ShTypeInfoCasts.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30B3F08787D7600729309 /* ShTypeInfoImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShTypeInfoImpl.hpp; path = ../src/sh/ShTypeInfoImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B4008787D7600729309 /* ShTypeInfoOps.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShTypeInfoOps.cpp; path = ../src/sh/ShTypeInfoOps.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30B4108787D7600729309 /* ShUtility.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShUtility.cpp; path = ../src/sh/ShUtility.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30B4208787D7600729309 /* ShUtility.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShUtility.hpp; path = ../src/sh/ShUtility.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B4308787D7600729309 /* ShValueTracking.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShValueTracking.cpp; path = ../src/sh/ShValueTracking.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30B4408787D7600729309 /* ShVariable.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShVariable.cpp; path = ../src/sh/ShVariable.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30B4508787D7600729309 /* ShVariable.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShVariable.hpp; path = ../src/sh/ShVariable.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B4608787D7600729309 /* ShVariableNode.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShVariableNode.cpp; path = ../src/sh/ShVariableNode.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30B4708787D7600729309 /* ShVariableNode.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShVariableNode.hpp; path = ../src/sh/ShVariableNode.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B4808787D7600729309 /* ShVariableType.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShVariableType.cpp; path = ../src/sh/ShVariableType.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30B4908787D7700729309 /* ShVariableType.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShVariableType.hpp; path = ../src/sh/ShVariableType.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B4A08787D7700729309 /* ShVariant.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShVariant.cpp; path = ../src/sh/ShVariant.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30B4B08787D7700729309 /* ShVariant.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShVariant.hpp; path = ../src/sh/ShVariant.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B4C08787D7700729309 /* ShVariantCast.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShVariantCast.hpp; path = ../src/sh/ShVariantCast.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B4D08787D7700729309 /* ShVariantCastImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShVariantCastImpl.hpp; path = ../src/sh/ShVariantCastImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B4E08787D7700729309 /* ShVariantFactory.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShVariantFactory.hpp; path = ../src/sh/ShVariantFactory.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B4F08787D7700729309 /* ShVariantFactoryImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShVariantFactoryImpl.hpp; path = ../src/sh/ShVariantFactoryImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B5008787D7700729309 /* ShVariantImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShVariantImpl.hpp; path = ../src/sh/ShVariantImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B5108787D7700729309 /* ShVector.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShVector.hpp; path = ../src/sh/ShVector.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30B5208787D7700729309 /* ShWrap.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShWrap.hpp; path = ../src/sh/ShWrap.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30C2B08787EE200729309 /* libshcc.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = libshcc.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		3EB30C2C08787EE200729309 /* CcBackend-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "CcBackend-Info.plist"; sourceTree = SOURCE_ROOT; };
+		3EB30C2F08787F4800729309 /* Cc.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Cc.cpp; path = ../backends/cc/Cc.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30C3008787F4800729309 /* Cc.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = Cc.hpp; path = ../backends/cc/Cc.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30C3108787F4800729309 /* CcEmit.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = CcEmit.cpp; path = ../backends/cc/CcEmit.cpp; sourceTree = SOURCE_ROOT; };
+		3EB30C3208787F4800729309 /* CcTextures.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = CcTextures.hpp; path = ../backends/cc/CcTextures.hpp; sourceTree = SOURCE_ROOT; };
+		3EB30C3308787F4800729309 /* CcTexturesString.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = CcTexturesString.hpp; path = ../backends/cc/CcTexturesString.hpp; sourceTree = SOURCE_ROOT; };
+		3EBE960E087EC91B00DA8A69 /* ShUtil.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ShUtil.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		3EBE960F087EC91B00DA8A69 /* ShUtil-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "ShUtil-Info.plist"; sourceTree = SOURCE_ROOT; };
+		3EBE9644087EC9CA00DA8A69 /* ShFunc.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShFunc.hpp; path = ../src/shutil/ShFunc.hpp; sourceTree = SOURCE_ROOT; };
+		3EBE9645087EC9CA00DA8A69 /* ShFuncImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShFuncImpl.hpp; path = ../src/shutil/ShFuncImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EBE9646087EC9CA00DA8A69 /* ShKernelLib.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShKernelLib.cpp; path = ../src/shutil/ShKernelLib.cpp; sourceTree = SOURCE_ROOT; };
+		3EBE9647087EC9CA00DA8A69 /* ShKernelLib.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShKernelLib.hpp; path = ../src/shutil/ShKernelLib.hpp; sourceTree = SOURCE_ROOT; };
+		3EBE9648087EC9CA00DA8A69 /* ShKernelLibImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShKernelLibImpl.hpp; path = ../src/shutil/ShKernelLibImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EBE9649087EC9CA00DA8A69 /* ShKernelLight.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShKernelLight.hpp; path = ../src/shutil/ShKernelLight.hpp; sourceTree = SOURCE_ROOT; };
+		3EBE964A087EC9CA00DA8A69 /* ShKernelLightImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShKernelLightImpl.hpp; path = ../src/shutil/ShKernelLightImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EBE964B087EC9CA00DA8A69 /* ShKernelPost.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShKernelPost.hpp; path = ../src/shutil/ShKernelPost.hpp; sourceTree = SOURCE_ROOT; };
+		3EBE964C087EC9CA00DA8A69 /* ShKernelPostImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShKernelPostImpl.hpp; path = ../src/shutil/ShKernelPostImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EBE964D087EC9CA00DA8A69 /* ShKernelSurface.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShKernelSurface.hpp; path = ../src/shutil/ShKernelSurface.hpp; sourceTree = SOURCE_ROOT; };
+		3EBE964E087EC9CA00DA8A69 /* ShKernelSurfaceImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShKernelSurfaceImpl.hpp; path = ../src/shutil/ShKernelSurfaceImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EBE964F087EC9CA00DA8A69 /* ShKernelSurfMap.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShKernelSurfMap.cpp; path = ../src/shutil/ShKernelSurfMap.cpp; sourceTree = SOURCE_ROOT; };
+		3EBE9650087EC9CA00DA8A69 /* ShKernelSurfMap.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShKernelSurfMap.hpp; path = ../src/shutil/ShKernelSurfMap.hpp; sourceTree = SOURCE_ROOT; };
+		3EBE9651087EC9CA00DA8A69 /* ShMesh.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShMesh.hpp; path = ../src/shutil/ShMesh.hpp; sourceTree = SOURCE_ROOT; };
+		3EBE9652087EC9CA00DA8A69 /* ShMeshImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShMeshImpl.hpp; path = ../src/shutil/ShMeshImpl.hpp; sourceTree = SOURCE_ROOT; };
+		3EBE9655087EC9CA00DA8A69 /* ShObjMesh.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShObjMesh.cpp; path = ../src/shutil/ShObjMesh.cpp; sourceTree = SOURCE_ROOT; };
+		3EBE9656087EC9CA00DA8A69 /* ShObjMesh.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShObjMesh.hpp; path = ../src/shutil/ShObjMesh.hpp; sourceTree = SOURCE_ROOT; };
+		3EBE9657087EC9CA00DA8A69 /* shutil.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = shutil.cpp; path = ../src/shutil/shutil.cpp; sourceTree = SOURCE_ROOT; };
+		3EBE9658087EC9CA00DA8A69 /* shutil.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = shutil.hpp; path = ../src/shutil/shutil.hpp; sourceTree = SOURCE_ROOT; };
+		3EC22E030899D80700EB5F51 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../examples/particle/main.cpp; sourceTree = SOURCE_ROOT; };
+		3EF90EC90878935800A31AD9 /* GlutExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GlutExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3EF90ECB0878935800A31AD9 /* GlutExample-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "GlutExample-Info.plist"; sourceTree = SOURCE_ROOT; };
+		3EF90ECD0878939E00A31AD9 /* Camera.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Camera.cpp; path = ../examples/glut/Camera.cpp; sourceTree = SOURCE_ROOT; };
+		3EF90ECE0878939E00A31AD9 /* Camera.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = Camera.hpp; path = ../examples/glut/Camera.hpp; sourceTree = SOURCE_ROOT; };
+		3EF90ECF0878939E00A31AD9 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../examples/glut/main.cpp; sourceTree = SOURCE_ROOT; };
+		3EF90ED00878939E00A31AD9 /* ShTrackball.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShTrackball.cpp; path = ../examples/glut/ShTrackball.cpp; sourceTree = SOURCE_ROOT; };
+		3EF90ED10878939E00A31AD9 /* ShTrackball.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShTrackball.hpp; path = ../examples/glut/ShTrackball.hpp; sourceTree = SOURCE_ROOT; };
+		3EF90F450878A05000A31AD9 /* libsharb.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = libsharb.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		3EF90F460878A05000A31AD9 /* ArbBackend-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "ArbBackend-Info.plist"; sourceTree = SOURCE_ROOT; };
+		3EF90F540878A0F900A31AD9 /* Arb.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Arb.cpp; path = ../backends/gl/Arb.cpp; sourceTree = SOURCE_ROOT; };
+		3EF90F550878A0F900A31AD9 /* Arb.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = Arb.hpp; path = ../backends/gl/Arb.hpp; sourceTree = SOURCE_ROOT; };
+		3EF90F560878A0F900A31AD9 /* ArbBackend.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ArbBackend.cpp; path = ../backends/gl/ArbBackend.cpp; sourceTree = SOURCE_ROOT; };
+		3EF90F570878A0F900A31AD9 /* ArbCode.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ArbCode.cpp; path = ../backends/gl/ArbCode.cpp; sourceTree = SOURCE_ROOT; };
+		3EF90F580878A0F900A31AD9 /* ArbCode.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ArbCode.hpp; path = ../backends/gl/ArbCode.hpp; sourceTree = SOURCE_ROOT; };
+		3EF90F590878A0F900A31AD9 /* ArbEmit.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ArbEmit.cpp; path = ../backends/gl/ArbEmit.cpp; sourceTree = SOURCE_ROOT; };
+		3EF90F5A0878A0F900A31AD9 /* ArbInst.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ArbInst.cpp; path = ../backends/gl/ArbInst.cpp; sourceTree = SOURCE_ROOT; };
+		3EF90F5B0878A0F900A31AD9 /* ArbInst.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ArbInst.hpp; path = ../backends/gl/ArbInst.hpp; sourceTree = SOURCE_ROOT; };
+		3EF90F5C0878A0F900A31AD9 /* ArbLimits.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ArbLimits.cpp; path = ../backends/gl/ArbLimits.cpp; sourceTree = SOURCE_ROOT; };
+		3EF90F5D0878A0F900A31AD9 /* ArbLimits.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ArbLimits.hpp; path = ../backends/gl/ArbLimits.hpp; sourceTree = SOURCE_ROOT; };
+		3EF90F5E0878A0F900A31AD9 /* ArbReg.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ArbReg.cpp; path = ../backends/gl/ArbReg.cpp; sourceTree = SOURCE_ROOT; };
+		3EF90F5F0878A0F900A31AD9 /* ArbReg.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ArbReg.hpp; path = ../backends/gl/ArbReg.hpp; sourceTree = SOURCE_ROOT; };
+		3EF90F600878A0F900A31AD9 /* GlBackend.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = GlBackend.cpp; path = ../backends/gl/GlBackend.cpp; sourceTree = SOURCE_ROOT; };
+		3EF90F610878A0F900A31AD9 /* GlBackend.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = GlBackend.hpp; path = ../backends/gl/GlBackend.hpp; sourceTree = SOURCE_ROOT; };
+		3EF90F620878A0F900A31AD9 /* GlTextureName.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = GlTextureName.cpp; path = ../backends/gl/GlTextureName.cpp; sourceTree = SOURCE_ROOT; };
+		3EF90F630878A0F900A31AD9 /* GlTextureName.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = GlTextureName.hpp; path = ../backends/gl/GlTextureName.hpp; sourceTree = SOURCE_ROOT; };
+		3EF90F640878A0F900A31AD9 /* GlTextures.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = GlTextures.cpp; path = ../backends/gl/GlTextures.cpp; sourceTree = SOURCE_ROOT; };
+		3EF90F650878A0F900A31AD9 /* GlTextures.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = GlTextures.hpp; path = ../backends/gl/GlTextures.hpp; sourceTree = SOURCE_ROOT; };
+		3EF90F660878A0F900A31AD9 /* GlTextureStorage.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = GlTextureStorage.cpp; path = ../backends/gl/GlTextureStorage.cpp; sourceTree = SOURCE_ROOT; };
+		3EF90F670878A0F900A31AD9 /* GlTextureStorage.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = GlTextureStorage.hpp; path = ../backends/gl/GlTextureStorage.hpp; sourceTree = SOURCE_ROOT; };
+		3EF9A642099A15B4009470BA /* ShPngImage.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = ShPngImage.cpp; path = ../src/shutil/ShPngImage.cpp; sourceTree = SOURCE_ROOT; };
+		3EF9A643099A15B4009470BA /* ShPngImage.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShPngImage.hpp; path = ../src/shutil/ShPngImage.hpp; sourceTree = SOURCE_ROOT; };
+		3EF9A644099A15B4009470BA /* ShPngImageImpl.hpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.h; name = ShPngImageImpl.hpp; path = ../src/shutil/ShPngImageImpl.hpp; sourceTree = SOURCE_ROOT; };
+		8D07F2C70486CC7A007CD1D0 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		8D07F2C80486CC7A007CD1D0 /* Sh.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Sh.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		3E3EA9D0087A19DA00A1405F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3E60CEAB087A18320078BC55 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3E7CF7B4092C1AB90080FDD2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3EB30C2908787EE200729309 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3EBE960C087EC91B00DA8A69 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3EF90EC70878935800A31AD9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3EF90F430878A05000A31AD9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8D07F2C30486CC7A007CD1D0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		034768DDFF38A45A11DB9C8B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8D07F2C80486CC7A007CD1D0 /* Sh.framework */,
+				3EB30C2B08787EE200729309 /* libshcc.bundle */,
+				3EF90EC90878935800A31AD9 /* GlutExample.app */,
+				3EF90F450878A05000A31AD9 /* libsharb.bundle */,
+				3E60CEAD087A18320078BC55 /* Particles.app */,
+				3E3EA9D2087A19DA00A1405F /* TexturesExample.app */,
+				3EBE960E087EC91B00DA8A69 /* ShUtil.framework */,
+				3E7CF7B6092C1AB90080FDD2 /* libshglsl.bundle */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		0867D691FE84028FC02AAC07 /* Sh */ = {
+			isa = PBXGroup;
+			children = (
+				3E442EF9099A12D30045676A /* ChangeLog */,
+				3E7CF7C0092C1ACE0080FDD2 /* GlslBackend */,
+				3EC22E010899D79800EB5F51 /* ShUtil */,
+				3E3EA9E1087A1A6200A1405F /* TexturesExample */,
+				3E60CEBE087A188F0078BC55 /* Particles */,
+				3EF90FA00878A2BA00A31AD9 /* GlutExample */,
+				3EF90F9F0878A2AC00A31AD9 /* ArbBackend */,
+				3EB30C2E08787F2B00729309 /* CcBackend */,
+				08FB77ACFE841707C02AAC07 /* Source */,
+				089C1665FE841158C02AAC07 /* Resources */,
+				0867D69AFE84028FC02AAC07 /* External Frameworks and Libraries */,
+				034768DDFF38A45A11DB9C8B /* Products */,
+				3EB30C2C08787EE200729309 /* CcBackend-Info.plist */,
+				3EF90ECB0878935800A31AD9 /* GlutExample-Info.plist */,
+				3EF90F460878A05000A31AD9 /* ArbBackend-Info.plist */,
+				3E60CEAF087A18320078BC55 /* Particles-Info.plist */,
+				3E3EA9D4087A19DA00A1405F /* TexturesExample-Info.plist */,
+				3EBE960F087EC91B00DA8A69 /* ShUtil-Info.plist */,
+				3E7CF7B7092C1AB90080FDD2 /* GlslBackend-Info.plist */,
+			);
+			name = Sh;
+			sourceTree = "<group>";
+		};
+		0867D69AFE84028FC02AAC07 /* External Frameworks and Libraries */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "External Frameworks and Libraries";
+			sourceTree = "<group>";
+		};
+		089C1665FE841158C02AAC07 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				3E2E62C6089589A8009505E4 /* Sh.icns */,
+				8D07F2C70486CC7A007CD1D0 /* Info.plist */,
+				089C1666FE841158C02AAC07 /* InfoPlist.strings */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		08FB77ACFE841707C02AAC07 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				3E5FD0490899DCD700A1BAFF /* ShLibNoise.hpp */,
+				3E5FD04A0899DCD700A1BAFF /* ShLibNoiseImpl.hpp */,
+				3E5FD04B0899DCD700A1BAFF /* ShLibWorley.hpp */,
+				3E5FD04C0899DCD700A1BAFF /* ShLibWorleyImpl.hpp */,
+				3E5FD04D0899DCD700A1BAFF /* ShMIPFilter.hpp */,
+				3EB30A8D08787D7600729309 /* sh.hpp */,
+				3EB30A8E08787D7600729309 /* ShAlgebra.cpp */,
+				3EB30A8F08787D7600729309 /* ShAlgebra.hpp */,
+				3EB30A9008787D7600729309 /* ShArray.hpp */,
+				3EB30A9108787D7600729309 /* ShAttrib.hpp */,
+				3EB30A9208787D7600729309 /* ShAttribImpl.hpp */,
+				3EB30A9308787D7600729309 /* ShBackend.cpp */,
+				3EB30A9408787D7600729309 /* ShBackend.hpp */,
+				3EB30A9508787D7600729309 /* ShBaseTexture.cpp */,
+				3EB30A9608787D7600729309 /* ShBaseTexture.hpp */,
+				3EB30A9708787D7600729309 /* ShBaseTextureImpl.hpp */,
+				3EB30A9808787D7600729309 /* ShBasicBlock.cpp */,
+				3EB30A9908787D7600729309 /* ShBasicBlock.hpp */,
+				3EB30A9A08787D7600729309 /* ShBitSet.cpp */,
+				3EB30A9B08787D7600729309 /* ShBitSet.hpp */,
+				3EB30A9C08787D7600729309 /* ShBlock.cpp */,
+				3EB30A9D08787D7600729309 /* ShBlock.hpp */,
+				3EB30A9E08787D7600729309 /* ShCastManager.cpp */,
+				3EB30A9F08787D7600729309 /* ShCastManager.hpp */,
+				3EB30AA008787D7600729309 /* ShCfgBlock.cpp */,
+				3EB30AA108787D7600729309 /* ShCfgBlock.hpp */,
+				3EB30AA208787D7600729309 /* ShChannel.hpp */,
+				3EB30AA308787D7600729309 /* ShChannelImpl.hpp */,
+				3EB30AA408787D7600729309 /* ShChannelNode.cpp */,
+				3EB30AA508787D7600729309 /* ShChannelNode.hpp */,
+				3EB30AA608787D7600729309 /* ShColor.hpp */,
+				3EB30AA708787D7600729309 /* ShConcreteCTypeOp.cpp */,
+				3EB30AA808787D7600729309 /* ShConcreteCTypeOpImpl.hpp */,
+				3EB30AA908787D7600729309 /* ShConcreteRegularOpImpl.hpp */,
+				3EB30AAA08787D7600729309 /* ShConstProp.cpp */,
+				3EB30AAB08787D7600729309 /* ShContext.cpp */,
+				3EB30AAC08787D7600729309 /* ShContext.hpp */,
+				3EB30AAD08787D7600729309 /* ShCtrlGraph.cpp */,
+				3EB30AAE08787D7600729309 /* ShCtrlGraph.hpp */,
+				3EB30AAF08787D7600729309 /* ShDataType.cpp */,
+				3EB30AB008787D7600729309 /* ShDataType.hpp */,
+				3EB30AB108787D7600729309 /* ShDataTypeImpl.hpp */,
+				3EB30AB208787D7600729309 /* ShDebug.hpp */,
+				3EB30AB308787D7600729309 /* ShDllExport.hpp */,
+				3EB30AB608787D7600729309 /* ShError.cpp */,
+				3EB30AB708787D7600729309 /* ShError.hpp */,
+				3EB30AB808787D7600729309 /* ShEval.cpp */,
+				3EB30AB908787D7600729309 /* ShEval.hpp */,
+				3EB30ABA08787D7600729309 /* ShEvalImpl.hpp */,
+				3EB30ABB08787D7600729309 /* ShEvaluate.cpp */,
+				3EB30ABC08787D7600729309 /* ShEvaluate.hpp */,
+				3EB30ABD08787D7600729309 /* ShException.cpp */,
+				3EB30ABE08787D7600729309 /* ShException.hpp */,
+				3EB30ABF08787D7600729309 /* ShFixedManipulator.cpp */,
+				3EB30AC008787D7600729309 /* ShFixedManipulator.hpp */,
+				3EB30AC108787D7600729309 /* ShFraction.hpp */,
+				3EB30AC208787D7600729309 /* ShFractionImpl.hpp */,
+				3EB30AC408787D7600729309 /* ShGeneric.hpp */,
+				3EB30AC508787D7600729309 /* ShGenericImpl.hpp */,
+				3EB30AC608787D7600729309 /* ShGraph.hpp */,
+				3EB30AC708787D7600729309 /* ShGraphImpl.hpp */,
+				3EB30AC808787D7600729309 /* ShHalf.hpp */,
+				3EB30AC908787D7600729309 /* ShHalfImpl.hpp */,
+				3EB30ACA08787D7600729309 /* ShHashMap.hpp */,
+				3EB30ACB08787D7600729309 /* ShTexDataImpl.hpp */,
+				3EB30ACC08787D7600729309 /* ShImage.hpp */,
+				3EB30ACD08787D7600729309 /* ShImage3D.cpp */,
+				3EB30ACE08787D7600729309 /* ShImage3D.hpp */,
+				3EB30ACF08787D7600729309 /* ShInfo.cpp */,
+				3EB30AD008787D7600729309 /* ShInfo.hpp */,
+				3EB30AD108787D7600729309 /* ShInfoImpl.hpp */,
+				3EB30AD208787D7600729309 /* ShInstructions.cpp */,
+				3EB30AD308787D7600729309 /* ShInstructions.hpp */,
+				3EB30AD408787D7600729309 /* ShInternals.cpp */,
+				3EB30AD508787D7600729309 /* ShInternals.hpp */,
+				3EB30AD608787D7600729309 /* ShInterp.hpp */,
+				3EB30AD708787D7600729309 /* ShLib.hpp */,
+				3EB30AD808787D7600729309 /* ShLibArith.hpp */,
+				3EB30AD908787D7600729309 /* ShLibArithImpl.hpp */,
+				3EB30ADA08787D7600729309 /* ShLibAttrib.hpp */,
+				3EB30ADB08787D7600729309 /* ShLibBoolean.hpp */,
+				3EB30ADC08787D7600729309 /* ShLibBooleanImpl.hpp */,
+				3EB30ADD08787D7600729309 /* ShLibClamp.hpp */,
+				3EB30ADE08787D7600729309 /* ShLibClampImpl.hpp */,
+				3EB30ADF08787D7600729309 /* ShLibColor.hpp */,
+				3EB30AE008787D7600729309 /* ShLibDeriv.hpp */,
+				3EB30AE108787D7600729309 /* ShLibDerivImpl.hpp */,
+				3EB30AE208787D7600729309 /* ShLibGeometry.hpp */,
+				3EB30AE308787D7600729309 /* ShLibGeometryImpl.hpp */,
+				3EB30AE408787D7600729309 /* ShLibMatrix.hpp */,
+				3EB30AE508787D7600729309 /* ShLibMatrixImpl.hpp */,
+				3EB30AE608787D7600729309 /* ShLibSplines.hpp */,
+				3EB30AE708787D7600729309 /* ShLibSplinesImpl.hpp */,
+				3EB30AE808787D7600729309 /* ShLibNormal.hpp */,
+				3EB30AE908787D7600729309 /* ShLibPlane.hpp */,
+				3EB30AEA08787D7600729309 /* ShLibPoint.hpp */,
+				3EB30AEB08787D7600729309 /* ShLibPosition.hpp */,
+				3EB30AEC08787D7600729309 /* ShLibTexCoord.hpp */,
+				3EB30AED08787D7600729309 /* ShLibTrig.hpp */,
+				3EB30AEE08787D7600729309 /* ShLibTrigImpl.hpp */,
+				3EB30AEF08787D7600729309 /* ShLibVector.hpp */,
+				3EB30AF008787D7600729309 /* ShLinearAllocator.cpp */,
+				3EB30AF108787D7600729309 /* ShLinearAllocator.hpp */,
+				3EB30AF208787D7600729309 /* ShManipulator.cpp */,
+				3EB30AF308787D7600729309 /* ShManipulator.hpp */,
+				3EB30AF408787D7600729309 /* ShManipulatorImpl.hpp */,
+				3EB30AF508787D7600729309 /* ShMath.hpp */,
+				3EB30AF608787D7600729309 /* ShMatrix.hpp */,
+				3EB30AF708787D7600729309 /* ShMatrixImpl.hpp */,
+				3EB30AF808787D7600729309 /* ShMemory.cpp */,
+				3EB30AF908787D7600729309 /* ShMemory.hpp */,
+				3EB30AFA08787D7600729309 /* ShMemoryDep.hpp */,
+				3EB30AFB08787D7600729309 /* ShMeta.hpp */,
+				3EB30AFC08787D7600729309 /* ShMetaForwarder.cpp */,
+				3EB30AFD08787D7600729309 /* ShMetaForwarder.hpp */,
+				3EB30AFE08787D7600729309 /* ShMetaImpl.hpp */,
+				3EB30AFF08787D7600729309 /* ShNibbles.hpp */,
+				3EB30B0008787D7600729309 /* ShNibblesImpl.hpp */,
+				3EB30B0108787D7600729309 /* ShNormal.hpp */,
+				3EB30B0208787D7600729309 /* ShOperation.cpp */,
+				3EB30B0308787D7600729309 /* ShOperation.hpp */,
+				3EB30B0408787D7600729309 /* ShOptimizations.cpp */,
+				3EB30B0508787D7600729309 /* ShOptimizations.hpp */,
+				3EB30B0608787D7600729309 /* ShPalette.hpp */,
+				3EB30B0708787D7600729309 /* ShPaletteImpl.hpp */,
+				3EB30B0808787D7600729309 /* ShPaletteNode.cpp */,
+				3EB30B0908787D7600729309 /* ShPaletteNode.hpp */,
+				3EB30B0A08787D7600729309 /* ShParser.cpp */,
+				3EB30B0B08787D7600729309 /* ShParser.hpp */,
+				3EB30B0C08787D7600729309 /* ShPlane.hpp */,
+				3EB30B0D08787D7600729309 /* ShPoint.hpp */,
+				3EB30B0E08787D7600729309 /* ShPool.cpp */,
+				3EB30B0F08787D7600729309 /* ShPool.hpp */,
+				3EB30B1008787D7600729309 /* ShPosition.hpp */,
+				3EB30B1108787D7600729309 /* ShProgram.cpp */,
+				3EB30B1208787D7600729309 /* ShProgram.hpp */,
+				3EB30B1308787D7600729309 /* ShProgramNode.cpp */,
+				3EB30B1408787D7600729309 /* ShProgramNode.hpp */,
+				3EB30B1508787D7600729309 /* ShProgramSet.cpp */,
+				3EB30B1608787D7600729309 /* ShProgramSet.hpp */,
+				3EB30B1708787D7600729309 /* ShQuaternion.hpp */,
+				3EB30B1808787D7600729309 /* ShQuaternionImpl.hpp */,
+				3EB30B1908787D7600729309 /* ShRecord.cpp */,
+				3EB30B1A08787D7600729309 /* ShRecord.hpp */,
+				3EB30B1B08787D7600729309 /* ShRefCount.hpp */,
+				3EB30B1C08787D7600729309 /* ShRefCountImpl.hpp */,
+				3EB30B1D08787D7600729309 /* ShSection.cpp */,
+				3EB30B1E08787D7600729309 /* ShSection.hpp */,
+				3EB30B1F08787D7600729309 /* ShSectionImpl.hpp */,
+				3EB30B2008787D7600729309 /* ShStatement.cpp */,
+				3EB30B2108787D7600729309 /* ShStatement.hpp */,
+				3EB30B2208787D7600729309 /* ShStorageType.cpp */,
+				3EB30B2308787D7600729309 /* ShStorageType.hpp */,
+				3EB30B2408787D7600729309 /* ShStorageTypeImpl.hpp */,
+				3EB30B2508787D7600729309 /* ShStream.cpp */,
+				3EB30B2608787D7600729309 /* ShStream.hpp */,
+				3EB30B2708787D7600729309 /* ShStreamImpl.hpp */,
+				3EB30B2808787D7600729309 /* ShStructural.cpp */,
+				3EB30B2908787D7600729309 /* ShStructural.hpp */,
+				3EB30B2A08787D7600729309 /* ShSwizzle.cpp */,
+				3EB30B2B08787D7600729309 /* ShSwizzle.hpp */,
+				3EB30B2C08787D7600729309 /* ShSwizzleImpl.hpp */,
+				3EB30B2D08787D7600729309 /* ShSyntax.cpp */,
+				3EB30B2E08787D7600729309 /* ShSyntax.hpp */,
+				3EB30B2F08787D7600729309 /* ShTable.hpp */,
+				3EB30B3008787D7600729309 /* ShTexCoord.hpp */,
+				3EB30B3108787D7600729309 /* ShTexture.hpp */,
+				3EB30B3208787D7600729309 /* ShTextureNode.cpp */,
+				3EB30B3308787D7600729309 /* ShTextureNode.hpp */,
+				3EB30B3408787D7600729309 /* ShToken.cpp */,
+				3EB30B3508787D7600729309 /* ShToken.hpp */,
+				3EB30B3608787D7600729309 /* ShTokenizer.cpp */,
+				3EB30B3708787D7600729309 /* ShTokenizer.hpp */,
+				3EB30B3808787D7600729309 /* ShTransformer.cpp */,
+				3EB30B3908787D7600729309 /* ShTransformer.hpp */,
+				3EB30B3A08787D7600729309 /* ShTransformerImpl.hpp */,
+				3EB30B3B08787D7600729309 /* ShTypeConvertTransformer.cpp */,
+				3EB30B3C08787D7600729309 /* ShTypeInfo.cpp */,
+				3EB30B3D08787D7600729309 /* ShTypeInfo.hpp */,
+				3EB30B3E08787D7600729309 /* ShTypeInfoCasts.cpp */,
+				3EB30B3F08787D7600729309 /* ShTypeInfoImpl.hpp */,
+				3EB30B4008787D7600729309 /* ShTypeInfoOps.cpp */,
+				3EB30B4108787D7600729309 /* ShUtility.cpp */,
+				3EB30B4208787D7600729309 /* ShUtility.hpp */,
+				3EB30B4308787D7600729309 /* ShValueTracking.cpp */,
+				3EB30B4408787D7600729309 /* ShVariable.cpp */,
+				3EB30B4508787D7600729309 /* ShVariable.hpp */,
+				3EB30B4608787D7600729309 /* ShVariableNode.cpp */,
+				3EB30B4708787D7600729309 /* ShVariableNode.hpp */,
+				3EB30B4808787D7600729309 /* ShVariableType.cpp */,
+				3EB30B4908787D7700729309 /* ShVariableType.hpp */,
+				3EB30B4A08787D7700729309 /* ShVariant.cpp */,
+				3EB30B4B08787D7700729309 /* ShVariant.hpp */,
+				3EB30B4C08787D7700729309 /* ShVariantCast.hpp */,
+				3EB30B4D08787D7700729309 /* ShVariantCastImpl.hpp */,
+				3EB30B4E08787D7700729309 /* ShVariantFactory.hpp */,
+				3EB30B4F08787D7700729309 /* ShVariantFactoryImpl.hpp */,
+				3EB30B5008787D7700729309 /* ShVariantImpl.hpp */,
+				3EB30B5108787D7700729309 /* ShVector.hpp */,
+				3EB30B5208787D7700729309 /* ShWrap.hpp */,
+			);
+			name = Source;
+			sourceTree = "<group>";
+		};
+		3E3EA9E1087A1A6200A1405F /* TexturesExample */ = {
+			isa = PBXGroup;
+			children = (
+				3E3EA9E2087A1A8B00A1405F /* Camera.cpp */,
+				3E3EA9E3087A1A8B00A1405F /* Camera.hpp */,
+				3E3EA9E4087A1A8B00A1405F /* kd.png */,
+				3E3EA9E5087A1A8B00A1405F /* ks.png */,
+				3E3EA9E6087A1A8B00A1405F /* main.cpp */,
+				3E3EA9E7087A1A8B00A1405F /* rustkd.png */,
+				3E3EA9E8087A1A8B00A1405F /* rustks.png */,
+				3E3EA9E9087A1A8B00A1405F /* ShTrackball.cpp */,
+				3E3EA9EA087A1A8B00A1405F /* ShTrackball.hpp */,
+			);
+			name = TexturesExample;
+			sourceTree = "<group>";
+		};
+		3E60CEBE087A188F0078BC55 /* Particles */ = {
+			isa = PBXGroup;
+			children = (
+				3EC22E030899D80700EB5F51 /* main.cpp */,
+				3E60CEBF087A18AA0078BC55 /* Camera.cpp */,
+				3E60CEC0087A18AA0078BC55 /* Camera.hpp */,
+				3E60CEC2087A18AA0078BC55 /* ShTrackball.cpp */,
+				3E60CEC3087A18AA0078BC55 /* ShTrackball.hpp */,
+			);
+			name = Particles;
+			sourceTree = "<group>";
+		};
+		3E7CF7C0092C1ACE0080FDD2 /* GlslBackend */ = {
+			isa = PBXGroup;
+			children = (
+				3E7CF7C1092C1AFC0080FDD2 /* Glsl.cpp */,
+				3E7CF7C2092C1AFC0080FDD2 /* Glsl.hpp */,
+				3E7CF7C3092C1AFC0080FDD2 /* GlslBackend.cpp */,
+				3E7CF7C4092C1AFC0080FDD2 /* GlslCode.cpp */,
+				3E7CF7C5092C1AFC0080FDD2 /* GlslCode.hpp */,
+				3E7CF7C6092C1AFC0080FDD2 /* GlslEmit.cpp */,
+				3E7CF7C7092C1AFC0080FDD2 /* GlslSet.cpp */,
+				3E7CF7C8092C1AFC0080FDD2 /* GlslSet.hpp */,
+				3E7CF7C9092C1AFC0080FDD2 /* GlslVariable.cpp */,
+				3E7CF7CA092C1AFC0080FDD2 /* GlslVariable.hpp */,
+				3E7CF7CB092C1AFC0080FDD2 /* GlslVariableMap.cpp */,
+				3E7CF7CC092C1AFC0080FDD2 /* GlslVariableMap.hpp */,
+			);
+			name = GlslBackend;
+			sourceTree = "<group>";
+		};
+		3EB30C2E08787F2B00729309 /* CcBackend */ = {
+			isa = PBXGroup;
+			children = (
+				3EB30C2F08787F4800729309 /* Cc.cpp */,
+				3EB30C3008787F4800729309 /* Cc.hpp */,
+				3EB30C3108787F4800729309 /* CcEmit.cpp */,
+				3EB30C3208787F4800729309 /* CcTextures.hpp */,
+				3EB30C3308787F4800729309 /* CcTexturesString.hpp */,
+			);
+			name = CcBackend;
+			sourceTree = "<group>";
+		};
+		3EC22E010899D79800EB5F51 /* ShUtil */ = {
+			isa = PBXGroup;
+			children = (
+				3EF9A642099A15B4009470BA /* ShPngImage.cpp */,
+				3EF9A643099A15B4009470BA /* ShPngImage.hpp */,
+				3EF9A644099A15B4009470BA /* ShPngImageImpl.hpp */,
+				3EBE9644087EC9CA00DA8A69 /* ShFunc.hpp */,
+				3EBE9645087EC9CA00DA8A69 /* ShFuncImpl.hpp */,
+				3EBE9646087EC9CA00DA8A69 /* ShKernelLib.cpp */,
+				3EBE9647087EC9CA00DA8A69 /* ShKernelLib.hpp */,
+				3EBE9648087EC9CA00DA8A69 /* ShKernelLibImpl.hpp */,
+				3EBE9649087EC9CA00DA8A69 /* ShKernelLight.hpp */,
+				3EBE964A087EC9CA00DA8A69 /* ShKernelLightImpl.hpp */,
+				3EBE964B087EC9CA00DA8A69 /* ShKernelPost.hpp */,
+				3EBE964C087EC9CA00DA8A69 /* ShKernelPostImpl.hpp */,
+				3EBE964D087EC9CA00DA8A69 /* ShKernelSurface.hpp */,
+				3EBE964E087EC9CA00DA8A69 /* ShKernelSurfaceImpl.hpp */,
+				3EBE964F087EC9CA00DA8A69 /* ShKernelSurfMap.cpp */,
+				3EBE9650087EC9CA00DA8A69 /* ShKernelSurfMap.hpp */,
+				3EBE9651087EC9CA00DA8A69 /* ShMesh.hpp */,
+				3EBE9652087EC9CA00DA8A69 /* ShMeshImpl.hpp */,
+				3EBE9655087EC9CA00DA8A69 /* ShObjMesh.cpp */,
+				3EBE9656087EC9CA00DA8A69 /* ShObjMesh.hpp */,
+				3EBE9657087EC9CA00DA8A69 /* shutil.cpp */,
+				3EBE9658087EC9CA00DA8A69 /* shutil.hpp */,
+			);
+			name = ShUtil;
+			sourceTree = "<group>";
+		};
+		3EF90F9F0878A2AC00A31AD9 /* ArbBackend */ = {
+			isa = PBXGroup;
+			children = (
+				3EF90F540878A0F900A31AD9 /* Arb.cpp */,
+				3EF90F550878A0F900A31AD9 /* Arb.hpp */,
+				3EF90F560878A0F900A31AD9 /* ArbBackend.cpp */,
+				3EF90F570878A0F900A31AD9 /* ArbCode.cpp */,
+				3EF90F580878A0F900A31AD9 /* ArbCode.hpp */,
+				3EF90F590878A0F900A31AD9 /* ArbEmit.cpp */,
+				3EF90F5A0878A0F900A31AD9 /* ArbInst.cpp */,
+				3EF90F5B0878A0F900A31AD9 /* ArbInst.hpp */,
+				3EF90F5C0878A0F900A31AD9 /* ArbLimits.cpp */,
+				3EF90F5D0878A0F900A31AD9 /* ArbLimits.hpp */,
+				3EF90F5E0878A0F900A31AD9 /* ArbReg.cpp */,
+				3EF90F5F0878A0F900A31AD9 /* ArbReg.hpp */,
+				3EF90F600878A0F900A31AD9 /* GlBackend.cpp */,
+				3EF90F610878A0F900A31AD9 /* GlBackend.hpp */,
+				3EF90F620878A0F900A31AD9 /* GlTextureName.cpp */,
+				3EF90F630878A0F900A31AD9 /* GlTextureName.hpp */,
+				3EF90F640878A0F900A31AD9 /* GlTextures.cpp */,
+				3EF90F650878A0F900A31AD9 /* GlTextures.hpp */,
+				3EF90F660878A0F900A31AD9 /* GlTextureStorage.cpp */,
+				3EF90F670878A0F900A31AD9 /* GlTextureStorage.hpp */,
+			);
+			name = ArbBackend;
+			sourceTree = "<group>";
+		};
+		3EF90FA00878A2BA00A31AD9 /* GlutExample */ = {
+			isa = PBXGroup;
+			children = (
+				3EF90ECD0878939E00A31AD9 /* Camera.cpp */,
+				3EF90ECE0878939E00A31AD9 /* Camera.hpp */,
+				3EF90ECF0878939E00A31AD9 /* main.cpp */,
+				3EF90ED00878939E00A31AD9 /* ShTrackball.cpp */,
+				3EF90ED10878939E00A31AD9 /* ShTrackball.hpp */,
+			);
+			name = GlutExample;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		3EBE9609087EC91B00DA8A69 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3EBE965B087EC9CA00DA8A69 /* ShFunc.hpp in Headers */,
+				3EBE965C087EC9CA00DA8A69 /* ShFuncImpl.hpp in Headers */,
+				3EBE965E087EC9CA00DA8A69 /* ShKernelLib.hpp in Headers */,
+				3EBE965F087EC9CA00DA8A69 /* ShKernelLibImpl.hpp in Headers */,
+				3EBE9660087EC9CA00DA8A69 /* ShKernelLight.hpp in Headers */,
+				3EBE9661087EC9CA00DA8A69 /* ShKernelLightImpl.hpp in Headers */,
+				3EBE9662087EC9CA00DA8A69 /* ShKernelPost.hpp in Headers */,
+				3EBE9663087EC9CA00DA8A69 /* ShKernelPostImpl.hpp in Headers */,
+				3EBE9664087EC9CA00DA8A69 /* ShKernelSurface.hpp in Headers */,
+				3EBE9665087EC9CA00DA8A69 /* ShKernelSurfaceImpl.hpp in Headers */,
+				3EBE9667087EC9CA00DA8A69 /* ShKernelSurfMap.hpp in Headers */,
+				3EBE9668087EC9CA00DA8A69 /* ShMesh.hpp in Headers */,
+				3EBE9669087EC9CA00DA8A69 /* ShMeshImpl.hpp in Headers */,
+				3EBE966D087EC9CA00DA8A69 /* ShObjMesh.hpp in Headers */,
+				3EBE966F087EC9CA00DA8A69 /* shutil.hpp in Headers */,
+				3EF9A646099A15B4009470BA /* ShPngImage.hpp in Headers */,
+				3EF9A647099A15B4009470BA /* ShPngImageImpl.hpp in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8D07F2BD0486CC7A007CD1D0 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3EB30B5308787D7700729309 /* sh.hpp in Headers */,
+				3EB30B5508787D7700729309 /* ShAlgebra.hpp in Headers */,
+				3EB30B5608787D7700729309 /* ShArray.hpp in Headers */,
+				3EB30B5708787D7700729309 /* ShAttrib.hpp in Headers */,
+				3EB30B5808787D7700729309 /* ShAttribImpl.hpp in Headers */,
+				3EB30B5A08787D7700729309 /* ShBackend.hpp in Headers */,
+				3EB30B5C08787D7700729309 /* ShBaseTexture.hpp in Headers */,
+				3EB30B5D08787D7700729309 /* ShBaseTextureImpl.hpp in Headers */,
+				3EB30B5F08787D7700729309 /* ShBasicBlock.hpp in Headers */,
+				3EB30B6108787D7700729309 /* ShBitSet.hpp in Headers */,
+				3EB30B6308787D7700729309 /* ShBlock.hpp in Headers */,
+				3EB30B6508787D7700729309 /* ShCastManager.hpp in Headers */,
+				3EB30B6708787D7700729309 /* ShCfgBlock.hpp in Headers */,
+				3EB30B6808787D7700729309 /* ShChannel.hpp in Headers */,
+				3EB30B6908787D7700729309 /* ShChannelImpl.hpp in Headers */,
+				3EB30B6B08787D7700729309 /* ShChannelNode.hpp in Headers */,
+				3EB30B6C08787D7700729309 /* ShColor.hpp in Headers */,
+				3EB30B6E08787D7700729309 /* ShConcreteCTypeOpImpl.hpp in Headers */,
+				3EB30B6F08787D7700729309 /* ShConcreteRegularOpImpl.hpp in Headers */,
+				3EB30B7208787D7700729309 /* ShContext.hpp in Headers */,
+				3EB30B7408787D7700729309 /* ShCtrlGraph.hpp in Headers */,
+				3EB30B7608787D7700729309 /* ShDataType.hpp in Headers */,
+				3EB30B7708787D7700729309 /* ShDataTypeImpl.hpp in Headers */,
+				3EB30B7808787D7700729309 /* ShDebug.hpp in Headers */,
+				3EB30B7908787D7700729309 /* ShDllExport.hpp in Headers */,
+				3EB30B7D08787D7700729309 /* ShError.hpp in Headers */,
+				3EB30B7F08787D7700729309 /* ShEval.hpp in Headers */,
+				3EB30B8008787D7700729309 /* ShEvalImpl.hpp in Headers */,
+				3EB30B8208787D7700729309 /* ShEvaluate.hpp in Headers */,
+				3EB30B8408787D7700729309 /* ShException.hpp in Headers */,
+				3EB30B8608787D7700729309 /* ShFixedManipulator.hpp in Headers */,
+				3EB30B8708787D7700729309 /* ShFraction.hpp in Headers */,
+				3EB30B8808787D7700729309 /* ShFractionImpl.hpp in Headers */,
+				3EB30B8A08787D7700729309 /* ShGeneric.hpp in Headers */,
+				3EB30B8B08787D7700729309 /* ShGenericImpl.hpp in Headers */,
+				3EB30B8C08787D7700729309 /* ShGraph.hpp in Headers */,
+				3EB30B8D08787D7700729309 /* ShGraphImpl.hpp in Headers */,
+				3EB30B8E08787D7700729309 /* ShHalf.hpp in Headers */,
+				3EB30B8F08787D7700729309 /* ShHalfImpl.hpp in Headers */,
+				3EB30B9008787D7700729309 /* ShHashMap.hpp in Headers */,
+				3EB30B9208787D7700729309 /* ShImage.hpp in Headers */,
+				3EB30B9408787D7700729309 /* ShImage3D.hpp in Headers */,
+				3EB30B9608787D7700729309 /* ShInfo.hpp in Headers */,
+				3EB30B9708787D7700729309 /* ShInfoImpl.hpp in Headers */,
+				3EB30B9908787D7700729309 /* ShInstructions.hpp in Headers */,
+				3EB30B9B08787D7700729309 /* ShInternals.hpp in Headers */,
+				3EB30B9C08787D7700729309 /* ShInterp.hpp in Headers */,
+				3EB30B9D08787D7700729309 /* ShLib.hpp in Headers */,
+				3EB30B9E08787D7700729309 /* ShLibArith.hpp in Headers */,
+				3EB30B9F08787D7700729309 /* ShLibArithImpl.hpp in Headers */,
+				3EB30BA008787D7700729309 /* ShLibAttrib.hpp in Headers */,
+				3EB30BA108787D7700729309 /* ShLibBoolean.hpp in Headers */,
+				3EB30BA208787D7700729309 /* ShLibBooleanImpl.hpp in Headers */,
+				3EB30BA308787D7700729309 /* ShLibClamp.hpp in Headers */,
+				3EB30BA408787D7700729309 /* ShLibClampImpl.hpp in Headers */,
+				3EB30BA508787D7700729309 /* ShLibColor.hpp in Headers */,
+				3EB30BA608787D7700729309 /* ShLibDeriv.hpp in Headers */,
+				3EB30BA708787D7700729309 /* ShLibDerivImpl.hpp in Headers */,
+				3EB30BA808787D7700729309 /* ShLibGeometry.hpp in Headers */,
+				3EB30BA908787D7700729309 /* ShLibGeometryImpl.hpp in Headers */,
+				3EB30BAA08787D7700729309 /* ShLibMatrix.hpp in Headers */,
+				3EB30BAB08787D7700729309 /* ShLibMatrixImpl.hpp in Headers */,
+				3EB30BAC08787D7700729309 /* ShLibSplines.hpp in Headers */,
+				3EB30BAD08787D7700729309 /* ShLibSplinesImpl.hpp in Headers */,
+				3EB30BAE08787D7700729309 /* ShLibNormal.hpp in Headers */,
+				3EB30BAF08787D7700729309 /* ShLibPlane.hpp in Headers */,
+				3EB30BB008787D7700729309 /* ShLibPoint.hpp in Headers */,
+				3EB30BB108787D7700729309 /* ShLibPosition.hpp in Headers */,
+				3EB30BB208787D7700729309 /* ShLibTexCoord.hpp in Headers */,
+				3EB30BB308787D7700729309 /* ShLibTrig.hpp in Headers */,
+				3EB30BB408787D7700729309 /* ShLibTrigImpl.hpp in Headers */,
+				3EB30BB508787D7700729309 /* ShLibVector.hpp in Headers */,
+				3EB30BB708787D7700729309 /* ShLinearAllocator.hpp in Headers */,
+				3EB30BB908787D7700729309 /* ShManipulator.hpp in Headers */,
+				3EB30BBA08787D7700729309 /* ShManipulatorImpl.hpp in Headers */,
+				3EB30BBB08787D7700729309 /* ShMath.hpp in Headers */,
+				3EB30BBC08787D7700729309 /* ShMatrix.hpp in Headers */,
+				3EB30BBD08787D7700729309 /* ShMatrixImpl.hpp in Headers */,
+				3EB30BBF08787D7700729309 /* ShMemory.hpp in Headers */,
+				3EB30BC008787D7700729309 /* ShMemoryDep.hpp in Headers */,
+				3EB30BC108787D7700729309 /* ShMeta.hpp in Headers */,
+				3EB30BC308787D7700729309 /* ShMetaForwarder.hpp in Headers */,
+				3EB30BC408787D7700729309 /* ShMetaImpl.hpp in Headers */,
+				3EB30BC508787D7700729309 /* ShNibbles.hpp in Headers */,
+				3EB30BC608787D7700729309 /* ShNibblesImpl.hpp in Headers */,
+				3EB30BC708787D7700729309 /* ShNormal.hpp in Headers */,
+				3EB30BC908787D7700729309 /* ShOperation.hpp in Headers */,
+				3EB30BCB08787D7700729309 /* ShOptimizations.hpp in Headers */,
+				3EB30BCC08787D7700729309 /* ShPalette.hpp in Headers */,
+				3EB30BCD08787D7700729309 /* ShPaletteImpl.hpp in Headers */,
+				3EB30BCF08787D7700729309 /* ShPaletteNode.hpp in Headers */,
+				3EB30BD108787D7700729309 /* ShParser.hpp in Headers */,
+				3EB30BD208787D7700729309 /* ShPlane.hpp in Headers */,
+				3EB30BD308787D7700729309 /* ShPoint.hpp in Headers */,
+				3EB30BD508787D7700729309 /* ShPool.hpp in Headers */,
+				3EB30BD608787D7700729309 /* ShPosition.hpp in Headers */,
+				3EB30BD808787D7700729309 /* ShProgram.hpp in Headers */,
+				3EB30BDA08787D7700729309 /* ShProgramNode.hpp in Headers */,
+				3EB30BDC08787D7700729309 /* ShProgramSet.hpp in Headers */,
+				3EB30BDD08787D7700729309 /* ShQuaternion.hpp in Headers */,
+				3EB30BDE08787D7700729309 /* ShQuaternionImpl.hpp in Headers */,
+				3EB30BE008787D7700729309 /* ShRecord.hpp in Headers */,
+				3EB30BE108787D7700729309 /* ShRefCount.hpp in Headers */,
+				3EB30BE208787D7700729309 /* ShRefCountImpl.hpp in Headers */,
+				3EB30BE408787D7700729309 /* ShSection.hpp in Headers */,
+				3EB30BE508787D7700729309 /* ShSectionImpl.hpp in Headers */,
+				3EB30BE708787D7700729309 /* ShStatement.hpp in Headers */,
+				3EB30BE908787D7700729309 /* ShStorageType.hpp in Headers */,
+				3EB30BEA08787D7700729309 /* ShStorageTypeImpl.hpp in Headers */,
+				3EB30BEC08787D7700729309 /* ShStream.hpp in Headers */,
+				3EB30BED08787D7700729309 /* ShStreamImpl.hpp in Headers */,
+				3EB30BEF08787D7700729309 /* ShStructural.hpp in Headers */,
+				3EB30BF108787D7700729309 /* ShSwizzle.hpp in Headers */,
+				3EB30BF208787D7700729309 /* ShSwizzleImpl.hpp in Headers */,
+				3EB30BF408787D7700729309 /* ShSyntax.hpp in Headers */,
+				3EB30BF508787D7700729309 /* ShTable.hpp in Headers */,
+				3EB30BF608787D7700729309 /* ShTexCoord.hpp in Headers */,
+				3EB30B9108787D7700729309 /* ShTexDataImpl.hpp in Headers */,
+				3EB30BF708787D7700729309 /* ShTexture.hpp in Headers */,
+				3EB30BF908787D7700729309 /* ShTextureNode.hpp in Headers */,
+				3EB30BFB08787D7700729309 /* ShToken.hpp in Headers */,
+				3EB30BFD08787D7700729309 /* ShTokenizer.hpp in Headers */,
+				3EB30BFF08787D7700729309 /* ShTransformer.hpp in Headers */,
+				3EB30C0008787D7700729309 /* ShTransformerImpl.hpp in Headers */,
+				3EB30C0308787D7700729309 /* ShTypeInfo.hpp in Headers */,
+				3EB30C0508787D7700729309 /* ShTypeInfoImpl.hpp in Headers */,
+				3EB30C0808787D7700729309 /* ShUtility.hpp in Headers */,
+				3EB30C0B08787D7700729309 /* ShVariable.hpp in Headers */,
+				3EB30C0D08787D7700729309 /* ShVariableNode.hpp in Headers */,
+				3EB30C0F08787D7700729309 /* ShVariableType.hpp in Headers */,
+				3EB30C1108787D7700729309 /* ShVariant.hpp in Headers */,
+				3EB30C1208787D7700729309 /* ShVariantCast.hpp in Headers */,
+				3EB30C1308787D7700729309 /* ShVariantCastImpl.hpp in Headers */,
+				3EB30C1408787D7700729309 /* ShVariantFactory.hpp in Headers */,
+				3EB30C1508787D7700729309 /* ShVariantFactoryImpl.hpp in Headers */,
+				3EB30C1608787D7700729309 /* ShVariantImpl.hpp in Headers */,
+				3EB30C1708787D7700729309 /* ShVector.hpp in Headers */,
+				3EB30C1808787D7700729309 /* ShWrap.hpp in Headers */,
+				3E5FD04E0899DCD700A1BAFF /* ShLibNoise.hpp in Headers */,
+				3E5FD04F0899DCD700A1BAFF /* ShLibNoiseImpl.hpp in Headers */,
+				3E5FD0500899DCD700A1BAFF /* ShLibWorley.hpp in Headers */,
+				3E5FD0510899DCD700A1BAFF /* ShLibWorleyImpl.hpp in Headers */,
+				3E5FD0520899DCD700A1BAFF /* ShMIPFilter.hpp in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		3E3EA9D1087A19DA00A1405F /* TexturesExample */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3E5B9266092C3ED900D86C12 /* Build configuration list for PBXNativeTarget "TexturesExample" */;
+			buildPhases = (
+				3E3EA9CE087A19DA00A1405F /* Resources */,
+				3E3EA9CF087A19DA00A1405F /* Sources */,
+				3E3EA9D0087A19DA00A1405F /* Frameworks */,
+			);
+			buildRules = (
+			);
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				INFOPLIST_FILE = "TexturesExample-Info.plist";
+				INSTALL_PATH = "$(LOCAL_APPS_DIR)/Sh Examples";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = (
+					"-framework",
+					CoreFoundation,
+					"-framework",
+					OpenGL,
+					"-framework",
+					GLUT,
+					"-framework",
+					Sh,
+					"-lobjc",
+				);
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = TexturesExample;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			dependencies = (
+				3E3EA9D6087A1A4200A1405F /* PBXTargetDependency */,
+				3E3EA9D8087A1A4200A1405F /* PBXTargetDependency */,
+				3EF9A66B099A16FD009470BA /* PBXTargetDependency */,
+			);
+			name = TexturesExample;
+			productName = TexturesExample;
+			productReference = 3E3EA9D2087A19DA00A1405F /* TexturesExample.app */;
+			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
+<plist version=\"1.0\">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>TexturesExample</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.yourcompany.TexturesExample</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+</dict>
+</plist>
+";
+			productType = "com.apple.product-type.application";
+		};
+		3E60CEAC087A18320078BC55 /* Particles */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3E5B9262092C3ED900D86C12 /* Build configuration list for PBXNativeTarget "Particles" */;
+			buildPhases = (
+				3E60CEA9087A18320078BC55 /* Resources */,
+				3E60CEAA087A18320078BC55 /* Sources */,
+				3E60CEAB087A18320078BC55 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			buildSettings = {
+				FRAMEWORK_VERSION = 7;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				INFOPLIST_FILE = "Particles-Info.plist";
+				INSTALL_PATH = "$(LOCAL_APPS_DIR)/Sh Examples";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = (
+					"-framework",
+					CoreFoundation,
+					"-framework",
+					OpenGL,
+					"-framework",
+					GLUT,
+					"-framework",
+					Sh,
+					"-lobjc",
+				);
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = Particles;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			dependencies = (
+				3E60CEB1087A187C0078BC55 /* PBXTargetDependency */,
+				3E60CEB3087A187C0078BC55 /* PBXTargetDependency */,
+				3E60CEB5087A187C0078BC55 /* PBXTargetDependency */,
+			);
+			name = Particles;
+			productName = Particles;
+			productReference = 3E60CEAD087A18320078BC55 /* Particles.app */;
+			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
+<plist version=\"1.0\">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>Particles</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.yourcompany.Particles</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+</dict>
+</plist>
+";
+			productType = "com.apple.product-type.application";
+		};
+		3E7CF7B5092C1AB90080FDD2 /* GlslBackend */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3E5B926E092C3ED900D86C12 /* Build configuration list for PBXNativeTarget "GlslBackend" */;
+			buildPhases = (
+				3E7CF7B2092C1AB90080FDD2 /* Resources */,
+				3E7CF7B3092C1AB90080FDD2 /* Sources */,
+				3E7CF7B4092C1AB90080FDD2 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			buildSettings = {
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G4;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				INFOPLIST_FILE = "GlslBackend-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Sh/Backends";
+				LIBRARY_STYLE = BUNDLE;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = (
+					"-framework",
+					OpenGL,
+					"-framework",
+					Sh,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = libshglsl;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			dependencies = (
+				3E7CF812092C1E880080FDD2 /* PBXTargetDependency */,
+			);
+			name = GlslBackend;
+			productName = GlslBackend;
+			productReference = 3E7CF7B6092C1AB90080FDD2 /* libshglsl.bundle */;
+			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
+<plist version=\"1.0\">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>GlslBackend</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.yourcompany.GlslBackend</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+	<key>CSResourcesFileMapped</key>
+	<string>yes</string>
+</dict>
+</plist>
+";
+			productType = "com.apple.product-type.bundle";
+		};
+		3EB30C2A08787EE200729309 /* CcBackend */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3E5B9256092C3ED900D86C12 /* Build configuration list for PBXNativeTarget "CcBackend" */;
+			buildPhases = (
+				3EB30C2708787EE200729309 /* Resources */,
+				3EB30C2808787EE200729309 /* Sources */,
+				3EB30C2908787EE200729309 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				HEADER_SEARCH_PATHS = "";
+				INFOPLIST_FILE = "CcBackend-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Sh/Backends";
+				LIBRARY_STYLE = BUNDLE;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Sh,
+				);
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = libshcc;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			dependencies = (
+				3EF90F2408789BC700A31AD9 /* PBXTargetDependency */,
+			);
+			name = CcBackend;
+			productName = CcBackend;
+			productReference = 3EB30C2B08787EE200729309 /* libshcc.bundle */;
+			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
+<plist version=\"1.0\">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>CcBackend</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.yourcompany.CcBackend</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+	<key>CSResourcesFileMapped</key>
+	<string>yes</string>
+</dict>
+</plist>
+";
+			productType = "com.apple.product-type.bundle";
+		};
+		3EBE960D087EC91B00DA8A69 /* ShUtil */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3E5B926A092C3ED900D86C12 /* Build configuration list for PBXNativeTarget "ShUtil" */;
+			buildPhases = (
+				3EBE9609087EC91B00DA8A69 /* Headers */,
+				3EBE960A087EC91B00DA8A69 /* Resources */,
+				3EBE960B087EC91B00DA8A69 /* Sources */,
+				3EBE960C087EC91B00DA8A69 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			buildSettings = {
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				INFOPLIST_FILE = "ShUtil-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LIBRARY_STYLE = DYNAMIC;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Sh,
+				);
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ShUtil;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			dependencies = (
+				3EBE9673087EC9FF00DA8A69 /* PBXTargetDependency */,
+			);
+			name = ShUtil;
+			productName = ShUtil;
+			productReference = 3EBE960E087EC91B00DA8A69 /* ShUtil.framework */;
+			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
+<plist version=\"1.0\">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>ShUtil</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.yourcompany.ShUtil</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundlePackageType</key>
+	<string>FMWK</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+</dict>
+</plist>
+";
+			productType = "com.apple.product-type.framework";
+		};
+		3EF90EC80878935800A31AD9 /* GlutExample */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3E5B925E092C3ED900D86C12 /* Build configuration list for PBXNativeTarget "GlutExample" */;
+			buildPhases = (
+				3EF90EC50878935800A31AD9 /* Resources */,
+				3EF90EC60878935800A31AD9 /* Sources */,
+				3EF90EC70878935800A31AD9 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				INFOPLIST_FILE = "GlutExample-Info.plist";
+				INSTALL_PATH = "$(LOCAL_APPS_DIR)/Sh Examples";
+				LIBRARY_STYLE = BUNDLE;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Sh,
+					"-framework",
+					OpenGL,
+					"-framework",
+					GLUT,
+					"-lobjc",
+				);
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = GlutExample;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+				ZERO_LINK = NO;
+			};
+			dependencies = (
+				3EF90F2808789BD400A31AD9 /* PBXTargetDependency */,
+				3E7CF7AC092C1A4C0080FDD2 /* PBXTargetDependency */,
+			);
+			name = GlutExample;
+			productName = GlutExample;
+			productReference = 3EF90EC90878935800A31AD9 /* GlutExample.app */;
+			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
+<plist version=\"1.0\">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>GlutExample</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.yourcompany.GlutExample</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+</dict>
+</plist>
+";
+			productType = "com.apple.product-type.application";
+		};
+		3EF90F440878A05000A31AD9 /* ArbBackend */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3E5B925A092C3ED900D86C12 /* Build configuration list for PBXNativeTarget "ArbBackend" */;
+			buildPhases = (
+				3EF90F410878A05000A31AD9 /* Resources */,
+				3EF90F420878A05000A31AD9 /* Sources */,
+				3EF90F430878A05000A31AD9 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				INFOPLIST_FILE = "ArbBackend-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Sh/Backends";
+				LIBRARY_STYLE = BUNDLE;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = (
+					"-framework",
+					OpenGL,
+					"-framework",
+					Sh,
+				);
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = libsharb;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			dependencies = (
+				3EF90F510878A0C500A31AD9 /* PBXTargetDependency */,
+			);
+			name = ArbBackend;
+			productName = ArbBackend;
+			productReference = 3EF90F450878A05000A31AD9 /* libsharb.bundle */;
+			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
+<plist version=\"1.0\">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>ArbBackend</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.yourcompany.ArbBackend</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+	<key>CSResourcesFileMapped</key>
+	<string>yes</string>
+</dict>
+</plist>
+";
+			productType = "com.apple.product-type.bundle";
+		};
+		8D07F2BC0486CC7A007CD1D0 /* Sh */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3E5B9252092C3ED900D86C12 /* Build configuration list for PBXNativeTarget "Sh" */;
+			buildPhases = (
+				8D07F2BD0486CC7A007CD1D0 /* Headers */,
+				8D07F2BF0486CC7A007CD1D0 /* Resources */,
+				8D07F2C10486CC7A007CD1D0 /* Sources */,
+				8D07F2C30486CC7A007CD1D0 /* Frameworks */,
+				8D07F2C50486CC7A007CD1D0 /* Rez */,
+			);
+			buildRules = (
+			);
+			buildSettings = {
+				DYLIB_COMPATIBILITY_VERSION = 0.7.9;
+				DYLIB_CURRENT_VERSION = 0.7.9;
+				FRAMEWORK_SEARCH_PATHS = "";
+				FRAMEWORK_VERSION = 7;
+				GCC_ENABLE_TRIGRAPHS = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
+				GCC_WARN_FOUR_CHARACTER_CONSTANTS = NO;
+				GCC_WARN_UNKNOWN_PRAGMAS = NO;
+				HEADER_SEARCH_PATHS = /sw/include;
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LIBRARY_SEARCH_PATHS = /sw/lib;
+				LIBRARY_STYLE = DYNAMIC;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = (
+					"-framework",
+					CoreFoundation,
+					"-lpng",
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = Sh;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+				WRAPPER_EXTENSION = framework;
+			};
+			dependencies = (
+			);
+			name = Sh;
+			productInstallPath = "$(HOME)/Library/Frameworks";
+			productName = Sh;
+			productReference = 8D07F2C80486CC7A007CD1D0 /* Sh.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		0867D690FE84028FC02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 3E5B9272092C3ED900D86C12 /* Build configuration list for PBXProject "Sh" */;
+			buildSettings = {
+			};
+			buildStyles = (
+				4F0BB7EC011F40E904CA0E50 /* Development */,
+				4F0BB7ED011F40E904CA0E50 /* Deployment */,
+			);
+			hasScannedForEncodings = 1;
+			mainGroup = 0867D691FE84028FC02AAC07 /* Sh */;
+			productRefGroup = 034768DDFF38A45A11DB9C8B /* Products */;
+			projectDirPath = "";
+			targets = (
+				8D07F2BC0486CC7A007CD1D0 /* Sh */,
+				3EB30C2A08787EE200729309 /* CcBackend */,
+				3EF90EC80878935800A31AD9 /* GlutExample */,
+				3EF90F440878A05000A31AD9 /* ArbBackend */,
+				3E60CEAC087A18320078BC55 /* Particles */,
+				3E3EA9D1087A19DA00A1405F /* TexturesExample */,
+				3EBE960D087EC91B00DA8A69 /* ShUtil */,
+				3E7CF7B5092C1AB90080FDD2 /* GlslBackend */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		3E3EA9CE087A19DA00A1405F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3E3EA9ED087A1A8B00A1405F /* kd.png in Resources */,
+				3E3EA9EE087A1A8B00A1405F /* ks.png in Resources */,
+				3E3EA9F0087A1A8B00A1405F /* rustkd.png in Resources */,
+				3E3EA9F1087A1A8B00A1405F /* rustks.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3E60CEA9087A18320078BC55 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3E60CEC5087A18AA0078BC55 /* Camera.hpp in Resources */,
+				3E60CEC8087A18AA0078BC55 /* ShTrackball.hpp in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3E7CF7B2092C1AB90080FDD2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3EB30C2708787EE200729309 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3EB30C3508787F4800729309 /* Cc.hpp in Resources */,
+				3EB30C3708787F4800729309 /* CcTextures.hpp in Resources */,
+				3EB30C3808787F4800729309 /* CcTexturesString.hpp in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3EBE960A087EC91B00DA8A69 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3E2E62C7089589A8009505E4 /* Sh.icns in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3EF90EC50878935800A31AD9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3EF90ED30878939E00A31AD9 /* Camera.hpp in Resources */,
+				3EF90ED60878939E00A31AD9 /* ShTrackball.hpp in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3EF90F410878A05000A31AD9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3EF90F6D0878A0F900A31AD9 /* Arb.hpp in Resources */,
+				3EF90F700878A0F900A31AD9 /* ArbCode.hpp in Resources */,
+				3EF90F730878A0F900A31AD9 /* ArbInst.hpp in Resources */,
+				3EF90F750878A0F900A31AD9 /* ArbLimits.hpp in Resources */,
+				3EF90F770878A0F900A31AD9 /* ArbReg.hpp in Resources */,
+				3EF90F790878A0F900A31AD9 /* GlBackend.hpp in Resources */,
+				3EF90F7B0878A0F900A31AD9 /* GlTextureName.hpp in Resources */,
+				3EF90F7D0878A0F900A31AD9 /* GlTextures.hpp in Resources */,
+				3EF90F7F0878A0F900A31AD9 /* GlTextureStorage.hpp in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8D07F2BF0486CC7A007CD1D0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8D07F2C00486CC7A007CD1D0 /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXRezBuildPhase section */
+		8D07F2C50486CC7A007CD1D0 /* Rez */ = {
+			isa = PBXRezBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXRezBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		3E3EA9CF087A19DA00A1405F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3E3EA9EB087A1A8B00A1405F /* Camera.cpp in Sources */,
+				3E3EA9EF087A1A8B00A1405F /* main.cpp in Sources */,
+				3E3EA9F2087A1A8B00A1405F /* ShTrackball.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3E60CEAA087A18320078BC55 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3E60CEC4087A18AA0078BC55 /* Camera.cpp in Sources */,
+				3E60CEC7087A18AA0078BC55 /* ShTrackball.cpp in Sources */,
+				3EC22E040899D80700EB5F51 /* main.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3E7CF7B3092C1AB90080FDD2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3E7CF7D4092C1B1E0080FDD2 /* GlBackend.cpp in Sources */,
+				3E7CF7D6092C1B1E0080FDD2 /* GlTextureName.cpp in Sources */,
+				3E7CF7D8092C1B1E0080FDD2 /* GlTextures.cpp in Sources */,
+				3E7CF7DA092C1B1E0080FDD2 /* GlTextureStorage.cpp in Sources */,
+				3E7CF7CD092C1AFC0080FDD2 /* Glsl.cpp in Sources */,
+				3E7CF7CE092C1AFC0080FDD2 /* GlslBackend.cpp in Sources */,
+				3E7CF7CF092C1AFC0080FDD2 /* GlslCode.cpp in Sources */,
+				3E7CF7D0092C1AFC0080FDD2 /* GlslEmit.cpp in Sources */,
+				3E7CF7D1092C1AFC0080FDD2 /* GlslSet.cpp in Sources */,
+				3E7CF7D2092C1AFC0080FDD2 /* GlslVariable.cpp in Sources */,
+				3E7CF7D3092C1AFC0080FDD2 /* GlslVariableMap.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3EB30C2808787EE200729309 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3EB30C3408787F4800729309 /* Cc.cpp in Sources */,
+				3EB30C3608787F4800729309 /* CcEmit.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3EBE960B087EC91B00DA8A69 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3EBE965D087EC9CA00DA8A69 /* ShKernelLib.cpp in Sources */,
+				3EBE9666087EC9CA00DA8A69 /* ShKernelSurfMap.cpp in Sources */,
+				3EBE966C087EC9CA00DA8A69 /* ShObjMesh.cpp in Sources */,
+				3EBE966E087EC9CA00DA8A69 /* shutil.cpp in Sources */,
+				3EF9A645099A15B4009470BA /* ShPngImage.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3EF90EC60878935800A31AD9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3EF90ED20878939E00A31AD9 /* Camera.cpp in Sources */,
+				3EF90ED40878939E00A31AD9 /* main.cpp in Sources */,
+				3EF90ED50878939E00A31AD9 /* ShTrackball.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3EF90F420878A05000A31AD9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3EF90F6C0878A0F900A31AD9 /* Arb.cpp in Sources */,
+				3EF90F6E0878A0F900A31AD9 /* ArbBackend.cpp in Sources */,
+				3EF90F6F0878A0F900A31AD9 /* ArbCode.cpp in Sources */,
+				3EF90F710878A0F900A31AD9 /* ArbEmit.cpp in Sources */,
+				3EF90F720878A0F900A31AD9 /* ArbInst.cpp in Sources */,
+				3EF90F740878A0F900A31AD9 /* ArbLimits.cpp in Sources */,
+				3EF90F760878A0F900A31AD9 /* ArbReg.cpp in Sources */,
+				3EF90F780878A0F900A31AD9 /* GlBackend.cpp in Sources */,
+				3EF90F7A0878A0F900A31AD9 /* GlTextureName.cpp in Sources */,
+				3EF90F7C0878A0F900A31AD9 /* GlTextures.cpp in Sources */,
+				3EF90F7E0878A0F900A31AD9 /* GlTextureStorage.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8D07F2C10486CC7A007CD1D0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3EB30B5408787D7700729309 /* ShAlgebra.cpp in Sources */,
+				3EB30B5908787D7700729309 /* ShBackend.cpp in Sources */,
+				3EB30B5B08787D7700729309 /* ShBaseTexture.cpp in Sources */,
+				3EB30B5E08787D7700729309 /* ShBasicBlock.cpp in Sources */,
+				3EB30B6008787D7700729309 /* ShBitSet.cpp in Sources */,
+				3EB30B6208787D7700729309 /* ShBlock.cpp in Sources */,
+				3EB30B6408787D7700729309 /* ShCastManager.cpp in Sources */,
+				3EB30B6608787D7700729309 /* ShCfgBlock.cpp in Sources */,
+				3EB30B6A08787D7700729309 /* ShChannelNode.cpp in Sources */,
+				3EB30B6D08787D7700729309 /* ShConcreteCTypeOp.cpp in Sources */,
+				3EB30B7008787D7700729309 /* ShConstProp.cpp in Sources */,
+				3EB30B7108787D7700729309 /* ShContext.cpp in Sources */,
+				3EB30B7308787D7700729309 /* ShCtrlGraph.cpp in Sources */,
+				3EB30B7508787D7700729309 /* ShDataType.cpp in Sources */,
+				3EB30B7C08787D7700729309 /* ShError.cpp in Sources */,
+				3EB30B7E08787D7700729309 /* ShEval.cpp in Sources */,
+				3EB30B8108787D7700729309 /* ShEvaluate.cpp in Sources */,
+				3EB30B8308787D7700729309 /* ShException.cpp in Sources */,
+				3EB30B8508787D7700729309 /* ShFixedManipulator.cpp in Sources */,
+				3EB30B9308787D7700729309 /* ShImage3D.cpp in Sources */,
+				3EB30B9508787D7700729309 /* ShInfo.cpp in Sources */,
+				3EB30B9808787D7700729309 /* ShInstructions.cpp in Sources */,
+				3EB30B9A08787D7700729309 /* ShInternals.cpp in Sources */,
+				3EB30BB608787D7700729309 /* ShLinearAllocator.cpp in Sources */,
+				3EB30BB808787D7700729309 /* ShManipulator.cpp in Sources */,
+				3EB30BBE08787D7700729309 /* ShMemory.cpp in Sources */,
+				3EB30BC208787D7700729309 /* ShMetaForwarder.cpp in Sources */,
+				3EB30BC808787D7700729309 /* ShOperation.cpp in Sources */,
+				3EB30BCA08787D7700729309 /* ShOptimizations.cpp in Sources */,
+				3EB30BCE08787D7700729309 /* ShPaletteNode.cpp in Sources */,
+				3EB30BD008787D7700729309 /* ShParser.cpp in Sources */,
+				3EB30BD408787D7700729309 /* ShPool.cpp in Sources */,
+				3EB30BD708787D7700729309 /* ShProgram.cpp in Sources */,
+				3EB30BD908787D7700729309 /* ShProgramNode.cpp in Sources */,
+				3EB30BDB08787D7700729309 /* ShProgramSet.cpp in Sources */,
+				3EB30BDF08787D7700729309 /* ShRecord.cpp in Sources */,
+				3EB30BE308787D7700729309 /* ShSection.cpp in Sources */,
+				3EB30BE608787D7700729309 /* ShStatement.cpp in Sources */,
+				3EB30BE808787D7700729309 /* ShStorageType.cpp in Sources */,
+				3EB30BEB08787D7700729309 /* ShStream.cpp in Sources */,
+				3EB30BEE08787D7700729309 /* ShStructural.cpp in Sources */,
+				3EB30BF008787D7700729309 /* ShSwizzle.cpp in Sources */,
+				3EB30BF308787D7700729309 /* ShSyntax.cpp in Sources */,
+				3EB30BF808787D7700729309 /* ShTextureNode.cpp in Sources */,
+				3EB30BFA08787D7700729309 /* ShToken.cpp in Sources */,
+				3EB30BFC08787D7700729309 /* ShTokenizer.cpp in Sources */,
+				3EB30BFE08787D7700729309 /* ShTransformer.cpp in Sources */,
+				3EB30C0108787D7700729309 /* ShTypeConvertTransformer.cpp in Sources */,
+				3EB30C0208787D7700729309 /* ShTypeInfo.cpp in Sources */,
+				3EB30C0408787D7700729309 /* ShTypeInfoCasts.cpp in Sources */,
+				3EB30C0608787D7700729309 /* ShTypeInfoOps.cpp in Sources */,
+				3EB30C0708787D7700729309 /* ShUtility.cpp in Sources */,
+				3EB30C0908787D7700729309 /* ShValueTracking.cpp in Sources */,
+				3EB30C0A08787D7700729309 /* ShVariable.cpp in Sources */,
+				3EB30C0C08787D7700729309 /* ShVariableNode.cpp in Sources */,
+				3EB30C0E08787D7700729309 /* ShVariableType.cpp in Sources */,
+				3EB30C1008787D7700729309 /* ShVariant.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		3E3EA9D6087A1A4200A1405F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8D07F2BC0486CC7A007CD1D0 /* Sh */;
+			targetProxy = 3E3EA9D5087A1A4200A1405F /* PBXContainerItemProxy */;
+		};
+		3E3EA9D8087A1A4200A1405F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3EF90F440878A05000A31AD9 /* ArbBackend */;
+			targetProxy = 3E3EA9D7087A1A4200A1405F /* PBXContainerItemProxy */;
+		};
+		3E60CEB1087A187C0078BC55 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8D07F2BC0486CC7A007CD1D0 /* Sh */;
+			targetProxy = 3E60CEB0087A187C0078BC55 /* PBXContainerItemProxy */;
+		};
+		3E60CEB3087A187C0078BC55 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3EB30C2A08787EE200729309 /* CcBackend */;
+			targetProxy = 3E60CEB2087A187C0078BC55 /* PBXContainerItemProxy */;
+		};
+		3E60CEB5087A187C0078BC55 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3EF90F440878A05000A31AD9 /* ArbBackend */;
+			targetProxy = 3E60CEB4087A187C0078BC55 /* PBXContainerItemProxy */;
+		};
+		3E7CF7AC092C1A4C0080FDD2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3EF90F440878A05000A31AD9 /* ArbBackend */;
+			targetProxy = 3E7CF7AB092C1A4C0080FDD2 /* PBXContainerItemProxy */;
+		};
+		3E7CF812092C1E880080FDD2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8D07F2BC0486CC7A007CD1D0 /* Sh */;
+			targetProxy = 3E7CF811092C1E880080FDD2 /* PBXContainerItemProxy */;
+		};
+		3EBE9673087EC9FF00DA8A69 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8D07F2BC0486CC7A007CD1D0 /* Sh */;
+			targetProxy = 3EBE9672087EC9FF00DA8A69 /* PBXContainerItemProxy */;
+		};
+		3EF90F2408789BC700A31AD9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8D07F2BC0486CC7A007CD1D0 /* Sh */;
+			targetProxy = 3EF90F2308789BC700A31AD9 /* PBXContainerItemProxy */;
+		};
+		3EF90F2808789BD400A31AD9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8D07F2BC0486CC7A007CD1D0 /* Sh */;
+			targetProxy = 3EF90F2708789BD400A31AD9 /* PBXContainerItemProxy */;
+		};
+		3EF90F510878A0C500A31AD9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8D07F2BC0486CC7A007CD1D0 /* Sh */;
+			targetProxy = 3EF90F500878A0C500A31AD9 /* PBXContainerItemProxy */;
+		};
+		3EF9A66B099A16FD009470BA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3EBE960D087EC91B00DA8A69 /* ShUtil */;
+			targetProxy = 3EF9A66A099A16FD009470BA /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		089C1666FE841158C02AAC07 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				089C1667FE841158C02AAC07 /* English */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		3E5B9253092C3ED900D86C12 /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				DEBUGGING_SYMBOLS = YES;
+				FRAMEWORK_SEARCH_PATHS = "";
+				FRAMEWORK_VERSION = 8;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_ENABLE_TRIGRAPHS = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
+				GCC_WARN_FOUR_CHARACTER_CONSTANTS = NO;
+				GCC_WARN_UNKNOWN_PRAGMAS = NO;
+				HEADER_SEARCH_PATHS = /sw/include;
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_GROUP = admin;
+				INSTALL_MODE_FLAG = "a-w,a+rX,gu+rw";
+				INSTALL_OWNER = root;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LIBRARY_SEARCH_PATHS = /sw/lib;
+				LIBRARY_STYLE = DYNAMIC;
+				MACH_O_TYPE = mh_dylib;
+				OPTIMIZATION_CFLAGS = "-O0";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = (
+					"-framework",
+					CoreFoundation,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = Sh;
+				REZ_PREPROCESSOR_DEFINITIONS = SH_DEBUG;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+				WRAPPER_EXTENSION = framework;
+				ZERO_LINK = NO;
+			};
+			name = Development;
+		};
+		3E5B9254092C3ED900D86C12 /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				FRAMEWORK_SEARCH_PATHS = "";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_ENABLE_TRIGRAPHS = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
+				GCC_WARN_FOUR_CHARACTER_CONSTANTS = NO;
+				GCC_WARN_UNKNOWN_PRAGMAS = NO;
+				HEADER_SEARCH_PATHS = /sw/include;
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_GROUP = admin;
+				INSTALL_MODE_FLAG = "a-w,a+rX,gu+rw";
+				INSTALL_OWNER = root;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LIBRARY_SEARCH_PATHS = /sw/lib;
+				LIBRARY_STYLE = DYNAMIC;
+				MACH_O_TYPE = mh_dylib;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = (
+					"-framework",
+					CoreFoundation,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = Sh;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+				WRAPPER_EXTENSION = framework;
+				ZERO_LINK = NO;
+			};
+			name = Deployment;
+		};
+		3E5B9257092C3ED900D86C12 /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				DEBUGGING_SYMBOLS = YES;
+				FRAMEWORK_VERSION = 8;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				HEADER_SEARCH_PATHS = "";
+				INFOPLIST_FILE = "CcBackend-Info.plist";
+				INSTALL_GROUP = admin;
+				INSTALL_MODE_FLAG = "a-w,a+rX,gu+rw";
+				INSTALL_OWNER = root;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Sh/Backends";
+				LIBRARY_STYLE = BUNDLE;
+				OPTIMIZATION_CFLAGS = "-O0";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Sh,
+				);
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = libshcc;
+				REZ_PREPROCESSOR_DEFINITIONS = SH_DEBUG;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+				ZERO_LINK = NO;
+			};
+			name = Development;
+		};
+		3E5B9258092C3ED900D86C12 /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				FRAMEWORK_VERSION = 7;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				HEADER_SEARCH_PATHS = "";
+				INFOPLIST_FILE = "CcBackend-Info.plist";
+				INSTALL_GROUP = admin;
+				INSTALL_MODE_FLAG = "a-w,a+rX,gu+rw";
+				INSTALL_OWNER = root;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Sh/Backends";
+				LIBRARY_STYLE = BUNDLE;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Sh,
+				);
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = libshcc;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+				ZERO_LINK = NO;
+			};
+			name = Deployment;
+		};
+		3E5B925B092C3ED900D86C12 /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				DEBUGGING_SYMBOLS = YES;
+				FRAMEWORK_VERSION = 8;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				INFOPLIST_FILE = "ArbBackend-Info.plist";
+				INSTALL_GROUP = admin;
+				INSTALL_MODE_FLAG = "a-w,a+rX,gu+rw";
+				INSTALL_OWNER = root;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Sh/Backends";
+				LIBRARY_STYLE = BUNDLE;
+				OPTIMIZATION_CFLAGS = "-O0";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = (
+					"-framework",
+					OpenGL,
+					"-framework",
+					Sh,
+				);
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = libsharb;
+				REZ_PREPROCESSOR_DEFINITIONS = SH_DEBUG;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+				ZERO_LINK = NO;
+			};
+			name = Development;
+		};
+		3E5B925C092C3ED900D86C12 /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				INFOPLIST_FILE = "ArbBackend-Info.plist";
+				INSTALL_GROUP = admin;
+				INSTALL_MODE_FLAG = "a-w,a+rX,gu+rw";
+				INSTALL_OWNER = root;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Sh/Backends";
+				LIBRARY_STYLE = BUNDLE;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = (
+					"-framework",
+					OpenGL,
+					"-framework",
+					Sh,
+				);
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = libsharb;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+				ZERO_LINK = NO;
+			};
+			name = Deployment;
+		};
+		3E5B925F092C3ED900D86C12 /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				DEBUGGING_SYMBOLS = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				INFOPLIST_FILE = "GlutExample-Info.plist";
+				INSTALL_GROUP = admin;
+				INSTALL_MODE_FLAG = "a-w,a+rX,gu+rw";
+				INSTALL_OWNER = root;
+				INSTALL_PATH = "$(LOCAL_APPS_DIR)/Sh Examples";
+				LIBRARY_STYLE = BUNDLE;
+				OPTIMIZATION_CFLAGS = "-O0";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Sh,
+					"-framework",
+					OpenGL,
+					"-framework",
+					GLUT,
+					"-lobjc",
+				);
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = GlutExample;
+				REZ_PREPROCESSOR_DEFINITIONS = SH_DEBUG;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+				ZERO_LINK = NO;
+			};
+			name = Development;
+		};
+		3E5B9260092C3ED900D86C12 /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				INFOPLIST_FILE = "GlutExample-Info.plist";
+				INSTALL_GROUP = admin;
+				INSTALL_MODE_FLAG = "a-w,a+rX,gu+rw";
+				INSTALL_OWNER = root;
+				INSTALL_PATH = "$(LOCAL_APPS_DIR)/Sh Examples";
+				LIBRARY_STYLE = BUNDLE;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Sh,
+					"-framework",
+					OpenGL,
+					"-framework",
+					GLUT,
+					"-lobjc",
+				);
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = GlutExample;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+				ZERO_LINK = NO;
+			};
+			name = Deployment;
+		};
+		3E5B9263092C3ED900D86C12 /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				DEBUGGING_SYMBOLS = YES;
+				FRAMEWORK_VERSION = 8;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				INFOPLIST_FILE = "Particles-Info.plist";
+				INSTALL_GROUP = admin;
+				INSTALL_MODE_FLAG = "a-w,a+rX,gu+rw";
+				INSTALL_OWNER = root;
+				INSTALL_PATH = "$(LOCAL_APPS_DIR)/Sh Examples";
+				OPTIMIZATION_CFLAGS = "-O0";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = (
+					"-framework",
+					CoreFoundation,
+					"-framework",
+					OpenGL,
+					"-framework",
+					GLUT,
+					"-framework",
+					Sh,
+					"-lobjc",
+				);
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = Particles;
+				REZ_PREPROCESSOR_DEFINITIONS = SH_DEBUG;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+				ZERO_LINK = NO;
+			};
+			name = Development;
+		};
+		3E5B9264092C3ED900D86C12 /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				FRAMEWORK_VERSION = 7;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				INFOPLIST_FILE = "Particles-Info.plist";
+				INSTALL_GROUP = admin;
+				INSTALL_MODE_FLAG = "a-w,a+rX,gu+rw";
+				INSTALL_OWNER = root;
+				INSTALL_PATH = "$(LOCAL_APPS_DIR)/Sh Examples";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = (
+					"-framework",
+					CoreFoundation,
+					"-framework",
+					OpenGL,
+					"-framework",
+					GLUT,
+					"-framework",
+					Sh,
+					"-lobjc",
+				);
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = Particles;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+				ZERO_LINK = NO;
+			};
+			name = Deployment;
+		};
+		3E5B9267092C3ED900D86C12 /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				DEBUGGING_SYMBOLS = YES;
+				FRAMEWORK_VERSION = 8;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				INFOPLIST_FILE = "TexturesExample-Info.plist";
+				INSTALL_GROUP = admin;
+				INSTALL_MODE_FLAG = "a-w,a+rX,gu+rw";
+				INSTALL_OWNER = root;
+				INSTALL_PATH = "$(LOCAL_APPS_DIR)/Sh Examples";
+				OPTIMIZATION_CFLAGS = "-O0";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = (
+					"-framework",
+					CoreFoundation,
+					"-framework",
+					OpenGL,
+					"-framework",
+					GLUT,
+					"-framework",
+					Sh,
+					"-framework",
+					ShUtil,
+					"-lobjc",
+				);
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = TexturesExample;
+				REZ_PREPROCESSOR_DEFINITIONS = SH_DEBUG;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+				ZERO_LINK = NO;
+			};
+			name = Development;
+		};
+		3E5B9268092C3ED900D86C12 /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				FRAMEWORK_VERSION = 7;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				INFOPLIST_FILE = "TexturesExample-Info.plist";
+				INSTALL_GROUP = admin;
+				INSTALL_MODE_FLAG = "a-w,a+rX,gu+rw";
+				INSTALL_OWNER = root;
+				INSTALL_PATH = "$(LOCAL_APPS_DIR)/Sh Examples";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = (
+					"-framework",
+					CoreFoundation,
+					"-framework",
+					OpenGL,
+					"-framework",
+					GLUT,
+					"-framework",
+					Sh,
+					"-framework",
+					ShUtil,
+					"-lobjc",
+				);
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = TexturesExample;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+				ZERO_LINK = NO;
+			};
+			name = Deployment;
+		};
+		3E5B926B092C3ED900D86C12 /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				DEBUGGING_SYMBOLS = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = 8;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				HEADER_SEARCH_PATHS = /sw/include;
+				INFOPLIST_FILE = "ShUtil-Info.plist";
+				INSTALL_GROUP = admin;
+				INSTALL_MODE_FLAG = "a-w,a+rX,gu+rw";
+				INSTALL_OWNER = root;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LIBRARY_SEARCH_PATHS = /sw/lib;
+				LIBRARY_STYLE = DYNAMIC;
+				MACH_O_TYPE = mh_dylib;
+				OPTIMIZATION_CFLAGS = "-O0";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Sh,
+					"-lpng",
+				);
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ShUtil;
+				REZ_PREPROCESSOR_DEFINITIONS = SH_DEBUG;
+				SECTORDER_FLAGS = "";
+				USER_HEADER_SEARCH_PATHS = "";
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+				ZERO_LINK = NO;
+			};
+			name = Development;
+		};
+		3E5B926C092C3ED900D86C12 /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = 7;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				HEADER_SEARCH_PATHS = /sw/include;
+				INFOPLIST_FILE = "ShUtil-Info.plist";
+				INSTALL_GROUP = admin;
+				INSTALL_MODE_FLAG = "a-w,a+rX,gu+rw";
+				INSTALL_OWNER = root;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LIBRARY_SEARCH_PATHS = /sw/lib;
+				LIBRARY_STYLE = DYNAMIC;
+				MACH_O_TYPE = mh_dylib;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Sh,
+					"-lpng",
+				);
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ShUtil;
+				SECTORDER_FLAGS = "";
+				USER_HEADER_SEARCH_PATHS = "";
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+				ZERO_LINK = NO;
+			};
+			name = Deployment;
+		};
+		3E5B926F092C3ED900D86C12 /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				DEBUGGING_SYMBOLS = YES;
+				FRAMEWORK_VERSION = 8;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				INFOPLIST_FILE = "GlslBackend-Info.plist";
+				INSTALL_GROUP = admin;
+				INSTALL_MODE_FLAG = "a-w,a+rX,gu+rw";
+				INSTALL_OWNER = root;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Sh/Backends";
+				LIBRARY_STYLE = BUNDLE;
+				OPTIMIZATION_CFLAGS = "-O0";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = (
+					"-framework",
+					OpenGL,
+					"-framework",
+					Sh,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = libshglsl;
+				REZ_PREPROCESSOR_DEFINITIONS = SH_DEBUG;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+				ZERO_LINK = NO;
+			};
+			name = Development;
+		};
+		3E5B9270092C3ED900D86C12 /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G4;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				INFOPLIST_FILE = "GlslBackend-Info.plist";
+				INSTALL_GROUP = admin;
+				INSTALL_MODE_FLAG = "a-w,a+rX,gu+rw";
+				INSTALL_OWNER = root;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Sh/Backends";
+				LIBRARY_STYLE = BUNDLE;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = (
+					"-framework",
+					OpenGL,
+					"-framework",
+					Sh,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = libshglsl;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+				ZERO_LINK = NO;
+			};
+			name = Deployment;
+		};
+		3E5B9273092C3ED900D86C12 /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DYLIB_COMPATIBILITY_VERSION = 0.8.0;
+				DYLIB_CURRENT_VERSION = 0.8.0;
+				FRAMEWORK_VERSION = 8;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = SH_DEBUG;
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-fvisibility=default",
+				);
+				PREBINDING = NO;
+			};
+			name = Development;
+		};
+		3E5B9274092C3ED900D86C12 /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DYLIB_COMPATIBILITY_VERSION = 0.8.0;
+				DYLIB_CURRENT_VERSION = 0.8.0;
+				FRAMEWORK_VERSION = 8;
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-fvisibility=default",
+				);
+			};
+			name = Deployment;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		3E5B9252092C3ED900D86C12 /* Build configuration list for PBXNativeTarget "Sh" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3E5B9253092C3ED900D86C12 /* Development */,
+				3E5B9254092C3ED900D86C12 /* Deployment */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Development;
+		};
+		3E5B9256092C3ED900D86C12 /* Build configuration list for PBXNativeTarget "CcBackend" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3E5B9257092C3ED900D86C12 /* Development */,
+				3E5B9258092C3ED900D86C12 /* Deployment */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Development;
+		};
+		3E5B925A092C3ED900D86C12 /* Build configuration list for PBXNativeTarget "ArbBackend" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3E5B925B092C3ED900D86C12 /* Development */,
+				3E5B925C092C3ED900D86C12 /* Deployment */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Development;
+		};
+		3E5B925E092C3ED900D86C12 /* Build configuration list for PBXNativeTarget "GlutExample" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3E5B925F092C3ED900D86C12 /* Development */,
+				3E5B9260092C3ED900D86C12 /* Deployment */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Development;
+		};
+		3E5B9262092C3ED900D86C12 /* Build configuration list for PBXNativeTarget "Particles" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3E5B9263092C3ED900D86C12 /* Development */,
+				3E5B9264092C3ED900D86C12 /* Deployment */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Development;
+		};
+		3E5B9266092C3ED900D86C12 /* Build configuration list for PBXNativeTarget "TexturesExample" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3E5B9267092C3ED900D86C12 /* Development */,
+				3E5B9268092C3ED900D86C12 /* Deployment */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Development;
+		};
+		3E5B926A092C3ED900D86C12 /* Build configuration list for PBXNativeTarget "ShUtil" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3E5B926B092C3ED900D86C12 /* Development */,
+				3E5B926C092C3ED900D86C12 /* Deployment */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Development;
+		};
+		3E5B926E092C3ED900D86C12 /* Build configuration list for PBXNativeTarget "GlslBackend" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3E5B926F092C3ED900D86C12 /* Development */,
+				3E5B9270092C3ED900D86C12 /* Deployment */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Development;
+		};
+		3E5B9272092C3ED900D86C12 /* Build configuration list for PBXProject "Sh" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3E5B9273092C3ED900D86C12 /* Development */,
+				3E5B9274092C3ED900D86C12 /* Deployment */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Development;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 0867D690FE84028FC02AAC07 /* Project object */;
+}

@@ -42,6 +42,7 @@ Here's what you might put in your ~/.emacs:
    '(c-offsets-alist (quote ((innamespace . 0))))
   )
 
+  (setq-default indent-tabs-mode nil)
   (setq-default cc-other-file-alist '(
                           ("Impl\\.hpp$" (".hpp"))
                           ("\\.cpp$" (".hpp" ".h"))

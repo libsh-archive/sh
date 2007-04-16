@@ -1,3 +1,242 @@
+2007-04-14 Bryan Chan <b8chan@cgl.uwaterloo.ca>
+	Merged trunk in up to r3920
+
+	(Commented out some of the AA texture/branch handling for now
+	since changes to CFG/textures breaks things) 
+
+	* src/sh/Manipulator.hpp, ManipulatorImpl.hpp, Maniplator.cpp,
+	FixedManipulator.cpp :
+	Fixed offsets for changes to Program input binding specs in trunk. 
+
+	* src/sh/Algebra.hpp, Algebra.cpp, Program.hpp:
+	Using const refs to Programs should be safe.
+	Factored some of the binding spec mess into functions in Program 
+	Fixed some bugs in algebra. 
+
+	* src/sh/Optimizations.cpp:
+	Fixed an issue with keeping decls when deleting empty nodes 
+
+	* src/sh/ProgramNode.hpp, ProgramNode.cpp:
+	Added in some snippets to clean dead decls.
+
+	* src/sh/CtrlGraph.hpp, CtrlGraph.cpp:
+	Fixed split to append to the right place (not back into the same
+	list we're currently reading from...). 
+	Moved clear_marked to better location. 
+
+	* src/sh/Hacks.hpp, Hacks.cpp:
+	Munged something together so bound input uniforms will work on shaders. 
+ 
+2006-10-21  Hans-Friedrich Pabst  <hfp@users.sf.net>
+
+	* VS7.1/8.0 (VERSION: 7/8) project files and install scripts
+	updated; structure of the install folder:
+	include\sh
+	include\shutil
+	bin\vcVERSION
+	lib\vcVERSION
+
+2006-10-21  Hans-Friedrich Pabst  <hfp@users.sf.net>
+
+	Merges from branch 0.8:
+
+	* backends/gl/GlBackend.cpp: Disable the throwing exception
+	while getting the gl extension functions.
+	This is mean to solve the issue 230.
+
+	* backends/gl/GlslEmit.cpp: Added support for
+	SH_OP_TEXBIAS in the glsl backend.
+	* Added support for shadow2D() function in GLSL.
+	Added output of comments to the IR dumping.
+
+	* backends/gl/GlslVariable.hpp/cpp: In GLSL, shadow textures
+	now generate shadow samplers.
+
+2006-09-08  Hans-Friedrich Pabst  <hfp@users.sf.net>
+
+	* backends/gl/GlslSet.cpp: SH_DEBUG_GLSL_BACKEND disabled;
+	option was defined per file level. Its very slow, it should
+	not be enabled in release code.
+
+2006-05-15  Stefanus Du Toit  <sdt@rapidmind.net>
+
+	* src/sh/CtrlGraph.hpp: Fix return type of successors_size(). Add
+	const iterators.
+
+2006-05-01  Filip Spacek  <filip@rapidmind.net>
+
+	* src/sh/Fraction.hpp: Add extra conversions for 'fb' type.
+
+2006-04-30  Stefanus Du Toit  <sdt@rapidmind.net>
+
+	* src/sh/ShLibGeometry.hpp, ShLibGeometryImpl.hpp: Fix refract_tir, add 
+	a prototype declaration for it in the non-implementation header, and 
+	use it for refract().
+
+2006-04-28  Hans-Friedrich Pabst  <hfp@users.sf.net>
+
+	* Array.hpp: Compile error with VC7.1 fixed. Base class definitions
+	must be included (TextureTraits, BaseTextureND) they can't be
+	forward-declared. Compilation tested with gcc, VC71, VC80.
+	Need struct ArrayTraits to be marked with SH_DLLEXPORT?
+
+2006-04-28  Stefanus Du Toit  <sdt@rapidmind.net>
+
+	* backends/gl/ArbCode.hpp, ArbCode.cpp: Indent arb backend code 
+	to make it easier to read/debug.
+
+2006-04-26  Hans-Friedrich Pabst  <hfp@users.sf.net>
+
+	* backends/gl/GlslVariable.cpp: Support non-trivial opengl.state
+	'depth.range'.
+
+	* backends/gl/GlslVariable.hpp: Make ArbToGlslEntry::from and
+	ArbToGlslEntry::to const.
+
+2006-04-21  Hans-Friedrich Pabst  <hfp@users.sf.net>
+
+	* Array.hpp: Array1D<T> using BaseTexture1D<T>::operator[];
+	Avoid hiding of BaseTexture1D<T>::operator[]'s with
+	Array1D<T>::operator[]'s.
+
+2006-04-07  Andrew Lauritzen  <atlaurit@rapidmind.net>
+
+	* backends/gl/GlslVariable.cpp, GlslVariable.hpp, GlslVariableMap.cpp, 
+	GlslVariableMap.hpp: Support state metadata in the GLSL backend. The 
+	metadata is converted from the ARB_fragment_program metadata where 
+	possible (basically everywhere except some obscure cases like light 
+	attenuations, etc. where there is not anobvious mapping between the 
+	data that GLSL provides and that of ARB).
+
+	* backends/gl/GlTextures.cpp: Fixed an issue wherein Sh was recreating 
+	all GL storages for mip levels every time a texture was bound.
+	Avoid updating texture parameters if they have not changed.
+
+2006-04-06  Andrew Lauritzen  <atlaurit@rapidmind.net>
+
+	* backends/gl/GlslCode.cpp, GlslCode.hpp, GlslEmit.cpp: Support for 
+	TEXD in glsl.  On NVIDIA, it uses the Cg function.  On ATI, it uses the
+	GL_ATI_shader_texture_lod extension.
+	Fixed maximum texture unit query.
+	
+	* backends/gl/GlslCode.cpp, GlslCode.hpp: Add single vendor query as 
+	well as a single extensions mechanism.
+
+	* examples/textures/main.cpp: Cleanups.
+
+2006-04-06  Francois Marier  <francois@rapidmind.net>
+
+	* src/sh/ShBackend.cpp, ShContext.cpp: Add binary relocation support
+	on Linux (necessary for autopackage).
+
+2006-04-06  Filip Spacek  <filip@rapidmind.net>
+
+	* backends/gl/GlTextures.cpp: Handle the case where mipmaps are
+	added after the main texture is bound.
+
+2006-04-05  Filip Spacek  <filip@rapidmind.net>
+
+	* src/sh/ShChannel.hpp: Add convenience method so that users don't
+	need to use ShMemory directly.
+
+2006-04-05  Filip Spacek  <filip@rapidmind.net>
+
+	* src/sh/ShChannelNode.hpp: Make stride and offset simple ints
+	rather than uniforms.
+
+2006-04-05  Filip Spacek  <filip@rapidmind.net>
+
+	* backends/gl/GlTextures.cpp: Fix binding of mipmapped cube maps.
+
+2006-04-04  Filip Spacek  <filip@rapidmind.net>
+
+	* backends/gl/GlTextures.cpp: Sync mipmap storages after the main storage.
+	Force RGBA textures as render targets when using NV_float_buffer extension.
+
+2006-03-30  Francois Marier  <francois@serioushack.com>
+
+	* src/sh/ShStatement.hpp, ShStatement.cpp: Add a new constructor with 
+	two source parameters for consistency.
+
+2006-03-29  Filip Spacek  <filip@rapidmind.net>
+
+	* backends/gl/GlslEmit.cpp: Discard fragments if any component is > 0 
+	rather than != 0.
+
+2006-03-27  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslVariableMap.cpp, GlslVariableMap.hpp: Fix
+	allocation of user-specified semantic indices by adding an extra
+	pass at the beginning.
+
+	* backends/gl/ArbCode.cpp, ArbCode.hpp: Add support for the
+	semantic_index metadata.
+
+2006-03-24  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslVariableMap.hpp, GlslVariable.cpp: Honour the
+	semantic index specified by the user through the
+	opengl:semantic_index metadata.
+
+2006-03-22  Kuo-Yu Tong  <k3tong@serioushack.com>
+
+	* src/sh/ShLibArith.hpp, ShLibArithImpl.hpp, ShLibClampImpl.hpp,
+	ShInstructions.cpp: Add a few overloaded versions of mad to get smoothstep
+	to compile with 1-tuples.
+
+2006-03-06  Stefanus Du Toit  <sdt@serioushack.com>
+
+	* backends/gl/GlTextureStorage.cpp: Use correct count when transfering
+	textures.
+
+2006-03-05  Stefanus Du Toit  <sdt@serioushack.com>
+
+	* src/sh/ShTransformer.hpp, src/sh/ShTransformer.cpp: Add
+	transformers to order swizzles on destinations and remove
+	writemasks.
+
+	* Fix Windows compilation breakage due to recent stride/offset changes.
+
+2006-03-04  Barold  <barold@serioushack.com>
+
+	* src/sh/ShLinearAllocator.hpp: Linear Allocator can now be used
+	to uniquely identify overlapping ranges on arbitrary types (not
+	just ShVariableNodes.)
+
+	* src/sh/ShLinearAllocator.cpp: Removed and inlined into new
+	template class in the hpp.
+
+2006-03-02  Filip Spacek  <filip@serioushack.com>
+
+	* backends/gl/FBOCache.cpp FBOCache.hpp FBOStreams.cpp GlBackend.cpp
+	GlTextureStorage.cpp GlTextureStorage.hpp GlTextures.cpp Makefile.am
+	PBufferStreams.cpp Utils.cpp Utils.hpp src/sh/ShChannel.hpp
+	src/sh/ShChannelImpl.hpp ShChannelNode.cpp ShChannelNode.hpp
+	ShMemory.hpp ShProgramNode.cpp ShProgramNode.hpp ShTransformer.cpp
+	win32/vc7/ShArbBackend.vcproj ShGlslBackend.vcproj
+	win32/vc8/ShArbBackend.vcproj ShGlslBackend.vcproj: First version of
+	offset/stride support. No destination offset/stride yet,
+	no support for RECT textures (old nv cards), breakage likely.
+
+2006-02-27  Stefanus Du Toit  <sdt@serioushack.com>
+
+	* examples/glut/main.cpp: Glut example destroys its programs at
+	program end.
+
+	* src/sh/ShBackend.cpp: On Windows, release backends won't get loaded.
+	This can otherwise cause trouble because the CRTs will be different.
+
+2006-02-24  Andrew Lauritzen  <atlaurit@serioushack.com>
+
+	* src/sh/ShStructural.cpp, ShStructural.hpp: Fixed an bug with
+	references to various bits of Sh data living on in a static member of
+	an internal Sh function.
+
+2006-02-22  Stefanus Du Toit  <sdt@serioushack.com>
+
+	* src/sh/ShTransformer.cpp, ShTransformer.hpp: Add DIV->RCP/MUL
+	transfomer.
+
 2006-02-22  Bryan Chan <b8chan@cgl.uwaterloo.ca>
 	* src/ShAaSymPlacer.hpp, ShAaSymPlacer.cpp:
 	Added in detection and condensation of unique symbols
@@ -48,6 +287,1521 @@
 
 	* src/ShMeta.hpp, ShMetaImpl.hpp:
 	Merged in operator= fix from trunk.
+	
+2006-02-21  Filip Spacek  <filip@serioushack.com>
+
+	* backends/gl/ArbBackend.cpp FBOCache.cpp GlBackend.cpp
+	GlTextureStorage.cpp GlTextureStorage.hpp GlslBackend.cpp: Register
+	transfer functions during initialization. Enable FBOs on both arb and
+	glsl backends.
+
+2006-02-20  Stefanus Du Toit  <sdt@serioushack.com>
+
+	* src/sh/ShChannel.hpp, ShChannelImpl.hpp, ShChannelNode.cpp
+	ShChannelNode.hpp: Allow changing the count of a channel without
+	changing its memory.
+
+	* src/sh/ShMemory.cpp, ShMemory.hpp: Allow setting memory alignment in
+	host storage.
+
+	* src/sh/ShOptimizations.cpp, ShSwizzle.hpp, ShSwizzleImpl.hpp: Allow
+	comparing swizzles. Do not forward substitute type conversions.
+
+	* src/sh/ShTypeConvertTransformer.cpp: Allow preserve_casts in
+	typeconverttransformer.
+
+	* src/sh/ShLib.hpp, ShLibBooleanImpl.hpp: Statically cast a few
+	things to avoid compiler warnings on some platforms.
+
+	* src/sh/ShTransformer.cpp: Implement expand_normalize() and
+	reciprocate_sqrt() transformers.
+
+	* src/sh/ShTransformer.hpp: Add expand_normalize() and
+	reciprocate_sqrt() transformers.
+
+2006-02-15  Filip Spacek  <filip@serioushack.com>
+
+	* backends/gl/GlTextureStorage.cpp: Implement OpenGL to host
+	transfer using glReadPixels
+
+	* backends/gl/FBOCache.cpp: Cache framebuffer objects between
+	stream executions.
+
+	* test/regress/test.hpp: Sync the storage before reading the results.
+
+2006-02-13  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslBackend.cpp, ArbBackend.cpp: Remove the
+	calls to new and delete in DLLMain, it's now handled by
+	instantiate_backend.
+
+2006-02-10  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlBackend.cpp (GlBackend): Prevent double
+	registration of the GlBackend DLL.
+
+2006-02-09  Filip Spacek  <filip@serioushack.com>
+
+	* backends/gl/FBOStreams.cpp: Frame Buffer Object streams
+	implementation.
+
+	* backends/gl/GlTextureStorage.cpp: Write flag for double
+	buffering and GlTexture to Host transfer class.
+
+	* backends/gl/GlTextures.cpp (bindTexture): Add support to bind
+	textures for writing (FBOs).
+
+	* src/sh/ShMemory.hpp: Add a freeze flag to ShMemory.
+
+2006-02-09  Francois Marier  <francois@serioushack.com>
+
+	* src/sh/ShSyntax.hpp: Add extra brackets to SH_BEGIN and SH_END
+	to prevent compilation when SH_END is missing (issue290).
+
+	* backends/cc/Cc.cpp (allocate_outputs): Initialize outputs to
+	zero in order to be consistent with GPU backends.
+
+	* backends/gl/GlslEmit.cpp, ArbEmit.cpp: Remove the ATI hacks for
+	DIV and MOD.  Tweak the unit tests instead.
+
+	* backends/gl/ArbCode.cpp (ArbCode): Fix the ATI_draw_buffers code
+	for ATI on Linux.
+
+2006-02-08  Francois Marier  <francois@serioushack.com>
+
+	* src/sh/ShBackend.cpp (load_all_backends): Fix an exception
+	thrown when SH_BACKEND_DIR is not set and no backend has been
+	specified.
+
+	* backends/gl/ArbCode.cpp (print): The option to output in the
+	shader should be ARB_draw_buffers if ATI_draw_buffers is not
+	defined.
+
+	* backends/cc/Cc.cpp (load_shader_func): Must compile the programs
+	with -fPIC to work on 64-bit machines.
+
+	* src/sh/ShTextureNode.cpp (initialize_memories): Improve the size
+	check for mipmapped textures and make it a runtime error instead
+	of an assertion.  Move that check to build_mipmaps since textures
+	filtering might be set incorrectly the first time the memory is
+	initialized.
+
+2006-02-08  Stefanus Du Toit  <sdt@serioushack.com>
+
+	* src/sh/ShSwizzleImpl.hpp: Check for __BIG_ENDIAN__ define.
+	
+	* src/sh/ShArray.hpp: Remove cyclic reference on BaseTexture.hpp.
+	
+	* src/sh/ShBackend.cpp: If an environment variable SH_BACKEND_DIR
+	is set on OS X or Linux, use it (and only it) to search for
+	backends. This is useful for IDEs. Should probably be done on
+	Windows as well.
+	
+2006-02-07  Francois Marier  <francois@serioushack.com>
+
+	* src/sh/ShAttribImpl.hpp, ShAttrib.hpp (ShAttrib): Make the
+	constructor take a const array (issue283).
+
+2006-02-07  Filip Spacek  <filip@serioushack.com>
+
+	* src/sh/ShVariableNode.cpp, ShVariableNode.hpp: Delete variable
+	nodes allocated using the global operator new
+
+2006-02-07  Andrew Lauritzen  <atlaurit@serioushack.com>
+
+	* backends/gl/GlslSet.cpp, GlslSet.hpp, GlBackend.hpp,
+	GlBackend.cpp: Changed GLSL backend sets to always bind, and query
+	the GL state to determine whether to unbind. This is
+	necessary for multi-GL-context situations.
+	
+2006-02-02  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslEmit.cpp, src/sh/ShTransformer.cpp
+	(allocate_constant): Fix memory leak.
+
+2006-02-01  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslEmit.cpp, GlslCode.hpp (emit_logic): Fix the
+	destination cast.
+	(emit_log): Work-around for log(1) != 0 on ATI.
+	(emit_ati_workaround): Work-around for DIV and MOD on ATI.
+
+2006-01-31  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslEmit.cpp, GlslCode.cpp: Remove the table lookup
+	caching code to work around gcc crashes with ATI on Linux.
+
+2006-01-31  Filip Spacek  <filip@serioushack.com>
+
+	* src/sh/ShOptimizations.cpp: Add a simple pass to reorder
+	statements in order to reduce the number of live variables at any
+	time.
+
+2006-01-30  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlTextures.cpp: Check for errors when getting the
+	list of GL_EXTENSIONS and display a warning.
+
+2006-01-30  Stefanus Du Toit  <sdt@serioushack.com>
+
+	* src/ShMeta.hpp, src/ShMetaImpl.hpp, src/ShMetaForwarder.hpp,
+	src/ShMetaForwarder.cpp: Allow iterating through meta data with
+	begin_meta and end_meta functions.
+
+2006-01-28  Andrew Lauritzen  <atlaurit@serioushack.com>
+	
+	* backends/gl/GlslEmit.cpp: Cast GLSL logical operations (<, >,
+	==, etc) to statement destination types (ex. float). This resolves
+	issue279, where not having this case would cause the shader to
+	fail to compile.
+	Fixed discard on ATI cards. (Needs to cast operand of bool/bvec
+	and use "any" on vector operands).
+	
+2006-01-27  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/ArbEmit.cpp, ArbCode.hpp (emit_div): Add a hack for
+	fixing division by the same number on ATI.
+	(real_div): refactor the code to remove this function
+
+2006-01-19  Stefanus Du Toit  <sdt@serioushack.com>
+
+	* src/ShOptimizations.cpp: Don't mark variables with decls
+	outside this programs as live because decls are currently
+	broken. Luckily, they're not really necessary.
+
+	* src/ArbCode.cpp: Remove unnecessary TODO. NVVP and NVFP are
+	different things entirely.
+
+2006-01-19  Barold Genova  <barold@serioushack.com>
+
+	* configure.ac: Add configure check for zlib, which libpng
+	depends on.  This fixes the case where libpng and zlib are
+	both static libraries and the linker is not aware of the
+	dependency.
+
+2006-01-18  Stefanus Du Toit  <sdt@serioushack.com>
+
+	* src/ShVariantImpl.hpp (encodeArray): Use "," since the purpose
+	of encodeArray is to provide C-style array declarations.
+	
+	* backends/gl/WGLPBufferContext.hpp: Prefer ATI extensions for
+	floating point buffers.
+	
+2006-01-16  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslEmit.cpp (emit_texture): Apply the right swizzle
+	if the destination size doesn't match the texture size.
+
+2006-01-12  Francois Marier  <francois@serioushack.com>
+
+	* src/ShLibGeometryImpl.hpp (reflect): Actually normalize b as
+	mentioned in the book.
+
+2006-01-10  Francois Marier  <francois@serioushack.com>
+
+	* src/ShBackend.cpp, ShBackend.hpp, backends/cc/Cc.hpp, Cc.cpp,
+	backends/gl/ArbBackend.cpp, GlslBackend.cpp, GlBackend.cpp,
+	GlBackend.hpp: Turn name() and version() into non-virtual
+	functions which return the contents of member variables set by the
+	backend constructors.  
+
+	* src/ShBackend.cpp (~ShBackend): Add assertions to make sure the
+	backend name is valid and exists in the map.
+
+2006-01-06  Barold Genova  <barold@serioushack.com>
+
+	* src/ShBackend*: Add new LibraryInformation class that
+	stores the backend handle and entry points.  This allows the
+	use of statically linked backends.
+
+	* src/ShSyntax*: Add new shRegisterBackend to allow using
+	backends that are not dynamically loaded.
+
+	* src/ShSwizzleImpl.hpp: Use __PPC__ as big endian flag
+	instead of __APPLE__.
+
+2006-01-04  Francois Marier  <francois@serioushack.com>
+
+	* src/ShVariantImpl.hpp: Use semicolons instead of commas as the
+	separator for array initialization.  This avoids a problem with
+	the stringstream constructor in VS2005.
+	
+	* backends/gl/GlslVariable.cpp (GlslVariable): Replace semicolons
+	with commas since the behaviour of encodeArray() changed.
+
+2005-12-12  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslEmit.cpp (emit_cond): Check the GL_VENDOR safely
+	and ignore it if it returns a NULL string.
+
+2005-11-30  Stefanus Du Toit  <sdt@serioushack.com>
+
+	* src/ShGeneric*: Undo Hans's change from 2005-11-29 as it
+	breaks a few things. This is done with the intention on
+	adding it back and fixing those things properly in 0.9.
+
+2005-11-30  Francois Marier  <francois@serioushack.com>
+
+	* src/ShLibMiscImpl.hpp (poly, sort): Avoid using ShGeneric as a
+	temporary variable.  This fixes the 'poly' unit test.
+
+2005-11-29  Hans-Friedrich Pabst  <hfp@users.sf.net>
+
+	* src/ShGeneric*: The C++ Standard says that a templated
+	copy c'tor will be never instanciated for the class type itself.
+	Example: You need to provide ShGeneric(const ShGeneric& other)
+	also if you have already implemented an conversion copy c'tor:
+	template<typename T2> ShGeneric(const ShGeneric<N, T2>& other).
+
+	Before the fix: A copy construction of a ShGeneric (without
+	conversion) slices the other ShGeneric down to a ShVariable.
+
+	ShGeneric provides a copy c'tor now.
+
+2005-11-21  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/ArbCode.cpp (updateUniform): Only display the
+	warning once.
+
+	* src/, backends/gl, backends/cc: Convert most ShPointer
+	parameters to const references to ShPointer (thanks to pmr for the
+	patch)
+
+2005-11-20  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShTexData.hpp, src/ShTexDataImpl.hpp, src/ShAttrib.hp,
+	src/ShBaseTexture.hpp: Avoid circular inclusion of Impl files.
+	* xcode: Update to Xcode 2.2, many many fixes.
+	* backends/gl: Several small fixes for Apple OS X build.
+
+2005-11-20  Hans-Friedrich Pabst  <hfp@users.sf.net>
+
+	* src: Some tiny problems (compile warnings) avoided.
+	Assignment operator could not be generated.
+	Base-from-member initialization problem.
+
+	* src/ShStructural.cpp: Add range check before iterator
+	decrement (remove duplicate successors; make succs unique).
+
+	* backends/gl: Some tiny problems (compile warnings) avoided.
+	Assignment operator could not be generated.
+	Some bit-ops (unsigned int) forced to bool.
+
+	* src/ShStructural.hpp: Public nested classes (CfgMatch)
+	needs (different heaps) to be exported (SH_DLLEXPORT).
+
+2005-11-19  Hans-Friedrich Pabst  <hfp@users.sf.net>
+
+	* src: Some conditions (preprocessor) are modified to allow
+	new targets (platform/compiler).
+
+2005-11-18  Francois Marier  <francois@serioushack.com>
+
+	* src/ShProgramNode.cpp (compile): Add a check for empty
+	ShProgram and return an error.
+
+2005-11-18  Hans-Friedrich Pabst  <hfp@users.sf.net>
+
+	* src/ShStructural.cpp: C'tor (make preds unique) Decrementing an
+	iterator needs some check against the begin of the range.
+
+	* src/ShLinearAllocator.cpp (allocate): multiset requires strict
+	weak ordering; LifeToken (operator<): if (a<b) -> !(b<a).
+
+2005-11-17  Hans-Friedrich Pabst  <hfp@users.sf.net>
+
+	* Boost Build System V2 (www.boost.org/tools/build/v2/index.html)
+	added (how to build instructions coming soon).
+
+2005-11-09  Hans-Friedrich Pabst  <hfp@users.sf.net>
+
+	* backends/gl/GlBackend.cpp: glUniform[X]fvARB/glUniform[X]ivARB
+	Match definitions as declared in GlBackend.hpp (Win32 only, VC8).
+
+2005-11-08  Francois Marier  <francois@serioushack.com>
+
+	* src/ShBaseTextureImpl.hpp, ShBaseTexture.hpp: operator() and
+	operator[] now return ShTexData objects.  This adds a level of
+	indirection which will allow for immediate mode texture
+	assignments later.
+
+2005-11-06  Andrew Lauritzen  <atlaurit@student.cs.uwaterloo.ca>
+
+	* backends/gl/: Several optimizations to uniform update,
+	specifically in GLSL.
+	
+	* backends/gl/GlslCode.cpp: Uniform update now correctly
+	handles non-"float" floating point types (like double and half)
+	and non-"int" integer types.
+	
+	* src/ShContext.*: Moved a few things to inline functions for
+	performance reasons.
+
+2005-11-04  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/ArbCode.cpp (genStructNode): Keep track of the node
+	that continue jumps to in order to close the if block at the right
+	time.
+
+	* backends/gl/GlslCode.cpp (gen_structural_node): Keep track of
+	the node that continue jumps to in order to close the if block at
+	the right time.
+
+2005-11-03  Francois Marier  <francois@serioushack.com>
+
+	* src/ShStructural.cpp (ShStructural): Detect and create PROPINT
+	nodes (multi-exit loops).
+	Fix bugs in removing duplicate successors and predescessors.
+
+	* src/ShStructural.hpp: Add the PROPINT type.
+
+	* backends/gl/GlslCode.cpp (gen_structural_node): Generate code
+	for PROPINT nodes.
+
+	* backends/gl/ArbCode.cpp (genStructNode): Generate code for
+	PROPINT nodes.
+	Refactor 'if' and 'break' statements into push_if() and
+	push_break().
+	Handle the invert member in 'if' instructions.
+
+	* backends/gl/ArbCode.hpp: Add push_break() and push_if().
+
+2005-10-31  Andrew Lauritzen  <atlaurit@student.cs.uwaterloo.ca>
+        
+	* backends/gl/ArbCode.cpp (updateUniforms): Optimized to be
+	more efficient, especially with normal (<= 4 component) float
+	uniforms.
+
+2005-10-24  Francois Marier  <francois@serioushack.com>
+
+	* src/ShSyntax.hpp (SH_UNTIL): The condition should be negated
+	since the loop becomes a do..while loop in immediate mode.
+
+	* src/ShParser.cpp (parseDo): Add an extra node between the body
+	and the condition evaluation so that SH_CONTINUE can jump there
+	and evaluate the condition again instead of jumping back to the
+	start of the body.
+
+2005-10-21  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/ArbCode.cpp (allocTemps): Reorder the write mapping
+	and the read check in the register allocator to fix a problem
+	where a variable that has been written to in the scope will not be
+	reused later on in the same scope.
+
+2005-10-20  Francois Marier  <francois@serioushack.com>
+
+	* src/ShSyntax.cpp, ShSyntax.hpp: Add a boolean parameter to both
+	shBreak() and shContinue().
+
+	* src/ShParser.cpp, ShParser.hpp: Add a stack which keeps track of
+	the break and continue points for each scope.
+	Add parse_break() and parse_continue() to generate the right
+	control flow graphs when using SH_BREAK and SH_CONTINUE.
+
+	* src/ShParser.hpp, ShCtrlGraph.cpp: Turn ShParser into a
+	singleton.
+
+2005-10-19  Francois Marier  <francois@serioushack.com>
+
+	* src/ShProgramNode.cpp (compile): Remove the check for stream
+	programs because on some backends (e.g. cc) it makes sense to
+	compile a stream program.
+
+	* backends/gl/GlBackend.cpp (generate_code): Prevent code
+	generation for stream programs and display a warning.
+
+2005-10-17  Stefanus Du Toit  <sdt@serioushack.com>
+
+	* src/ShDllExport.hpp: Don't define SH_DLLEXPORT if it already
+	is. Fixes the build on win32.
+
+2005-10-14  Francois Marier  <francois@serioushack.com>
+
+	* src/ShDllExport.hpp: Define the SH_DLLEXPORT macro for the gcc
+	visibility feature.  Define a new SH_DLLLOCAL macro to be used for
+	explicitely hiding functions and methods.
+
+	* backends/gl/ArbCode.cpp (ArbCode): Throw an error when creating
+	an ArbCode object with an unit type other than vertex or fragment.
+
+	* src/ShProgramNode.cpp (compile): Ignore compilations of stream
+	programs and output a warning.
+
+	* src/ShSyntax.cpp (shCompile): Move duplicated code into a single
+	generic function.
+
+2005-10-07  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslCode.cpp, GlslCode.hpp
+	(bind_generic_attributes): Add this method to be called before
+	linking the glsl program.  It binds all attributes to the index
+	they were assigned to earlier.
+	(generate): Pass the original variables to the variable map so
+	that it can edit the user-facing metadata.
+
+	* backends/gl/GlslSet.cpp: Bind all generic vertex attributes when
+	a vertex shader is bound.
+	
+	* backends/gl/GlslVariable.hpp, GlslVariable.cpp: The m_attribute
+	member variable now keeps track of the index where vertex
+	attributes are located.
+
+	* backends/gl/GlslVariableMap.cpp: Refactor
+	allocate_generic_vertex_inputs() to use the new
+	allocate_generic_vertex_input() method which assign an index to
+	the variable and change its user-facing metadata.
+	Add m_original_vars to constructor and destructor.
+
+	* backends/gl/GlslVariableMap.hpp: Add the
+	allocate_generic_vertex_input() method.  
+	Keep a copy of the original variables to change their metadata.
+
+2005-10-06  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslCode.hpp, GlslCode.cpp, GlslVariableMap.cpp,
+	GlslVariableMap.hpp: Print the original Sh name when declaring
+	variables.
+
+	* backends/gl/ArbCode.cpp: Print an error message when an input
+	cannot be bound to any built-in variables (semantic binding).
+
+2005-09-30  Francois Marier  <francois@serioushack.com>
+
+	* src/ShProgramNode.hpp, ShProgramNode.cpp, ShProgram.hpp,
+	ShVariableNode.cpp, backends/gl/Utils.cpp, GlslVariableMap.cpp,
+	PBufferStreams.cpp, GlslCode.cpp, ArbCode.cpp, backends/cc/Cc.cpp:
+	Renamed the iterators according to the names used in the book.
+
+	* util/ShPngImage.hpp, ShPngImageImpl.hpp, ShPngImage.cpp: Move
+	all libpng code to a cpp file so that nobody but Sh will need to
+	include the libpng and zlib headers.
+
+	* src/ShProgramNode.cpp, ShProgramNode.hpp
+	(collect_dependent_uniform): Add this method to support the
+	collection of dependent uniforms' dependent uniforms.
+	(collectNodeDecls, collectVar, collectNodeVars): Rename some
+	private methods to match new coding standards
+	
+2005-09-29  Francois Marier  <francois@serioushack.com>
+
+	* src/ShProgramNode.hpp, ShProgramNode.cpp, ShProgram.hpp: Add
+	all_uniforms_begin() and all_uniforms_end() to return all
+	uniforms, including recursively dependent ones.
+
+	* src/ShProgramNode.cpp (describe_interface): Display all uniforms
+	instead of just iterating through uniforms_begin().
+
+2005-09-27  Francois Marier  <francois@serioushack.com>
+
+	* util/ShPngImage.hpp, ShPngImageImpl.hpp, shutil.hpp,
+	src/ShImage.hpp, src/ShImageImpl.hpp, src/ShImage.cpp: Move the
+	PNG stuff to util.  Make load_PNG, save_PNG and save_PNG16 free
+	functions instead of ShImage methods.
+
+2005-09-23  Francois Marier  <francois@serioushack.com>
+
+	* src/ShSyntax.hpp: Add the namespace qualifier to ShContext so
+	that it's not necessary to be using the SH namespace before using
+	SH_IF or any other control flow macro.
+
+	* backends/gl/GlslVariable.cpp, GlslVariable.hpp (attribute): Add
+	this method to set the name of the variable and make it an
+	attribute (with the new m_attribute bool).
+
+	* backends/gl/GlslVariableMap.cpp, GlslVariableMap.hpp
+	(allocate_generic_vertex_inputs): Add this method and call it
+	instead of allocate_builtin_inputs() when the "opengl:matching"
+	meta tag is set to "generic".  It uses the attribute facility in
+	Glsl instead of using the built-in attribute names (like
+	gl_Position).
+	(attribute_begin, attribute_end): Add these methods to allow the
+	code generation to declare attributes at the top of the code.
+
+	* backends/gl/GlslCode.cpp (print): Declare attributes at the top
+	of the source file.
+
+	* backends/gl/GlslVariableMap.cpp (GlslVariableMap),
+	ArbCode.cpp (ArbCode): Remove the hard-coded number of maximum
+	draw buffers and get it through OpenGL's glGet instead.
+
+2005-09-22  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/PBufferStreams.cpp (execute): Only display the
+	warning about intermediate streams once per process.
+
+	* backends/gl/ArbCode.cpp, GlslCode.cpp (genStructNode): Don't
+	check for the size of the successor in IF blocks, it prevents
+	perfectly valid code (e.g. nested IFs inside another IF) from
+	being generated.
+
+2005-09-21  Francois Marier  <francois@serioushack.com>
+
+	* src/ShLibClampImpl.hpp, ShLibClamp.hpp: Rename smoothstep() to
+	linstep() and cubicstep() to smoothstep().  This is done to be
+	consistent with RenderMan.
+
+2005-09-16  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslEmit.cpp (emit_discard): Implement SH_OP_RET.
+
+	* backends/gl/GlslCode.hpp (emit_discard): Add a string parameter
+	to select the function to call.
+
+	* src/ShSyntax.cpp: Add the SH_RETURN statement.
+
+	* src/ShTypeConvertTransformer.cpp: Add SH_OP_RET to the switch
+	statement.
+
+	* src/ShTextureNode.cpp (build_mipmaps): Add a check to avoid
+	building the mipmaps when the texture is set to a specific texid.
+
+2005-09-15  Francois Marier  <francois@serioushack.com>
+
+	* src/ShNibblesImpl.hpp, ShNibbles.hpp: Add a nibbles for bezier
+	and hermite.
+
+	* src/ShLibSplines.hpp, ShLibSplinesImpl.hpp: Move bezier to the
+	core and fix it so that it actually compiles.
+	Add a dummy function for hermite.
+
+	* util/ShFunc.hpp, ShFuncImpl.hpp: Remove bezier from util.
+	Remove broken hashlcg() function.
+	
+	* src/ShLibClampImpl.hpp, ShLibClamp.hpp (cubicstep): Add
+	cubicstep to the core.
+
+	* util/ShFuncImpl.hpp, ShFunc.hpp (deprecated_smoothstep): Remove
+	this function since it's been renamed and moved to the core.
+
+2005-09-14  Francois Marier  <francois@serioushack.com>
+
+	* src/ShConcreteCTypeOp.cpp, ShConcreteRegularOpImpl.hpp,
+	ShTranformer.cpp, backend/cc/CcEmit.cpp: Reverse the parameters of
+	atan2().
+
+	* src/ShLibSplinesImpl.hpp, ShLibSplines.hpp (bernstein): Add this
+	function to the core.  This is a dummy function for anything other
+	than N=4.
+
+	* src/ShNibblesImpl.hpp, ShNibbles.hpp (shBernstein): Add this
+	nibble.
+
+	* src/ShLib.hpp: Include the splines functions header.
+
+	* util/ShFuncImpl.hpp: Remove the old version of
+	bernstein_basis_4.
+
+2005-09-09  Francois Marier  <francois@serioushack.com>
+
+	* src/ShImage.hpp, ShImageImpl.hpp, ShImage.cpp,
+	examples/textures/main.cpp: Rename loadPng, savePng, savePng16,
+	load_png and save_png to load_PNG, save_PNG and save_PNG16.
+
+2005-09-07  Francois Marier  <francois@serioushack.com>
+
+	* src/ShNibblesImpl.hpp, ShNibbles.hpp: Add nibbles for discard()
+	and groupsort<S>().
+
+2005-08-30  Stefanus Du Toit  <sdt@serioushack.com>
+
+	* src/FixedManipulator.cpp (operator&): Allow empty manipulators.
+	Might need to be done elsewhere also.
+
+	* backends/gl/ArbCode.cpp: Do not use the same destination register
+	when updating conditional registers on NV. Fixes branches based on
+	uniforms, which cannot be assigned to.
+
+	* src/ShNibblesImpl.hpp: Remove extra default parameters in
+	function definitions. Fixes build with MSVC7.
+	
+2005-08-26  Francois Marier  <francois@serioushack.com>
+
+	* src/ShNibblesImpl.hpp, ShNibbles.hpp: Added nibbles for
+	faceforward, lit, reflect, refract, sat, ceil, floor, round, sign,
+	sort, not, and, or, any, all, max1, min1, clamp, cond, smoothstep,
+	smoothpulse and join.
+	Fixed the nibbles for prod, sum and mad.
+
+	* src/ShLibClampImpl.hpp (smoothpulse): Changed sstep() calls to
+	use smoothstep().
+
+	* src/ShProgramNode.hpp, ShProgram.hpp (backend_name): Add this
+	method to retrieve the backend name on which the program is
+	currently compiled.
+
+	* src/ShProgramNode.cpp (compile): Set the backend name when
+	compiling the program.
+	(ShProgramNode): Initialize the backend name to "".
+
+2005-08-25  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/ArbReg.cpp, ArbReg.hpp (binding_name): Add this
+	method to return the actual name of the Arb variable.
+
+	* backends/gl/ArbCode.cpp (describe_bindings): Implementation of
+	describe_bindings() in the Arb backend.
+
+	* backends/gl/GlslCode.cpp (describe_bindings): Implementation of
+	describe_bindings() in the Glsl backend.
+
+	* src/ShProgramNode.cpp (describe_bindings): Add a little header
+	before outputing the backend information.
+
+2005-08-24  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslVariable.cpp, GlslVariable.hpp: Add the draw
+	buffer variable (gl_FragData[]) to the built-in output variables.
+	
+	* backends/gl/GlslVariableMap.cpp (GlslVariableMap): Enable the
+	the draw buffers extension if it's available.
+
+	* backends/gl/ArbCode.cpp (ArbCode): The ATI_draw_buffers
+	extension is also known as ARB_draw_buffers so check for both.
+	
+	* backends/gl/GlslEmit.cpp, GlslCode (emit_exp10): Replace the
+	call to pow by a multiplication.
+	(emit_log10): Replace the division by a multiplication.
+	(emit_log, emit_exp): Remove these functions and use the built-in
+	exp and log functions instead.
+
+	* backends/gl/GlslEmit.cpp (table_substitution): Remove
+	unnecessary casts when the destination variable is the same size
+	as the source (in the case of assignments) or the result of the
+	function call.
+
+	* backends/gl/PBufferStreams.cpp: Use the target of the stream
+	program to come out with the proper target for vertex and fragment
+	programs (e.g. if the stream program's target is "glsl:stream"
+	then the other targets should be "glsl:vertex" and "glsl:fragment")
+
+	* src/ShProgramNode.cpp, ShProgramNode.hpp, ShProgram.hpp
+	(describe_bindings): Add the two versions of describe_bindings().
+	They call the backend functions and return the backend-specific
+	binding info.
+
+	* src/ShBackend.hpp (describe_bindings): Add this new pure virtual
+	method.
+	
+	* backends/gl/GlslCode.cpp, GlslCode.hpp, ArbCode.cpp,
+	ArbCode.hpp, backends/cc/Cc.cpp, Cc.hpp (describe_bindings): Add
+	empty implementations of describe_bindings() for all three
+	backends.
+
+2005-08-23  Francois Marier  <francois@serioushack.com>
+
+	* backends/cc/Cc.cpp (generate): On OSX, define exp10() in the
+	prologue of generated programs.
+
+	* src/ShMath.hpp: Add exp10() on OSX.
+
+	* src/ShBackend.cpp, ShBackend.hpp (derived_targets): Go through
+	all installed backends when making a list of derived targets.
+	(check_target): Add this method.
+	(target_handler): Move the backend loading to load_backends().
+
+	* src/ShGeneric.hpp: Add typedefs like the ones availabled in
+	ShAttrib (e.g. ShGeneric2f, ShGeneric4fub, etc.).
+
+	* src/ShImage.hpp: Make ShPngImage a DLL-exported class.
+
+2005-08-22  Francois Marier  <francois@serioushack.com>
+
+	* src/ShImage.hpp, ShImageImpl.hpp, ShImage.cpp: Move all libpng
+	code into a non-templated class to reduce the libpng dependency.
+	Remove the DLL_EXPORT tag so that it compiles on Windows.
+
+	* src/ShImageImpl.hpp, ShImage.hpp: Rename ShImageNode to
+	ShTypedImage.
+
+2005-08-19  Francois Marier  <francois@serioushack.com>
+
+	* src/ShMemory.cpp (ShHostHostTransfer::transfer): Only check that
+	sizes match when the types are the same.
+
+	* src/ShTextureNode.cpp (build_mipmaps): Make a float copy of the
+	base storage so that mipmaps can be built from a non-float
+	texture.
+	
+	* src/ShImage.hpp, ShImageImpl.hpp, ShImage.cpp: Rename ShImage
+	into ShImageNode and template it so that fub images can be created
+	fron PNG files for example.  Make ShImage a typedef of
+	ShImageNode<float> for backwards compatibility.
+
+2005-08-17  Francois Marier  <francois@serioushack.com>
+
+	* src/ShTransformer.cpp (struct ATan2ExpanderBase): Fix issues
+	related to negative values and zeroes in atan2().
+
+2005-08-17  Andrew Lauritzen  <atlaurit@student.cs.uwaterloo.ca>
+
+	* src/ShBaseTexture.hpp: Added a method to access the node that a
+	texture refers to.
+
+2005-08-16  Francois Marier  <francois@serioushack.com>
+
+	* src/ShTextureNode.cpp (memory): Must reinitialize memories
+	whenever the base level is modified.
+
+	* src/ShTextureNode.hpp, ShTextureNode.cpp (build_mipmaps): Add
+	some checks to skip rebuilding the mipmaps when it's not necessary
+	and return a boolean to indicate whether they were rebuilt or
+	not.
+
+	* backends/gl/GlTextures.cpp (bindTexture): Always call
+	build_mipmaps() since it includes the necessary checks now.
+
+2005-08-15  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslCode.hpp, GlslCode.cpp (resolve): Cast the
+	argument to the proper size if necessary.
+
+	* backends/gl/GlslEmit.cpp (table_substitution): Make use of the
+	new resolve method to avoid casting arguments unnecessarily.
+
+	* backends/gl/GlslEmit.cpp, GlslCode.hpp (emit_pow): Add this
+	method to emit pow operations and properly cast both the result
+	and the arguments.
+
+	* backends/gl/GlslEmit.cpp (emit_exp, emit_cbrt, emit_hyperbolic):
+	Make use of emit_pow to do the necessary casts.
+
+	* src/ShTextureNode.cpp (initialize_memories): Make sure the
+	mipmap levels are always >= 1.
+
+2005-08-12  Francois Marier  <francois@serioushack.com>
+
+	* src/ShBackend.cpp: Changed some more iterators to be 64-bit
+	safe.
+
+2005-08-11  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslEmit.cpp (GlslOpCodeVecs), 
+	backends/cc/CcEmit.cpp (CcOpCodeVecs),
+	src/ShBackend.cpp (load_libraries): 
+	Change size of iterators to be size_t so that it works on 64-bit
+	machines.
+
+2005-08-11  Andrew Lauritzen  <atlaurit@student.cs.uwaterloo.ca>
+
+	* src/ShNibblesImpl.hpp: Fixed a minor compilation error on
+	windows to do with redefinition of default parameters.
+	
+	* src/ShRecord.cpp: Removed some unnecessary debug spew.
+
+2005-08-10  Francois Marier  <francois@serioushack.com>
+
+	* src/ShNibblesImpl.hpp, ShNibbles.hpp: Add nibbles for gradient,
+	cellnoise, scellnoise, hash, texhash, linnoise, slinnoise, noise,
+	snoise, perlin, sperlin, turbulence, sturbulence, poly, cross,
+	length, length_1, length_inf, distance, distance_1, distance_inf.
+
+2005-08-09  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlTextures.cpp (shGlInternalFormat): Add a warning
+	about the lack of float textures.  Fallback on byte textures.
+
+2005-08-08  Francois Marier  <francois@serioushack.com>
+
+	* src/ShNibblesImpl.hpp, ShNibbles.hpp: Add nibbles for exp,
+	expm1, exp2, exp10, log, logp1, log2, log10, cbrt, rsqrt prod,
+	sum, rcp, atan2, atan, mad, sinh, cosh, tan, tanh, asinh, acosh,
+	atanh, dx, dy and fwidth.
+	Add macros for ternary operations.
+	
+2005-08-04  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/ArbEmit.cpp (emit_sgn): Optimized the sign operation
+	on Arb by removing one addition (Will's idea).
+
+	* src/ShNibblesImpl.hpp, ShNibbles.hpp: Rename the nibbles so that
+	they match the book.
+
+2005-08-03  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/ArbEmit.cpp (emit_sgn): Fix the sign(0) case without
+	using DIV or COND.
+
+	* backends/gl/ArbEmit.cpp, ArbCode.hpp (emit_atan): Implement ATAN.
+
+2005-08-02  Francois Marier  <francois@serioushack.com>
+
+	* src/ShLibMiscImpl.hpp (cast): Make sure all components are
+	initialized to zero to avoid problems in some environments.
+
+2005-07-27  Andrew Lauritzen  <atlaurit@student.cs.uwaterloo.ca>
+
+	* src/ShMatrix.hpp: Added "rows" and "cols" static variables to
+	ShMatrix set to the corresponding template parameters.
+
+2005-07-27  Stefanus Du Toit  <sdt@serioushack.com>
+
+	* src/ShOptimizations.cpp: Added redundant edge removal optimization.
+	
+	* src/ShLibMatrixImpl.hpp: Add hack for MSVC which cannot handle
+	as beefy template matching as gcc, in particular for operator| and
+	operator* for matrices with special types.
+	
+	* src/ShLibMatrix.hpp: Remove #ifndef WIN32 which for some strange
+	reason was there.
+	
+2005-07-27  Francois Marier  <francois@serioushack.com>
+
+	* src/ShLibMatrixImpl.hpp (operator|): Support non-square matrices
+	in the expanded matrix-tuple products.
+
+	* src/ShLibMiscImpl.hpp, ShLibMisc.hpp (join): Add support for
+	scalars in the 2-argument version of join.
+
+	* src/ShLibArithImpl.hpp (lerp): Fix the support for scalars.
+	(mad): Fix the support for scalars.
+	
+	* src/ShLibMatrixImpl.hpp, ShLibMatrix.hpp: Optimize the
+	matrix-tuple product for SH_VECTOR and SH_NORMAL.  
+	Make the matrix-tuple expansion work as intended by returning the
+	same semantic type and size as the argument.
+
+2005-07-27  Stefanus Du Toit  <sdt@serioushack.com>
+
+	* src/ShOptimizations.cpp: Added empty block removal optimization,
+	enabled by default.
+	
+	* src/ShStructural.hpp: Removed comment about IF being unused cause
+	it isn't anymore.
+	
+	* src/ShStructural.cpp: Handle IF nodes.
+	
+	* backends/gl/ArbCode.cpp: Handle IF nodes in structural analysis.
+	
+	* backends/gl/GlslCode.cpp: Handle IF nodes in structural analysis.
+	
+2005-07-26  Francois Marier  <francois@serioushack.com>
+
+	* src/ShLibBooleanImpl.hpp, ShLibBoolean.hpp (cond): Adding a
+	version of cond where the first parameter doesn't have to be an Sh
+	type.
+
+	* src/ShLibNormal.hpp, ShLibPoint.hpp, ShLibVector.hpp,
+	ShLibTexCoord.hpp: Remove unnecessary expansion methods.
+
+	* src/ShLibMatrixImpl.hpp, ShLibMatrix.hpp (operator|): Add
+	tuple-expansion for this operator as well.
+	
+	* src/ShLibMatrixImpl.hpp, ShLibMatrix.hpp (operator*): Add tuple
+	expansion for matrix-tuple multiplication of certain semantic
+	types.
+
+	* backends/gl/ArbEmit.cpp (emit_tex): Fix a bug in the
+	LUMINANCE_ALPHA special case so that texture lookups work with
+	2-component variables.
+
+2005-07-25  Francois Marier  <francois@serioushack.com>
+
+	* src/ShLibNoise.hpp, ShLibNoiseImpl.hpp: Add a dummy texhash()
+	function (it just calls hash() right now).
+
+2005-07-22  Francois Marier  <francois@serioushack.com>
+
+	* src/ShOperation.hpp, ShOperation.cpp: Add IR operations for the
+	inverse hyperbolic functions.
+
+	* src/ShLibTrigImpl.hpp, ShLibTrig.hpp, ShInstructions.hpp: Add
+	library functions for the inverse hyperbolic functions.
+
+	* src/ShTransformer.hpp, ShTransformer.cpp: Add implementations
+	for the inverse hyperbolic functions and for ATAN2.
+	
+	* backends/cc/CcEmit.cpp, src/ShConcreteCTypeOp.cpp,
+	ShConcreteRegularOpImpl.hpp: Fix the ATAN2 mapping to agree with
+	the book.
+
+	* src/ShConcreteCTypeOpImpl.hpp, ShEvalImpl.hpp,
+	ShConcreteCTypeOp.cpp backends/cc/CcEmit.cpp, ShInstructions.cpp,
+	ShConcreteRegularOpImpl.hpp: Add mappings for the inverse
+	hyperbolic functions.
+	
+	* backends/gl/ArbCode.cpp, GlslCode.cpp (generate): Call the
+	tranformers to expand ATAN2 and the inverse hyperbolic functions.
+
+	* src/ShTransformer.cpp (struct DummyOpStripperBase): Fix the
+	dummy op stripper so that the changes are not ignored (m_changed =
+	true).
+	
+2005-07-21  Francois Marier  <francois@serioushack.com>
+
+	* src/ShLibNoise.hpp: Add the hash() function and move cellnoise
+	and scellnoise in the same section.
+
+	* src/ShLibNoiseImpl.hpp: Add hash() and rename all calls to
+	hashmrg() to calls to the new function. 
+
+	* src/ShOperation.cpp, ShOperation.hpp, ShEvalImpl.hpp: Add the
+	NOISE and HASH IR operations.
+
+	* src/ShInstructions.cpp, ShInstructions.hpp: Add shHASH().
+
+	* src/ShConcreteCTypeOpImpl.hpp, ShConcreteRegularOpImpl.hpp: Add
+	dummy implementations for NOISE and HASH.
+
+	* backends/gl/GlslEmit.cpp, GlslCode.hpp: Add a real
+	implementation of the NOISE IR operation using the noise[1234]()
+	glsl function.
+	
+	* util/ShFunc.hpp, ShFunc.cpp: Remove hashmrg() since it has been
+	moved into the core.
+	
+2005-07-20  Francois Marier  <francois@serioushack.com>
+
+	* src/ShLibNoise.hpp, ShLibNoiseImpl.hpp: Add dummy
+	implementations of noise(), snoise(), linnoise() and slinnoise().
+
+	* src/ShLibWorleyImpl.hpp (operator()): Remove frac() since issue58
+	is resolved.
+
+	* src/ShLib.hpp: Add ShLibNoise.hpp and ShLibWorley to the include
+	list.
+
+	* src/ShGenericImpl.hpp, ShBaseTextureImpl.hpp: Remove the
+	unnecessary include of ShLib.hpp.
+	
+	* src/ShMatrixImpl.hpp: Include ShLibMisc.hpp.
+	
+	* src/ShLibMisc.hpp, ShLibGeometry.hpp, ShLibMatrix.hpp,
+	ShLibArith.hpp, ShLibClamp.hpp, ShLibTrig.hpp, ShLibDeriv.hpp,
+	ShLibBoolean.hpp: Move the ShLib.hpp include before the header
+	guard to guarantee that the file will be included by ShLib.hpp,
+	not the other way around.  This is necessary because some macros
+	are undefined by ShLib.
+
+	* src/ShLibMiscImpl.hpp: Move sort() after groupsort() since
+	sort() calls groupsort().
+
+	* src/ShLibWorley.hpp, ShLibWorleyImpl.hpp, ShLibNoise.hpp,
+	ShLibNoiseImpl.hpp: Create these files from the related files
+	under util/.
+
+	* ShNoiseImpl.hpp, ShWorleyImpl.hpp, shutil.hpp, ShNoise.hpp,
+	ShWorley.hpp, Makefile.am: Remove the noise and worley code since
+	it is now part of the core.
+	
+2005-07-12  Andrew Lauritzen  <atlaurit@student.cs.uwaterloo.ca>
+
+	* src/ShInternals.*: Add a utility class for tracking variable
+	transformations (while compiling, etc).
+
+	* backends/gl/ArbCode.hpp: Added "generic" binding support for
+	vertex shader inputs if requested (by metadata). Resolves issue100
+	for the ARB backend.
+
+2005-07-12  Stefanus Du Toit  <sdt@serioushack.com>
+
+	* src/ShLibGeometry.hpp: Document sane convention for
+	refract() parameters.
+
+	* src/ShLibGeometryImpl.hpp: Change refract() to conform to a
+	sane convention for its inputs. Resolves issue200.
+	
+	* backends/gl/ArbEmit.cpp: Better implementation of SGN.
+
+2005-07-12  Andrew Lauritzen  <atlaurit@student.cs.uwaterloo.ca>
+
+	* src/ShProgramNode.cpp (clone): Cloning ShProgramNodes now copies
+	metadata.
+
+2005-07-08  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslCode.cpp (real_update_uniform): Removing the
+	unknown uniform message.
+
+	* util/ShNoiseImpl.hpp (turbulence): Add a missing return
+	statement.
+
+	* backends/gl/GlslVariableMap.cpp (GlslVariableMap): Allocate
+	GlslVariables for the uniforms.
+
+	* backends/gl/PBufferStreams.cpp (execute): Only print the
+	fragment program when SH_DEBUG_PBS_PRINTFP is defined.
+
+	* src/ShAlgebra.cpp (connect): Add a missing collectVariables().
+	(combine): Add a missing collectVariables().
+
+2005-07-07  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/ArbCode.cpp: Map result.depth to SH_POSITION
+	variables only to avoid generic mappings.
+
+	* add_libsh_copyright_notice.pl, COPYING, *.cpp, *.hpp: Change the
+	license and copyright notices to the GNU LGPL.
+	
+	* src/ShException.cpp, ShException.hpp: Make ShException inherit
+	from std::exception and add a what() method so that ShExceptions
+	can be handled in the same way as regular C++ exceptions.
+
+2005-07-06  Francois Marier  <francois@serioushack.com>
+
+	* src/ShTextureNode.cpp, ShTextureNode.hpp (build_mipmaps): Only
+	build one face of the cube map at a time (takes an extra optional
+	parameter).
+	Fix the base memory pointer for cube maps.
+
+	* backends/gl/GlTextures.cpp (bindTexture): Give the proper target
+	for cube map mipmap levels.
+
+2005-07-05  Francois Marier  <francois@serioushack.com>
+
+	* src/ShTextureNode.cpp (initialize_memories): Make a copy of all
+	the base textures (one per face for cube maps).
+
+	* src/ShTextureNode.hpp: Remove the (now) useless base_memory
+	parameter.
+
+	Adding mipmapping support in ShTextures:
+	
+	* backends/gl/GlTextureStorage.cpp: Specify the mipmap level when
+	transfering textures to the graphics card.
+	Add the mipmap_level parameter to the constructor.
+
+	* backends/gl/GlTextureStorage.hpp: Add a mipmap_level parameter
+	to the constructor.
+	Add the mipmap_level() method.
+	Add the m_mipmap_level member.
+
+	* backends/gl/GlTextures.cpp (shGlFormat): Replace a comment by an
+	assertion.
+	(bindTexture): Create extra GLStorage for the mipmap levels if it
+	is enabled.
+
+	* backends/gl/GlTextureName.cpp (params): Turn on mipmapping if it
+	is set in the traits.
+
+	* src/ShTextureNode.hpp: Add m_mipmap_levels and m_nb_memories.
+	Add the mipmap_level parameter to the memory() methods.
+	Remove SH_FILTER_MIPMAP and replace it with
+	SH_FILTER_MIPMAP_NEAREST and SH_FILTER_MIPMAP_LINEAR.
+	Add the mipmap_levels() and build_mipmaps() public methods.
+	
+	* src/ShTextureNode.cpp: Add interpolation methods to generate
+	mipmaps automatically.
+	Reinitialize the memories when the texture size is changed.
+	Add the mipmap_level parameter to the memory() methods.
+	Add the mipmap_levels() and build_mipmaps() public methods.
+
+	* src/ShTexture.hpp: Make the default mipmap filtering be linear.
+
+	* src/ShBaseTextureImpl.hpp, ShBaseTexture.hpp: Add the
+	mipmap_level parameter to all memory() methods.
+	Add the build_mipmaps() public method.
+	
+	* src/ShMIPFilter.hpp: New file containing the ShNoMIPFilter and
+	ShMIPFilter templates.
+
+	* src/sh.hpp: Include ShMIPFilter.hpp
+	
+	* backends/cc/Cc.cpp, backends/gl/Utils.cpp, PBufferStreams.cpp:
+	Add the mipmap_level to the memory() calls.
+	
+	* win32/Sh.vcproj, src/Makefile.am, src/Makefile.win32: Add
+	ShMIPFilter.hpp to the project and makefiles.
+
+	* test/regress/tex.cpp.py: Make all the textures be non-mipmapped
+	for now.
+
+	* configure.ac, examples/Makefile.am, examples/mipmap/*: Add the
+	mipmap example to test that mipmap is working correctly.
+
+	* examples/textures/*: Turn on mipmapping in the diffuse textures
+	and off in the specular textures.  One texture, default, will
+	provide all the images for the mipmap levels while the other one,
+	rust, will let Sh generate them.
+
+2005-07-05  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* src/ShRefCount.hpp (class ShPointer): Use Boost's
+	unspecified_bool_type trick to allow implicit conversion to bool
+	but nothing else.
+
+2005-06-27  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* backends/cc/Cc.cpp (load_shader_func): Use -bundle on OSX
+	instead of -shared. Fixes issue196.
+
+	* backends/gl/ArbBackend.cpp (shBackend_libsharb_target_cost):
+	Indicate that we cannot run stream programs on OSX yet.
+
+	* backends/gl/GlslBackend.cpp (shBackend_libshglsl_target_cost):
+	Indicate that we cannot run stream programs on OSX yet.
+
+	* examples/particle/Camera.cpp: Copy from glut example for OSX fixes.
+
+	* examples/particle/main.cpp (gprintf): Use GLint instead of int
+	for viewport variable.
+	Correct headers for OSX.
+
+	* examples/particles/Makefile.am (LDADD): Use GLUT_LIBS and
+	GL_LIBS for cross-platform compilation (osx in particular).
+
+2005-06-22  Francois Marier  <francois@serioushack.com>
+
+	* backends/cc/Cc.cpp (load_shader_func): Remove the -shared
+	parameter on OSX (patch from evan AT dogboy DOT org).
+
+2005-06-21  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslCode.hpp, GlslEmit.cpp (emit_comment): Add this
+	method.
+
+	* backends/gl/GlslEmit.cpp (emit): Add support for the
+	SH_OP_COMMENT operation.
+
+	* backends/cc/Cc.cpp, Cc.hpp (delete_temporary_files): Add this
+	method to delete the temporary files created before execution.
+	(execute): Call delete_temporary_files() once execution is done.
+	(generate): Move the library loading code to load_shader_func.
+	(load_shader_func): Add this method.
+	
+	* src/ShMemory.hpp, ShMemory.cpp (dirtyall): Use
+	increment_timestamp to update the memory timestamp and to
+	correctly handle out-of-sync objects.
+	(increment_timestamp): Add this method to replace updateTimestamp.
+	(updateTimestamp): Remove this method.
+	
+	* src/ShLibMatrixImpl.hpp, ShLibMatrix.hpp (operator|): Expand
+	matrices if their sizes are not compatible.
+	(operator*): Allow matrices of incompatible sizes
+
+	* src/ShLibGeometryImpl.hpp, ShLibGeometry.hpp (dot): Allow
+	vectors of different sizes and return an ShException in that case.
+	This is necessary for the matrix expansion changes.
+
+	* src/test/regress/common.py: Add a matrix_expansion function.
+
+	* src/ShMatrix.hpp, ShMatrixImpl.hpp: Remove unused copy
+	constructor.
+
+	* src/ShMemory.cpp, ShMemory.hpp (value_type): When changing the
+	value type, also update the size.
+
+2005-06-17  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/ArbEmit.cpp (emit_eq): Fix emit_eq so that it works
+	when emitting SNE.  This will fix the issue of SNE not working on
+	ATI.
+
+	* src/ShImage.hpp (load_PNG): Add this function with a deprecated
+	comment because it is mentionned in one of the examples of the
+	book.
+
+2005-06-16  Francois Marier  <francois@serioushack.com>
+	
+	After the 0.7.8 release:
+
+	* backends/gl/Glsl.hpp, Glsl.cpp: Rename unbind_all() to
+	unbind_all_programs().
+
+2005-06-15  Francois Marier  <francois@serioushack.com>
+
+	* util/shutil.cpp, shutil.hpp: Add the normalize_path() function
+	to convert the path separators in the pathname to "\" on Windows
+	and to "/" on UNIX.
+
+2005-06-14  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslEmit.cpp (emit_cond): Make cond() follow the
+	Glsl spec except on NVIDIA where component-wise COND is available.
+
+2005-06-13  Francois Marier  <francois@serioushack.com>
+	
+	* src/ShMemory.hpp: Remove the default value of "value_type" in
+	the ShHostMemory constructors.
+
+	* examples/particle/main.cpp: Must specify the value_type when
+	creating ShHostMemory objects.
+
+	* backends/gl/ArbEmit.cpp, ArbCode.hpp (real_div): Add this method.
+
+	* backends/gl/ArbEmit.cpp (emit_div): Make use of real_div().
+	(emit_hyperbolic): Make use of real_div().
+	Remove useless instructions in COSH and SINH.
+
+	* backends/gl/GlslEmit.cpp (emit_discard): Properly cast the zero
+	constant.
+
+2005-06-10  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslEmit.cpp, GlslCode.hpp (emit_cond): Add this
+	method to properly typecast the 0 constant.
+
+2005-06-09  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/ArbCode.cpp, ArbReg.cpp, ArbReg.hpp: Add support for
+	the extra color ouputs of the ATI_draw_buffers extension.
+
+2005-06-08  Francois Marier  <francois@serioushack.com>
+
+	* src/ShContext.cpp, ShContext.hpp (set_binding): There's no
+	reason why the ShProgram argument shouldn't be a constant
+	reference.
+
+	* src/ShProgramNode.cpp, ShProgramNode.hpp, ShProgram.hpp
+	(is_compiled): Add this method (issue35).
+
+	* src/ShBackend.cpp, ShBackend.hpp (derived_targets): Add this
+	method to reduce coupling between the available backends and the
+	methods that take a "target" argument.
+
+	* src/ShContext.cpp (bound_program): Make use of the new
+	derived_backends() method in ShBackend.
+
+2005-06-07  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/PBufferStreams.cpp (execute): Only use an
+	intermediate stream if there are channels that are both being read
+	from and written to.  That way if users are already
+	double-buffering, no intermediate stream will be used (issue152).
+
+2005-06-06  Francois Marier  <francois@serioushack.com>
+
+	Removing ShUnclamped and adding types to ShStorage:
+	
+	* src/ShMemory.cpp, ShMemory.hpp: 
+	Add a value type to ShStorage.
+	Add an extra parameter to the ShHostStorage and ShHostMemory
+	constructors (defaults to SH_FLOAT in the case of ShHostMemory).
+	Do type conversion on host-to-host transfers.
+	Add value_type() and value_size() methods to ShStorage.
+
+	* src/sh.hpp, Makefile.am, Makefile.win32, win32/Sh.vcproj:
+	Remove ShClamping.h
+
+	* src/ShTable.hpp, ShTexture.hpp, ShTextureNode.hpp, ShArray.hpp:
+	Remove the clamping trait.
+
+	* src/ShImage.cpp, ShImage3D.cpp: Explicitely specify that the
+	host memory type should be SH_FLOAT.
+
+	* backends/cc/CcTexturesString.hpp, CcTextures.hpp, CcEmit.cpp:
+	Remove all clamping-related code and comments.
+
+	* backends/cc/Cc.cpp: Specify the host memory type when
+	constructing the host storage.
+
+	* backends/gl/PBufferContext.cpp: Remove unused constructor.  
+	Add assert to make sure the type of both storage objects match in
+	the transfer method.
+
+	* backends/gl/PBufferContext.hpp: Remove unused constructor and
+	make_storage method.
+
+	* backends/gl/Utils.cpp, GlTextureName.cpp: Remove the clamping
+	trait.
+	
+	* backends/gl/PBufferStreams.cpp: Specify the value type when
+	creating storage and memory objects.
+	Add assert to ensure proper types.
+
+	* backends/gl/GlTextures.cpp: Remove all clamped code and leave
+	only the unclamped alternative.
+
+	* backends/gl/GlTextureStorage.cpp, GlTextureStorage.hpp: Remove
+	the m_valueType member and the valueType() method since they have
+	been moved to ShStorage.
+	Do type conversion on host-to-GL transfers.
+
+	* test/regress/shtest.py, test.hpp, tex.cpp.py: Specify the value
+	type when creating the host memory.
+
+	* test/regress/tex.cpp.py: Remove all ShUnclamped and ShClamped.
+
+	* examples/textures/main.cpp: Change textures from AttribNf to
+	AttribNfub.
+	
+2005-06-06  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* test/regress/test.hpp:
+	Fixed ShVariant constructors to match changes made below.
+
+	* backend/gl/GLTextureStorage.cpp, backends/gl/PBufferStreams.cpp:
+	Fixed ShVariant constructors to match changes made below.
+
+	* src/ShGenericImpl.hpp:
+	Fixed ShVariant constructors to match changes made below.
+
+	* src/ShVariant.hpp, src/ShVariantImpl.hpp, src/ShVariantFactory.hpp,
+	src/ShVariantFactoryImpl.hpp: Modified ShDataVariant constructor 
+	arguments to be consistent with other constructors. Associated
+	generate() functions were also modified for consistency.
+
+2005-06-06  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/Glsl.cpp, GlslSet.cpp, GlslCode.cpp, ArbLimits.hpp,
+	ArbCode.hpp, ArbCode.cpp:  Change some ints to GLints to fix
+	compilation errors on OSX (issue195).
+
+2005-05-31  Francois Marier  <francois@serioushack.com>
+
+	* src/ShContext.cpp, ShContext.hpp (bound_program): Add this method.
+	(is_bound): Add this method.
+	(shIsBound): Add this function.
+	(shBound): Add this function.
+
+2005-05-31  Kevin Moule  <krmoule@cgl.uwaterloo.ca>
+
+	* src/Makefile.win32: Updated to reflect previous changes to VS project
+	files.
+	
+	* src/ShHalfImpl.hpp: Changed fabsf to fabs, code uses doubles.
+
+2005-05-30  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* test/regress/Makefile.am (INCLUDES): Use $(top_srcdir) to allow
+	out-of-source build.
+	(AM_LDFLAGS): Use $(top_builddir) to allow out-of-source build.
+
+2005-05-30  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslVariable.cpp (GlslVariable): Typecast all
+	numerical constants.
+	
+	* backends/gl/Makefile.am: Moving the common GL stuff into a
+	separate library.
+
+	* src/ShBackend.cpp: Ignore the libshgl library since it is not a
+	real backend.
+	
+	* backends/gl/GlTextureStorage.cpp (HostGlTextureTransfer):
+	Restoring the dynamic_cast.
+
+	* src/ShBackend.cpp, ShBackend.hpp (is_valid_name): Add this
+	method.
+	(load_library): Check whether the backend name is valid before
+	trying to load the library (issue194).
+
+	* src/ShVariableType.hpp, ShVariableType.cpp: Add the SH_PLANE
+	semantic type.
+
+	* src/scripts/ShPlane.hpp.py, src/ShPlane.hpp, ShLibPlane.hpp: Add
+	these files for the new SH_PLANE semantic type.
+	
+	* src/ShSyntax.cpp, ShSyntax.hpp (shHaveBackend): Add this
+	function (issue34).
+	(shClearBackends): Add this function (issue33).
+	(shFindBackend): Add this function (issue34).
+
+	* src/ShBackend.cpp, ShBackend.hpp (have_backend): Add this
+	method.
+	(target_handler): Add this method and make get_backend() use it.
+
+2005-05-26  Francois Marier  <francois@serioushack.com>
+
+	* src/ShBackend.cpp: Refactor the code related to the library
+	loading and search paths.
+	Add a user path for user-installed libraries on UNIX.
+	(~ShBackend): Unload the library whenever the backend is
+	destroyed.
+
+	* src/ShBackend.hpp (load_libraries): Add this method.
+
+2005-05-25  Francois Marier  <francois@serioushack.com>
+
+	Backend infrastructure improvements (issue31):
+	
+	* src/ShBackend.cpp (target_cost): Separate library loading,
+	backend instantiation and cost function.  A backend is no longer
+	initialized unless it is the best backend that should be used.
+
+	* backends/cc/Cc.cpp, Cc.hpp, backends/gl/ArbBackend.cpp,
+	GlslBackend.cpp: Remove the can_handle() method to replace it with
+	the target_cost() non-member function.
+	
+	* src/ShBackend.hpp, ShBackend.cpp: Add an unbind_all_backends()
+	static method that iterates through all backends and calls
+	"unbind_all_programs()" on them.
+
+	* backends/gl/GlBackend.cpp, GlBackend.hpp: Rename the
+	unbind_all() methods to unbind_all_programs() in order to
+	differentiate them from ShBackend::unbind_all_backends().	
+	Remove the can_handle() method.
+
+	* src/ShSyntax.cpp (shUnbind): No need to iterate through all
+	backends, this is done from within ShBackend now.
+
+
+2005-05-20  Francois Marier  <francois@serioushack.com>
+
+	Backend infrastructure improvements (issue31):
+
+	* backends/cc/Cc.cpp, Cc.hpp, ArbBackend.cpp, GlslBackend.cpp:
+	Make the can_handle() method return an integer cost instead of a
+	boolean value.
+
+	* backends/gl/GlBackend.cpp, GlBackend.hpp (can_handle): Return an
+	integer cost instead of a boolean. Only provide the costs that are
+	common to both Arb and Glsl.
+
+	* src/ShBackend.cpp, ShBackend.hpp: Remove the generic
+	can_handle() function since it is not used by the other backends
+	anymore.  Make the pure virtual can_handle() method return an int.
+	
+	* src/ShBackend.cpp, ShBackend.hpp: Add lists of selected and
+	instantiated backends.
+	Add get_backend(), can_handle(), use_backend(), clear_backends()
+	and load_library().
+	Remove all references to ShEnvironment.  
+
+	* src/ShSyntax.cpp: Convert all calls to ShEnvironment::backend to
+	calls to ShBackend::get_backend().
+	Remove the ShEnvironment include.
+	Add an shUseBackend() method.
+
+	* src/ShSyntax.hpp: Add an shUseBackend() method.
+
+	* src/ShStream.cpp (operator=): Convert call to
+	ShEnvironment::backend to ShBackend::get_backend(). 
+
+	* backends/gl/ArbCode.cpp, src/scripts/ShAttribImpl.hpp.py,
+	src/ShAttribImpl.hpp, ShProgramNode.cpp, ShTextureNode.cpp,
+	ShFixedManipulator.cpp, ShAlgebra.cpp, ShVariableNode.cpp: 
+	Remove the ShEnvironment include.
+
+	* backends/gl/GlBackend.cpp, GlBackend.hpp (can_handle): Add this
+	method.
+	
+	* backends/gl/ArbBackend.cpp, GlslBackend.cpp: Remove the static
+	variable and instead add a non-member function to initialize the
+	backend.
+	(version): Add this method.
+
+	* backends/gl/PBufferStreams.cpp (execute): Removed the target
+	check since by that time it should have already been done.
+
+	* backends/gl/GlTextureStorage.cpp (HostGlTextureTransfer):
+	Changed a dynamic_cast to a static_cast as a hack to support two
+	copies of this class to be loaded at the same time.
+
+	* test/regress/shtest.py: Set the backend to "stream" instead of
+	"gpu:stream" since we want to test the "cc" backend as well.
+
+	* examples/particle/main.cpp, glut/main.cpp, textures/main.cpp:
+	Instead of always calling shSetBackend, only call shUseBackend
+	when a backend name has been specified on the command line.
+
+2005-05-16  Francois Marier  <francois@serioushack.com>
+
+	* src/ShLibMiscImpl.hpp (poly): Improve efficiency of the
+	algorithm used to compute poly().
+
+2005-05-10  Francois Marier  <francois@serioushack.com>
+
+	Improve the speed of row by row matrix assignment (mat_asn_vec).
+
+	* src/scripts/ShAttribImpl.hpp.py (Impl.scalarcons): Set all
+	values at once using setValues() instead of several calls to
+	setValue().
+	
+	* src/ShVariantImpl.hpp: Inline all the variant_cast() functions.
+
+	* src/ShGenericImpl.hpp (setValues): Replace the std::copy call by
+	a for loop.
 
 2005-05-10  Bryan Chan <b8chan@cgl.uwaterloo.ca>
 	* examples/bb:
@@ -73,6 +1827,16 @@
 	Wrapped these kernels in SECTION markers so they show up in graphviz
 	dumps as separate blocks.
 
+2005-05-09  Francois Marier  <francois@serioushack.com>
+
+	* backends/gl/GlslEmit.cpp (emit_texture): Fix the swizzle for
+	2-component texture lookups.
+
+2005-05-09  Stefanus Du Toit  <sjdutoit@uwaterloo.ca>
+
+	* configure.ac: On OS X, add -lSystem instead of -lmx. This seems
+	to be more appropriate, and allows linking with libraries such as
+	wxwidgets without causing duplicate symbols.
 
 2005-05-06	Bryan Chan <b8chan@cgl.uwaterloo.ca>
 	Merged trunk in up to r2375

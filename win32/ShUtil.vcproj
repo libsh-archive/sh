@@ -1,105 +1,155 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="7.10"
+	Version="8.00"
 	Name="ShUtil"
 	ProjectGUID="{AAB247CA-4D0A-41E6-BA0B-C673B30B1AAD}"
-	Keyword="Win32Proj">
+	Keyword="Win32Proj"
+	>
 	<Platforms>
 		<Platform
-			Name="Win32"/>
+			Name="Win32"
+		/>
 	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="Debug"
 			IntermediateDirectory="Debug"
 			ConfigurationType="4"
-			CharacterSet="2">
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+				CommandLine="prebuild.bat"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GR /EHsc /wd4003 /MDd /Zi /Od"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\src"
 				PreprocessorDefinitions="SH_DLLEXPORT=&quot;__declspec(dllimport)&quot;;WIN32;NOMINMAX;_USE_MATH_DEFINES;_DEBUG;SH_DEBUG"
-				MinimalRebuild="TRUE"
+				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				RuntimeTypeInfo="TRUE"
+				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="1"
-				Detect64BitPortabilityProblems="TRUE"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
-				DisableSpecificWarnings="4003"/>
+				DisableSpecificWarnings="4003"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/libshutild.lib"/>
+				OutputFile="$(OutDir)/libshutild.lib"
+			/>
 			<Tool
-				Name="VCMIDLTool"/>
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="postbuild_util.bat"/>
-			<Tool
-				Name="VCPreBuildEventTool"
-				CommandLine="prebuild.bat"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
-			<Tool
-				Name="VCResourceCompilerTool"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				CommandLine="postbuild_util.bat"
+			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="Release"
 			IntermediateDirectory="Release"
 			ConfigurationType="4"
-			CharacterSet="2">
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+				CommandLine="prebuild.bat"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/GR /EHsc /wd4003 /MD /O2"
 				AdditionalIncludeDirectories="..\src"
 				PreprocessorDefinitions="SH_DLLEXPORT=&quot;__declspec(dllimport)&quot;;WIN32;NOMINMAX;_USE_MATH_DEFINES"
 				RuntimeLibrary="2"
-				RuntimeTypeInfo="TRUE"
+				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="1"
-				Detect64BitPortabilityProblems="TRUE"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
-				DisableSpecificWarnings="4003"/>
+				DisableSpecificWarnings="4003"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/libshutil.lib"/>
+				OutputFile="$(OutDir)/libshutil.lib"
+			/>
 			<Tool
-				Name="VCMIDLTool"/>
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="postbuild_util.bat"/>
-			<Tool
-				Name="VCPreBuildEventTool"
-				CommandLine="prebuild.bat"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
-			<Tool
-				Name="VCResourceCompilerTool"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				CommandLine="postbuild_util.bat"
+			/>
 		</Configuration>
 	</Configurations>
 	<References>
@@ -108,83 +158,108 @@
 		<Filter
 			Name="Source Files"
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
+			>
 			<File
-				RelativePath="..\util\ShKernelLib.cpp">
+				RelativePath="..\util\ShKernelLib.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\util\ShKernelSurfMap.cpp">
+				RelativePath="..\util\ShKernelSurfMap.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\util\ShObjMesh.cpp">
+				RelativePath="..\util\ShObjMesh.cpp"
+				>
 			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
+			>
 			<File
-				RelativePath="..\util\ShFunc.hpp">
+				RelativePath="..\util\ShFunc.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\util\ShFuncImpl.hpp">
+				RelativePath="..\util\ShFuncImpl.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\util\ShKernelLib.hpp">
+				RelativePath="..\util\ShKernelLib.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\util\ShKernelLibImpl.hpp">
+				RelativePath="..\util\ShKernelLibImpl.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\util\ShKernelLight.hpp">
+				RelativePath="..\util\ShKernelLight.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\util\ShKernelLightImpl.hpp">
+				RelativePath="..\util\ShKernelLightImpl.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\util\ShKernelPost.hpp">
+				RelativePath="..\util\ShKernelPost.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\util\ShKernelPostImpl.hpp">
+				RelativePath="..\util\ShKernelPostImpl.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\util\ShKernelSurface.hpp">
+				RelativePath="..\util\ShKernelSurface.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\util\ShKernelSurfaceImpl.hpp">
+				RelativePath="..\util\ShKernelSurfaceImpl.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\util\ShKernelSurfMap.hpp">
+				RelativePath="..\util\ShKernelSurfMap.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\util\ShMesh.hpp">
+				RelativePath="..\util\ShMesh.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\util\ShMeshImpl.hpp">
+				RelativePath="..\util\ShMeshImpl.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\util\ShNoise.hpp">
+				RelativePath="..\util\ShNoise.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\util\ShNoiseImpl.hpp">
+				RelativePath="..\util\ShNoiseImpl.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\util\ShObjMesh.hpp">
+				RelativePath="..\util\ShObjMesh.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\util\shutil.hpp">
+				RelativePath="..\util\shutil.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\util\ShWorley.hpp">
+				RelativePath="..\util\ShWorley.hpp"
+				>
 			</File>
 			<File
-				RelativePath="..\util\ShWorleyImpl.hpp">
+				RelativePath="..\util\ShWorleyImpl.hpp"
+				>
 			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx"
-			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}">
+			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
+			>
 		</Filter>
 	</Files>
 	<Globals>

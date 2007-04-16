@@ -1,0 +1,9 @@
+Welcome to the Sh Version 0.7.9 Installation for OS X.
+
+These OS X binaries are currently new and should be considered Beta
+quality. If you have comments on how they could be improved, please
+e-mail us at <libsh-users@libsh.org>.
+
+Thanks!
+
+The Sh Team

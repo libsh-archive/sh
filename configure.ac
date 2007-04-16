@@ -1,6 +1,6 @@
 # Process this file with autoconf to produce a configure script.
-AC_INIT(Sh, 0.7.7, libsh-devel@lists.sourceforge.net, libsh)
-AC_CONFIG_SRCDIR([src/ShVariable.hpp])
+AC_INIT(Sh, 0.8.0rc0, libsh-devel@lists.libsh.org, libsh)
+AC_CONFIG_SRCDIR([src/sh/Variable.hpp])
 AM_INIT_AUTOMAKE
 
 AC_CANONICAL_HOST
@@ -9,7 +9,7 @@ AM_CONFIG_HEADER(config.h)
 
 # Checks for programs.
 if test "x$CXXFLAGS" = x ; then
-    CXXFLAGS="-Wall -g -O2" 
+    CXXFLAGS="-Wall -Werror -g -O2"
 fi
 
 # Additional libraries if in OSX
@@ -34,12 +34,22 @@ AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
 
+dnl get SDL path (due to a bug/feature in SDL.m4 this has to be before AC_LANG(C++))
+SDL_VERSION=1.2.0
+AM_PATH_SDL($SDL_VERSION,[HAVE_SDL=yes],)
+
 # Set up some stuff
 AC_LANG(C++)
+
+#GCC_VISIBILITY_CHECK
 
 SH_CHECK_ENABLE_DEBUG
 
 # Checks for libraries.
+AC_CHECK_LIB([z], [deflate],
+             [],
+             [AC_MSG_ERROR([sh requires zlib.])])
+
 AC_CHECK_LIB([png], [png_create_read_struct],
              [],
              [AC_MSG_ERROR([sh requires libpng.])])
@@ -53,13 +63,13 @@ AC_CHECK_HEADER([sstream], [], [AC_MSG_ERROR([sh requires <sstream>. Please use 
 # Checks for library functions.
 AC_CHECK_FUNCS([pow sqrt])
 
-required_glext_version=21
+required_glext_version=29
 
 # Mac OSX Tests
 case $host_os in 
   darwin*)
     AC_MSG_NOTICE([configuring OSX build, you have $host_os])
-    AC_CHECK_LIB([mx], [log2f])
+    AC_CHECK_LIB([System], [log2f])
     LDFLAGS="$LDFLAGS -flat_namespace"
     required_glext_version=7
     enable_pbuffer_streams=false
@@ -70,7 +80,6 @@ esac
 AM_CONDITIONAL(INCLUDE_PBUFFERSTREAMS, test x$enable_pbuffer_streams = xtrue)
 # Backends
 
-SM_WITH_SM_DIR
 GL_WITH_GL_DIR
 
 #version spec is done in the style [current[:release=0[:age=0]]]
@@ -95,25 +104,13 @@ fi
 
 AC_DEFINE_UNQUOTED(SH_SHLIB_EXT, "$sh_shlib_ext", [Platform-specific shared library extension])
 
-# SH_CHECK_BACKEND([sm], [SM])
-# if test "x$sh_backend_sm" = xtrue ; then
-#   SM_CHECK_SM_HEADERS([],
-#     [AC_MSG_WARN([sm.hpp not found. Disabling SM backend.])
-#      sh_backend_sm=false ])
-# fi
-sh_backend_sm=false
-SH_DECLARE_BACKEND([sm], [SM])
-SH_BACKEND_MESSAGE([sm], [The SM backend is disabled for the moment.])
-
-AM_CONDITIONAL(ENABLE_SM_BACKEND, test x$sh_backend_sm = xtrue)
-
 SH_CHECK_BACKEND([arb], [OpenGL ARB])
 if test "x$sh_backend_arb" = xtrue ; then
   GL_CHECK_GL_HEADERS([],
     [SH_BACKEND_MESSAGE([arb], [OpenGL headers (GL/gl.h and GL/glext.h) not found. Disabling ARB backend.])
      sh_backend_arb=false])
   GL_CHECK_GLEXT_VERSION([$required_glext_version], [], [
-    SH_BACKEND_MESSAGE([arb], [glext.h version 18 or greater (available at http://oss.sgi.com/projects/ogl-sample/registry/) not found. Disabling ARB backend.])
+    SH_BACKEND_MESSAGE([arb], [glext.h version $required_glext_version or greater (available at http://oss.sgi.com/projects/ogl-sample/registry/) not found. Disabling ARB backend.])
     sh_backend_arb=false
   ])
 fi
@@ -122,7 +119,7 @@ AM_CONDITIONAL(ENABLE_ARB_BACKEND, test x$sh_backend_arb = xtrue)
 SH_CHECK_BACKEND([glsl], [OpenGL Shading Language])
 if test "x$sh_backend_glsl" = xtrue ; then
   GL_CHECK_GL_HEADERS([],
-    [SH_BACKEND_MESSAGE([glsl], [OpenGL headers (GL/gl.h and GL/glext.h) not found. Disabling GLSL backend.])
+    [SH_BACKEND_MESSAGE([glsl], [OpenGL headers not found. Disabling GLSL backend.])
      sh_backend_glsl=false])
   GL_CHECK_GLEXT_EXTENSION([ARB_shading_language_100], [], [
     SH_BACKEND_MESSAGE([glsl], [Headers for ARB_shading_language_100 not found. You may need to upgrade your glext.h from http://oss.sgi.com/projects/ogl-sample/registry/. Disabling GLSL backend.])
@@ -134,12 +131,12 @@ AM_CONDITIONAL(ENABLE_GL_BACKENDS, test x$sh_backend_arb = xtrue -o x$sh_backend
 
 AC_ARG_ENABLE([docs],
 	      AC_HELP_STRING([--enable-docs],
-                             [generate doxygen documentation (default=yes)]),
+                             [generate doxygen documentation (default=no)]),
 	      [case ${enableval} in
 	         yes) sh_enable_docs=true ;;
 		 no)  sh_enable_docs=false ;;
                  *) AC_MSG_ERROR(bad value ${enableval} for --enable-docs) ;;
-              esac],[sh_enable_docs=true])
+              esac],[sh_enable_docs=false])
 
 if test "x$sh_enable_docs" = xtrue ; then
   DOXYGEN_FIND_DOXYGEN
@@ -157,24 +154,51 @@ else
    AC_DEFINE_UNQUOTED(SH_INSTALL_PREFIX, "$prefix", [Installation prefix directory])
 fi
 
+# Make list of examples to build
+if test x$HAVE_SDL = xyes; then
+  EXAMPLE_DIRS="$EXAMPLE_DIRS sdl"
+fi
+AC_SUBST(EXAMPLE_DIRS)
 
 AC_CONFIG_FILES([Makefile
 		 src/Makefile
+		 src/sh/Makefile
+		 src/shutil/Makefile
 		 test/Makefile
+		 test/apps/break_continue/Makefile
+		 test/apps/generic_binding/Makefile
+		 test/apps/mipmapping/Makefile
 		 test/regress/Makefile
+		 test/sandbox/Makefile
 		 backends/Makefile
 		 backends/cc/Makefile
-		 backends/sm/Makefile
 		 backends/gl/Makefile
-		 util/Makefile
 		 examples/Makefile
 		 examples/binding/Makefile
 		 examples/glut/Makefile
 		 examples/particle/Makefile
+		 examples/sdl/Makefile
 		 examples/textures/Makefile
-		 doc/Makefile])
+		 doc/Makefile
+		 autopackage/default.apspec])
+
+# Add symlinks to support out of source building
+AC_CONFIG_LINKS(doc/Doxyfile:doc/Doxyfile.real)
+AC_CONFIG_LINKS(test/regress/tex.png:test/regress/tex_squares.png)
+AC_CONFIG_LINKS(examples/textures/tex_kd.png:examples/textures/kd.png)
+AC_CONFIG_LINKS(examples/textures/tex_kd1.png:examples/textures/kd1.png)
+AC_CONFIG_LINKS(examples/textures/tex_kd2.png:examples/textures/kd2.png)
+AC_CONFIG_LINKS(examples/textures/tex_kd3.png:examples/textures/kd3.png)
+AC_CONFIG_LINKS(examples/textures/tex_kd4.png:examples/textures/kd4.png)
+AC_CONFIG_LINKS(examples/textures/tex_kd5.png:examples/textures/kd5.png)
+AC_CONFIG_LINKS(examples/textures/tex_kd6.png:examples/textures/kd6.png)
+AC_CONFIG_LINKS(examples/textures/tex_kd7.png:examples/textures/kd7.png)
+AC_CONFIG_LINKS(examples/textures/tex_kd8.png:examples/textures/kd8.png)
+AC_CONFIG_LINKS(examples/textures/tex_kd9.png:examples/textures/kd9.png)
+AC_CONFIG_LINKS(examples/textures/tex_ks.png:examples/textures/ks.png)
+AC_CONFIG_LINKS(examples/textures/tex_rustkd.png:examples/textures/rustkd.png)
+AC_CONFIG_LINKS(examples/textures/tex_rustks.png:examples/textures/rustks.png)
 
 AC_OUTPUT
 
 SH_SUMMARISE_BACKENDS
-
