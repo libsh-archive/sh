@@ -95,7 +95,7 @@ std::ostream& Statement::dumpVar(std::ostream &out, const Variable& var)
   if(var.null()) {
     out << "[null]";
   } else {
-    out << (var.neg() ? "-" : "") << var.name() << var.swizzle() << " " << id(var.node().object()); 
+    out << (var.neg() ? "-" : "") << var.name() << var.swizzle(); 
   }
   return out;
 }

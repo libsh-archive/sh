@@ -7,7 +7,7 @@
 #include <iostream>
 #include <sstream>
 #include <sh/sh.hpp>
-#include <sh/ShTransformer.hpp>
+#include <sh/Transformer.hpp>
 #include "ExprParser.hpp"
 
 typedef std::vector<std::string> vecs;

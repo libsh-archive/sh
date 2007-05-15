@@ -80,6 +80,8 @@ public:
   void splice(iterator I, StmtList &l, iterator lI) {
     m_statements.splice(I, l, lI, l.end());
   }
+
+  void insert(iterator I, const Statement& stmt) { m_statements.insert(I, stmt); }
   
   StmtList m_statements;
 //private:

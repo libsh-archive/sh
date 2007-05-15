@@ -48,6 +48,10 @@ public:
 
   /// Obtain the node which this Program wraps
   ProgramNodePtr node() { return m_node; }
+
+  /// Clones node and keeps bindings 
+  /// cloneVariables indicates whether to clone all non-uniform/const variables as well
+  Program clone(bool cloneVariables=false) const;
   
   /** Forcefully compile this program for a particular backend, even
    * if it has been compiled previously. Use code() to obtain the

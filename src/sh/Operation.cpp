@@ -132,7 +132,7 @@ const OperationInfo opInfo[] = {
   {"RADIUS", 1, OperationInfo::LINEAR, false, false, false},
   {"CENTER", 1, OperationInfo::LINEAR, false, false, false},
   {"IVAL", 2, OperationInfo::LINEAR, true, true, false},
-  {"UNION", 2, OperationInfo::LINEAR, true, false, true},
+  {"UNION", 2, OperationInfo::LINEAR, true, true, true},
   {"ISCT", 2, OperationInfo::LINEAR, true, false, true},
   {"CONTAINS", 2, OperationInfo::LINEAR, false, true, false},
 

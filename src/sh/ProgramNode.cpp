@@ -29,6 +29,8 @@
 #include "PaletteNode.hpp"
 #include "CtrlGraph.hpp"
 #include "Error.hpp"
+#include "Internals.hpp"
+#include "Transformer.hpp"
 
 #define CLEAN_DECLS true 
 
@@ -69,6 +71,19 @@ std::string describe_stats(const ProgramNode::VarList &varlist) {
   }
   return os.str();
 }
+
+struct VariableClonerBase: public TransformerParent {
+  VarMap vmap;
+  void handleVarList(ProgramNode::VarList &varlist, BindingType type) {
+    if(type == SH_CONST) return;
+    for(ProgramNode::VarList::iterator V = varlist.begin(); V != varlist.end(); ++V) {
+      if((*V)->uniform()) continue;
+      vmap[*V] = (*V)->clone(BINDINGTYPE_END, 0, VALUETYPE_END, SEMANTICTYPE_END, false);
+    }
+  }
+
+};
+typedef DefaultTransformer<VariableClonerBase> VariableCloner;
 
 }
 
@@ -273,7 +288,14 @@ void ProgramNode::dump(std::string filename) const
 
   std::ostringstream sout;
   ctrlGraph->graphviz_dump(sout);
+
+#if 1
+  std::ofstream fout((filename + ".dot").c_str());
+  fout << sout.str();
+  fout.close();
+#else
   dotGen(sout.str(), filename);
+#endif
 }
 
 void ProgramNode::updateUniform(const VariableNodePtr& uniform)
@@ -486,7 +508,7 @@ std::ostream& ProgramNode::print(std::ostream& out, const VarIt& begin, size_t s
   return out;
 }
 
-Pointer<ProgramNode> ProgramNode::clone() const
+Pointer<ProgramNode> ProgramNode::clone(bool cloneVariables) const
 {
   ProgramNodePtr result = new ProgramNode(target());
   result->InfoHolder::operator=(*this);
@@ -495,6 +517,16 @@ Pointer<ProgramNode> ProgramNode::clone() const
   result->inputs = inputs;
   result->outputs = outputs;
   result->collectAll();
+  if(cloneVariables) { /* replace non-uniform/non-const variables */  
+    VariableCloner vc;
+    vc.transform(result);
+
+    VariableReplacer vr(vc.vmap);
+    result->ctrlGraph->dfs(vr);
+    vr(result->inputs);
+    vr(result->outputs);
+    result->collectAll();
+  }
   return result;
 }
 

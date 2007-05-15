@@ -38,8 +38,7 @@
 #include "Internals.hpp"
 #include "Syntax.hpp"
 #include "Optimizations.hpp"
-// @todo range
-//#include "RangeBranchFixer.hpp"
+#include "RangeBranchFixer.hpp"
 #include "TextureNode.hpp"
 #include "Transformer.hpp"
 #include "CtrlGraphWranglers.hpp"
@@ -352,7 +351,7 @@ typedef DefaultTransformer<AffineOutputToIntervalBase> AffineOutputToInterval;
 Program inclusion(Program a)
 {
   add_stmt_indices(a);
-  Program result(a.node()->clone());
+  Program result(a.node()->clone()); 
   result.name(a.name() + "_ia_incl");
   dump(result, a.name() + "_inclusion_start");
 
@@ -360,7 +359,7 @@ Program inclusion(Program a)
     FloatToIntervalConverter ftic;
     ftic.setPrograms(a, result);
     ftic.transform(result.node());
-    //fixRangeBranches(result);
+    fixRangeBranches(result);
     optimize(result);
   Context::current()->exit();
 
@@ -388,7 +387,7 @@ Program affine_inclusion_syms(Program a)
     ftac.setPrograms(a, result);
     ftac.transform(result.node());
   dump(result, a.name() + "_aaincl_ftac");
-    //fixRangeBranches(result);
+    fixRangeBranches(result);
     optimize(result);
   Context::current()->exit();
 

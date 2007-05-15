@@ -29,6 +29,14 @@ VariableReplacer::VariableReplacer(VarMap& v)
 
 void VariableReplacer::operator()(CtrlGraphNode* node) 
 {
+  // replace decls
+  for(VarMap::iterator V = varMap.begin(); V != varMap.end(); ++V) {
+    if(node->hasDecl(V->first)) {
+      node->removeDecl(V->first);
+      node->addDecl(V->second);
+    }
+  }
+  
   // replace variables that are conditions in branches
   CtrlGraphNode::SuccessorIt I;
   for(I = node->successors_begin(); I != node->successors_end(); ++I) {

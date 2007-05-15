@@ -66,21 +66,29 @@ AaVariable aaMUL(const AaVariable& src0, const Variable& src1);
 AaVariable aaASN(const AaVariable& src);
 //AaVariable aaNEG(const AaVariable& src);
 
-AaVariable aaSLT(const AaVariable& a, const AaVariable& b);
-AaVariable aaSLE(const AaVariable& a, const AaVariable& b);
-AaVariable aaSGT(const AaVariable& a, const AaVariable& b);
-AaVariable aaSGE(const AaVariable& a, const AaVariable& b);
-AaVariable aaSEQ(const AaVariable& a, const AaVariable& b);
-AaVariable aaSNE(const AaVariable& a, const AaVariable& b);
+#endif
+
+AaVariable aaSLT(const AaVariable& a, const AaVariable& b, const AaSyms &newsyms);
+AaVariable aaSLE(const AaVariable& a, const AaVariable& b, const AaSyms &newsyms);
+AaVariable aaSGT(const AaVariable& a, const AaVariable& b, const AaSyms &newsyms);
+AaVariable aaSGE(const AaVariable& a, const AaVariable& b, const AaSyms &newsyms);
+AaVariable aaSEQ(const AaVariable& a, const AaVariable& b, const AaSyms &newsyms);
+AaVariable aaSNE(const AaVariable& a, const AaVariable& b, const AaSyms &newsyms);
+
+#if 0
 
 AaVariable aaABS(const AaVariable& a);
-AaVariable aaACOS(const AaVariable& a);
-AaVariable aaASIN(const AaVariable& a);
-AaVariable aaATAN(const AaVariable& a);
+#endif
+AaVariable aaACOS(const AaVariable& a, const AaSyms& newsyms);
+AaVariable aaASIN(const AaVariable& a, const AaSyms& newsyms);
+AaVariable aaATAN(const AaVariable& a, const AaSyms& newsyms);
+#if 0
 AaVariable aaATAN2(const AaVariable& a, const AaVariable& b);
 AaVariable aaCBRT(const AaVariable& a);
 AaVariable aaCEIL(const AaVariable& a);
-AaVariable aaCOS(const AaVariable& a);
+#endif
+AaVariable aaCOS(const AaVariable& a, const AaSyms& newsyms);
+#if 0
 AaVariable aaCMUL(const AaVariable& a);
 #endif
 AaVariable aaCSUM(const AaVariable& a);
@@ -122,8 +130,8 @@ AaVariable aaRND(const AaVariable& a);
 AaVariable aaRSQ(const AaVariable& a, const AaSyms& newsyms);
 #if 0
 AaVariable aaSGN(const AaVariable& a);
-AaVariable aaSIN(const AaVariable& a);
 #endif
+AaVariable aaSIN(const AaVariable& a, const AaSyms& newsyms);
 AaVariable aaSQRT(const AaVariable& a, const AaSyms& newsyms);
 #if 0
 AaVariable aaTAN(const AaVariable& a);
@@ -168,10 +176,11 @@ AaVariable aaCENTER(const AaVariable& a);
 #endif
 AaVariable aaIVAL(const Variable& a, const Variable& b, 
     const AaSyms& newsyms);
+
+AaVariable aaUNION(const AaVariable& a, const AaVariable& b, 
+    const AaSyms& newsyms);
+
 #if 0
-
-AaVariable aaUNION(const AaVariable& a, const AaVariable& b);
-
 AaVariable aaISCT(const AaVariable& a, const AaVariable& b);
 
 AaVariable aaCONTAINS(const AaVariable& a, const AaVariable& b);

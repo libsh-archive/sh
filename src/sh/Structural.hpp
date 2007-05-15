@@ -109,12 +109,23 @@ public:
   // node = 0 indicates the typical case of node = this
   void getEntries(CfgMatchList &result, StructuralNode* node = 0);
 
+  /* Some useful queries about nodes in the tree */ 
+  int depth();
 
   // Spanning tree
   StructuralNode* parent;
   typedef std::list< StructuralNode* > ChildList;
   ChildList children;
 
+  /* DFS through the spanning tree */
+  template<class F>
+  void dfs(F& functor) {
+    functor(this);
+    for(ChildList::iterator C = children.begin(); C != children.end(); ++C) {
+      (*C)->dfs(functor);
+    }
+    functor.finish(this);
+  }
 };
 
 typedef Pointer<StructuralNode> StructuralNodePtr;
@@ -137,6 +148,15 @@ public:
         st.m_live_structural_nodes.begin(), st.m_live_structural_nodes.end());
   }
 
+  /* Retrieves the section containing cfgNode */
+  StructuralNodePtr operator[](CtrlGraphNode* cfgNode);
+
+  /* dfs from head */
+  template<class F>
+  void dfs(F& functor) {
+    m_head->dfs(functor);
+  }
+
   
 private:
   CtrlGraphPtr m_graph;
@@ -148,6 +168,10 @@ private:
   StructuralNode* build_tree(CtrlGraphNode* node, std::map<CtrlGraphNode*, StructuralNode*>& nodemap);
   void build_postorder(StructuralNode* node);
 
+  /* A lookup table for finding the structural node that holds a particular CFG node */ 
+  typedef std::map<CtrlGraphNode*, StructuralNodePtr> CfgStructuralMap;
+  CfgStructuralMap cfgStructural; 
+  void gatherCfgStructural(const StructuralNodePtr& s); 
 
   // Keep StructuralNodes alive
   typedef std::list<StructuralNodePtr> StructuralNodePtrList;

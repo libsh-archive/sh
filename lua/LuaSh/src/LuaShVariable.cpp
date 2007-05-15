@@ -26,8 +26,8 @@ LuaShVariable::LuaShVariable(lua_State *L)
 {    
     // Extract the parameters from the stack
     int N = lua_gettop(L);
-    ShVar = new ShVariable(
-        new ShVariableNode(SH_TEMP, N, SH_FLOAT, SH_ATTRIB));
+    ShVar = new Variable(
+        new VariableNode(SH_TEMP, N, SH_FLOAT, SH_ATTRIB));
 
     for (int i = 1; i <= N; ++i)
     {
@@ -56,7 +56,7 @@ int LuaShVariable::size(lua_State *L)
 int LuaShVariable::Assign(lua_State *L)
 {
     const LuaShVariable *v = GetInstance(L, 1);
-    if (v)                   // Assignment from ShVariable/promoted scalar
+    if (v)                   // Assignment from Variable/promoted scalar
     {
         shASN(*ShVar, *(v->ShVar));
     }

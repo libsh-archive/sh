@@ -58,6 +58,13 @@ Program::Program(const ProgramNodePtr& node)
 {
 }
 
+Program Program::clone(bool cloneVariables) const
+{
+  Program result(m_node ? m_node->clone(cloneVariables) : 0);
+  result.clone_bindings_from(*this);
+  return result; 
+}
+
 void Program::clone_bindings_from(const Program& other) 
 {
   binding_spec = other.binding_spec;

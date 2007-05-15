@@ -337,6 +337,12 @@ void StructuralNode::getEntries(CfgMatchList &result, StructuralNode* node)
   getStructuralPreds(result, this, predicate);
 }
 
+int StructuralNode::depth()
+{
+  if(!parent) return 0;
+  return parent->depth() + 1;
+}
+
 Structural::Structural(const CtrlGraphPtr& graph)
   : m_graph(graph),
     m_head(0)
@@ -746,6 +752,24 @@ void Structural::build_postorder(StructuralNode* node)
   }
   
   m_postorder.push_back(node);
+}
+
+StructuralNodePtr Structural::operator[](CtrlGraphNode* cfgNode)
+{
+  if(cfgStructural.empty()) {
+    gatherCfgStructural(m_head);
+  }
+  return cfgStructural[cfgNode];
+}
+
+void Structural::gatherCfgStructural(const StructuralNodePtr& s) {
+  if(s->cfg_node) {
+    cfgStructural[s->cfg_node] = s;
+  }
+  
+  for(StructuralNode::ChildList::iterator J = s->children.begin(); J != s->children.end(); ++J) {
+    gatherCfgStructural(*J);
+  }
 }
 
 StructuralNode* Structural::head()

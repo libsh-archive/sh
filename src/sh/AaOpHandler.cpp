@@ -337,7 +337,7 @@ Program getProgram(Statement& stmt, SymAllocator& alloc) {
         
       }
 
-      dest.ZERO(); // always zero out dest - dead code will deal with some of the inefficiency
+      //dest.ZERO(); // always zero out dest - dead code will deal with some of the inefficiency
                    // @todo range - implement SSA... 
                    // @todo range - check if perhaps this can be handled before
                    // this
@@ -347,14 +347,20 @@ Program getProgram(Statement& stmt, SymAllocator& alloc) {
         case OP_MUL:   dest.ASN(aaMUL(src[0], src[1], stmtSyms->newdest)); break;
       //  case OP_DIV:   return affineDIV(stmt, alloc);
 
-#if 0
-        case OP_SLT:   return affineSLT(N, valueType);
-        case OP_SLE:   return affineSLE(N, valueType);
-        case OP_SGT:   return affineSGT(N, valueType);
-        case OP_SGE:   return affineSGE(N, valueType);
+        case OP_SLT:   dest.ASN(aaSLT(src[0], src[1], stmtSyms->newdest)); break; 
+        case OP_SLE:   dest.ASN(aaSLE(src[0], src[1], stmtSyms->newdest)); break; 
+        case OP_SGT:   dest.ASN(aaSGT(src[0], src[1], stmtSyms->newdest)); break; 
+        case OP_SGE:   dest.ASN(aaSGE(src[0], src[1], stmtSyms->newdest)); break; 
+        case OP_SEQ:   dest.ASN(aaSEQ(src[0], src[1], stmtSyms->newdest)); break; 
+        case OP_SNE:   dest.ASN(aaSNE(src[0], src[1], stmtSyms->newdest)); break; 
 
+#if 0
         case OP_CEIL:   return affineBinaryMonotonic<OP_CEIL>(N, valueType);
 #endif
+        case OP_ACOS:  dest.ASN(aaACOS(src[0], stmtSyms->newdest)); break;
+        case OP_ASIN:  dest.ASN(aaASIN(src[0], stmtSyms->newdest)); break;
+        case OP_ATAN:  dest.ASN(aaATAN(src[0], stmtSyms->newdest)); break;
+        case OP_COS:   dest.ASN(aaCOS(src[0], stmtSyms->newdest)); break;
         case OP_CSUM:  dest.ASN(aaCSUM(src[0])); break;
         case OP_DOT:   dest.ASN(aaDOT(src[0], src[1], stmtSyms->newdest)); break; 
         case OP_EXP:   dest.ASN(aaEXP(src[0], stmtSyms->newdest)); break; 
@@ -373,6 +379,7 @@ Program getProgram(Statement& stmt, SymAllocator& alloc) {
         case OP_POW:   dest.ASN(aaPOW(src[0], src[1], stmtSyms->newdest)); break;
         case OP_RCP:   dest.ASN(aaRCP(src[0], stmtSyms->newdest)); break; 
         case OP_RSQ:   dest.ASN(aaRSQ(src[0], stmtSyms->newdest)); break; 
+        case OP_SIN:   dest.ASN(aaSIN(src[0], stmtSyms->newdest)); break;
 #if 0
         case OP_RND:   return affineBinaryMonotonic<OP_RND>(N, valueType);
         case OP_SGN:   return affineBinaryMonotonic<OP_SGN>(N, valueType);
@@ -380,9 +387,8 @@ Program getProgram(Statement& stmt, SymAllocator& alloc) {
         case OP_SQRT:  dest.ASN(aaSQRT(src[0], stmtSyms->newdest)); break; 
         case OP_TEX:   dest.ASN(aaTEX(stmt.src[0], src[1], stmtSyms->dest, stmtSyms->newdest)); break; 
         case OP_TEXI:  dest.ASN(aaTEXI(stmt.src[0], src[1], stmtSyms->dest, stmtSyms->newdest)); break; 
+        case OP_UNION: dest.ASN(aaUNION(src[0], src[1], stmtSyms->newdest)); break;
 #if 0
-
-        case OP_UNION:   return affineUNION(N, valueType);
         case OP_ISCT:   return affineISCT(N, valueType);
         case OP_CONTAINS:   avCONTAINS(dest, src[0]); break;
         // @todo type add in some more operations
@@ -441,6 +447,7 @@ struct SymOpSplitterBase: public TransformerParent {
     }
 
     m_changed = true;
+    SH_DEBUG_PRINT_AHO("replacing " << stmt); 
 
     // replace stmt with a new program fragment
     Program newProgram = getProgram(stmt, *m_alloc); 
@@ -492,7 +499,7 @@ bool handleAaOps(ProgramNodePtr programNode) {
   AohDebugOn = !Context::current()->get_flag("aa_disable_debug"); 
 
   ostringstream idout;
-  idout << programNode->name() << "_" << programNode.object();
+  idout << programNode->name() /*<< "_" << programNode.object()*/;
   if(disableHier) idout << "_nohier";
   if(disableUniqMerge) idout << "_noum";
   idout << "_";

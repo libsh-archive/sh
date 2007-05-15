@@ -611,9 +611,7 @@ void optimize(Program& p, int level)
     SH_DEBUG_PRINT("---Optimizer pass " << pass << " BEGIN---");
     std::ostringstream s;
     s << p.name() << "_opt_" << pass;
-    std::ostringstream gvout; 
-    p.node()->ctrlGraph->graphviz_dump(gvout);
-    dotGen(gvout.str(), s.str()); 
+    p.node()->dump(s.str());
 #endif
 
     changed = false;

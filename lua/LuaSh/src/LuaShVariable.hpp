@@ -34,7 +34,7 @@ private:
     
 protected:
     // The actual internal Sh variable
-    SH::ShVariable *ShVar;
+    SH::Variable *ShVar;
 
 public:
     // Variables needed by the autobind template class
@@ -43,10 +43,10 @@ public:
     static const LuaBind<LuaShVariable>::tMethod Operators[];
 
     // Internal constructors
-    LuaShVariable(const SH::ShVariableNodePtr &node,
-                  const SH::ShSwizzle &swizzle, bool neg)
+    LuaShVariable(const SH::VariableNodePtr &node,
+                  const SH::Swizzle &swizzle, bool neg)
     {
-        ShVar = new SH::ShVariable(node, swizzle, neg);
+        ShVar = new SH::Variable(node, swizzle, neg);
     }
     
     

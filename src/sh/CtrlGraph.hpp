@@ -114,9 +114,11 @@ public:
   bool hasDecls() const { return !m_decls.empty(); }
 
   void removeDecl(const DeclIt& D) { m_decls.erase(D); }
+  void removeDecl(const VariableNodePtr& v) { m_decls.erase(v); }
 
   /** Inserts the given declarations into this */ 
   void insert_decls(DeclIt f, DeclIt l);
+
 
   /** Iterators into the decl set */ 
   DeclIt decl_begin() const;
@@ -278,6 +280,15 @@ public:
   /// node is unreferenced (as it might be deleted if allow_delete is true!)  
   void release_owned_node(CtrlGraphNode* node, bool allow_delete = true);
 
+  /// Globally disable delete
+  /// Ownership references are updated as usual, but this can be used when
+  /// performing a complex sequence of graph mangling ops where it is not
+  /// easy to ensure nodes are not accidentally deleted. 
+  static void disable_delete() { delete_enabled = false; }
+  static void enable_delete() { delete_enabled = true; }
+
+  int owned_count() { return m_owned_nodes.size(); }
+
 private:
   CtrlGraphNode* m_entry;
   CtrlGraphNode* m_exit;
@@ -286,11 +297,15 @@ private:
   NodeSet m_owned_nodes;
 
   /// Owner reference management functions
-  void add_owned_node(CtrlGraphNode *node) { m_owned_nodes.insert(node); }
+  void add_owned_node(CtrlGraphNode *node) { m_owned_nodes.insert(node); 
+  //SH_DEBUG_PRINT("owner: " << this << " node: " << node);
+  }
   void release_all_owned_nodes();
 
   // Allow nodes to call node management functions
   friend class CtrlGraphNode;  
+
+  static bool delete_enabled;
 };
 
 typedef Pointer<CtrlGraph> CtrlGraphPtr;

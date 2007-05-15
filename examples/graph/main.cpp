@@ -26,12 +26,25 @@ enum GraphMode {
   GR_POLY, // polynomial (tests MAD, ADD, MUL)
   GR_RATPOLY, // rational polynomial (MAD, ADD, MUL, RCP, DIV)
   GR_EXP, // exponential (EXP, EXP2, EXP10)
+  GR_EXP2, // exponential (EXP, EXP2, EXP10)
+  GR_EXP10, // exponential (EXP, EXP2, EXP10)
   GR_LOG, // logarithm (LOG, LOG2, LOG10)
+  GR_LOG2, // logarithm (LOG, LOG2, LOG10)
+  GR_LOG10, // logarithm (LOG, LOG2, LOG10)
   GR_RCP, // reciprocal (RCP) 
+  GR_TRACE, // trace test case
+  GR_DOT, // trace test case
   GR_SQRT, // square root (SQRT)
   GR_RSQ, // inverse square root
+  GR_SIN, // sin
+  GR_COS, // cos 
+  GR_ACOS, // acos 
+  GR_ASIN, // asin 
+  GR_ATAN, // atan 
   GR_FLR, // floor (FLR)
   GR_FRAC, // frac
+  GR_IF, // if branch
+  GR_IFELSE, // if-else branch
   GR_NORM, // norm
   /*
   GR_NOISE, // perlin noise
@@ -42,7 +55,7 @@ enum GraphMode {
   GR_MAX, // max of EXP and LOG 
   GR_MIN, // min of EXP and LOG 
   GR_LRP  // lerp between EXP and LOG (LRP, EXP, LOG)
-} mode = GR_POLY;
+} mode = GR_IFELSE; 
 const int NUMGRAPHS = (int)(GR_LRP) + 1;
 
 const char* GraphModeName[] = {
@@ -50,12 +63,25 @@ const char* GraphModeName[] = {
   "poly",
   "ratpoly",
   "exp",
+  "exp2",
+  "exp10",
   "log",
+  "log2",
+  "log10",
   "rcp",
+  "trace",
+  "dot",
   "sqrt",
   "rsq",
+  "sin",
+  "cos",
+  "acos",
+  "asin",
+  "atan",
   "floor",
   "frac",
+  "if",
+  "ifelse",
   "norm",
   /*
   "noise",
@@ -72,7 +98,7 @@ Attrib1f rangeWidth;
 Attrib1f eps;
 Attrib2f myoffset;
 Attrib1f myscale;
-Attrib1f myscale2;
+Attrib1f curveWidth;
 Attrib1f edge;
 Attrib1f edge2;
 Attrib1f edge3;
@@ -115,22 +141,85 @@ struct PlotFunction {
           case GR_RATPOLY:
             value = (t * mad(t, mad(t, coeff(3), coeff(2)), coeff(1)) + coeff(0))
               * rcp(mad(t, mad(t, denom(2), denom(1)), denom(0))); break; 
+            /*
+             value = mad(t, coeff(2), mad(t, coeff(1), coeff(0))) * 
+                     rcp(mad(t, denom(2), mad(t, denom(1), denom(0)))); break; */
           case GR_EXP:
-            value = exp(t); break;
+            value = exp(-(t*t)); break;
     //        value = exp(t) * coeff(0) + exp2(t) * coeff(1) + exp10(t) * coeff(2); break;
+          case GR_EXP2:
+            value = exp2(t); break;
+          case GR_EXP10:
+            value = exp10(t); break;
+
           case GR_LOG:
             value = log(t); break;
+          case GR_LOG2:
+            value = log2(t); break;
+          case GR_LOG10:
+            value = log10(t); break;
+
      //       value = log(t) * coeff(0) + log2(t) * coeff(1) + log10(t) * coeff(2); break;
           case GR_RCP:
             value = rcp(t); break;
+
+          case GR_TRACE: {
+            Point2f p = t(0,0) * ConstAttrib2f(-1, 1); 
+            //Point2f p =  t(0,0) * coeff(0, 1); 
+            //Point2f p =  mad(t(0,0), coeff(0, 1), denom(0, 1)); 
+            //Point3f p =  mad(t(0, 0,0), coeff(0, 1 2), denom(0, 1, 2)); 
+            //Attrib1f p2 = p | p; 
+            //Attrib1f p2 = p(0) * p(0) + p(1) * p(1); 
+            Attrib1f p2 = exp(p(0)) + exp(p(1)); 
+            //Attrib1f p2 = p(0) * p(0) + p(1) * p(1);
+            value = -p2;
+            //value = 2 * exp(-p2);
+            break;
+          }
+          case GR_DOT: {
+            Point3f p =  mad(t(0,0,0), coeff(0, 1, 2), denom(0, 1, 2)); 
+            value = p | p;
+            break;
+          }
           case GR_SQRT:
             value = sqrt(t); break;
           case GR_RSQ:
             value = rsqrt(t); break;
+
+          case GR_SIN:
+            value = sin(t); break;
+
+          case GR_COS:
+            value = cos(t); break;
+
+          case GR_ACOS:
+            value = acos(t); break;
+
+          case GR_ASIN:
+            value = asin(t); break;
+
+          case GR_ATAN:
+            value = atan(t); break;
+
           case GR_FLR:
             value = floor(t); break;
           case GR_FRAC:
             value = frac(t); break;
+
+          case GR_IF:
+            value = t;
+            SH_IF(t > coeff(0)) {
+              value = exp(t); 
+            } SH_ENDIF;
+            break;
+
+          case GR_IFELSE:
+            SH_IF(t > coeff(0)) {
+              value = exp(t); 
+            } SH_ELSE {
+              value = exp(-t);
+            } SH_ENDIF;
+            break;
           case GR_NORM:
             value = normalize(t); break;
 
@@ -172,9 +261,14 @@ void initShaders() {
     Matrix4x4f id;
     vsh = KernelLib::vsh(id, id);
     vsh = vsh << extract("lightPos") << ConstAttrib3f(0, 0, 0);
+    //Context::current()->optimization(0);
+    //Context::current()->set_flag("aa_disable_debug", false);
 
     rangeWidth.name("rangeWidth");
     rangeWidth = 0.1f; 
+
+    curveWidth.name("curveWidth");
+    curveWidth = 0.001f;
 
     eps.name("epsilon");
     eps = 0.005f; 
@@ -184,9 +278,6 @@ void initShaders() {
     
     myscale.name("myscale");
     myscale = 5.0f; 
-
-    myscale2.name("myscale2");
-    myscale2 = 20.0; 
 
     edge.name("edge");
     edge = 0.01;
@@ -201,7 +292,7 @@ void initShaders() {
     denom.name("denom");
 
     Color3f SH_DECL(funcColor) = ConstAttrib3f(0, 0, 0);
-    Color3f SH_DECL(bkgdColor) = ConstAttrib3f(1, 1, 1);
+    Color3f SH_DECL(bkgdColor) = ConstAttrib3f(.75, .75, .75);
     Color3f SH_DECL(gridColor) = ConstAttrib3f(.25, .25, .25);
     Color3f SH_DECL(inrangeColor) = ConstAttrib3f(0, 0, 0);
     Color3f SH_DECL(edgeColor) = ConstAttrib3f(0.5,0.5,0.5);
@@ -224,11 +315,13 @@ void initShaders() {
       Program func = plotfunc.func(static_cast<GraphMode>(i));
       Program ifunc = inclusion(func);
 
-      func.node()->dump(std::string("func_") + GraphModeName[i]); 
-      ifunc.node()->dump(std::string("ifunc_") + GraphModeName[i]); 
 
       Program afunc = affine_inclusion_syms(func);
+#ifdef DBG_MODE
+      func.node()->dump(std::string("func_") + GraphModeName[i]); 
+      ifunc.node()->dump(std::string("ifunc_") + GraphModeName[i]); 
       afunc.node()->dump(std::string("afunc_") + GraphModeName[i]); 
+#endif
 
       // if programs could take Program parameters, we wouldn't have to do this 
       // (although this could be factored out in C++ too...)
@@ -249,8 +342,12 @@ void initShaders() {
 
         // check if in curve
         Attrib1f SH_DECL(val) = func(pos(0));  // evaluate function 
-        Attrib1f deriv = abs(dx(val));
-        inCurve = abs(val - pos(1)) < scaled_eps * myscale2 * deriv; 
+        Attrib2f pnormal;
+        pnormal(0) = dx(val);
+        pnormal(1) = 1.0f;
+        pnormal = normalize(pnormal);
+        Attrib1f pfdelta = pos(1) - val; 
+        inCurve = abs(pfdelta * pnormal(1)) < myscale * curveWidth; 
 
         // check if in range
 
@@ -304,6 +401,7 @@ void initShaders() {
 
 #endif
         inEdge = inEdge || (inRange && (abs(pos(0) - center) - rangeWidth > -edge));
+        inEdge = 0.0f;
 
 
 
@@ -315,16 +413,26 @@ void initShaders() {
         //color=pos(0,1,0);
         //color = abs(dx(val))(0, 0, 0) * myscale2;
         //color = inCurve(0,0,0);
+        //color = abs(pfdelta * pnormal(1))(0,0,0) / myscale;
+        //color = abs(pnormal(1,1,1));
         Context::current()->parsing()->name(std::string("initial_fsh_") + GraphModeName[i]);
       } SH_END;
 
       fsh[i].name(string("fsh_") + GraphModeName[i]);
-      placeAaSyms(fsh[i].node(), true);
-      fsh[i].node()->dump(std::string("fsh_") + GraphModeName[i]);
+      cout << "done building: " << GraphModeName[i] << endl;
+#ifdef DBG_MODE
+      Program foo(fsh[i].node()->clone());
+      placeAaSyms(foo.node(), true);
+      foo.node()->dump(std::string("foo_") + GraphModeName[i]);
+      handleAaOps(foo.node());
+      foo.node()->dump(std::string("foo_aaop_") + GraphModeName[i]);
+#endif
     }
     vsh = namedAlign(vsh, fsh[mode]);
+#ifdef DBG_MODE
     vsh.name("vsh");
     vsh.node()->dump("vsh");
+#endif
 }
 
 GLuint displayList;
@@ -456,24 +564,39 @@ void keyboard(unsigned char k, int x, int y)
                 else mode = static_cast<GraphMode>(mode - 1);
                 bind(fsh[mode]); break;
 
-      case 'a': myscale2 *= 1.05f; break;
-      case 'z': myscale2 /= 1.05f; break; 
+      case '\\': {
+        Program foo(fsh[mode].node()->clone());
+        placeAaSyms(foo.node());
+        foo.node()->dump("current_aa");
+        handleAaOps(foo.node());
+        foo.node()->dump("current_aa_ops");
+        break;
+      }
+
       case 's': edge *= 1.05f; break;
       case 'x': edge /= 1.05f; break; 
       case 'd': edge2 *= 1.05f; break;
       case 'c': edge2 /= 1.05f; break; 
       case 'f': edge3 *= 1.05f; break;
       case 'v': edge3 /= 1.05f; break; 
+      case 'g': curveWidth *= 1.05f; break;
+      case 'b': curveWidth /= 1.05f; break; 
     }
+    cout << coeff << endl;
   glutPostRedisplay();
 }
 
 int main(int argc, char** argv)
 {
+  /*
   coeff(0) = 1.0f; 
   coeff(1) = 1.0f; 
   coeff(2) = 1.5f; 
   coeff(3) = -1.0; 
+  */
+  coeff(0) = 0.0f;
+  coeff(1) = 1.0f;
+  coeff(2) = 0.0f;
 
   denom(0) = 1.0f;
   denom(1) = denom(2) = 0.0f;

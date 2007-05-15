@@ -405,7 +405,7 @@ void CcBackendCode::emit(CtrlGraphNode* node)
 bool CcBackendCode::generate(void) 
 {
   // Transform the code to remove types this backend cannot handle
-  m_program = m_original_program->clone();
+  m_program = m_original_program->clone(false);
   Context::current()->enter(m_program);
   Transformer transform(m_program);
 

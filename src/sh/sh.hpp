@@ -71,6 +71,7 @@
 #include "MemoryDep.hpp"
 #include "Palette.hpp"
 #include "Inclusion.hpp"
+#include "AutoDiff.hpp"
 
 // @todo range - probably don't want to include all of these
 #include "Structural.hpp"

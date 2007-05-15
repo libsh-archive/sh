@@ -1,3 +1,48 @@
+2007-05-14 Bryan Chan <b8chan@cgl.uwaterloo.ca>
+	* examples/sh/go:
+		Switched to wxWidgets,
+		Added GENMOD style generative modelling constructs,
+		Parametric curve/surface plotting,
+		Global optimization for computing distance between two parametric manifolds,
+		SVG curve/bezier patch file input
+
+ 	* examples/sh/implicit:
+		Added a few more implicit functions
+		Added more graphs showing the branch&bound in progress  
+		Fixed a few 
+
+	* src/sh/IntervalImpl.hpp, IntervalConverter.cpp, AaOps.hpp, 
+		AaOps.cpp, AaOpHandler.cpp:
+		Added in a few more ops (sin, cos, asin, acos, atan, comparison)
+		Fixed some bugs (when inputs are outside valid function ranges)
+
+	* src/sh/AutoDiff.hpp, AutoDiff.cpp:
+		Automatic differentiation on Programs for every op that 
+		is easy 
+
+	* src/sh/LiveVarFinder.cpp, Optimizations.hpp,  
+		AaSymPlacer.cpp, AaHier.hpp, AaHier.cpp, Structural.hpp, Structural.cpp:
+		Replaced hierarchical condensation with a simpler analysis using classic 
+		live variables.
+
+	* src/sh/RangeBranchFixer.cpp, CtrlGraph.hpp, CtrlGraph.cpp:
+		Fixed this up for CFG ownership changes. 
+		(Added a no-delete flag so nodes don't disappear when they change 
+		owners in messy mangles)
+
+	* src/sh/Context.hpp:
+		Silly hack to allow multiple contexts (e.g. multiple OpenGL widgets in an application)
+
+  * src/sh/LibArith.hpp:
+		Oddly log10 and exp10 were named log and exp? (and not a peep from the
+		compiler?!) 
+
+ 	* src/sh/Transformer.cpp:
+		Fixed a negation bug in the variable splitter 
+
+	* src/sh/Program.hpp, Program.cpp, ProgramNode.hpp, ProgramNode.cpp:
+	  Changed clone() to allow copying non-uniform/const variables, if requested. 
+
 2007-04-14 Bryan Chan <b8chan@cgl.uwaterloo.ca>
 	Merged trunk in up to r3920
 

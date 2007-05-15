@@ -1,7 +1,7 @@
 #include <iomanip>
 #include <ctype.h>
 #include "ExprParser.hpp"
-#include <sh/ShEvaluate.hpp>
+#include <sh/Evaluate.hpp>
 
 using namespace SH;
 using namespace std;
@@ -10,7 +10,7 @@ bool DBG =  false;
 
 #define DOUT(s) { if(DBG) { std::cout << setw(m_indent) << " " << s << endl; } }
 
-ShVariable ExprParser::registerVar(std::string name, ShVariable var) {
+Variable ExprParser::registerVar(std::string name, Variable var) {
   if(m_streams.find(name) != m_streams.end()) { 
     std::cerr << "Warning: Replacing stream " << name << endl; 
     m_streams.erase(name);
@@ -25,12 +25,12 @@ bool ExprParser::hasVar(std::string name) {
   return m_vars.find(name) != m_vars.end(); 
 }
 
-SH::ShVariable ExprParser::getVar(std::string name) {
-  if(!hasVar(name)) return ShVariable();
+SH::Variable ExprParser::getVar(std::string name) {
+  if(!hasVar(name)) return Variable();
   return m_vars[name];
 }
 
-ShStream ExprParser::registerStream(std::string name, ShStream stream) {
+Stream ExprParser::registerStream(std::string name, Stream stream) {
   if(m_vars.find(name) != m_vars.end()) {
     std::cerr << "Warning: Replacing var " << name << endl; 
     m_vars.erase(name);
@@ -45,24 +45,24 @@ bool ExprParser::hasStream(std::string name) {
          (m_vars.find(name) != m_vars.end() && m_vars[name].node()->hasValues()); 
 }
 
-SH::ShStream ExprParser::getStream(std::string name) {
+SH::Stream ExprParser::getStream(std::string name) {
   if(m_streams.find(name) == m_streams.end()) {
     if(hasVar(name) && m_vars[name].node()->hasValues()) { 
       return varToStream(m_vars[name]);
     } else {
-      return ShStream();
+      return Stream();
     }
   }
   return m_streams[name];
 }
 
-void ExprParser::registerFunc(std::string name, ShProgram func) {
+void ExprParser::registerFunc(std::string name, Program func) {
   func.name(name);
   m_funcs[name] = func;
   func.name(name);
 }
 
-ShProgram& ExprParser::operator[](std::string name) {
+Program& ExprParser::operator[](std::string name) {
   return m_funcs[name];
 }
 
@@ -93,7 +93,7 @@ void ExprParser::parse(std::string stmtlist) {
   parse_stmtlist();
 }
 
-SH::ShVariable ExprParser::parse_expr(std::string expr) {
+SH::Variable ExprParser::parse_expr(std::string expr) {
   m_stmtlist = expr; 
   m_cur = 0;
   m_end = expr.length(); 
@@ -133,16 +133,16 @@ void ExprParser::parse_directive() {
   debugExit();
 }
 
-ShVariable ExprParser::parse_decl() {
+Variable ExprParser::parse_decl() {
   debugEnter("decl");
   eatChar('@');
   string shtype = token();
   string name = token();
-  ShVariable result = registerVar(name, makeVar(shtype));
+  Variable result = registerVar(name, makeVar(shtype));
   eatWs();
   if(peek() == '=') {
     eatChar('=');
-    ShVariable init = parse_expr();
+    Variable init = parse_expr();
     shASN(result, init);
     DOUT("Initialized " << name << " = " << init);
   }
@@ -161,17 +161,17 @@ bool ExprParser::parse_asmop() {
   for(;opInfo[i].name != 0; ++i) {
     if(first == opInfo[i].name) {
       int arity = opInfo[i].arity;
-      ShVariable dest = parse_expr(); 
-      ShStatement stmt(dest, static_cast<ShOperation>(i));
+      Variable dest = parse_expr(); 
+      Statement stmt(dest, static_cast<Operation>(i));
 
       for(int j = 0; j < arity; ++j) {
         eatChar(',');
         stmt.src[j] = parse_expr();
       }
 
-      // decision taken from ShInstructions.cpp
-      if(ShContext::current()->parsing()) {
-        ShContext::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
+      // decision taken from Instructions.cpp
+      if(Context::current()->parsing()) {
+        Context::current()->parsing()->tokenizer.blockList()->addStatement(stmt);
       } else {
         evaluate(stmt);
       }
@@ -184,9 +184,9 @@ bool ExprParser::parse_asmop() {
   return false;
 }
 
-ShVariable ExprParser::parse_expr() { 
+Variable ExprParser::parse_expr() { 
   debugEnter("expr = ");
-  ShVariable lhs = parse_expr0();
+  Variable lhs = parse_expr0();
   eatWs();
   char next = peek();
   if(next != '=') { 
@@ -195,7 +195,7 @@ ShVariable ExprParser::parse_expr() {
   }
   DOUT("operator " << next);
   eatChar('=');
-  ShVariable rhs = parse_expr();
+  Variable rhs = parse_expr();
   SH_DEBUG_ASSERT(lhs.size() == rhs.size());
   shASN(lhs, rhs);
 
@@ -204,9 +204,9 @@ ShVariable ExprParser::parse_expr() {
   return lhs;
 }
 
-ShVariable ExprParser::parse_expr0() { 
+Variable ExprParser::parse_expr0() { 
   debugEnter("expr0 = ");
-  ShVariable lhs = parse_expr1();
+  Variable lhs = parse_expr1();
   eatWs();
   char next = peek();
   if(next != '|') { 
@@ -215,9 +215,9 @@ ShVariable ExprParser::parse_expr0() {
   }
   DOUT("operator " << next);
   eatChar('|');
-  ShVariable rhs = parse_expr0();
-  ShValueType rvt = lhs.valueType();
-  ShVariable result(new ShVariableNode(SH_TEMP, 1, rvt));
+  Variable rhs = parse_expr0();
+  ValueType rvt = lhs.valueType();
+  Variable result(new VariableNode(SH_TEMP, 1, rvt));
   SH_DEBUG_ASSERT(lhs.size() == rhs.size());
   shDOT(result, lhs, rhs);
   DOUT("expr0 = " << result);
@@ -225,9 +225,9 @@ ShVariable ExprParser::parse_expr0() {
   return result;
 }
 
-ShVariable ExprParser::parse_expr1() { 
+Variable ExprParser::parse_expr1() { 
   debugEnter("expr +-");
-  ShVariable result = parse_expr2();
+  Variable result = parse_expr2();
   while(true) {
     eatWs();
     char next = peek();
@@ -236,10 +236,10 @@ ShVariable ExprParser::parse_expr1() {
     }
     DOUT("operator " << next);
     ++m_cur;
-    ShVariable rhs = parse_expr2();
+    Variable rhs = parse_expr2();
     int rsize = max(result.size(), rhs.size());
-    ShValueType rvt = result.valueType();
-    ShVariable temp(new ShVariableNode(SH_TEMP, rsize, rvt));
+    ValueType rvt = result.valueType();
+    Variable temp(new VariableNode(SH_TEMP, rsize, rvt));
     switch(next) {
       case '+': shADD(temp, result, rhs); break;
       case '-': shADD(temp, result, -rhs); break;
@@ -251,9 +251,9 @@ ShVariable ExprParser::parse_expr1() {
   return result;
 }
 
-ShVariable ExprParser::parse_expr2() { 
+Variable ExprParser::parse_expr2() { 
   debugEnter("expr2 */%");
-  ShVariable result = parse_expr3();
+  Variable result = parse_expr3();
   while(true) {
     eatWs();
     char next = peek();
@@ -262,10 +262,10 @@ ShVariable ExprParser::parse_expr2() {
     }
     DOUT("operator " << next);
     ++m_cur;
-    ShVariable rhs = parse_expr3();
+    Variable rhs = parse_expr3();
     int rsize = max(result.size(), rhs.size());
-    ShValueType rvt = result.valueType();
-    ShVariable temp(new ShVariableNode(SH_TEMP, rsize, rvt));
+    ValueType rvt = result.valueType();
+    Variable temp(new VariableNode(SH_TEMP, rsize, rvt));
     switch(next) {
       case '*': shMUL(temp, result, rhs); break;
       case '/': shDIV(temp, result, rhs); break;
@@ -278,7 +278,7 @@ ShVariable ExprParser::parse_expr2() {
   return result;
 }
 
-ShVariable ExprParser::parse_expr3() { 
+Variable ExprParser::parse_expr3() { 
   debugEnter("expr3 unary -");
   eatWs();
   char next = peek();
@@ -289,7 +289,7 @@ ShVariable ExprParser::parse_expr3() {
     eatWs();
     next = peek();
   }
-  ShVariable result = parse_expr4(); 
+  Variable result = parse_expr4(); 
   result = negate ? -result : result;
 
   DOUT("expr3 = " << result);
@@ -298,9 +298,9 @@ ShVariable ExprParser::parse_expr3() {
 }
 
 
-ShVariable ExprParser::parse_expr4() { 
+Variable ExprParser::parse_expr4() { 
   debugEnter("expr4");
-  ShVariable result; 
+  Variable result; 
   eatWs();
   char next = peek();
   if(isalpha(next)) {
@@ -309,14 +309,14 @@ ShVariable ExprParser::parse_expr4() {
       result = m_vars[tok];
       eatWs();
       if(peek() == '(') {
-        ShSwizzle swiz = parse_swiz(result.size());
+        Swizzle swiz = parse_swiz(result.size());
         result = result(swiz);
       }
     } else if(m_funcs.find(tok) != m_funcs.end()) {
-      ShProgram func = m_funcs[tok];
-      ShRecord args = parse_arglist();
-      result = ShVariable((*func.outputs_begin())->clone(
-            SH_TEMP, 0, SH_VALUETYPE_END, SH_SEMANTICTYPE_END,
+      Program func = m_funcs[tok];
+      Record args = parse_arglist();
+      result = Variable((*func.begin_outputs())->clone(
+            SH_TEMP, 0, VALUETYPE_END, SEMANTICTYPE_END,
             true, false));
       result = func(args); 
     } else {
@@ -326,14 +326,14 @@ ShVariable ExprParser::parse_expr4() {
     eatChar('@');
     result = makeVar(token());
     std::vector<float> consts = parse_constlist();
-    if(shIsInterval(result.valueType())) { 
+    if(isInterval(result.valueType())) { 
       DOUT("const list - interval"); 
       // @todo factor out and merge with branch below 
       // (virtually the same code)
       SH_DEBUG_ASSERT(consts.size() * 2 == result.size());
       size_t N = result.size();
       
-      ShDataVariant<ShInterval<float> > val(N);
+      DataVariant<Interval<float> > val(N);
       for(size_t i = 0; i < N; ++i) {
         val[i].lo() = consts[2 * i];
         val[i].hi() = consts[2 * i + 1];
@@ -342,7 +342,7 @@ ShVariable ExprParser::parse_expr4() {
       if(result.node()->kind() == SH_CONST) {
         result.setVariant(&val);
       } else {
-        ShVariable newconst(new ShVariableNode(SH_CONST, N, SH_I_FLOAT, SH_ATTRIB));
+        Variable newconst(new VariableNode(SH_CONST, N, SH_I_FLOAT, SH_ATTRIB));
         newconst.setVariant(&val);
         shASN(result, newconst);
       }
@@ -351,7 +351,7 @@ ShVariable ExprParser::parse_expr4() {
       SH_DEBUG_ASSERT(consts.size() == result.size());
       size_t N = result.size();
 
-      ShDataVariant<float> val(N);
+      DataVariant<float> val(N);
       for(size_t i = 0; i < N; ++i) {
         val[i] = consts[i];
         DOUT(i << ": " << consts[i]);
@@ -360,13 +360,13 @@ ShVariable ExprParser::parse_expr4() {
       if(result.node()->kind() == SH_CONST) {
         result.setVariant(&val);
       } else {
-        ShVariable newconst(new ShVariableNode(SH_CONST, N, SH_FLOAT, SH_ATTRIB));
+        Variable newconst(new VariableNode(SH_CONST, N, SH_FLOAT, SH_ATTRIB));
         newconst.setVariant(&val);
         shASN(result, newconst);
       }
     }
   } else if(isdigit(next)) {
-    result = ShConstAttrib1f(real()); 
+    result = ConstAttrib1f(real()); 
   } else if (next == '(') {
     eatChar('(');
     result = parse_expr();
@@ -380,9 +380,9 @@ ShVariable ExprParser::parse_expr4() {
   return result;
 }
 
-ShRecord ExprParser::parse_arglist() { 
+Record ExprParser::parse_arglist() { 
   debugEnter("arglist");
-  ShRecord result;
+  Record result;
   eatWs();
   if(!eatChar('(')) return result;
   for(;;) {
@@ -417,7 +417,7 @@ std::vector<float> ExprParser::parse_constlist() {
   return result;
 }
 
-ShSwizzle ExprParser::parse_swiz(int srcSize) {
+Swizzle ExprParser::parse_swiz(int srcSize) {
   vector<int> indices;
   eatChar('(');
   for(;;) {
@@ -435,7 +435,7 @@ ShSwizzle ExprParser::parse_swiz(int srcSize) {
   }
   int *temp = new int[indices.size()];
   std::copy(indices.begin(), indices.end(), temp);
-  ShSwizzle result(srcSize, indices.size(), temp);
+  Swizzle result(srcSize, indices.size(), temp);
   delete[] temp;
   eatWs();
   eatChar(')');
@@ -512,11 +512,11 @@ void ExprParser::restore() {
   m_cur = m_save;
 }
 
-ShVariable ExprParser::makeVar(string shtype) {
+Variable ExprParser::makeVar(string shtype) {
   int size = 1;
-  ShValueType vt = SH_FLOAT;
-  ShSemanticType type = SH_ATTRIB;
-  ShBindingType kind = SH_TEMP;
+  ValueType vt = SH_FLOAT;
+  SemanticType type = SH_ATTRIB;
+  BindingType kind = SH_TEMP;
   size_t i = 0;
   string foo;
   int temp = 0;
@@ -570,20 +570,17 @@ ShVariable ExprParser::makeVar(string shtype) {
       foo = foo + ci;
     }
   }
-  return ShVariable(new ShVariableNode(kind, size, vt, type));
+  return Variable(new VariableNode(kind, size, vt, type));
 }
 
-ShStream ExprParser::varToStream(ShVariable& var) {
+Stream ExprParser::varToStream(Variable& var) {
   DOUT("Converting var --> stream " << var.node()->nameOfType() << " " << var.name());
   SH_DEBUG_ASSERT(var.node()->hasValues());
-  ShVariantPtr variant = var.node()->getVariant();
-  ShMemoryPtr mem = new ShHostMemory(var.size() * variant->datasize(), variant->array());
-  ShChannelNodePtr channel = new ShChannelNode(var.node()->specialType(),
-                                    var.size(),
-                                    var.valueType(),
-                                    mem,
-                                    1);
-  return ShStream(channel);
+  VariantPtr variant = var.node()->getVariant();
+  MemoryPtr mem = new HostMemory(var.size() * variant->datasize(), variant->array(), var.valueType());
+  TextureNodePtr channel = new TextureNode(SH_TEXTURE_1D, var.size(), var.valueType(), ArrayTraits(), 1);
+  channel->memory(mem, 1);
+  return Stream(BaseTexture(channel));
 }
 
 void ExprParser::debugEnter(std::string node) {

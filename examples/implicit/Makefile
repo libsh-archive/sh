@@ -6,8 +6,8 @@ SOURCES = $(wildcard *.cpp)
 OBJECTS = $(SOURCES:.cpp=.o)
 DEPENDS = $(SOURCES:.cpp=.d)
 LIBS = -lglut -lGL -lGLU -lsh -lshutil -lpthread
-LDFLAGS = -L$(SH_INSTALL_DIR)/lib $(LIBS)
-INCLUDES = -I$(SH_INSTALL_DIR)/include
+LDFLAGS = -L$(SH_INSTALL_DIR)/lib $(LIBS) `pkg-config libxml++-2.6 --libs` `wx-config --libs std,gl`
+INCLUDES = -I$(SH_INSTALL_DIR)/include `pkg-config libxml++-2.6 --cflags` `wx-config --cflags std,gl`
 CPPFLAGS = $(INCLUDES) 
 CXXFLAGS = $(CPPFLAGS) -Wall -g -O2
 CXX = g++

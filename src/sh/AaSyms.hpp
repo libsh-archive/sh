@@ -34,7 +34,7 @@
 #include "DllExport.hpp"
 
 // enable this to turn on all AA debugging
-// #define DBG_AA
+//#define DBG_AA
 
 namespace SH {
 

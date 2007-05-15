@@ -55,7 +55,8 @@ Pointer<T>::Pointer(const Pointer<T>& other)
   : m_object(other.m_object)
 {
 #ifdef REFCOUNT_DEBUGGING
-  SH_DEBUG_ASSERT((unsigned long)m_object < 0xb0000000L);
+  //SH_DEBUG_ASSERT((unsigned long)m_object < 0xb0000000L);
+  // not valid on 64-bit systems? 
   RCDEBUG_BLUE;
   std::cerr << "[copy] " << std::flush << std::setw(10) << other.m_object << " <" << (other.m_object ? typeid(*(other.m_object)).name() : "n/a") << ">" << std::endl;
   RCDEBUG_NORMAL;

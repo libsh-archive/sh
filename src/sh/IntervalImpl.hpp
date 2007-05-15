@@ -123,6 +123,7 @@ Interval<T>& Interval<T>::operator+=(const T &value)
 {
   m_lo += value;
   m_hi += value;
+  return *this;
 }
 
 template<typename T>
@@ -444,7 +445,24 @@ Interval<TT> atanh(const Interval<TT> &a)
 template<typename TT>
 Interval<TT> cos(const Interval<TT> &a) 
 {
-  //@todo
+  Interval<TT> flra = a;
+  flra /= M_PI;
+  flra = floor(flra);
+  if(flra.lo() == flra.hi()) { // monotonic
+    TT flo = std::cos(a.lo());
+    TT fhi = std::cos(a.hi());
+    return Interval<TT>(std::min(flo, fhi), std::max(flo, fhi));
+  } else if (flra.lo() + 1 == flra.hi()) { // partial
+    TT flo = std::cos(a.lo());
+    TT fhi = std::cos(a.hi());
+    Interval<TT> result(std::min(flo, fhi), std::max(flo, fhi));
+    if(::fmod(flra.lo(), 2.0) == 0) {
+      result.lo() = -1;
+    } else {
+      result.hi() = 1;
+    }
+    return result;
+  } 
   return Interval<TT>(-1, 1);
 }
 
@@ -458,8 +476,9 @@ Interval<TT> cosh(const Interval<TT> &a)
 template<typename TT>
 Interval<TT> sin(const Interval<TT> &a) 
 {
-  // @todo
-  return Interval<TT>(-1, 1);
+  Interval<TT> temp = a;
+  temp += -M_PI / 2;
+  return cos(temp);
 }
 
 template<typename TT>

@@ -37,6 +37,7 @@
 #include "Inclusion.hpp"
 #include "AaHier.hpp"
 #include "AaSymPlacer.hpp"
+#include "RangeBranchFixer.hpp"
 
 #ifdef DBG_AA
 bool AaspDebugOn = true; 
@@ -93,6 +94,54 @@ void symComment(Statement& stmt, AaStmtSyms* syms) {
   }
 }
 
+/* Pulls out any interval definitions later used in affine ops so repeated uses end 
+ * up with the same error symbols */ 
+struct IntervalPullerBase: public TransformerParent 
+{
+  /* Gather syms for vars */
+  bool handleStmt(BasicBlock::StmtList::iterator& I, CtrlGraphNode* node)
+  {
+    Statement& stmt = *I;
+    if(stmt.dest.null()) return false;
+    if(!isInterval(stmt.dest.valueType())) return false;
+    SH_DEBUG_PRINT_ASP("IPB Handling statement " << stmt);
+
+    ++I;
+
+    ValueTracking* vt = stmt.get_info<ValueTracking>();
+    Variable aaDup(0);
+    for(size_t i = 0; i < stmt.dest.size(); ++i) {
+      ValueTracking::DefUseChain::iterator U = vt->uses[i].begin();
+      for(;U != vt->uses[i].end(); ++U) {
+        if(U->kind != ValueTracking::Use::STMT) continue;
+        bool aastmt = false;
+        Statement* us = U->stmt;
+        if(!us->dest.null()) {
+          aastmt |= isAffine(us->dest.valueType());
+        }
+        for(size_t j = 0; us->src.size() < 3; ++j) {
+          if(us->src[j].null()) break;
+          aastmt |= isAffine(us->src[j].valueType());
+        }
+        if(aastmt) {
+          SH_DEBUG_PRINT_ASP("  fixing use in stmt " << *us);
+          if(aaDup.null()) {
+            aaDup = Variable(stmt.dest.node()->clone(SH_TEMP, 0, affineValueType(stmt.dest.valueType())));
+            aaDup.name(stmt.dest.node()->name() + "_i2aa_dup");
+            node->block->insert(I, Statement(aaDup, OP_ASN, Variable(stmt.dest.node()))); 
+          }
+          Variable &use = us->src[U->source];
+          use = Variable(aaDup.node(), use.swizzle(), use.neg());  
+        } 
+      }
+    }
+
+
+    return true;
+  }
+};
+typedef DefaultTransformer<IntervalPullerBase> IntervalPuller;
+
 
 /* Places symbols for inputs, intervals used as sources, and statement
  * destinations when a statement is non-affine.
@@ -111,10 +160,8 @@ struct SymTransferBase: public TransformerParent
    * Assigns the worklist to fill with w
    *
    * This must be called exactly once before each transform call */
-  void init(SectionTree* s, const AaVarSymsMap* inputs) 
+  void init(const AaVarSymsMap* inputs) 
   {
-    sectionTree = s; 
-
     psyms->inputs = *inputs;
     int max_index = -1;
     for(AaVarSymsMap::const_iterator I = inputs->begin(); I != inputs->end(); ++I) {
@@ -140,7 +187,10 @@ struct SymTransferBase: public TransformerParent
       if(!isAffine(node->valueType())) continue; 
       else if(psyms->inputs.find(node) != psyms->inputs.end()) continue;
 
-      psyms->inputs[node] = AaSyms(node->size(), false);
+      AaSyms& as = psyms->inputs[node] = AaSyms(node->size(), false);
+      for(int i = 0; i < as.size(); ++i) {
+        input_symbols |= as[i];
+      }
       insertSyms(0, psyms->inputs[node]);
       m_changed = true;
 
@@ -166,9 +216,10 @@ struct SymTransferBase: public TransformerParent
     Statement& stmt = *I;
     if(stmt.dest.null()) return false;
 
-    // get node nesting level
-    SectionNodePtr section = (*sectionTree)[node]; 
-    int level = section->depth();
+    // get node nesting level in structural tree
+    StmtDepth* sd = I->get_info<StmtDepth>();
+    int level = 0;
+    if(sd) level = sd->depth();
 
     AaStmtSyms *stmtSyms = new AaStmtSyms(level, &stmt); 
     stmt.destroy_info<AaStmtSyms>();
@@ -184,8 +235,9 @@ struct SymTransferBase: public TransformerParent
     // or dests in the statement.
 
     /* Handle inputs and IA sources */ 
+    bool aa_op = isAffine(stmt.dest.valueType()); /* whether the stmt is an affine arithmetic op */
     for(int i = 0; i < opInfo[stmt.op].arity; ++i) {
-
+      if(isAffine(stmt.src[i].valueType())) aa_op = true;
       if(psyms->inputs.find(stmt.src[i].node()) != psyms->inputs.end()) {
         if(!vt) {
           SH_DEBUG_PRINT("vt missing for stmt=" << stmt);
@@ -214,7 +266,7 @@ struct SymTransferBase: public TransformerParent
     }
 
     // check if op adds a symbol to the output, if so, add it 
-    if(opInfo[stmt.op].affine_add && isRange(stmt.dest.valueType())) { 
+    if(aa_op && opInfo[stmt.op].affine_add && isRange(stmt.dest.valueType())) { 
       // special cases where more than one sym need to be inserted
       switch(stmt.op) {
         case OP_NORM:
@@ -338,6 +390,9 @@ struct SymTransferBase: public TransformerParent
 
   // levelSyms[i] represents the symbols inserted at nesting level i 
   SymLevelVec levelSyms;
+
+  // input symbols 
+  AaIndexSet input_symbols;
 
   private:
     /* Transfer function for noise symbol dataflow propagation.
@@ -490,6 +545,7 @@ struct SymTransferBase: public TransformerParent
     }
     // current worklist
     WorkList worklist;
+
 };
 typedef DefaultTransformer<SymTransferBase> SymTransfer;
 
@@ -506,6 +562,14 @@ typedef DefaultTransformer<SymTransferBase> SymTransfer;
  *
  * dead = (def union in) - out 
  * (may also include def 
+ *
+ * rchout = reaching defs after this statement (as found in Valuetracking.cpp)
+ *          (used only on last statement in a block to make live def analysis tighter))
+ *
+ * This alters the computation of out, which is normally
+ *    out = union_{S in succs} in(S)
+ * to be
+ *    out' = out intersect rchout 
  * 
  * pred/succ are statements that come before after this statement 
  *    (0 may be used in the pred list if statement can be first 
@@ -518,7 +582,7 @@ typedef set<ValueTracking::Def> DefSet;
 typedef set<Statement*> StmtSet;  
 struct LiveDef: public Info 
 {
-  DefSet in, use, def, out;
+  DefSet in, use, def, out, rchout;
   DefSet dead; 
 
   // @todo should be computing these from CFG, but don't  
@@ -535,6 +599,11 @@ struct LiveDef: public Info
 ostream& operator<<(ostream& out, const DefSet& ds) {
   int lastIndex = -1;
   for(DefSet::const_iterator D = ds.begin(); D != ds.end(); ++D) {
+    if(D->kind == ValueTracking::Def::SH_INPUT) {
+      out << "in[" << D->node->name() << "](" << D->index << ")";
+      continue;
+    }
+
     StmtIndex* stmtIdx = D->stmt->get_info<StmtIndex>();
     SH_DEBUG_ASSERT(stmtIdx);
     if(lastIndex != stmtIdx->index()) {
@@ -567,7 +636,7 @@ ostream& operator<<(ostream& out, const StmtSet& ss) {
 
 ostream& operator<<(ostream& out, const LiveDef& ld) {
   out << "<LiveDef in: " << ld.in << " use: " << ld.use << " def:" << ld.def
-      << " out:" << ld.out << " dead:" << ld.dead 
+      << " out:" << ld.out << " rchout: " << ld.rchout << " dead:" << ld.dead 
       << " pred: " << ld.pred << " succ:" << ld.succ << ">";
   return out;
 }
@@ -689,12 +758,16 @@ typedef DefaultTransformer<StmtClosureBase> StmtClosure;
 // Initializes use, def sets and pred, succ sets 
 struct LiveDefFinderBase: TransformerParent {
   StmtWorkList worklist;
+  ReachingDefs* rchDef;
 
   void start(ProgramNodePtr program) {
     TransformerParent::start(program);
 
     StmtClosure sc;
     sc.transform(program);
+
+    rchDef = program->get_info<ReachingDefs>();
+    SH_DEBUG_ASSERT(rchDef);
   }
 
   bool handleStmt(BasicBlock::StmtList::iterator &I, CtrlGraphNode* node) 
@@ -719,9 +792,7 @@ struct LiveDefFinderBase: TransformerParent {
       for(J = vt->defs.begin(); J != vt->defs.end(); ++J) {
         for(K = J->begin(); K != J->end(); ++K) {
           for(L = K->begin(); L != K->end(); ++L) {
-            if(L->kind == ValueTracking::Def::STMT) {
-              insert(liveDef->use, *K);
-            }
+            insert(liveDef->use, *K);
           }
         }
       }
@@ -744,6 +815,17 @@ struct LiveDefFinderBase: TransformerParent {
 
     if(&*I == &*node->block->rbegin()) {
       insert(liveDef->succ, nodeAdj->succ); 
+      // also set up rchout
+      SH_DEBUG_ASSERT(rchDef->out.find(node) != rchDef->out.end());
+      const BitSet& nodeOut = rchDef->out[node];
+      for(int i = 0; i < rchDef->defs.size(); ++i) {
+        ReachingDefs::Definition &d = rchDef->defs[i];
+        for(int j = 0; j < d.size(); ++j) {
+          if(nodeOut[d.off(j)]) {
+            liveDef->rchout.insert(d.toDef(j));
+          }
+        }
+      }
     } else {
       BasicBlock::StmtList::iterator J = I;
       ++J;
@@ -809,14 +891,20 @@ struct LiveDefFinderBase: TransformerParent {
 
       LiveDef* ld = stmt->get_info<LiveDef>();
 
-      // update out(N) = union in(S), S is in succ(N)
+      // update out(N) = (union in(S), S is in succ(N)) intersect rchout(N)
+      // (ignore rchout part if stmt is not last) 
       StmtSet::iterator S = ld->succ.begin();
       for(; S != ld->succ.end(); ++S) {
         if(!*S) { // don't need to consider exit...it's alread considered
           continue;
         }
         LiveDef* Sld = (*S)->get_info<LiveDef>();
-        insert(ld->out, Sld->in);
+        if(ld->rchout.empty()) {
+          insert(ld->out, Sld->in);
+        } else {
+          set_intersection(Sld->in.begin(), Sld->in.end(), ld->rchout.begin(), ld->rchout.end(),
+                           inserter(ld->out, ld->out.begin()));
+        }
       }
 
       size_t inCount = ld->in.size();
@@ -833,6 +921,12 @@ struct LiveDefFinderBase: TransformerParent {
       }
 
       SH_DEBUG_PRINT_ASP("LiveDef - Prop - " << *stmt << " = " << *ld << ", out - def = " << outLessDef);
+      /*
+      ostringstream sout;
+      sout << *ld;
+      stmt->destroy_info<InfoComment>();
+      stmt->add_info(new InfoComment(sout.str()));
+      */
     }
   }
 };
@@ -880,11 +974,15 @@ struct SymCount
   typedef pair<VariableNodePtr, int> Element;  
   typedef map<Element, SymCountMap> VarCountMap;
   VarCountMap varCount;
+  AaProgramSyms* psyms;
+
+  SymCount(): psyms(0) {}
   
 
   // Re-initializes count from a set of live definitions 
-  void init(const DefSet& defs) 
+  void init(const DefSet& defs, AaProgramSyms* psyms) 
   {
+    this->psyms = psyms;
     count.clear();
     varCount.clear();
     inc(defs);
@@ -910,10 +1008,11 @@ struct SymCount
     update<-1>(def);
   }
 
-  AaIndexSet unique() const {
+  /* Finds all unique symbols, excluding special symbols */
+  AaIndexSet unique(const AaIndexSet& special) const {
     AaIndexSet result;
     for(SymCountMap::const_iterator I = count.begin(); I != count.end(); ++I) {
-      if(I->second == 1) {
+      if(I->second == 1 && !special.contains(I->first)) {
         result |= I->first;
       }
     }
@@ -939,20 +1038,37 @@ struct SymCount
     template<int DELTA>
     void update(const ValueTracking::Def& def) 
     {
-      Statement& stmt = *def.stmt;
-      SH_DEBUG_ASSERT(def.kind == ValueTracking::Def::STMT);
-      int index = def.index;
+      VariableNodePtr defNode; 
+      int rawIndex = def.absIndex();
+      AaIndexSet* indexSet;
+      switch(def.kind) {
+        case ValueTracking::Def::STMT: {
+          Statement& stmt = *def.stmt;
+          SH_DEBUG_ASSERT(def.kind == ValueTracking::Def::STMT);
+          int index = def.index;
 
-      VariableNodePtr defNode = stmt.dest.node();
-      int rawIndex = stmt.dest.swizzle()[index]; 
+          defNode = stmt.dest.node();
+
+          AaStmtSyms* stmtSyms = stmt.get_info<AaStmtSyms>();
+          SH_DEBUG_ASSERT(stmtSyms);
+          indexSet = &stmtSyms->mergeDest[index];
+          break;
+        }
+        case ValueTracking::Def::SH_INPUT: {
+          defNode = def.node;
+          if(psyms->inputs.find(defNode) == psyms->inputs.end()) { // not AA, no need to update 
+            return;
+          }
+          indexSet = &psyms->inputs[defNode][rawIndex]; 
+          break;
+        }
+      } 
       SymCountMap& defVarCount = varCount[Element(defNode, rawIndex)];
+      AaIndexSet::const_iterator I, is_end; 
+      I = indexSet->begin(); 
+      is_end = indexSet->end();
 
-      AaStmtSyms* stmtSyms = stmt.get_info<AaStmtSyms>();
-      SH_DEBUG_ASSERT(stmtSyms);
-      AaIndexSet& indexSet = stmtSyms->mergeDest[index];
-
-      AaIndexSet::const_iterator I = indexSet.begin();
-      for(;I != indexSet.end(); ++I) {
+      for(;I != is_end; ++I) {
         int oldCount = defVarCount[*I];
         int newCount = (defVarCount[*I] += DELTA);
         int& counti = count[*I];
@@ -981,9 +1097,35 @@ ostream& operator<<(ostream& out, const SymCount& sc) {
     out << I->first << ":" << I->second << " ";
   }
   
-  out << "unique=" << sc.unique() << ">"; 
+  out << "unique=" << sc.unique(AaIndexSet()) << ">"; 
   return out;
 }
+
+/* Collects special symbols (those that we should not merge) */
+struct SpecialFinderBase: TransformerParent 
+{
+  AaIndexSet special;
+  void init(const AaIndexSet& input_symbols) {
+    special = input_symbols;
+  }
+
+  bool handleStmt(BasicBlock::StmtList::iterator& I, CtrlGraphNode* node) 
+  {
+    Statement& stmt = *I;
+    if(stmt.dest.null()) return false;
+    if(stmt.op != OP_ERRFROM && stmt.op != OP_LASTERR) return false;
+
+    AaStmtSyms* syms = stmt.get_info<AaStmtSyms>();
+    for(int i = 0; i < syms->src[1].size(); ++i) {
+      special |= syms->src[1][i];
+    }
+    return false;
+  }
+
+  void finish() {
+  }
+};
+typedef DefaultTransformer<SpecialFinderBase> SpecialFinder; 
 
 // This works accelerated on a per-node basis
 // (only  
@@ -1005,10 +1147,12 @@ struct UniqueMergerBase: TransformerParent
   string symfile; 
   ofstream sout;
   size_t iteration;
+  AaIndexSet special;
 
-  void init(SymTransfer* st, bool dumpStats, bool disableMerge, const string& symfile)
+  void init(SymTransfer* st, const AaIndexSet& special, bool dumpStats, bool disableMerge, const string& symfile)
   {
     iteration = 0;
+    this->special = special;
     this->dumpStats = dumpStats; 
     this->disableMerge = disableMerge;
     symTransfer = st;
@@ -1051,7 +1195,7 @@ struct UniqueMergerBase: TransformerParent
     SH_DEBUG_ASSERT(liveDef);
 
     if(I == node->block->begin()) {
-      symCount.init(liveDef->in);
+      symCount.init(liveDef->in, symTransfer->psyms);
     }
 
     symCount.inc(liveDef->def);
@@ -1082,7 +1226,7 @@ struct UniqueMergerBase: TransformerParent
     // @todo actually implement merging
 
     // get unique symbol set in mergeDest
-    AaIndexSet unique = symCount.unique();
+    AaIndexSet unique = symCount.unique(special);
     SH_DEBUG_PRINT_ASP("  Unique Set " << unique);
 
     // filter against each element in dest, and update unique/mergeReps
@@ -1141,6 +1285,7 @@ void addUniqueMerge(ProgramNodePtr programNode, SymTransfer& st, bool dumpStats,
 
   LiveDefFinder ldf;
   ldf.transform(programNode);
+  dump(programNode, "_asp-3.0-livedef");
 
   Reaper r;
   r.transform(programNode);
@@ -1150,8 +1295,12 @@ void addUniqueMerge(ProgramNodePtr programNode, SymTransfer& st, bool dumpStats,
   AaProgramSyms* progSyms = programNode->get_info<AaProgramSyms>(); 
   SH_DEBUG_ASSERT(progSyms);
 
+  SpecialFinder sf;
+  sf.init(st.input_symbols);
+  sf.transform(programNode);
+
   UniqueMerger umb;
-  umb.init(&st, dumpStats, disableMerge, symfile);
+  umb.init(&st, sf.special, dumpStats, disableMerge, symfile);
   while(umb.transform(programNode));
   dump(programNode, "_asp-3-uniq_merge");
 }
@@ -1171,6 +1320,7 @@ struct SymGatherBase: public TransformerParent
   bool handleStmt(BasicBlock::StmtList::iterator& I, CtrlGraphNode* node)
   {
     Statement& stmt = *I;
+
     if(stmt.dest.null()) return false;
 
     ValueTracking* vt = stmt.get_info<ValueTracking>();
@@ -1180,7 +1330,8 @@ struct SymGatherBase: public TransformerParent
       SH_DEBUG_PRINT_ASP("  gathering " << stmt);
       SH_DEBUG_PRINT_ASP("     syms= " << *stmtSyms);
     }
-    if(stmtSyms && !stmtSyms->mergeDest.empty()) {
+    // @todo range - want to create something even for vars without syms */
+    if(stmtSyms /*&& !stmtSyms->mergeDest.empty()*/) {
       if(psyms->vars.find(stmt.dest.node()) == psyms->vars.end()) {
         psyms->vars[stmt.dest.node()] = AaSyms(stmt.dest.node()->size());
       }
@@ -1386,7 +1537,7 @@ void placeAaSyms(ProgramNodePtr programNode, const AaVarSymsMap& inputs, bool sh
   Program program(programNode);
 
   ostringstream idout;
-  idout << programNode->name() << "_" << programNode.object();
+  idout << programNode->name() /*<< "_" << programNode.object()*/;
   if(disableHier) idout << "_nohier";
   if(disableUniqMerge) idout << "_noum";
   idout << "_";
@@ -1401,30 +1552,39 @@ void placeAaSyms(ProgramNodePtr programNode, const AaVarSymsMap& inputs, bool sh
   SH_DEBUG_PRINT_ASP("Clearing any old syms");
   clearAaSyms(programNode);
 
+  SH_DEBUG_PRINT_ASP("Fixing branches");
+  fixRangeBranches(program);
+
   SH_DEBUG_PRINT_ASP("Adding Value Tracking, compute preds");
   add_value_tracking(program);
 
+  SH_DEBUG_PRINT_ASP("Pulling intervals");
+  IntervalPuller ip;
+  ip.transform(programNode);
+
+  SH_DEBUG_PRINT_ASP("Adding Value Tracking, compute preds");
+  add_value_tracking(program);
 
   SH_DEBUG_PRINT_ASP("Hierarchical Initialization");  
   Structural programStruct(programNode->ctrlGraph);
+  /*
   SectionTree sectionTree(programStruct);
-
   if(AaspDebugOn) {
     ostringstream sout;
     sectionTree.dump(sout);
     dotGen(sout.str(), dumpPrefix + "_asp-0-stree");
   }
+  */
 
   if(!disableHier) {
     SH_DEBUG_PRINT_ASP("Hierarchical disabled. Skipping escape analysis");
-    inEscAnalysis(sectionTree, programNode);
+    liveVarAnalysis(programStruct, program);
     dump(programNode, "_asp-1-inesc");
   }
 
   SH_DEBUG_PRINT_ASP("Adding Value Tracking");
   insert_branch_instructions(program);
   add_value_tracking(program);
-  remove_branch_instructions(program);
 
 
   SH_DEBUG_PRINT_ASP("Filling in empty stmt indices");
@@ -1434,7 +1594,7 @@ void placeAaSyms(ProgramNodePtr programNode, const AaVarSymsMap& inputs, bool sh
   // and add defs to the worklist if they insert an extra error symbol
   SH_DEBUG_PRINT_ASP("Running error symbol initialization");
   SymTransfer st; 
-  st.init(&sectionTree, &inputs);
+  st.init(&inputs);
   st.transform(programNode);
   AaProgramSyms* psyms = st.psyms;
 
@@ -1450,6 +1610,8 @@ void placeAaSyms(ProgramNodePtr programNode, const AaVarSymsMap& inputs, bool sh
   SymGather sg;
   sg.init(psyms);
   sg.transform(programNode);
+
+  remove_branch_instructions(program);
 }
 
 

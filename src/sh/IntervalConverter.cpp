@@ -45,8 +45,7 @@
 #include "Manipulator.hpp"
 #include "CtrlGraphWranglers.hpp"
 #include "Optimizations.hpp"
-// @todo range - add this back in
-//#include "RangeBranchFixer.hpp"
+#include "RangeBranchFixer.hpp"
 
 /* @todo fix this */
 //#include "IntervalTexture.hpp"
@@ -97,10 +96,13 @@ Program intervalBinaryMonotonic(int N, ValueType valueType)
     VariablePair b(SH_INPUT, N, valueType);
     VariablePair r(SH_OUTPUT, N, valueType);
 
+    VariablePair temp(SH_TEMP, N, valueType);
     Context::current()->parsing()->tokenizer.blockList()->addStatement(
-        Statement(r.lo, a.lo, OP, b.lo));
+        Statement(temp.lo, a.lo, OP, b.lo));
     Context::current()->parsing()->tokenizer.blockList()->addStatement(
-        Statement(r.hi, a.hi, OP, b.hi));
+        Statement(temp.hi, a.hi, OP, b.hi));
+    shMIN(r.lo, temp.lo, temp.hi);
+    shMAX(r.hi, temp.lo, temp.hi);
   } SH_END;
   return result;
 }
@@ -154,7 +156,7 @@ Program intervalSLT(int N, ValueType valueType)
     VariablePair r(SH_OUTPUT, N, valueType);
 
     shSLT(r.lo, a.hi, b.lo);
-    shSGT(r.hi, a.lo, b.hi);
+    shSLT(r.hi, a.lo, b.hi);
   } SH_END;
   return result;
 }
@@ -167,7 +169,7 @@ Program intervalSLE(int N, ValueType valueType)
     VariablePair r(SH_OUTPUT, N, valueType);
 
     shSLE(r.lo, a.hi, b.lo);
-    shSGT(r.hi, a.lo, b.hi);
+    shSLE(r.hi, a.lo, b.hi);
   } SH_END;
   return result;
 }
@@ -179,8 +181,8 @@ Program intervalSGT(int N, ValueType valueType)
     VariablePair b(SH_INPUT, N, valueType);
     VariablePair r(SH_OUTPUT, N, valueType);
 
-    shSGT(r.lo, a.hi, b.lo);
-    shSLT(r.hi, a.lo, b.hi);
+    shSGT(r.lo, a.lo, b.hi);
+    shSGT(r.hi, a.hi, b.lo);
   } SH_END;
   return result;
 }
@@ -192,8 +194,66 @@ Program intervalSGE(int N, ValueType valueType)
     VariablePair b(SH_INPUT, N, valueType);
     VariablePair r(SH_OUTPUT, N, valueType);
 
-    shSGE(r.lo, a.hi, b.lo);
-    shSLT(r.hi, a.lo, b.hi);
+    shSGE(r.lo, a.lo, b.hi);
+    shSLT(r.hi, a.hi, b.lo);
+  } SH_END;
+  return result;
+}
+
+Program intervalCOS(int N, ValueType valueType)
+{
+  Program result = SH_BEGIN_PROGRAM() {
+    VariablePair a(SH_INPUT, N, valueType);
+    VariablePair r(SH_OUTPUT, N, valueType);
+
+    // @todo range debugging hack
+    // using conditionals hopefully to get by NaNs
+    // (check if a.lo < 0 && 0 < a.hi 
+    //
+    VariablePair flr(SH_TEMP, N, valueType);
+    Variable temp(new VariableNode(SH_TEMP, N, valueType));
+    Variable isMonotonic(new VariableNode(SH_TEMP, N, valueType));
+    Variable isPartial(new VariableNode(SH_TEMP, N, valueType)); /* not the full [-1,1] range */
+
+    ConstAttrib1f zero(0.0);
+    ConstAttrib1f one(1.0);
+    ConstAttrib1f half(0.5);
+    ConstAttrib1f pi_inv(1.0 / M_PI);
+
+    /* figure out if isMonotonic */
+    shMUL(flr.lo, a.lo, pi_inv); 
+    shFLR(flr.lo, flr.lo);
+
+    shMUL(flr.hi, a.hi, pi_inv); 
+    shFLR(flr.hi, flr.hi);
+
+    shSEQ(isMonotonic, flr.lo, flr.hi);
+
+    /* figure out if is partial */
+    shADD(temp, flr.hi, -flr.lo);
+    shSEQ(isPartial, temp, one.repeat(N)); 
+
+    VariablePair rMono(SH_TEMP, N, valueType);
+    VariablePair rPartial(SH_TEMP, N, valueType);
+    // monotonoic result
+    VariablePair cosa(SH_TEMP, N, valueType);
+    shCOS(cosa.lo, a.lo);
+    shCOS(cosa.hi, a.hi);
+    shMIN(rMono.lo, cosa.lo, cosa.hi);
+    shMAX(rMono.hi, cosa.lo, cosa.hi);
+
+    // partial result (if flr.lo % 2 == 0, we have a min -1 in between, else 1) 
+    shMUL(temp, flr.lo, half.repeat(N)); 
+    shFRAC(temp, temp);
+    shSEQ(temp, temp, zero.repeat(N));
+    shCOND(rPartial.lo, temp, -one.repeat(N), rMono.lo);
+    shCOND(rPartial.hi, temp, rMono.hi, one.repeat(N));
+
+
+    shCOND(r.lo, isMonotonic, rMono.lo, -one.repeat(N)); 
+    shCOND(r.hi, isMonotonic, rMono.hi, one.repeat(N)); 
+    shCOND(r.lo, isPartial, rPartial.lo, r.lo); 
+    shCOND(r.hi, isPartial, rPartial.hi, r.hi); 
   } SH_END;
   return result;
 }
@@ -303,6 +363,22 @@ Program intervalRCP(int N, ValueType valueType)
   return result;
 }
 
+Program intervalSIN(int N, ValueType valueType)
+{
+  Program cosN = intervalCOS(N, valueType);
+  Program result = SH_BEGIN_PROGRAM() {
+    VariablePair a(SH_INPUT, N, valueType);
+    VariablePair r(SH_OUTPUT, N, valueType);
+
+    VariablePair temp(SH_TEMP, N, valueType);
+    Variable pi2 = ConstAttrib1f(M_PI / 2.0).repeat(N);
+    shADD(temp.lo, a.lo, -pi2);
+    shADD(temp.hi, a.hi, -pi2);
+    r.record() = cosN(temp.record());
+  } SH_END;
+  return result;
+}
+
 
 Program intervalUNION(int N, ValueType valueType) 
 {
@@ -398,7 +474,11 @@ Program getProgram(Operation op, int N, ValueType valueType) {
     case OP_SGT:   return intervalSGT(N, valueType);
     case OP_SGE:   return intervalSGE(N, valueType);
 
+    case OP_ACOS:   return intervalBinaryMonotonic<OP_ACOS>(N, valueType);
+    case OP_ASIN:   return intervalBinaryMonotonic<OP_ASIN>(N, valueType);
+    case OP_ATAN:   return intervalBinaryMonotonic<OP_ATAN>(N, valueType);
     case OP_CEIL:   return intervalBinaryMonotonic<OP_CEIL>(N, valueType);
+    case OP_COS:    return intervalCOS(N, valueType);
     case OP_CSUM:   return intervalCSUM(N, valueType);
     case OP_DOT:   return intervalDOT(N, valueType);
     case OP_EXP:   return intervalBinaryMonotonic<OP_EXP>(N, valueType);
@@ -416,6 +496,7 @@ Program getProgram(Operation op, int N, ValueType valueType) {
     case OP_RSQ:   return intervalBinaryMonotonic<OP_RSQ>(N, valueType);
     case OP_RCP:   return intervalRCP(N, valueType);
     case OP_RND:   return intervalBinaryMonotonic<OP_RND>(N, valueType);
+    case OP_SIN:    return intervalSIN(N, valueType);
     case OP_SGN:   return intervalBinaryMonotonic<OP_SGN>(N, valueType);
     case OP_SQRT:   return intervalBinaryMonotonic<OP_SQRT>(N, valueType);
 

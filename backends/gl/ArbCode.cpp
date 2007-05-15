@@ -58,7 +58,7 @@ using namespace std;
 #define glDeleteProgramsARB glDeleteProgramsARB
 #define glBindProgramARB glBindProgramARB
 
-#define SH_ARBCODE_DEBUG
+//#define SH_ARBCODE_DEBUG
 
 class ArbBindingSpecs {
 public:
@@ -229,7 +229,7 @@ void ArbCode::generate()
   // Transform code to be ARB_fragment_program compatible
   // TODO: clone should update m_originalVarsMap to map our cloned variables
   // back to the originals in m_originalShader.
-  ProgramNodePtr temp_shader = m_originalShader->clone();
+  ProgramNodePtr temp_shader = m_originalShader->clone(false);
   m_shader = temp_shader.object();
   m_shader->acquireRef();
   temp_shader = NULL;
@@ -257,6 +257,7 @@ void ArbCode::generate()
   transform.stripDummyOps();
   transform.expand_atan2();
   transform.expand_inverse_hyperbolic();
+  transform.handleDbgOps();
   dump(m_shader, "arbcode_done");
  
   if (transform.changed()) {

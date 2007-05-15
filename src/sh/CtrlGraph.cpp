@@ -94,6 +94,25 @@ std::ostream& CtrlGraphNode::graphviz_dump(std::ostream& out) const
   mark();
   out << "\"" << this << "\" ";
   out << " [label=\"";
+  /*
+  out << "object: " << this << "\\n";
+  out << "owner: " << m_owner<< "\\n";
+  out << "follower: " << m_follower << "\\n";
+  out << "predecessors: "; 
+  for(PredecessorList::const_iterator P = m_predecessors.begin(); P != m_predecessors.end(); ++P) {
+    out << " " << *P;
+  }
+  out << "\\n";
+  out << "successors:\\n";
+  for(SuccessorList::const_iterator S = m_successors.begin(); S != m_successors.end(); ++S) {
+    out << "    "; 
+    if(!S->cond.null()) {
+      out << S->cond.name() << " : ";
+    }
+    out << S->node << "\\n"; 
+  }
+  */
+
 
   if(!m_decls.empty()) {
     out << "DECLS:\\n";
@@ -278,7 +297,6 @@ void CtrlGraphNode::change_owner(CtrlGraph *new_owner, bool recursive)
   m_owner->release_owned_node(this, false);
   m_owner = new_owner;
   m_owner->add_owned_node(this);
-  
 
   // If recursive, call on our children (this MUST be last, after marking ourselves)
   if (recursive) {
@@ -334,6 +352,8 @@ CtrlGraphNode * CtrlGraphNode::clone(CloneMap *clone_map) const
   // Return the new node
   return new_node;
 }
+
+bool CtrlGraph::delete_enabled = true;
 
 void CtrlGraph::clear_marked() const
 {
@@ -394,8 +414,11 @@ void CtrlGraph::release_owned_node(CtrlGraphNode* node, bool allow_delete)
   // Also ONLY destruct something that belongs to us!
   NodeSet::iterator i = m_owned_nodes.find(node);
   if (i != m_owned_nodes.end()) {
+    // SH_DEBUG_PRINT(this << " releasing " << node);
     m_owned_nodes.erase(i);
-    if (allow_delete) delete node;
+    if (allow_delete && delete_enabled) {
+      delete node;
+    }
   }
 }
 

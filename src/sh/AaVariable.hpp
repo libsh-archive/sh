@@ -122,6 +122,8 @@ struct AaVariableNode: public RefCountable {
   /** Returns the name of the variable */
   const std::string& name() const { return m_name; }
 
+  void name(const std::string& s) { m_name = s; }
+
   /** Makes a temporary with the same value type as center and the given suffix
    * attached to name() */
   Variable makeTemp(int size, const std::string& suffix); 
@@ -216,6 +218,7 @@ struct AaVariable {
 
   /** Returns the name of the variable */
   const std::string& name() const { return m_node->name(); }
+  void name(const std::string& s) { m_node->name(s); }
 
   /** Returns the center (swizzled appropriately) */
   Variable center() const; 

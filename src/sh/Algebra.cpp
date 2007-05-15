@@ -39,8 +39,8 @@ Program connect(const Program &pa, const Program &pb)
   ProgramNodeCPtr b = pb.node();
 
   if( !a || !b ) SH_DEBUG_WARN( "Connecting with a null Program" );
-  if( !a ) return pb;
-  if( !b ) return pa;
+  if( !a ) return pb; 
+  if( !b ) return pa; 
   
   int aosize = a->outputs.size();
   int bisize = pb.free_input_count(); 
@@ -380,7 +380,7 @@ Program operator>>(const Program& p, const Variable &var) {
 
 Program replaceVariable(const Program& a, const Variable& v)
 {
-  Program program(a.node()->clone()); 
+  Program program(a.node()->clone(false)); 
   
   VarMap varMap;
 

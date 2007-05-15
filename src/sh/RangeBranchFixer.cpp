@@ -27,6 +27,7 @@
 #include <map>
 #include <iterator>
 #include <algorithm>
+#include <sstream>
 #include <fstream>
 #include "Context.hpp"
 #include "CfgBlock.hpp"
@@ -39,10 +40,22 @@
 #include "Syntax.hpp"
 #include "Optimizations.hpp"
 #include "RangeBranchFixer.hpp"
+#include "Lib.hpp"
+
+using namespace std;
 
 namespace SH  {
 
-typedef std::map<VariableNodePtr, BitSet> UsageMap;
+//#define RBF_DEBUG
+
+#ifdef RBF_DEBUG
+#  define SH_RBF_DEBUG_PRINT(x) SH_DEBUG_PRINT(x)
+#else
+#  define SH_RBF_DEBUG_PRINT(x)
+#endif
+
+
+typedef map<VariableNodePtr, BitSet> UsageMap;
 
 // Sets a = a \union b, empties b, where union denotes the componentwise
 // union of corresponding elements in the read/write maps.
@@ -65,8 +78,8 @@ void merge(UsageMap &a, UsageMap &b)
 UsageMap intersect(UsageMap &a, UsageMap &b)
 {
   UsageMap isct;
-  std::insert_iterator<UsageMap> isct_inserter(isct, isct.begin());
-  std::set_intersection(a.begin(), a.end(), b.begin(), b.end(), 
+  insert_iterator<UsageMap> isct_inserter(isct, isct.begin());
+  set_intersection(a.begin(), a.end(), b.begin(), b.end(), 
       isct_inserter, isct.value_comp());
 
   // intersection copies elements from the first, so we need to 
@@ -85,13 +98,13 @@ UsageMap intersect(UsageMap &a, UsageMap &b)
    
 }
 
-std::ostream& operator<<(std::ostream &out, const UsageMap &a) 
+ostream& operator<<(ostream &out, const UsageMap &a) 
 {
-  out << "UsageMap {" << std::endl;
+  out << "UsageMap {" << endl;
   for(UsageMap::const_iterator I = a.begin(); I != a.end(); ++I) {
-    out << "  " << I->first->name() << I->second << std::endl; 
+    out << "  " << I->first->name() << " : " << I->second << endl; 
   }
-  out << "}" << std::endl;
+  out << "}" << endl;
   return out;
 }
 
@@ -132,11 +145,11 @@ void merge(UsageInfo &a, UsageInfo &b)
   merge(a.write, b.write);
 }
 
-std::ostream& operator<<(std::ostream &out, const UsageInfo &a) {
-  out << "UsageInfo {" << std::endl;
+ostream& operator<<(ostream &out, const UsageInfo &a) {
+  out << "UsageInfo {" << endl;
   //out << "Use " << a.use;
   out << "Write " << a.write;
-  out << "}" << std::endl;
+  out << "}" << endl;
   return out;
 }
 
@@ -150,9 +163,9 @@ struct RangeBranchChecker {
     if (!node || m_needfix) return;
     for(CtrlGraphNode::SuccessorConstIt I = node->successors_begin();
         I != node->successors_end(); ++I) {
-      if(isInterval(I->cond.valueType())) {
+      if(isRange(I->cond.valueType())) {
         m_needfix = true;
-        SH_DEBUG_PRINT("Found conditional branch variable " << I->cond.node()->nameOfType() << " " << I->cond.name());
+        SH_RBF_DEBUG_PRINT("Found conditional branch variable " << I->cond.node()->nameOfType() << " " << I->cond.name());
       }
     }
   }
@@ -204,36 +217,37 @@ struct RangeBranchFixer {
   // structural graph).
   void fix(StructuralNode* node, UsageInfo &usageInfo)
   {
-    SH_DEBUG_PRINT("Entering fix " << node); 
-    SH_DEBUG_PRINT("Node type = " << node->type);
+    SH_RBF_DEBUG_PRINT("Entering fix " << node); 
+    SH_RBF_DEBUG_PRINT("Node type = " << node->type);
     switch(node->type) {
       case StructuralNode::UNREDUCED:
         if(node->cfg_node) {
           usageInfo.add(node->cfg_node);
-          SH_DEBUG_PRINT("fix UNREDUCED");
-          std::cout << usageInfo;
-          std::cout << std::endl;
+          SH_RBF_DEBUG_PRINT("fix UNREDUCED");
+          SH_RBF_DEBUG_PRINT( usageInfo);
+          SH_RBF_DEBUG_PRINT( endl);
         }
         break;
       case StructuralNode::BLOCK:
         for(StructuralNode::StructNodeList::iterator S = node->structnodes.begin();
             S != node->structnodes.end(); ++S) {
-          SH_DEBUG_PRINT("fix BLOCK");
+          SH_RBF_DEBUG_PRINT("fix BLOCK");
           fix(*S, usageInfo);
         }
         break;
-      //case StructuralNode::IF: 
+      case StructuralNode::IF: 
       case StructuralNode::IFELSE:
+        SH_RBF_DEBUG_PRINT("fix IFELSE");
         fixIf(node, usageInfo);
         break;
 
       case StructuralNode::SELFLOOP:
-        SH_DEBUG_PRINT("Self loop");
+        SH_RBF_DEBUG_PRINT("fix self loop");
         fixSelfloop(node, usageInfo);
         break;
 
       case StructuralNode::WHILELOOP:
-        SH_DEBUG_PRINT("While loop");
+        SH_RBF_DEBUG_PRINT("fix While loop");
         fixWhileloop(node, usageInfo);
         break;
       default:
@@ -244,12 +258,12 @@ struct RangeBranchFixer {
 
   void makeUsageRecord(Record &a, UsageMap &usage) {
     for(UsageMap::iterator U = usage.begin(); U != usage.end(); ++U) {
-      SH_DEBUG_PRINT("  saving " << U->first->name());
+      SH_RBF_DEBUG_PRINT("  saving " << U->first->name());
       a.append(Variable(U->first));
     }
   }
 
-  void makeUsageBackup(Record &acopy, std::string suffix, UsageMap &usage) {
+  void makeUsageBackup(Record &acopy, string suffix, UsageMap &usage) {
     for(UsageMap::iterator U = usage.begin(); U != usage.end(); ++U) {
       VariableNodePtr newNode = U->first->clone(SH_TEMP, 0, VALUETYPE_END, SEMANTICTYPE_END, false, false); 
       newNode->name(newNode->name() + suffix); 
@@ -260,39 +274,40 @@ struct RangeBranchFixer {
   void recUnion(Record &a, Record &b) {
     Record::iterator A, B; 
     for(A = a.begin(), B = b.begin(); A != a.end(); ++A, ++B) {
-      SH_DEBUG_PRINT("Adding a union for " << A->name());
+      SH_RBF_DEBUG_PRINT("Adding a union for " << A->name());
       shUNION(*A, *A, *B);
     }
   }
 
   void fixIf(StructuralNode* node, UsageInfo &usageInfo) 
   {
-    SH_DEBUG_PRINT("fix IFELSE {");
+    SH_RBF_DEBUG_PRINT("fix IFELSE {");
     // Pick out the three struct nodes in the region
     StructuralNode::StructNodeList::iterator R = node->structnodes.begin();
     StructuralNode *condNode, *thenNode, *elseNode; 
+    bool ifOnly = node->type == StructuralNode::IF;
     condNode = *R; ++R; 
     thenNode = *R; ++R; 
-    elseNode = *R;
+    elseNode = ifOnly ? 0 : *R;
     UsageInfo thenUsage, elseUsage;
 
     // fix branches under each node 
-    SH_DEBUG_PRINT("  fixing cond");
+    SH_RBF_DEBUG_PRINT("  fixing cond");
     fix(condNode, usageInfo);
 
-    SH_DEBUG_PRINT("  fixing then");
+    SH_RBF_DEBUG_PRINT("  fixing then");
     fix(thenNode, thenUsage);
 
-    SH_DEBUG_PRINT("  fixing else");
-    fix(elseNode, elseUsage);
+    SH_RBF_DEBUG_PRINT("  fixing else");
+    if(!ifOnly) fix(elseNode, elseUsage);
 
     Variable &cond = condNode->succs.front().first; 
     if(cond.size() > 1) {
       error(Exception("Conditional in SH_IF must be scalar"));
     }
-    SH_DEBUG_PRINT("cond variable is " << cond.name());
-    if(!isInterval(cond.valueType())) {
-      SH_DEBUG_PRINT("} no fix - cond variable is " << cond.name());
+    SH_RBF_DEBUG_PRINT("cond variable is " << cond.name());
+    if(!isRange(cond.valueType())) {
+      SH_RBF_DEBUG_PRINT("} no fix - cond variable is " << cond.name());
       return;
     } 
 
@@ -317,37 +332,38 @@ struct RangeBranchFixer {
     //     falseVar = cond may be false
     //   }
     //
+    //   S' = S 
     //   IF-ELSE { // thenStruct
-    //      copy S to S' 
     //      if trueVar, do thenNode (with S replaced by S')
     //      else null cfg node 
     //   }
+    //   // if trueVar, S' contains then result, else S' = S 
     //   IF-ELSE { // elseStruct
     //      if falseVar, do elseNode 
     //      else null cfg node 
     //   }
+    //   // if falseVar, S contains the else result 
+    //
     //   merge S' and S into S' 
     //   S = cond(trueVar, S, S')
     // } 
     UsageMap save;
     merge(save, thenUsage.write);
-    merge(save, elseUsage.write); 
-    SH_DEBUG_PRINT("Intersected usage maps:");
-    std::cout << save << std::endl;
+    //merge(save, elseUsage.write); 
+    SH_RBF_DEBUG_PRINT("Intersected usage maps:");
+    SH_RBF_DEBUG_PRINT( save << endl);
 
-    CtrlGraphNode* thenEntry, *thenExit; 
-    CtrlGraphNode* elseEntry, *elseExit; 
+    CtrlGraphNode *thenEntry, *thenExit; 
+    CtrlGraphNode *elseEntry, *elseExit; 
 
     // use Program to specify the graph transformation
-    int oldOpt = Context::current()->optimization();
-    Context::current()->optimization(0);
     Program newGraph = SH_BEGIN_PROGRAM() {
       // generate code to assign to trueVar, falseVar 
       Attrib1f SH_NAMEDECL(trueVar, cond.name() + "_maybetrue");
       Attrib1f SH_NAMEDECL(falseVar, cond.name() + "_maybefalse");
 
-      shLO(trueVar, cond);
-      shHI(falseVar, cond);
+      shHI(trueVar, cond);
+      shLO(falseVar, cond);
       falseVar = falseVar <= 0.0f;
 
       // generate records representing the variables that need to be saved 
@@ -362,15 +378,17 @@ struct RangeBranchFixer {
         makeCfgHolder(thenEntry, thenExit);
       } SH_ENDIF;
 
-      // if condition may be false, execute else branch
-      SH_IF(falseVar) {
-        // revert saved
-        temp = saved;
-        saved = savedCopy;
-        savedCopy = temp;
+      if(!ifOnly) {
+        // if condition may be false, execute else branch
+        SH_IF(falseVar) {
+          // swap saved and savedCopy  
+          temp = saved;
+          saved = savedCopy;
+          savedCopy = temp;
 
-        makeCfgHolder(elseEntry, elseExit);
-      } SH_ENDIF;
+          makeCfgHolder(elseEntry, elseExit);
+        } SH_ENDIF;
+      }
 
       // now if only one branch executed, the results are in saved, and
       // we're okay.  if both branches exeuted, then we need to merge
@@ -378,7 +396,6 @@ struct RangeBranchFixer {
         recUnion(saved, savedCopy);
       } SH_ENDIF;
     } SH_END;
-    Context::current()->optimization(oldOpt);
 
     // do structural analysis on newGraph
     Structural newStruct(newGraph.node()->ctrlGraph);
@@ -386,12 +403,29 @@ struct RangeBranchFixer {
     StructuralNode* newHead = newStruct.head();
     CtrlGraphNode* newEntry = newGraph.node()->ctrlGraph->entry();
     CtrlGraphNode* newExit = newGraph.node()->ctrlGraph->exit();
+    SH_RBF_DEBUG_PRINT( "newEntry: " << newEntry << endl);
+    SH_RBF_DEBUG_PRINT( "newExit: " << newExit << endl);
+    SH_RBF_DEBUG_PRINT( "thenEntry: " << thenEntry << endl);
+    SH_RBF_DEBUG_PRINT( "thenExit: " << thenExit << endl);
 
     // Do some more graph mangling to get things in the right places
-    structSplit(condNode, thenNode, newEntry, thenEntry);
+    // It's important to handle the else first, because the mangling replaces
+    // the follower of condNode
+    if(!ifOnly) {
+      SH_RBF_DEBUG_PRINT( "elseEntry: " << elseEntry << endl);
+      SH_RBF_DEBUG_PRINT( "elseExit: " << elseExit << endl);
+      SH_RBF_DEBUG_PRINT("replace exits else");
+      structReplaceExits(elseNode, elseExit, newExit);
+      SH_RBF_DEBUG_PRINT("struct split else");
+      structSplit(condNode, elseNode, newEntry, elseEntry);
+      SH_RBF_DEBUG_PRINT("done");
+    }
+
+    SH_RBF_DEBUG_PRINT("replace exits then");
     structReplaceExits(thenNode, thenExit, newExit);
-    structSplit(condNode, elseNode, newEntry, elseEntry);
-    structReplaceExits(elseNode, elseExit, newExit);
+    SH_RBF_DEBUG_PRINT("struct split then");
+    structSplit(condNode, thenNode, newEntry, thenEntry);
+
 
     // add newHead to the region
     // (Note, the structnodes no longer matches the expected format for an
@@ -403,22 +437,22 @@ struct RangeBranchFixer {
     newHead->parent = node; 
 
     merge(usageInfo, thenUsage);
-    merge(usageInfo, elseUsage);
+    //merge(usageInfo, elseUsage);
 
-    SH_DEBUG_PRINT("Usage Info");
-    std::cout << usageInfo;
-    std::cout << std::endl;
-    SH_DEBUG_PRINT("} IFELSE");
+    SH_RBF_DEBUG_PRINT("Usage Info");
+    SH_RBF_DEBUG_PRINT( usageInfo);
+    SH_RBF_DEBUG_PRINT( endl);
+    SH_RBF_DEBUG_PRINT("} IFELSE");
   }
 
   void fixSelfloop(StructuralNode* node, UsageInfo &usageInfo) 
   {
-    SH_DEBUG_PRINT("fix SELFLOOP {");
+    SH_RBF_DEBUG_PRINT("fix SELFLOOP {");
     StructuralNode* selfNode = node->structnodes.front(); 
     UsageInfo selfUsage; 
 
     // fix branches under each node 
-    SH_DEBUG_PRINT("  fixing self");
+    SH_RBF_DEBUG_PRINT("  fixing self");
     fix(selfNode, selfUsage);
 
     Variable cond; 
@@ -429,7 +463,7 @@ struct RangeBranchFixer {
       if(S->second != selfNode) {
         cond = S->first;
         if(cond.null()) {
-          SH_DEBUG_PRINT("self loop with null condition...");
+          SH_RBF_DEBUG_PRINT("self loop with null condition...");
           continue;
         }
         break;
@@ -441,9 +475,9 @@ struct RangeBranchFixer {
       error(Exception("Conditional in SELFLOOP must be scalar"));
     }
 
-    SH_DEBUG_PRINT("  cond variable is " << cond.name());
-    if(!isInterval(cond.valueType())) {
-      SH_DEBUG_PRINT("} no fix - cond variable is " << cond.name());
+    SH_RBF_DEBUG_PRINT("  cond variable is " << cond.name());
+    if(!isRange(cond.valueType())) {
+      SH_RBF_DEBUG_PRINT("} no fix - cond variable is " << cond.name());
       return;
     } 
 
@@ -465,14 +499,12 @@ struct RangeBranchFixer {
     //  if cond may be false
     //    merge S with S' 
     // } while cond may be true 
-    SH_DEBUG_PRINT("Self usage maps:");
-    std::cout << selfUsage << std::endl;
+    SH_RBF_DEBUG_PRINT("Self usage maps:");
+    SH_RBF_DEBUG_PRINT( selfUsage << endl);
 
-    CtrlGraphNode* selfEntry, selfExit; 
+    CtrlGraphNode *selfEntry, *selfExit; 
 
     // use Program to specify the graph transformation
-    int oldOpt = Context::current()->optimization();
-    Context::current()->optimization(0);
     Program newGraph = SH_BEGIN_PROGRAM() {
       // generate code to assign to trueVar, falseVar 
       Attrib1f SH_NAMEDECL(maybeVar, cond.name() + "_maybe"); // may be true
@@ -501,15 +533,16 @@ struct RangeBranchFixer {
       } SH_UNTIL(trueVar) // must be true
       saved = result;
     } SH_END;
-    Context::current()->optimization(oldOpt);
 
-    std::ostringstream sout; 
+#ifdef RBF_DEBUG
+    ostringstream sout; 
     newGraph.node()->ctrlGraph->graphviz_dump(sout);
     dotGen(sout.str(), "selfloop");
+#endif
 
     // do structural analysis on newGraph
     Structural newStruct(newGraph.node()->ctrlGraph);
-    st.addstruct(newStruct);
+    st.addStruct(newStruct);
     StructuralNode* newHead = newStruct.head();
     CtrlGraphNode* newEntry = newGraph.node()->ctrlGraph->entry();
     CtrlGraphNode* newExit = newGraph.node()->ctrlGraph->exit();
@@ -518,9 +551,11 @@ struct RangeBranchFixer {
     structReplaceExits(selfNode, selfExit, newExit); 
     structReplaceEntries(selfNode, newEntry, selfEntry); 
 
-    std::ostringstream sout2; 
+#ifdef RBF_DEBUG
+    ostringstream sout2; 
     newGraph.node()->ctrlGraph->graphviz_dump(sout2);
     dotGen(sout2.str(), "selfloop-after");
+#endif
 
     // add newHead to the region
     // (Note, the structnodes no longer matches the expected format for an
@@ -531,24 +566,24 @@ struct RangeBranchFixer {
 
     merge(usageInfo, selfUsage);
 
-    SH_DEBUG_PRINT("Usage Info");
-    std::cout << usageInfo;
-    std::cout << std::endl;
-    SH_DEBUG_PRINT("} SELFLOOP");
+    SH_RBF_DEBUG_PRINT("Usage Info");
+    SH_RBF_DEBUG_PRINT( usageInfo);
+    SH_RBF_DEBUG_PRINT( endl);
+    SH_RBF_DEBUG_PRINT("} SELFLOOP");
   }
   
   void fixWhileloop(StructuralNode* node, UsageInfo &usageInfo) 
   {
-    SH_DEBUG_PRINT("fix WHILELOOP {");
+    SH_RBF_DEBUG_PRINT("fix WHILELOOP {");
     StructuralNode* condNode = node->structnodes.front(); 
     StructuralNode* bodyNode = node->structnodes.back(); 
     UsageInfo condUsage, bodyUsage; 
 
     // fix branches under each node 
-    SH_DEBUG_PRINT("  fixing cond");
+    SH_RBF_DEBUG_PRINT("  fixing cond");
     fix(condNode, condUsage);
 
-    SH_DEBUG_PRINT("  fixing body");
+    SH_RBF_DEBUG_PRINT("  fixing body");
     fix(bodyNode, bodyUsage);
 
     Variable cond; 
@@ -562,9 +597,9 @@ struct RangeBranchFixer {
       error(Exception("Conditional in WHILELOOP must be scalar"));
     }
 
-    SH_DEBUG_PRINT("  cond variable is " << cond.name());
-    if(!isInterval(cond.valueType())) {
-      SH_DEBUG_PRINT("} no fix - cond variable is " << cond.name());
+    SH_RBF_DEBUG_PRINT("  cond variable is " << cond.name());
+    if(!isRange(cond.valueType())) {
+      SH_RBF_DEBUG_PRINT("} no fix - cond variable is " << cond.name());
       return;
     } 
 
@@ -588,20 +623,18 @@ struct RangeBranchFixer {
     //  break if cond must be false
     //  bodyNode
     // } 
-    SH_DEBUG_PRINT("usage maps:");
-    std::cout << condUsage << std::endl;
-    std::cout << bodyUsage << std::endl;
+    SH_RBF_DEBUG_PRINT("usage maps:");
+    SH_RBF_DEBUG_PRINT( condUsage << endl);
+    SH_RBF_DEBUG_PRINT( bodyUsage << endl);
 
     UsageInfo usage;
     merge(usage, condUsage);
     merge(usage, bodyUsage);
 
-    CtrlGraphNode* condEntry, condExit; 
-    CtrlGraphNode* bodyEntry, bodyExit; 
+    CtrlGraphNode *condEntry, *condExit; 
+    CtrlGraphNode *bodyEntry, *bodyExit; 
 
     // use Program to specify the graph transformation
-    int oldOpt = Context::current()->optimization();
-    Context::current()->optimization(0);
     Program newGraph = SH_BEGIN_PROGRAM() {
       // generate code to assign to trueVar, falseVar 
       Attrib1f SH_NAMEDECL(maybeVar, cond.name() + "_maybe"); // may be false 
@@ -634,16 +667,17 @@ struct RangeBranchFixer {
         bool internal_cond; // dummy var since we're parsing
         arg = arg && SH_PROCESS_ARG(falseVar, &internal_cond);
 
-      ::SH::while(arg); {
+      SH::internal_while(arg); {
         makeCfgHolder(bodyEntry, bodyExit);
       } ::SH::endWhile();
       saved = result;
     } SH_END;
-    Context::current()->optimization(oldOpt);
 
-    std::ostringstream sout; 
+#ifdef RBF_DEBUG
+    ostringstream sout; 
     newGraph.node()->ctrlGraph->graphviz_dump(sout);
     dotGen(sout.str(), "whileloop");
+#endif
 
     // do structural analysis on newGraph
     Structural newStruct(newGraph.node()->ctrlGraph);
@@ -658,9 +692,11 @@ struct RangeBranchFixer {
     structSplit(condNode, bodyNode, condExit, bodyEntry);
     structSplit(bodyNode, condNode, bodyExit, condEntry);
 
-    std::ostringstream sout2; 
+#ifdef RBF_DEBUG
+    ostringstream sout2; 
     newGraph.node()->ctrlGraph->graphviz_dump(sout2);
     dotGen(sout2.str(), "whileloop-after");
+#endif
 
     // add newHead to the region
     // (Note, the structnodes no longer matches the expected format for an
@@ -671,10 +707,10 @@ struct RangeBranchFixer {
 
     merge(usageInfo, usage);
 
-    SH_DEBUG_PRINT("Usage Info");
-    std::cout << usageInfo;
-    std::cout << std::endl;
-    SH_DEBUG_PRINT("} WHILELOOP");
+    SH_RBF_DEBUG_PRINT("Usage Info");
+    SH_RBF_DEBUG_PRINT( usageInfo);
+    SH_RBF_DEBUG_PRINT( endl);
+    SH_RBF_DEBUG_PRINT("} WHILELOOP");
   }
 };
 
@@ -683,10 +719,17 @@ bool fixRangeBranches(ProgramNodePtr p) {
   p->ctrlGraph->dfs(rbc);
   if(!rbc.needfix()) return false;
 
-  Structural structural(p->ctrlGraph);
+  Structural structural(p->ctrlGraph.object());
   UsageInfo ui;
-  RangeBranchFixer rbf(p->ctrlGraph, structural);
-  rbf.fix(structural.head(), ui);
+  int oldOpt = Context::current()->optimization();
+  Context::current()->optimization(0);
+  CtrlGraph::disable_delete();
+    RangeBranchFixer rbf(p->ctrlGraph.object(), structural);
+    rbf.fix(structural.head(), ui);
+  CtrlGraph::enable_delete();
+  Context::current()->optimization(oldOpt);
+  optimize(p);
+
   return true;
 }
 

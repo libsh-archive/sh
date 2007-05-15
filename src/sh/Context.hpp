@@ -70,6 +70,7 @@ public:
     return m_bound.end();
   }
 
+
   /// \internal
   void set_binding(const std::string& unit, const Program& program);
   /// \internal
@@ -83,6 +84,16 @@ public:
 
   /// Finish constructing the current program
   void exit();
+
+  /// Create a context other than the default one
+  static Context* createContext() { 
+    m_contexts.push_back(new Context());
+    return m_contexts.back(); 
+  }
+
+  /// Set the current context to the given one 
+  static void setContext(Context* c) { m_instance = c; }
+
   
 private:
   Context();
@@ -97,6 +108,8 @@ private:
   std::set<std::string> m_flags;
   
   static Context* m_instance;
+  typedef std::vector<Context*> ContextVec; 
+  static ContextVec m_contexts;
 
   // NOT IMPLEMENTED
   Context(const Context& other);

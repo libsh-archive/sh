@@ -44,109 +44,6 @@
 namespace {
 using namespace SH;
 
-
-// Data related to doing reaching definitions
-struct ReachingDefs {
-  ReachingDefs()
-    : defsize(0)
-  {
-  }
-  
-  struct Definition {
-    Definition(Statement* stmt,
-               CtrlGraphNode* node,
-               int offset,
-               BitSet disable_mask)
-      : varnode(stmt->dest.node()), stmt(stmt), node(node), offset(offset),
-        disable_mask(disable_mask)
-    {}
-
-    Definition(const VariableNodePtr& varnode,
-               CtrlGraphNode* node,
-               int offset,
-               BitSet disable_mask)
-      : varnode(varnode), stmt(0), node(node), offset(offset), 
-        disable_mask(disable_mask)
-    {}
-
-    bool isInput() const
-    { 
-      return !stmt; 
-    }
-
-    int size() const
-    {
-      if(isInput()) return varnode->size();
-      else return stmt->dest.size();
-    }
-    
-    /* returns whether the i'th element is disabled */
-    int isDisabled(int i) const
-    {
-      return disable_mask[index(i)];
-    }
-    
-    /* returns the offset of the i'th tuple element */
-    int off(int i) const
-    {
-      return offset + i;
-    }
-
-    /* returns unswizzled index for i'th tuple element */
-    int index(int i) const
-    {
-      if(isInput()) return i;
-      return stmt->dest.swizzle()[i];
-    }
-
-    /* returns Def for i'th tuple element */
-    ValueTracking::Def toDef(int i) const
-    {
-      if(isInput()) return ValueTracking::Def(varnode, i); 
-      return ValueTracking::Def(stmt, i);
-    }
-
-    friend std::ostream& operator<<(std::ostream& out, const Definition& def)
-    {
-      out << "{";
-      out << " off " << def.offset;
-      out << ", node " << def.node;
-      out << ", dsbl " << def.disable_mask << ", ";
-      if(def.isInput()) out << "input " << def.varnode->name();
-      else out << "stmt " << *def.stmt;
-      out << "}";
-      return out;
-    }
-    
-    VariableNodePtr varnode;
-    Statement* stmt;
-    CtrlGraphNode* node;
-    int offset;
-    
-    // Sometimes we want to ignore some of the elements, when
-    // constructing gen, because they are overwritten by later
-    // statements. In that case we mark the ignored components here.
-    // unswizzled disable mask
-    BitSet disable_mask;
-  };
-
-  void addDefinition(const Definition& d)
-  {
-    // Otherwise, add this definition
-    defs.push_back(d);
-    defsize += d.size(); 
-  }
-
-  typedef std::map<CtrlGraphNode*, int> SizeMap;
-  typedef std::map<CtrlGraphNode*, BitSet> ReachingMap;
-  
-  std::vector<Definition> defs;
-  int defsize; ///< current defsize, offset for next added Definition
-
-  ReachingMap gen, prsv;
-  ReachingMap rchin;
-};
-
 struct DefFinder {
   DefFinder(ReachingDefs& r, CtrlGraphNode* entry, const ProgramNode::VarList& inputs)
     : entry(entry), inputs(inputs), r(r), offset(0)
@@ -233,6 +130,7 @@ struct InitRch {
     if (!node) return;
 
     r.rchin[node] = BitSet(r.defsize);
+    r.out[node] = BitSet(r.defsize);
     r.gen[node] = BitSet(r.defsize);
     r.prsv[node] = ~BitSet(r.defsize);
       
@@ -253,27 +151,28 @@ struct InitRch {
       }
     }
 
-    if(!block) return;
+    if(block) {
+      // Initialize prsv
+      for (BasicBlock::StmtList::iterator I = block->begin(); I != block->end(); ++I) {
+        if (I->dest.null() 
+            || I->op == OP_KIL
+            || I->op == OP_OPTBRA
+            /*|| I->dest.node()->kind() != SH_TEMP*/) continue;
+        for (unsigned int i = 0; i < r.defs.size(); i++) {
+          ReachingDefs::Definition &d = r.defs[i];
+          if (d.varnode != I->dest.node()) continue;
 
-    // Initialize prsv
-    for (BasicBlock::StmtList::iterator I = block->begin(); I != block->end(); ++I) {
-      if (I->dest.null() 
-          || I->op == OP_KIL
-          || I->op == OP_OPTBRA
-          /*|| I->dest.node()->kind() != SH_TEMP*/) continue;
-      for (unsigned int i = 0; i < r.defs.size(); i++) {
-        ReachingDefs::Definition &d = r.defs[i];
-        if (d.varnode != I->dest.node()) continue;
-
-        for (int j = 0; j < I->dest.size(); ++j) {
-          for (int k = 0; k < d.size(); ++k) {
-            if (d.index(k) == I->dest.swizzle()[j]) {
-              r.prsv[node][d.off(k)] = false;
+          for (int j = 0; j < I->dest.size(); ++j) {
+            for (int k = 0; k < d.size(); ++k) {
+              if (d.index(k) == I->dest.swizzle()[j]) {
+                r.prsv[node][d.off(k)] = false;
+              }
             }
           }
         }
       }
     }
+    r.out[node] = r.gen[node] | (r.rchin[node] & r.prsv[node]);
   }
 
   ReachingDefs& r;
@@ -300,10 +199,11 @@ struct IterateRch {
       SH_DEBUG_ASSERT(r.prsv.find(*I) != r.prsv.end());
       SH_DEBUG_ASSERT(r.rchin.find(*I) != r.rchin.end());
       
-      newRchIn |= (r.gen[*I] | (r.rchin[*I] & r.prsv[*I]));
+      newRchIn |= r.out[*I]; 
     }
     if (newRchIn != r.rchin[node]) {
       r.rchin[node] = newRchIn;
+      r.out[node] = r.gen[node] | (r.rchin[node] & r.prsv[node]);
       changed = true;
     }
   }
@@ -618,20 +518,40 @@ std::ostream& operator<<(std::ostream& out, const OutputValueTracking& ovt)
   return out;
 }
 
+Info* ReachingDefs::clone() const 
+{
+  return new ReachingDefs(*this);
+}
+
+std::ostream& operator<<(std::ostream& out, const ReachingDefs::Definition& def)
+{
+  out << "{";
+  out << " off " << def.offset;
+  out << ", node " << def.node;
+  out << ", dsbl " << def.disable_mask << ", ";
+  if(def.isInput()) out << "input " << def.varnode->name();
+  else out << "stmt " << *def.stmt;
+  out << "}";
+  return out;
+}
+
 void add_value_tracking(Program& p)
 {
-  ReachingDefs r;
+
+  ReachingDefs* r = new ReachingDefs();
+  p.node()->destroy_info<ReachingDefs>();
+  p.node()->add_info(r);
 
   CtrlGraphPtr graph = p.node()->ctrlGraph;
   
-  DefFinder finder(r, graph->entry(), p.node()->inputs);
+  DefFinder finder(*r, graph->entry(), p.node()->inputs);
   graph->dfs(finder);
 
-  InitRch init(r);
+  InitRch init(*r);
   graph->dfs(init);
 
   bool changed;
-  IterateRch iter(r, changed);
+  IterateRch iter(*r, changed);
   do {
     changed = false;
     graph->dfs(iter);
@@ -639,18 +559,18 @@ void add_value_tracking(Program& p)
 
 #ifdef SH_DEBUG_VALUETRACK
   SH_DEBUG_PRINT("Dumping Reaching Defs");
-  SH_DEBUG_PRINT("defsize = " << r.defsize);
-  SH_DEBUG_PRINT("defs.size() = " << r.defs.size());
-  for(unsigned int i = 0; i < r.defs.size(); ++i) {
-    SH_DEBUG_PRINT("  " << i << ": " << r.defs[i]);
+  SH_DEBUG_PRINT("defsize = " << r->defsize);
+  SH_DEBUG_PRINT("defs.size() = " << r->defs.size());
+  for(unsigned int i = 0; i < r->defs.size(); ++i) {
+    SH_DEBUG_PRINT("  " << i << ": " << r->defs[i]);
   }
   std::cerr << std::endl;
 
-  for (ReachingDefs::ReachingMap::const_iterator I = r.rchin.begin(); I != r.rchin.end(); ++I) {
+  for (ReachingDefs::ReachingMap::const_iterator I = r->rchin.begin(); I != r->rchin.end(); ++I) {
     CtrlGraphNode* node = I->first;
     SH_DEBUG_PRINT(" rchin[" << node << "]: " << I->second);
-    SH_DEBUG_PRINT("   gen[" << node << "]: " << r.gen[I->first]);
-    SH_DEBUG_PRINT("  prsv[" << node << "]: " << r.prsv[I->first]);
+    SH_DEBUG_PRINT("   gen[" << node << "]: " << r->gen[I->first]);
+    SH_DEBUG_PRINT("  prsv[" << node << "]: " << r->prsv[I->first]);
     std::cerr << std::endl;
   }
 #endif
@@ -658,7 +578,7 @@ void add_value_tracking(Program& p)
   UdDuClearer clearer;
   graph->dfs(clearer);
   
-  UdDuBuilder builder(r, p.node());
+  UdDuBuilder builder(*r, p.node());
   graph->dfs(builder);
 
 #ifdef SH_DEBUG_VALUETRACK
@@ -667,6 +587,7 @@ void add_value_tracking(Program& p)
   graph->dfs(dumper);
   dumper(p.node());
 #endif
+
 }
 
 

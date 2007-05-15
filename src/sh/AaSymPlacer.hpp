@@ -64,6 +64,8 @@ struct AaStmtSyms: public Info
   // representative element (which may not be in unique
   // any more if it was merged away earlier. in fact,
   // unique may be empty with mergeRep set)
+  // (unique may contain some elements that formerly
+  // existed but do not any more)
   AaSyms unique;
   AaSyms mergeRep;
   
@@ -149,6 +151,7 @@ struct AaProgramSyms: public Info
  *    - add special merge statements
  *
  * @todo range - worry about branches...when do we call fixRangeBranches?
+ *             -okay, how about in here.  Added a call at the beginning
  *
  * @param programNode program to place syms on
  * @param inputs Input symbol assignment to use.  Any affine input not in

@@ -121,12 +121,12 @@ Variable AaVariableNode::radius() {
         ostringstream eout;
         eout << "_radius_err" << i;
         Variable symAbs = makeTemp(m_symvar[i].size(), eout.str()); 
-        SH_DEBUG_PRINT(symAbs.size() << " " << m_symvar[i].size());
         shABS(symAbs, m_symvar[i]);
         shCSUM(resulti, symAbs); 
       }
     }
   }
+  return result;
 }
 
 Variable AaVariableNode::makeTemp(int size, const string& suffix) {
@@ -314,7 +314,7 @@ AaVariable& AaVariable::ZERO() {
   for(int i = 0; i < size(); ++i) {
     if((*m_node)(i).empty()) continue;
     Variable erri = err(i, (*m_node)(i)); // get tuple for all error symbols
-    shASN(erri, Variable(ZERO.node(), Swizzle(ZERO.swizzle(), erri.size()), false));
+    shASN(erri, ZERO.repeat(erri.size())); 
   }
   return *this;
 }
@@ -513,6 +513,7 @@ ostream& operator<<(ostream& out, const AaVariable &var)
 // @todo range - need to check these
 Swizzle AaVariable::getSymSwiz(int i, const AaIndexSet& used) const {
   int num = used.size();
+  SH_DEBUG_ASSERT(!used.empty());
   int *s = new int[num];
 
   int j, uj;

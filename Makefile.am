@@ -7,7 +7,7 @@ DOC_SUBDIR =
 endif
 
 ## If you add a directory, don't forget to add it to DIST_SUBDIRS as well
-SUBDIRS = libltdl src backends test $(DOC_SUBDIR)
+SUBDIRS = libltdl src backends test lua $(DOC_SUBDIR)
 DIST_SUBDIRS = libltdl src backends test doc examples
 
 ## Do not put a directory here since the distributed tarball will include its

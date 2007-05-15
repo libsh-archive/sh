@@ -29,12 +29,15 @@ template<int N, typename T>
 Generic<N, T> bernstein(const Generic<1, T>& a)
 {
   Attrib<N, SH_TEMP, T> result;
+  result.name("bernstein_result");
   if (4 == N) {
     Attrib<1, SH_TEMP, T> it = Attrib<1,SH_TEMP, T>(1.0f) - a;
-    result(0) = it*it*it;
-    result(1) = 3.0*it*it*a;
-    result(2) = 3.0*it*a*a;
-    result(3) = a*a*a;
+    Attrib<1, SH_TEMP, T> it2 = it * it; 
+    Attrib<1, SH_TEMP, T> a2 = a * a; 
+    result(0) = it2 * it; 
+    result(1) = 3.0*it2*a;
+    result(2) = 3.0*it*a2;
+    result(3) = a2 * a;
   }
   else {
     // TODO: implement the real thing for the general case

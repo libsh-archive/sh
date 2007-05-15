@@ -26,11 +26,12 @@
 namespace SH {
 
 Context* Context::m_instance = 0;
+Context::ContextVec Context::m_contexts;
 
 Context* Context::current()
 {
   if (!m_instance) {
-    m_instance = new Context();
+    m_instance = createContext(); 
 
     // must be done this way since
     // init_types requires a Context object, 

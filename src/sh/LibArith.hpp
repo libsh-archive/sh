@@ -114,7 +114,7 @@ Generic<N, T> exp2(const Generic<N, T>& var);
  * Returns the exponent of x using base 10.
  */
 template<int N, typename T>
-Generic<N, T> exp(const Generic<N, T>& var);
+Generic<N, T> exp10(const Generic<N, T>& var);
 
 /** Minus-one Exponent base 10.
  * Operates componentwise on tuples.
@@ -142,7 +142,7 @@ Generic<N, T> log2(const Generic<N, T>& var);
  * Returns the logarithm of x using base 10.
  */
 template<int N, typename T>
-Generic<N, T> log(const Generic<N, T>& var);
+Generic<N, T> log10(const Generic<N, T>& var);
 
 /** Plus-One Logarithm base 10.
  * Operates componentwise on tuples.

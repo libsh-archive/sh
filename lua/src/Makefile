@@ -5,22 +5,24 @@
 # == CHANGE THE SETTINGS BELOW TO SUIT YOUR ENVIRONMENT =======================
 
 CC= gcc
-CFLAGS= -O2 -Wall $(MYCFLAGS)
+CFLAGS= -O2 -Wall $(MYCFLAGS) -fPIC
 AR= ar rcu
 RANLIB= ranlib
 RM= rm -f
 LIBS= -lm $(MYLIBS)
 
+
 MYCFLAGS=
 MYLDFLAGS=
 MYLIBS=
 # enable dynamic loading and line editing in Linux
-# MYCFLAGS= -DLUA_USE_DLOPEN -DLUA_USE_READLINE
-# MYLIBS= -Wl,-E -ldl -lreadline -lhistory -lncurses
+MYCFLAGS= -DLUA_USE_DLOPEN -DLUA_USE_READLINE
+MYLIBS= -Wl,-E -ldl -lreadline -lhistory -lncurses
 
 # == END OF USER SETTINGS. NO NEED TO CHANGE ANYTHING BELOW THIS LINE =========
 
 LUA_A=	liblua.a
+LUA_SO=liblua.so
 CORE_O=	lapi.o lcode.o ldebug.o ldo.o ldump.o lfunc.o lgc.o llex.o lmem.o \
 	lobject.o lopcodes.o lparser.o lstate.o lstring.o ltable.o ltm.o  \
 	lundump.o lvm.o lzio.o
@@ -34,7 +36,7 @@ LUAC_T=	luac
 LUAC_O=	luac.o print.o
 
 ALL_O= $(CORE_O) $(LIB_O) $(LUA_O) $(LUAC_O)
-ALL_T= $(LUA_A) $(LUA_T) $(LUAC_T)
+ALL_T= $(LUA_A) $(LUA_T) $(LUAC_T) $(LUA_SO)
 ALL_A= $(LUA_A)
 
 all:	$(ALL_T)
@@ -46,6 +48,9 @@ a:	$(ALL_A)
 $(LUA_A): $(CORE_O) $(LIB_O)
 	$(AR) $@ $?
 	$(RANLIB) $@
+
+$(LUA_SO): $(CORE_O) $(LIB_O)  
+	$(CXX) -shared -fPIC -o $@ $(CORE_O) $(LIB_O) $(LIBS)
 
 $(LUA_T): $(LUA_O) $(LUA_A)
 	$(CC) -o $@ $(MYLDFLAGS) $(LUA_O) $(LUA_A) $(LIBS)

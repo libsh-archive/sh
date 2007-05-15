@@ -90,7 +90,7 @@ AaScanCore::AaScanCore(Program program)
   SH_DEBUG_PRINT_ASC("Program Syms");
   SH_DEBUG_PRINT_ASC(*m_psyms);
 
-  m_aa_opped = Program(m_aa_program.node()->clone());
+  m_aa_opped = Program(m_aa_program.node()->clone(false));
   handleAaOps(m_aa_opped.node());
   
 #ifdef DBG_ASCCANCORE
@@ -157,7 +157,7 @@ Stream AaScanCore::doit(VariableNodePtr input, const Stream& inputStream,
   // get input ranges from m_program
   pattern.clear();
 
-  Program m_aa_clone(m_aa_opped.node()->clone());
+  Program m_aa_clone(m_aa_opped.node()->clone(false));
 
   // @todo - there's really two functions intertwined in here
   // one for input = 0 and one for input != 0...

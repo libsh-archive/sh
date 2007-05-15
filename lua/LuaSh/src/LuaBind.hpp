@@ -161,7 +161,7 @@ private:
                 // Call the member function with the instance pointer, "this"
                 ReturnVal = (Instance->*(m->MemFunc))(L);
             }
-            catch (LuaException &e) { HandleException(e); }
+            catch (LuaException &e) { StderrLuaException::HandleException(e); }
             return ReturnVal;
         }
         else

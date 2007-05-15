@@ -196,7 +196,7 @@ AaScanErrMap aaScanLightnessErr(Program program)
   // Add indices
   add_stmt_indices(program);
 
-  Program progClone(program.node()->clone());
+  Program progClone(program.node()->clone(false));
 
   // Tack on RGB->luminance conversion
   progClone = rgbToLightness(output) << progClone;

@@ -369,8 +369,8 @@ Variant* VariableNode::makeHigh() const
 void VariableNode::update_all() 
 {
   if (m_uniform && !m_locked) {
-    const BoundIterator begin = beginBound();
-    const BoundIterator end   = endBound();
+    const BoundIterator begin = beginBound(); 
+    const BoundIterator end   = endBound(); 
     for (BoundIterator i = begin; i != end; ++i) {
       // TODO: Maybe pass in the backend unit to updateUniform
       if (i->second.node()) i->second.updateUniform(this);

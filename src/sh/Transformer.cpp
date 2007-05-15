@@ -167,6 +167,7 @@ struct StatementSplitter {
     std::size_t i, j, k;
     int n;
     const Swizzle &swiz = v.swizzle();
+    bool neg = v.neg();
     
     // get VarNodeVec for src
     Transformer::VarNodeVec srcVec;
@@ -203,7 +204,11 @@ struct StatementSplitter {
         }
         if( tempSize > 0 ) {
           Variable srcVar(srcVec[j]);
-          stmts.push_back(Statement(tempVar(tempSize, tempSwiz), OP_ASN, srcVar(tempSize, srcSwiz)));
+          if(neg) {
+            stmts.push_back(Statement(tempVar(tempSize, tempSwiz), OP_ASN, -srcVar(tempSize, srcSwiz)));
+          } else {
+            stmts.push_back(Statement(tempVar(tempSize, tempSwiz), OP_ASN, srcVar(tempSize, srcSwiz)));
+          }
         }
       }
       delete [] tempSwiz;
@@ -657,6 +662,10 @@ struct DbgOpHandlerBase: public TransformerParent
     for(ProgramNode::VarList::iterator I = varlist.begin(); I != varlist.end(); ++I) {
       if((*I)->specialType() == SH_COLOR) {
         m_temp = Variable((*I)->clone(SH_TEMP));
+        m_temp.name((*I)->name() + "_dbg");
+        m_dodbg = Attrib1f();
+        m_dodbg.name("do_dbg");
+        m_outputTemp = (*I)->clone(SH_TEMP); 
         m_output = Variable(*I);
         break;
       }
@@ -665,27 +674,41 @@ struct DbgOpHandlerBase: public TransformerParent
 
   bool handleStmt(BasicBlock::StmtList::iterator &I, CtrlGraphNode* node) 
   { 
-    if(m_temp.null() || I->op != OP_DBG) return false;
+    if(I->op != OP_DBG) return false;
+    if(m_temp.null()) {
+      I = node->block->erase(I);
+      SH_DEBUG_PRINT("removed DBG stmt");
+      return true;
+    }
     m_has_dbg = true;
     I->op = OP_ASN;
     I->dest = m_temp;
+    node->block->insert(I, Statement(m_dodbg, OP_ASN, ConstAttrib1f(1.0f)));
+    m_changed = true;
+    SH_DEBUG_PRINT("handled DBG stmt");
     return false; 
   }
 
   void finish() 
   {
     if(!m_has_dbg) return;
-    CtrlGraphNode* last = m_program->ctrlGraph->exit();
+    VarMap outputMap;
+    outputMap[m_output.node()] = m_outputTemp.node();
+    VariableReplacer vr(outputMap);
+    m_program->ctrlGraph->dfs(vr);
 
-    if(!last->block) {
-      last->block = new BasicBlock();
-    }
-    last->block->addStatement(Statement(m_output, OP_ASN, m_temp));
+    CtrlGraphNode* entry = m_program->ctrlGraph->prepend_entry();
+    entry->block->prependStatement(Statement(m_dodbg, OP_ASN, ConstAttrib1f(0.0f)));
+
+    CtrlGraphNode* last = m_program->ctrlGraph->append_exit();
+    last->block->addStatement(Statement(m_output, OP_COND, m_dodbg, m_temp, m_outputTemp));
   }
 
   private:
     Variable m_temp;
+    Variable m_outputTemp;
     Variable m_output;
+    Variable m_dodbg; /* in case dbg assignment is in branch */
     bool m_has_dbg;
 };
 typedef DefaultTransformer<DbgOpHandlerBase> DbgOpHandler;

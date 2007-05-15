@@ -69,10 +69,12 @@ public:
   BitSet& operator&=(const BitSet& other);
   BitSet& operator|=(const BitSet& other);
   BitSet& operator^=(const BitSet& other);
+  BitSet& operator-=(const BitSet& other);
 
   BitSet operator&(const BitSet& other) const;
   BitSet operator|(const BitSet& other) const;
   BitSet operator^(const BitSet& other) const;
+  BitSet operator-(const BitSet& other) const;
   
   BitSet operator~() const;
 
@@ -83,6 +85,8 @@ public:
   bool full() const;
   // Return true iff all entries are 0
   bool empty() const;
+  // Returns count of number of true elements
+  std::size_t count() const; 
   
   std::size_t size() const;
 

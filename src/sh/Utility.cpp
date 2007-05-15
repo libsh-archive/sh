@@ -40,7 +40,7 @@ void dotGen(const std::string& dot_string, const std::string& filename)
   std::string cmd;
   //std::string cmd = std::string("dot -Tps < ") + dot_filename + " > " + filename + ".ps"; 
   //system(cmd.c_str());
-  cmd = std::string("dot -Tpng < ") + dot_filename + " > " + filename + ".png" + " & "; 
+  cmd = std::string("dot -Tpng < ") + dot_filename + " > " + filename + ".png";
   system(cmd.c_str());
 //  cmd = std::string("rm -f ") + dot_filename; 
 //  system(cmd.c_str());

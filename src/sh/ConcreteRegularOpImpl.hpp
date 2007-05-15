@@ -250,7 +250,7 @@ struct ConcreteRegularOp<OP_NORM, T>
     SH_DEBUG_ASSERT(dest && a);
     typename Variant::CppDataType m = sqrt(std::inner_product(a->begin(), a->end(), 
           a->begin(), DataTypeInfo<T, HOST>::Zero));
-
+  
     typename Variant::iterator D = dest->begin();
     typename Variant::const_iterator A = a->begin();
     for(; D != dest->end(); ++A, ++D) (*D) = (*A) / m;

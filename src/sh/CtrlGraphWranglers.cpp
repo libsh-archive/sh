@@ -26,6 +26,14 @@
 //////////////////////////////////////////////////////////////////////////////
 #include "CtrlGraphWranglers.hpp"
 
+//#define CGW_DEBUG
+
+#ifdef CGW_DEBUG
+#  define SH_CGW_DEBUG_PRINT(x) SH_DEBUG_PRINT(x)
+#else
+#  define SH_CGW_DEBUG_PRINT(x)
+#endif
+
 namespace SH  {
 
 void spliceProgram(CtrlGraphNode* node, BasicBlock::StmtList::iterator stmt, Program &program) 
@@ -69,10 +77,15 @@ void structSplit(StructuralNode* from, StructuralNode* to, CtrlGraphNode* fromCf
     CtrlGraphNode* toCfg) {
   StructuralNode::CfgMatchList cfgmatch; 
 
+  SH_CGW_DEBUG_PRINT("structSplit(" << from << "," << to << "," << fromCfg << "," << toCfg <<")");
+
   for(StructuralNode::SuccessorList::iterator S = from->succs.begin();
       S != from->succs.end();) {
     if(S->second == to) {
+      SH_CGW_DEBUG_PRINT("getSuccs S->first " << (S->first.null() ? "null" : S->first.name())
+                     << " S->second " << S->second);
       from->getSuccs(cfgmatch, *S);
+      SH_CGW_DEBUG_PRINT("result count: " << cfgmatch.size());
       S = from->succs.erase(S);
     } else ++S;
   }
@@ -80,19 +93,20 @@ void structSplit(StructuralNode* from, StructuralNode* to, CtrlGraphNode* fromCf
   // can only handle a single entry node in to right now
   CtrlGraphNode* toEntry = 0; 
 
-  SH_DEBUG_PRINT("split cfgmatch size = " << cfgmatch.size()); 
+  SH_CGW_DEBUG_PRINT("split cfgmatch size = " << cfgmatch.size()); 
 
   StructuralNode::CfgMatchList::iterator I;
   for(I = cfgmatch.begin(); I != cfgmatch.end(); ++I) {
     if(!toEntry) {
       toEntry = I->to;
+      toCfg->follower(toEntry);
     } else if(toEntry != I->to) {
       SH_DEBUG_ERROR("Cannot handle multiple-entries in to node");
     }
+
     I->from->follower(fromCfg);
     if(!I->isFollower()) I->from->successors_erase(I->S);
   }
-  if(toEntry) toCfg->follower(toEntry);
 }
 
 void structReplaceExits(StructuralNode* node, CtrlGraphNode* head, CtrlGraphNode* tail) { 
@@ -102,11 +116,12 @@ void structReplaceExits(StructuralNode* node, CtrlGraphNode* head, CtrlGraphNode
 
   CtrlGraphNode* end = 0;
 
-  SH_DEBUG_PRINT("structReplaceExits match size = " << cfgmatch.size());
+  SH_CGW_DEBUG_PRINT("structReplaceExits match size = " << cfgmatch.size());
   StructuralNode::CfgMatchList::iterator I;
   for(I = cfgmatch.begin(); I != cfgmatch.end(); ++I) {
     if(!end) {
       end = I->to;
+      if(tail) tail->follower(end);
     } else if(end != I->to) {
       SH_DEBUG_ERROR("Cannot handle branching exits from node");
     }
@@ -115,7 +130,6 @@ void structReplaceExits(StructuralNode* node, CtrlGraphNode* head, CtrlGraphNode
       I->from->successors_erase(I->S);
     }
   }
-  if(end && tail) tail->follower(end); 
 }
 
 void structReplaceEntries(StructuralNode* node, CtrlGraphNode* head, CtrlGraphNode* tail) { 
@@ -125,7 +139,7 @@ void structReplaceEntries(StructuralNode* node, CtrlGraphNode* head, CtrlGraphNo
 
   CtrlGraphNode* entry = 0; // the entry into this node
 
-  SH_DEBUG_PRINT("structReplaceEntries match size = " << cfgmatch.size());
+  SH_CGW_DEBUG_PRINT("structReplaceEntries match size = " << cfgmatch.size());
   StructuralNode::CfgMatchList::iterator I;
   for(I = cfgmatch.begin(); I != cfgmatch.end(); ++I) {
     if(!entry) {

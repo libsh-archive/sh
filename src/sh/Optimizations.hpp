@@ -28,6 +28,7 @@
 #include "Info.hpp"
 #include "Statement.hpp"
 #include "BaseTexture.hpp"
+#include "BitSet.hpp"
 
 // Uncomment this to turn on optimizer debugging using dot.
 // Warning: This is very verbose!
@@ -60,6 +61,12 @@ void optimize(const ProgramNodePtr& p);
 // If it already exists, overwrite it.
 SH_DLLEXPORT
 void add_value_tracking(Program& prg);
+
+// Finds live variables 
+// If it already exists, overwrite it
+// Branch instructions should be present
+SH_DLLEXPORT
+void find_live_vars(Program& prg);
 
 /// Insert instructions representing each conditional branch
 SH_DLLEXPORT
@@ -209,6 +216,116 @@ struct OutputValueTracking: public Info
 
   typedef std::map<VariableNodePtr, ValueTracking::TupleUseDefChain> OutputTupleUseDefChain; 
   OutputTupleUseDefChain outputDefs;
+};
+
+/* Holds the live variable sets (by tuple element) for each CFG node  
+ * Built in much the same way as ValueTracking information
+ */
+struct 
+SH_DLLEXPORT
+LiveVars: public Info {
+  typedef std::map<VariableNodePtr, BitSet> ElementSet;
+  ElementSet in, use, out, def;
+  Info* clone() const;
+  friend std::ostream& operator<<(std::ostream& out, const LiveVars& lvs);
+};
+
+// Data related to doing reaching definitions
+struct ReachingDefs: public Info {
+  ReachingDefs()
+    : defsize(0)
+  {
+  }
+
+  Info* clone() const; 
+  
+  struct Definition {
+    Definition(Statement* stmt,
+               CtrlGraphNode* node,
+               int offset,
+               BitSet disable_mask)
+      : varnode(stmt->dest.node()), stmt(stmt), node(node), offset(offset),
+        disable_mask(disable_mask)
+    {
+      SH_DEBUG_ASSERT(varnode);
+    }
+
+    Definition(const VariableNodePtr& varnode,
+               CtrlGraphNode* node,
+               int offset,
+               BitSet disable_mask)
+      : varnode(varnode), stmt(0), node(node), offset(offset), 
+        disable_mask(disable_mask)
+    {
+      SH_DEBUG_ASSERT(varnode);
+    }
+
+    bool isInput() const
+    { 
+      return !stmt; 
+    }
+
+    int size() const
+    {
+      if(isInput()) return varnode->size();
+      else return stmt->dest.size();
+    }
+    
+    /* returns whether the i'th element is disabled */
+    int isDisabled(int i) const
+    {
+      return disable_mask[index(i)];
+    }
+    
+    /* returns the offset of the i'th tuple element */
+    int off(int i) const
+    {
+      return offset + i;
+    }
+
+    /* returns unswizzled index for i'th tuple element */
+    int index(int i) const
+    {
+      if(isInput()) return i;
+      return stmt->dest.swizzle()[i];
+    }
+
+    /* returns Def for i'th tuple element */
+    ValueTracking::Def toDef(int i) const
+    {
+      if(isInput()) return ValueTracking::Def(varnode, i); 
+      return ValueTracking::Def(stmt, i);
+    }
+
+    friend std::ostream& operator<<(std::ostream& out, const Definition& def);
+    
+    VariableNodePtr varnode;
+    Statement* stmt;
+    CtrlGraphNode* node;
+    int offset;
+    
+    // Sometimes we want to ignore some of the elements, when
+    // constructing gen, because they are overwritten by later
+    // statements. In that case we mark the ignored components here.
+    // unswizzled disable mask
+    BitSet disable_mask;
+  };
+
+  void addDefinition(const Definition& d)
+  {
+    // Otherwise, add this definition
+    defs.push_back(d);
+    defsize += d.size(); 
+  }
+
+  typedef std::map<CtrlGraphNode*, int> SizeMap;
+  typedef std::map<CtrlGraphNode*, BitSet> ReachingMap;
+  
+  std::vector<Definition> defs;
+  int defsize; ///< current defsize, offset for next added Definition
+
+  ReachingMap gen, prsv;
+  ReachingMap rchin, out;
 };
 
 }

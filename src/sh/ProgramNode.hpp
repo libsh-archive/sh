@@ -187,7 +187,7 @@ public:
   std::string& target() { return m_target; }
 
   /// Make a copy of this program.
-  Pointer<ProgramNode> clone() const;
+  Pointer<ProgramNode> clone(bool cloneVariables=false) const;
 
   /// Print a description of a list of variables
   static std::ostream& print(std::ostream& out, const VarList& list);

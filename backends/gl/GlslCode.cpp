@@ -85,7 +85,7 @@ GlslCode::~GlslCode()
 
 void GlslCode::generate()
 {
-  ProgramNodePtr temp_shader = m_originalShader->clone();
+  ProgramNodePtr temp_shader = m_originalShader->clone(false);
   m_shader = temp_shader.object();
   m_shader->acquireRef();
   temp_shader = NULL;
@@ -122,6 +122,7 @@ void GlslCode::generate()
   transform.stripDummyOps();
   transform.expand_atan2();
   transform.expand_inverse_hyperbolic();
+  transform.handleDbgOps();
   //transform.texd_to_texlod();
 
   if (transform.changed()) {

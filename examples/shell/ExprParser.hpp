@@ -10,25 +10,25 @@
 class  ExprParser {
   public:
     // Register a named variable (usually a global or external parameter) for use in expressions
-    SH::ShVariable registerVar(std::string name, SH::ShVariable var);
+    SH::Variable registerVar(std::string name, SH::Variable var);
     bool hasVar(std::string name); // returns whether a variable is defined
-    SH::ShVariable getVar(std::string name); // returns null variable if not defined 
+    SH::Variable getVar(std::string name); // returns null variable if not defined 
 
     // Register a named stream 
-    SH::ShStream registerStream(std::string name, SH::ShStream var);
+    SH::Stream registerStream(std::string name, SH::Stream var);
     bool hasStream(std::string name); // returns whether a stream is defined
 
     // returns null stream if not defined 
-    // (note this also automatically casts a ShVariable into a one-element
+    // (note this also automatically casts a Variable into a one-element
     // stream if the variable is uniform or constant)
     // @todo this should go the other way too (in effect simulating the 
     // var/stream, memory/variant merge that may come in the future)
-    SH::ShStream getStream(std::string name); 
+    SH::Stream getStream(std::string name); 
 
-    void registerFunc(std::string name, SH::ShProgram func);
+    void registerFunc(std::string name, SH::Program func);
 
     // fetches program
-    SH::ShProgram& operator[](std::string name);
+    SH::Program& operator[](std::string name);
 
     void dump(std::ostream& out);
 
@@ -79,16 +79,16 @@ class  ExprParser {
      */
     void parse(std::string stmtlist);
 
-    SH::ShVariable parse_expr(std::string expr); 
+    SH::Variable parse_expr(std::string expr); 
 
   private:
-    typedef std::map<std::string, SH::ShVariable> VarMap;
+    typedef std::map<std::string, SH::Variable> VarMap;
     VarMap m_vars; // user defined variables
 
-    typedef std::map<std::string, SH::ShStream> StreamMap;
+    typedef std::map<std::string, SH::Stream> StreamMap;
     StreamMap m_streams; // user defined streams 
 
-    typedef std::map<std::string, SH::ShProgram> FuncMap;
+    typedef std::map<std::string, SH::Program> FuncMap;
     FuncMap m_funcs; // user defined functions
 
     // parsing variables
@@ -103,17 +103,17 @@ class  ExprParser {
     void parse_stmt();
     bool parse_asmop(); // returns true if ASM op parsed
     void parse_directive();
-    SH::ShVariable parse_decl();
-    SH::ShVariable parse_expr(); // @todo allow user-defined operators and precedence 
-    SH::ShVariable parse_expr0(); // @todo allow user-defined operators and precedence 
-    SH::ShVariable parse_expr1();
-    SH::ShVariable parse_expr2();
-    SH::ShVariable parse_expr3();
-    SH::ShVariable parse_expr4();
-    //SH::ShVariable parse_func(); // @todo allow user defined functions using functors/func pointers
-    SH::ShRecord parse_arglist();
+    SH::Variable parse_decl();
+    SH::Variable parse_expr(); // @todo allow user-defined operators and precedence 
+    SH::Variable parse_expr0(); // @todo allow user-defined operators and precedence 
+    SH::Variable parse_expr1();
+    SH::Variable parse_expr2();
+    SH::Variable parse_expr3();
+    SH::Variable parse_expr4();
+    //SH::Variable parse_func(); // @todo allow user defined functions using functors/func pointers
+    SH::Record parse_arglist();
     std::vector<float> parse_constlist();
-    SH::ShSwizzle parse_swiz(int srcSize);
+    SH::Swizzle parse_swiz(int srcSize);
 
     void eatWs();
     bool eatChar(char expected);
@@ -123,16 +123,16 @@ class  ExprParser {
     float real(); // real number ([-]digits[.digits]) 
     void save(); // saves and restores m_cur to/from m_save (useful for trial parses)
     void restore(); 
-    SH::ShVariable makeVar(std::string shtype); 
+    SH::Variable makeVar(std::string shtype); 
 
-    SH::ShStream varToStream(SH::ShVariable& var);
+    SH::Stream varToStream(SH::Variable& var);
 
     void debugEnter(std::string node);
     void debugExit();
 };
 
-struct ExprParserException: public SH::ShException {
-  ExprParserException(std::string msg): SH::ShException(msg) {}
+struct ExprParserException: public SH::Exception {
+  ExprParserException(std::string msg): SH::Exception(msg) {}
 };
 
 #endif

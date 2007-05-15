@@ -68,7 +68,7 @@ std::ostream& help(std::ostream& out) {
   out << left << setw(40) << "stream \"name\" \"var1\" \"var2\" ... " << "Makes a single-element stream using the given float variables as channels. " << endl;
   out << left << setw(40) << "apply \"out_stream\" \"func\" \"in_stream\"" << endl; 
   out << left << setw(40) << "r \"filename\" arg1 arg2 ..." << "Executes commands in filename" << endl;
-  out << left << setw(40) << "b \"backend\"" << "Executes shSetBackend(\"backend\")" << endl;
+  out << left << setw(40) << "b \"backend\"" << "Executes setBackend(\"backend\")" << endl;
   out << left << setw(40) << "dump" << "Dumps current expression parser state" << endl;
   out << left << setw(40) << "// or #" <<  "comments (note that to disambiguate, # must be followed by a space)" << endl;
   out << left << setw(40) << "q" << "Quits" << endl;
@@ -163,42 +163,42 @@ std::istream& Shell::start(std::istream& in, const vecs& args, CommandProcessor*
 
             } else if (toks[0] == "incl") { EXPECT(3);
               std::cerr << toks[2] << " =  incl " << toks[1] << endl;
-              ShProgram result = inclusion(ep[toks[1]]);
+              Program result = inclusion(ep[toks[1]]);
               result.name(toks[2]);
               ep.registerFunc(toks[2], result); 
 
             } else if (toks[0] == "aincl") { EXPECT(3);
               std::cerr << toks[2] << " =  aincl " << toks[1] << endl;
-              ShProgram result = affine_inclusion(ep[toks[1]]);
+              Program result = affine_inclusion(ep[toks[1]]);
               result.name(toks[2]);
               ep.registerFunc(toks[2], result); 
 
             } else if (toks[0] == "conv") { EXPECT(3);
               std::cerr << toks[2] << " =  aconv " << toks[1] << endl;
-              ShProgram cprog(ep[toks[1]].node()->clone());
+              Program cprog(ep[toks[1]].node()->clone());
               cprog.name(toks[2]);
 
-              ShContext::current()->enter(cprog.node());
-                SH::ShTransformer tf(cprog.node());
+              Context::current()->enter(cprog.node());
+                SH::Transformer tf(cprog.node());
                 tf.handleDbgOps();
                 tf.convertInputOutput();
                 tf.convertTextureLookups();
                 tf.convertAffineTypes();
                 tf.convertIntervalTypes();
                 optimize(cprog);
-              ShContext::current()->exit();
+              Context::current()->exit();
 
               ep.registerFunc(toks[2], cprog); 
 
             } else if (toks[0] == "meta") { EXPECT(4);
               std::cerr << toks[1] << ".meta(" << toks[2] << ") = " << toks[3] << endl;
-              ShProgram p = ep[toks[1]];
+              Program p = ep[toks[1]];
               p.meta(toks[2], toks[3]);
               std::cerr << toks[2] << ":" << p.meta(toks[2]) << endl;
 
             } else if (toks[0] == "flag") { EXPECT(3);
               std::cerr << "set_flag(" << toks[1] << "," << toks[2]  << ")" << endl; 
-              ShContext::current()->set_flag(toks[1], toks[2] == "true");
+              Context::current()->set_flag(toks[1], toks[2] == "true");
             } else if (toks[0] == "print") { EXPECT(2);
               string expr;
               for(size_t i = 1; i < toks.size(); ++i) {
@@ -208,9 +208,9 @@ std::istream& Shell::start(std::istream& in, const vecs& args, CommandProcessor*
 
             } else if (toks[0] == "stream") { EXPECT(3);
               name = toks[1];
-              ShStream result; 
+              Stream result; 
               for(size_t i = 2; i < toks.size(); ++i) {
-                ShStream s = ep.getStream(toks[i]);
+                Stream s = ep.getStream(toks[i]);
                 result = result & s;  
               }
               ep.registerStream(name, result);
@@ -218,16 +218,16 @@ std::istream& Shell::start(std::istream& in, const vecs& args, CommandProcessor*
               if(!ep.hasStream(toks[1])) {
                 std::cout << "Couldn't find stream " << toks[1] << endl; 
               }
-              ShStream outStream = ep.getStream(toks[1]);
+              Stream outStream = ep.getStream(toks[1]);
 
               name = toks[2];
-              ShProgram prog = ep[name];
+              Program prog = ep[name];
 
               if(!ep.hasStream(toks[3])) {
                 std::cout << "Couldn't find stream " << toks[3] << endl; 
               }
 
-              ShStream inStream = ep.getStream(toks[3]);
+              Stream inStream = ep.getStream(toks[3]);
               outStream = prog << inStream; 
 
             } else if (toks[0] == "r") { EXPECT(2);
@@ -240,7 +240,7 @@ std::istream& Shell::start(std::istream& in, const vecs& args, CommandProcessor*
               start(fin, args, comproc, false);
 
             } else if (toks[0] == "b") { EXPECT(2);
-              shSetBackend(toks[1]);
+              setBackend(toks[1]);
 
             } else if (toks[0] == "dump") {
               ep.dump(std::cout);
@@ -267,20 +267,20 @@ std::istream& Shell::start(std::istream& in, const vecs& args, CommandProcessor*
               ep.parse(prog);
             }
           }
-        } catch (ShException& se) {
+        } catch (Exception& se) {
           cerr << "Exception: " << se.message() << endl;
         }
         break;
       case INPROG:
         if(toks.size() == 1 && toks[0] == "p") {
           std::cerr << "Parsing Program:" << endl << prog << endl;
-          //ShContext::current()->optimization(0);
-          ShProgram newprog;
+          //Context::current()->optimization(0);
+          Program newprog;
           try {
-            newprog  = SH_BEGIN_PROGRAM("gpu:stream"); {
+            newprog  = SH_BEGIN_PROGRAM("stream") {
               ep.parse(prog);
             } SH_END;
-          } catch (ShException e) {
+          } catch (Exception e) {
             cerr << "Exception:" << e.message() << endl;
           }
           ep.registerFunc(name, newprog);
@@ -299,7 +299,7 @@ std::istream& Shell::start(std::istream& in, const vecs& args, CommandProcessor*
           prog += ";\n";
           try {
             ep.parse(prog);
-          } catch (ShException e) {
+          } catch (Exception e) {
             cerr << "Exception:" << e.message() << endl;
           }
                 

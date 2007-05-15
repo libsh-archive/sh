@@ -68,7 +68,7 @@ int OffsetRange<std::string>::absIndex( std::string index, int offset,
 
   // match first occurrence of the index name
   ProgramNode::VarIt it = V; 
-  for( int i = 0; i < vsize; ++it, ++i ) {
+  for( size_t i = 0; i < vsize; ++it, ++i ) {
     if( (*it)->name() == index && result == OFFSET_RANGE_BAD_INDEX ) {
       result = i; 
       break;

@@ -31,7 +31,7 @@ Program keep(const std::string & name)
 {
   Program nibble = SH_BEGIN_PROGRAM() {
     typename T::InOutType SH_NAMEDECL(attr, name); 
-  } SH_END_PROGRAM;
+  } SH_END;
   nibble.name("keep");
   return nibble;
 }
@@ -43,7 +43,7 @@ Program dup(const std::string & name)
     typename T::InputType SH_NAMEDECL(attr, name); 
     typename T::OutputType SH_NAMEDECL(attr1, name + "_1") = attr; 
     typename T::OutputType SH_NAMEDECL(attr2, name + "_2") = attr; 
-  } SH_END_PROGRAM;
+  } SH_END;
   nibble.name("dup");
   return nibble;
 }
@@ -53,7 +53,7 @@ Program lose(const std::string & name)
 {
   Program nibble = SH_BEGIN_PROGRAM() {
     typename T::InputType SH_NAMEDECL(attr, name);
-  } SH_END_PROGRAM;
+  } SH_END;
   nibble.name("lose");
   return nibble;
 };
