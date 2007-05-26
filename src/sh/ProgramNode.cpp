@@ -85,6 +85,19 @@ struct VariableClonerBase: public TransformerParent {
 };
 typedef DefaultTransformer<VariableClonerBase> VariableCloner;
 
+struct StatementCounterBase: public TransformerParent {
+  /* Splits a statement.  Returns whether the operator requires splicing in a new program
+   * fragment. 
+   */
+  int count;
+  StatementCounterBase(): count(0) {}
+  bool handleStmt(BasicBlock::StmtList::iterator& I, CtrlGraphNode* node)
+  {
+    count ++;
+    return false;
+  }
+};
+typedef DefaultTransformer<StatementCounterBase> StatementCounter;
 }
 
 namespace SH {
@@ -528,6 +541,13 @@ Pointer<ProgramNode> ProgramNode::clone(bool cloneVariables) const
     result->collectAll();
   }
   return result;
+}
+
+/// Prints a statement count
+int ProgramNode::statement_count() {
+  StatementCounter sc;
+  sc.transform(this);
+  return sc.count;
 }
 
 void ProgramNode::finish()

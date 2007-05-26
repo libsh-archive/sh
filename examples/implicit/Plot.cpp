@@ -41,6 +41,7 @@ Color3f plot(Program func, const Attrib2f& texcoord, const Attrib1i_f &input_ran
   pnormal(0) = dx(val);
   pnormal(1) = 1.0f;
   pnormal = normalize(pnormal);
+  Attrib1f deltay = abs(dy(pos(1))) * 4;
   Attrib1f pfdelta = pos(1) - val; 
   inCurve = abs(pfdelta * pnormal(1)) < scale * lineWidth; 
 
@@ -61,7 +62,7 @@ Color3f plot(Program func, const Attrib2f& texcoord, const Attrib1i_f &input_ran
 
     Attrib1f errValue = (pos(0) - center) / range_radius(aa_range);
     
-    inRangeAA = abs(errValue * result_inerr + result_center - pos(1)) < result_other;
+    inRangeAA = abs(errValue * result_inerr + result_center - pos(1)) - deltay < result_other;
 
     // check if in IA range
     Attrib1i_f SH_DECL(ia_result) = ifunc(input_range);

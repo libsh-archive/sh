@@ -51,7 +51,7 @@ class TracerFrame: public wxFrame
 {
   public:
     TracerFrame(wxFrame *frame, const wxString& title, const wxPoint& pos,
-        const wxSize& size, long style = wxDEFAULT_FRAME_STYLE);
+        const wxSize& size, long style = wxDEFAULT_FRAME_STYLE, bool singleCanvas=false, bool noBackground=false);
 
     void initParams();
 
@@ -62,8 +62,11 @@ class TracerFrame: public wxFrame
 
     /* some presets */
     void OnPreset(wxCommandEvent& event);
+    void ShowSphere();
     void ShowSpheres();
+    void ShowLine();
     void ShowTorus();
+    void ShowH2O();
     void ClearModels();
     void InitShaders(); 
 
@@ -96,14 +99,17 @@ class TracerFrame: public wxFrame
     PlotFuncPtr pfs[9];
     int selected; // 0 = no selection (mouse interacts with view), 1-9 means selected object i-1
 
+    /* background colour */
+    Color3f backgroundColor;
+
 private:
 DECLARE_EVENT_TABLE()
     wxMenu* m_presetMenu;
     wxMenuBar* m_menuBar;
     wxSplitterWindow* m_split;
       wxSplitterWindow* m_rightSplit;
-      static const int numCanvas = 3;
-      TracerGLCanvas *m_canvas[numCanvas];
+      int numCanvas; 
+      TracerGLCanvas *m_canvas[3];
 
     int cur_x, cur_y; // mouse position
 };

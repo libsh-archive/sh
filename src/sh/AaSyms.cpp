@@ -207,6 +207,15 @@ bool AaSyms::empty() const
   return result;
 }
 
+AaIndexSet AaSyms::all() const
+{
+  AaIndexSet result;
+  for(const_iterator I = begin(); I != end(); ++I) {
+    result |= *I; 
+  }
+  return result;
+}
+
 AaSyms operator|(const AaSyms &a, const AaSyms &b)
 {
   AaSyms result(a);

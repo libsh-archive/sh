@@ -18,6 +18,8 @@
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 #include "Utility.hpp"
+#include "Transformer.hpp"
+#include "ProgramNode.hpp"
 #include <iostream>
 #include <fstream>
 
@@ -42,8 +44,11 @@ void dotGen(const std::string& dot_string, const std::string& filename)
   //system(cmd.c_str());
   cmd = std::string("dot -Tpng < ") + dot_filename + " > " + filename + ".png";
   system(cmd.c_str());
+  cmd = std::string("dot -Tps < ") + dot_filename + " > " + filename + ".ps";
+  system(cmd.c_str());
 //  cmd = std::string("rm -f ") + dot_filename; 
 //  system(cmd.c_str());
 }
+
 
 }

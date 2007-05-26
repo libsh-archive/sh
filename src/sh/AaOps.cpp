@@ -201,6 +201,10 @@ void convexApprox(AaVariable &dest, const AaVariable &src, const AaSyms &newsyms
   Variable lo, hi; 
   src.lohi(lo, hi);
 
+  /* @todo this shouldn't be here...  */
+  shADD(lo, lo, -EPS.repeat(lo.size()));
+  shADD(hi, hi, EPS.repeat(hi.size()));
+
   if(F::fix_range) {
     F::fix(lo, hi); /* compute the approximation only on this range */
   }
@@ -213,7 +217,9 @@ void convexApprox(AaVariable &dest, const AaVariable &src, const AaSyms &newsyms
   Variable alpha, ss, bpd, bmd, beta, delta; 
   alpha = src.temp("alpha");
 
-  Variable width = src.width(); 
+  //Variable width = src.width(); 
+  Variable width = src.temp("width");
+  shADD(width, hi, -lo); 
   shMAX(width, width, EPS.repeat(width.size()));
 
   Variable fhiflo = src.temp("fhi-flo");
@@ -650,6 +656,7 @@ AaVariable aaSQRT(const AaVariable& a, const AaSyms& newsyms)
   SH_IF(affineIsNegative(a)) { // we're screwed - return some invalid form 
     Variable resultCenter = result.center();
     shASN(resultCenter, INF.repeat(result.size())); 
+    result.setErr(ZERO, newsyms);
   } SH_ELSE {
     convexApprox<__aaop_sqrt>(result, a, newsyms); 
   } SH_ENDIF;
@@ -899,6 +906,40 @@ AaVariable aaSNE(const AaVariable& a, const AaVariable& b, const AaSyms &newsyms
   SH_DEBUG_ASSERT(false);
 }
 
+AaVariable aaABS(const AaVariable& a, const AaSyms& newsyms) {
+  AaVariable result(new AaVariableNode(*a.node(), a.use()));
+  result.name("aopABSt");
+
+  Variable lo, hi, hiNeg, loPos, spansZero; 
+  a.lohi(lo, hi);
+  hiNeg = a.temp("aopABShiNeg");
+  loPos = a.temp("aopABSloPos");
+  spansZero = a.temp("aopABSspansZero");
+
+  shSLE(hiNeg, hi, ZERO.repeat(hi.size()));
+  shSGE(loPos, lo, ZERO.repeat(lo.size()));
+  shADD(spansZero, hiNeg, loPos);
+  shADD(spansZero, ONE.repeat(spansZero.size()), -spansZero);
+
+  result.ZERO();
+  result.ASN(a);
+  result.COND(hiNeg, a.NEG());
+
+  AaVariable zeroResult(new AaVariableNode(*a.node(), a.use()));
+  Variable alpha, beta, delta;
+  alpha = a.temp("aopABSalpha");
+  beta = a.temp("aopABSbeta");
+  delta = a.temp("aopABSdelta");
+
+  shMAD(beta, -alpha, hi, hi);
+  shMUL(beta, beta, HALF.repeat(beta.size()));
+  shASN(delta, beta);
+
+  affineApprox(zeroResult, a, alpha, beta, delta, newsyms);
+  result.COND(spansZero, zeroResult); 
+  return result;
+}
+
 AaVariable aaCOS(const AaVariable& a, const AaSyms& newsyms) {
   AaVariable acopy(new AaVariableNode(*a.node(), a.use()));
   acopy.name("aopCOSt");
@@ -1069,6 +1110,7 @@ AaVariable aaLOG(const AaVariable& a, const AaSyms& newsyms)
   SH_IF(affineMaybeNegative(a)) {
     Variable resultCenter = result.center();
     shASN(resultCenter, INF.repeat(result.size())); 
+    result.setErr(ZERO, newsyms);
   } SH_ELSE {
     convexApprox<__aaop_log>(result, a, newsyms); // @todo range - fix this
   } SH_ENDIF;
@@ -1096,6 +1138,7 @@ AaVariable aaLOG2(const AaVariable& a, const AaSyms& newsyms)
   SH_IF(affineMaybeNegative(a)) {
     Variable resultCenter = result.center();
     shASN(resultCenter, INF.repeat(result.size())); 
+    result.setErr(ZERO, newsyms);
   } SH_ELSE {
     convexApprox<__aaop_log2>(result, a, newsyms); // @todo range - fix this
   } SH_ENDIF;
@@ -1123,6 +1166,7 @@ AaVariable aaLOG10(const AaVariable& a, const AaSyms& newsyms)
   SH_IF(affineMaybeNegative(a)) {
     Variable resultCenter = result.center();
     shASN(resultCenter, INF.repeat(result.size())); 
+    result.setErr(ZERO, newsyms);
   } SH_ELSE {
     convexApprox<__aaop_log10>(result, a, newsyms); // @todo range - fix this
   } SH_ENDIF;

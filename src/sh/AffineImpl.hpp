@@ -1174,9 +1174,11 @@ Affine<TT> abs(const Affine<TT>& a)
 
   TT hi = bounds.hi();
   TT lo = bounds.lo();
+  TT abshi = hi;
+  TT abslo = -lo;
   TT alpha, beta, delta; // beta = delta in this case
-  alpha = (hi - lo) / bounds.width();
-  beta = delta = hi - alpha * hi; 
+  alpha = (abshi - abslo) / bounds.width();
+  beta = delta = 0.5 * (hi - alpha * hi); 
 
   return a.affine_approx(alpha, beta, beta); 
 }

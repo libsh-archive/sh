@@ -65,9 +65,19 @@ std::ostream& operator<<(std::ostream& out, const Swizzle& swizzle)
 {
   if (swizzle.identity()) return out;
   out << "(";
+  /* condense consecutive indices to make long swizzles more intelligible */
   for (int i = 0; i < swizzle.size(); i++) {
-    if (i > 0) out << ", ";
-    out << swizzle[i];
+    if(i > 0) {
+      if(swizzle[i] == swizzle[i-1] + 1 && swizzle.size() > 4) {
+        if(i == swizzle.size() - 1 || swizzle[i+1] != swizzle[i] + 1) {
+          out << ":" << swizzle[i];
+        } 
+      } else {
+        out << "," << swizzle[i];
+      }
+    } else {
+      out << swizzle[i];
+    }
   }
   out << ")";
   return out;

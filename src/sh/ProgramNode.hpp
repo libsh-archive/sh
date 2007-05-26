@@ -189,11 +189,15 @@ public:
   /// Make a copy of this program.
   Pointer<ProgramNode> clone(bool cloneVariables=false) const;
 
+  /// Prints a statement count
+  int statement_count();
+
   /// Print a description of a list of variables
   static std::ostream& print(std::ostream& out, const VarList& list);
 
   /// Print a description of a list of variables
   static std::ostream& print(std::ostream& out, const VarIt& begin, size_t size);
+
 
   /// True if this program has been completed with SH_END.
   bool finished() const { return m_finished; }

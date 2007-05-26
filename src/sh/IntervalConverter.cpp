@@ -200,6 +200,31 @@ Program intervalSGE(int N, ValueType valueType)
   return result;
 }
 
+Program intervalABS(int N, ValueType valueType) 
+{
+  Program result = SH_BEGIN_PROGRAM() {
+    VariablePair a(SH_INPUT, N, valueType);
+    VariablePair r(SH_OUTPUT, N, valueType);
+
+    VariablePair aa(SH_TEMP, N, valueType);
+    VariablePair temp(SH_TEMP, N, valueType);
+    shABS(aa.lo, a.lo);
+    shABS(aa.hi, a.hi);
+    shMIN(temp.lo, aa.lo, aa.hi);
+    shMAX(temp.hi, aa.lo, aa.hi);
+
+    /* if original interval spans zero, we need to set lo = 0 */ 
+    VariablePair spansZero(SH_TEMP, N, valueType);
+    ConstAttrib1f ZERO(0.0f);
+    shSLT(spansZero.lo, a.lo, ZERO.repeat(N));
+    shSGT(spansZero.hi, a.hi, ZERO.repeat(N));
+    shMUL(spansZero.lo, spansZero.lo, spansZero.hi);
+    shLRP(r.lo, spansZero.lo, ZERO.repeat(N), temp.lo); 
+    shASN(r.hi, temp.hi);
+  } SH_END;
+  return result;
+}
+
 Program intervalCOS(int N, ValueType valueType)
 {
   Program result = SH_BEGIN_PROGRAM() {
@@ -474,6 +499,7 @@ Program getProgram(Operation op, int N, ValueType valueType) {
     case OP_SGT:   return intervalSGT(N, valueType);
     case OP_SGE:   return intervalSGE(N, valueType);
 
+    case OP_ABS:   return intervalABS(N, valueType);
     case OP_ACOS:   return intervalBinaryMonotonic<OP_ACOS>(N, valueType);
     case OP_ASIN:   return intervalBinaryMonotonic<OP_ASIN>(N, valueType);
     case OP_ATAN:   return intervalBinaryMonotonic<OP_ATAN>(N, valueType);

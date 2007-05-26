@@ -75,10 +75,8 @@ AaVariable aaSGE(const AaVariable& a, const AaVariable& b, const AaSyms &newsyms
 AaVariable aaSEQ(const AaVariable& a, const AaVariable& b, const AaSyms &newsyms);
 AaVariable aaSNE(const AaVariable& a, const AaVariable& b, const AaSyms &newsyms);
 
-#if 0
 
-AaVariable aaABS(const AaVariable& a);
-#endif
+AaVariable aaABS(const AaVariable& a, const AaSyms& newsyms);
 AaVariable aaACOS(const AaVariable& a, const AaSyms& newsyms);
 AaVariable aaASIN(const AaVariable& a, const AaSyms& newsyms);
 AaVariable aaATAN(const AaVariable& a, const AaSyms& newsyms);

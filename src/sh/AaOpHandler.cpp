@@ -357,6 +357,7 @@ Program getProgram(Statement& stmt, SymAllocator& alloc) {
 #if 0
         case OP_CEIL:   return affineBinaryMonotonic<OP_CEIL>(N, valueType);
 #endif
+        case OP_ABS:   dest.ASN(aaABS(src[0], stmtSyms->newdest)); break;
         case OP_ACOS:  dest.ASN(aaACOS(src[0], stmtSyms->newdest)); break;
         case OP_ASIN:  dest.ASN(aaASIN(src[0], stmtSyms->newdest)); break;
         case OP_ATAN:  dest.ASN(aaATAN(src[0], stmtSyms->newdest)); break;
@@ -568,7 +569,6 @@ bool handleAaOps(ProgramNodePtr programNode) {
   optimize(programNode); // should do this here since there are likely lots of program fragments that could use straightening start later work
   dump(programNode, "_aho-4-sectremove_opt");
 
- 
   // Now here's the process
   // 1) Change inputs to intervals 
   //    Insert code at beginning to turn intervals into affine (center + 1 err

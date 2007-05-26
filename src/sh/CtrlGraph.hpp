@@ -88,6 +88,14 @@ public:
   /// See http://www.research.att.com/sw/tools/graphviz/ for more details.
   std::ostream& graphviz_dump(std::ostream& out) const;
 
+  /// Version of dump where dumper is responsible for generating 
+  /// the output per statement.
+  ///     string operator()(const Statement& stmt)
+  /// Unlike above, this uses HTML-dot labels
+  /// (see http://www.graphviz.org/doc/info/shapes.html)
+  template<class D>
+  std::ostream& graphviz_dump(std::ostream& out, D& dumper) const;
+
   /** Splits this control graph node into two nodes A, B, at the given statement.
    * A is this, and keeps all predecessor information, 
    * B is a new node that takes over all successor/follower
@@ -242,6 +250,9 @@ public:
   
   std::ostream& graphviz_dump(std::ostream& out) const;
 
+  template<class D>
+  std::ostream& graphviz_dump(std::ostream& out, D& dumper) const;
+
   /// Use these with care... respect the ownership system!
   CtrlGraphNode* entry() const { return m_entry; }
   CtrlGraphNode* exit() const  { return m_exit;  }
@@ -338,6 +349,47 @@ void CtrlGraphNode::real_dfs(F& functor) const
   if (m_follower) m_follower->real_dfs(functor);
 }
 
+template<class D>
+std::ostream& CtrlGraphNode::graphviz_dump(std::ostream& out, D& dumper) const
+{
+  if (marked()) return out;
+  mark();
+  out << "\"" << this << "\" ";
+
+
+  if (block) {
+    out << " [label=<" << std::endl;
+    out << "   <TABLE BORDER=\"0\" CELLBORDER=\"0\" CELLPADDING=\"1\" CELLSPACING=\"1\">" << std::endl;
+    for (BasicBlock::const_iterator I = block->begin();
+         I != block->end(); ++I) { 
+      out << "     <TR>" << dumper.dump(*I) << "</TR>" << std::endl; 
+    }
+    out << "   </TABLE> >, shape=box];";
+  } else {
+    out << "[label=\"\", shape=circle];";
+  }
+
+  for (SuccessorList::const_iterator I = m_successors.begin();
+       I != m_successors.end(); ++I) {
+    I->node->graphviz_dump(out, dumper);
+    out << "\"" << this << "\" ";
+    out << "-> ";
+    out << "\"" << I->node << "\" ";
+
+    out << "[style=dashed, label=\"" << I->cond.name() << "\"]";
+    out << ";" << std::endl;
+  }
+
+  if (m_follower) {
+    m_follower->graphviz_dump(out, dumper);
+    out << "\"" << this << "\" ";
+    out << "-> ";
+    out << "\"" << m_follower << "\";" << std::endl;
+  }
+  
+  return out;
+}
+
 template<typename F>
 void CtrlGraph::dfs(F& functor)
 {
@@ -353,6 +405,22 @@ void CtrlGraph::dfs(F& functor) const
   m_entry->real_dfs(functor);
   clear_marked();
 }
+
+template<class D>
+std::ostream& CtrlGraph::graphviz_dump(std::ostream& out, D& dumper) const
+{
+  out << "digraph control {" << std::endl;
+  
+  if (m_entry) {
+    clear_marked();
+    m_entry->graphviz_dump(out, dumper);
+    clear_marked();
+  }
+  
+  out << "}" << std::endl;
+  return out;
+}
+
 
 }
 

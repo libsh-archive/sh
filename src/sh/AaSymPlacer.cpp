@@ -635,9 +635,9 @@ ostream& operator<<(ostream& out, const StmtSet& ss) {
 }
 
 ostream& operator<<(ostream& out, const LiveDef& ld) {
-  out << "<LiveDef in: " << ld.in << " use: " << ld.use << " def:" << ld.def
+  out << "{ LiveDef in: " << ld.in << " use: " << ld.use << " def:" << ld.def
       << " out:" << ld.out << " rchout: " << ld.rchout << " dead:" << ld.dead 
-      << " pred: " << ld.pred << " succ:" << ld.succ << ">";
+      << " pred: " << ld.pred << " succ:" << ld.succ << " }";
   return out;
 }
 
@@ -1040,7 +1040,7 @@ struct SymCount
     {
       VariableNodePtr defNode; 
       int rawIndex = def.absIndex();
-      AaIndexSet* indexSet;
+      AaIndexSet* indexSet = 0;
       switch(def.kind) {
         case ValueTracking::Def::STMT: {
           Statement& stmt = *def.stmt;
@@ -1126,6 +1126,177 @@ struct SpecialFinderBase: TransformerParent
   }
 };
 typedef DefaultTransformer<SpecialFinderBase> SpecialFinder; 
+
+/* Dumper used to dump out noise symbol information 
+ * Initial phase is to run it as a transformer so it can
+ * remap used noise symbols to the range [0, N].
+ *
+ * Then run again using CtrlGraph::graphviz_dump 
+ * to generate output.
+ * */ 
+enum SymbolState {
+  DEAD, /* transparent */
+  LIVE, /* grey */
+  NEW,  
+
+  MERGED_REP,
+  MERGED_UM,
+  MERGED_HIER
+};
+
+// colors from ColorBrewer Set2 7-class qualitative
+const char* StateColour[] = {
+  "",
+  "#aaaaaa", /* grey picked to be around the same luminance value */ 
+  "#ffd92f", /* new = gold */
+
+  "#a6d854", /* merged_rep = green */
+  "#8da0cb", /* merged_um = blue */
+  "#fc8d62", /* merged_hier = red */
+};
+
+typedef vector<SymbolState> StateVec;
+struct StmtSymDumperBase: public TransformerParent {
+  map<int, int> symmap; /* map for noise symbols */
+  AaProgramSyms* psyms;
+  map<string, string> tempmap; /* map for temporary names */
+  int tempidx; 
+
+  void init(AaProgramSyms* psyms) {
+    this->psyms = psyms;
+    tempidx = 0;
+  }
+
+  /* special versions of statement dumping from Statement.cpp - shortens temps */ 
+  std::ostream& dumpVar(std::ostream &out, const Variable& var)
+  {
+    if(var.null()) {
+      out << "[null]";
+    } else {
+      out << (var.neg() ? "-" : "");
+
+      /* shorten temporary names (i.e. those that are in the form prefix + digits) */
+      string name = var.name(); 
+      //static const char* prefix[] = { "aa_t", "t", "ut" };
+      //for(int i = 0; i < 3; ++i) {
+      static const char* prefix[] = { "aa_t", "ut" }; /* t's may be branch variables.. */ 
+      for(int i = 0; i < 2; ++i) {
+        if(var.name().find(prefix[i]) != 0) continue;
+        if(var.name().length() == strlen(prefix[i])) continue;
+        if(var.name().find_first_not_of("0123456789", strlen(prefix[i])) != string::npos) continue;
+        if(tempmap.find(var.name()) == tempmap.end()) {
+          ostringstream tout;
+          tout << prefix[i] << tempidx++;
+          tempmap[var.name()] = tout.str();
+        }
+        name = tempmap[var.name()];
+      }
+      out << name << var.swizzle();
+    }
+    return out;
+  }
+
+  bool handleStmt(BasicBlock::StmtList::iterator& I, CtrlGraphNode* node)
+  {
+    const Statement& stmt = *I;
+    const AaStmtSyms* syms = stmt.get_info<AaStmtSyms>(); 
+
+    if(!syms || syms->mergeDest.empty()) return false; 
+    AaIndexSet all = syms->dest.all();
+    for(size_t i = 0; i < syms->src.size(); ++i) {
+      all |= syms->src[i].all();
+    }
+
+    for(AaIndexSet::const_iterator S = all.begin(); S != all.end(); ++S) {
+      if(symmap.find(*S) != symmap.end()) continue;
+      int idx = symmap.size();
+      symmap[*S] = idx; 
+    }
+    return false;
+  }
+
+  string dump(const Statement& stmt) {
+    /* build up live noise symbol information */
+    const LiveDef* ld = stmt.get_info<LiveDef>();
+    StateVec state(symmap.size(), DEAD);
+
+    ostringstream sout; 
+//    sout << "<TD ALIGN=\"LEFT\">" << stmt << "</TD>";
+//         << "<TD>" << *syms << "</TD>";
+//         << "<TD>" << *ld << "</TD>"; 
+    sout << "<TD ALIGN=\"RIGHT\">";         
+    dumpVar(sout, stmt.dest) << " = ";
+    sout << "</TD><TD ALIGN=\"LEFT\">";
+    if(stmt.op != OP_ASN) sout << opInfo[stmt.op].name << " ";
+    for(int i = 0; i < opInfo[stmt.op].arity; ++i) {
+      if(i > 0) sout << ", "; 
+      dumpVar(sout, stmt.src[i]);
+    }
+    sout << "</TD>";
+
+    
+    /* mark live */
+    const AaStmtSyms* syms = stmt.get_info<AaStmtSyms>();
+    if(syms) {
+      AaIndexSet alive;
+      for(DefSet::const_iterator D = ld->out.begin(); D != ld->out.end(); ++D) {
+        if(D->kind == ValueTracking::Def::SH_INPUT) {
+          if(isAffine(D->node->valueType())) {
+            SH_DEBUG_ASSERT(psyms->inputs.find(D->node) != psyms->inputs.end());
+            alive |= psyms->inputs[D->node][D->absIndex()];
+          }
+        } else {
+          const AaStmtSyms* dsyms = D->stmt->get_info<AaStmtSyms>(); 
+          alive |= dsyms->mergeDest.all(); 
+        }
+      }
+      mark(state, alive, LIVE);
+
+      /* mark others */
+      mark(state, syms->newdest.all(), NEW); 
+      for(int i = 0; i < syms->mergeRep.size(); ++i) {
+        if(!syms->mergeRep[i].empty()) {
+          mark(state, syms->unique[i] & syms->dest[i], MERGED_UM); 
+          mark(state, syms->mergeRep[i], MERGED_REP);
+        }
+      }
+      if(stmt.op == OP_ESCJOIN) {
+        mark(state, syms->src[0].all() - syms->mergeDest.all(), MERGED_HIER); 
+      }
+    }
+
+    sout << "<TD><TABLE BGCOLOR=\"#dddddd\" BORDER=\"0\" CELLBORDER=\"0\" CELLPADDING=\"2\"><TR>"; 
+    for(size_t i = 0; i < state.size(); ++i) {
+      const char* color = StateColour[static_cast<int>(state[i])]; 
+      if(color[0]) {
+        sout << "<TD WIDTH=\"10\" BGCOLOR=\"" << color << "\"> </TD>";
+      } else {
+        sout << "<TD WIDTH=\"10\"> </TD>";
+      }
+    }
+    sout << "</TR></TABLE></TD>";
+    return sout.str();
+  }
+
+  void mark(StateVec& state, const AaIndexSet& syms, SymbolState symstate) {
+    for(AaIndexSet::const_iterator I = syms.begin(); I != syms.end(); ++I) {
+      SH_DEBUG_ASSERT(symmap.find(*I) != symmap.end());
+      state[symmap[*I]] = symstate;
+    }
+  }
+
+};
+typedef DefaultTransformer<StmtSymDumperBase> StmtSymDumper;
+
+void symdump(ProgramNodePtr p, AaProgramSyms* psyms, string name) {
+  ostringstream dout;
+  StmtSymDumper ssd;
+  ssd.init(psyms);
+  ssd.transform(p);
+
+  p->ctrlGraph->graphviz_dump(dout, ssd);
+  dotGen(dout.str(), dumpPrefix + name);
+}
 
 // This works accelerated on a per-node basis
 // (only  
@@ -1276,19 +1447,21 @@ struct UniqueMergerBase: TransformerParent
 };
 typedef DefaultTransformer<UniqueMergerBase> UniqueMerger; 
 
+void addLiveDef(ProgramNodePtr programNode) {
+  // Step 1: Compute per statement LiveDef information 
+  LiveDefFinder ldf;
+  ldf.transform(programNode);
+
+  Reaper r;
+  r.transform(programNode);
+}
+
 /** adds unique merge information **/ 
 void addUniqueMerge(ProgramNodePtr programNode, SymTransfer& st, bool dumpStats, bool disableMerge, const string& symfile) 
 {
   if (!dumpStats && disableMerge) return;
 
-  // Step 1: Compute per statement LiveDef information 
-
-  LiveDefFinder ldf;
-  ldf.transform(programNode);
-  dump(programNode, "_asp-3.0-livedef");
-
-  Reaper r;
-  r.transform(programNode);
+  // Step 1: add live defs (moved out to right before this is called - it's used also for dumping the sym dot graphs
 
   // Step 2: Identify unique symbols, propagate merged symbols through
   //         the live definition range, and repeat until no further improvement
@@ -1302,7 +1475,8 @@ void addUniqueMerge(ProgramNodePtr programNode, SymTransfer& st, bool dumpStats,
   UniqueMerger umb;
   umb.init(&st, sf.special, dumpStats, disableMerge, symfile);
   while(umb.transform(programNode));
-  dump(programNode, "_asp-3-uniq_merge");
+  // dump syms 
+  symdump(programNode, st.psyms, "_asp-4-um");
 }
 
 /* Set inputs syms, and given completed AaStmtsyms info at each statement,
@@ -1445,7 +1619,7 @@ bool AaStmtSyms::empty() const {
 
 ostream& operator<<(ostream& out, const AaStmtSyms& stmtSyms)
 {
-  out << "<StmtSyms ";
+  out << "{ StmtSyms ";
   out << " level=" << stmtSyms.level;
 
   if(!stmtSyms.unique.empty()) {
@@ -1461,14 +1635,14 @@ ostream& operator<<(ostream& out, const AaStmtSyms& stmtSyms)
   }
 
   if(!(stmtSyms.dest - stmtSyms.mergeDest).empty()) {
-    out << " dest=("; 
+    out << " dest=( "; 
     for(int i = 0; i < stmtSyms.dest.size(); ++i) {
       out << stmtSyms.dest[i];
     }
     out << " )";
   }
 
-  out << " mergeDest=("; 
+  out << " mergeDest=( "; 
   for(int i = 0; i < stmtSyms.dest.size(); ++i) {
     out << stmtSyms.mergeDest[i];
   }
@@ -1482,7 +1656,7 @@ ostream& operator<<(ostream& out, const AaStmtSyms& stmtSyms)
     }
   }
   out << " ]";
-  out << " >";
+  out << " }";
   return out;
 }
 
@@ -1602,9 +1776,11 @@ void placeAaSyms(ProgramNodePtr programNode, const AaVarSymsMap& inputs, bool sh
   SH_DEBUG_PRINT_ASP("Propagating syms");
   st.propagate(true);
 
-  dump(programNode, "_asp-2-syms");
+  addLiveDef(programNode);
 
+  symdump(programNode, st.psyms, "_asp-2-syms");
   addUniqueMerge(programNode, st, showStats, disableUniqMerge, symfile);
+
 
   // Gather syms for vars, outputs
   SymGather sg;

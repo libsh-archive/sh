@@ -41,10 +41,14 @@ enum GraphMode {
   GR_ACOS, // acos 
   GR_ASIN, // asin 
   GR_ATAN, // atan 
+  GR_ABS, // abs 
   GR_FLR, // floor (FLR)
   GR_FRAC, // frac
   GR_IF, // if branch
   GR_IFELSE, // if-else branch
+  GR_BLINN1, // blinn blobby breakdown 
+  GR_BLINN2, // blinn blobby breakdown 
+  GR_BLINN3, // blinn blobby breakdown 
   GR_NORM, // norm
   /*
   GR_NOISE, // perlin noise
@@ -55,7 +59,7 @@ enum GraphMode {
   GR_MAX, // max of EXP and LOG 
   GR_MIN, // min of EXP and LOG 
   GR_LRP  // lerp between EXP and LOG (LRP, EXP, LOG)
-} mode = GR_IFELSE; 
+} mode = GR_ABS; 
 const int NUMGRAPHS = (int)(GR_LRP) + 1;
 
 const char* GraphModeName[] = {
@@ -78,10 +82,14 @@ const char* GraphModeName[] = {
   "acos",
   "asin",
   "atan",
+  "abs",
   "floor",
   "frac",
   "if",
   "ifelse",
+  "blinn1",
+  "blinn2",
+  "blinn3",
   "norm",
   /*
   "noise",
@@ -97,7 +105,7 @@ const char* GraphModeName[] = {
 Attrib1f rangeWidth;
 Attrib1f eps;
 Attrib2f myoffset;
-Attrib1f myscale;
+Attrib2f myscale;
 Attrib1f curveWidth;
 Attrib1f edge;
 Attrib1f edge2;
@@ -201,6 +209,9 @@ struct PlotFunction {
           case GR_ATAN:
             value = atan(t); break;
 
+          case GR_ABS:
+            value = abs(t + coeff(0)); break;
+
           case GR_FLR:
             value = floor(t); break;
           case GR_FRAC:
@@ -220,6 +231,27 @@ struct PlotFunction {
               value = exp(-t);
             } SH_ENDIF;
             break;
+          case GR_BLINN1: {
+            Attrib1f p = t + coeff(0);
+            Attrib1f pp  = p * p; 
+            Attrib1f epp = 2 * exp(-pp);
+            value = pp;
+          }
+          break;
+          case GR_BLINN2: {
+            Attrib1f p = t + coeff(0);
+            Attrib1f pp  = p * p; 
+            Attrib1f epp = 2 * exp(-pp);
+            value = epp;
+          }
+          break;
+          case GR_BLINN3: {
+            Attrib1f p = t + coeff(0);
+            Attrib1f pp  = p * p; 
+            Attrib1f invpp = rcp(pp);
+            value = invpp;
+          }
+          break;
           case GR_NORM:
             value = normalize(t); break;
 
@@ -262,7 +294,7 @@ void initShaders() {
     vsh = KernelLib::vsh(id, id);
     vsh = vsh << extract("lightPos") << ConstAttrib3f(0, 0, 0);
     //Context::current()->optimization(0);
-    //Context::current()->set_flag("aa_disable_debug", false);
+    Context::current()->set_flag("aa_disable_debug", false);
 
     rangeWidth.name("rangeWidth");
     rangeWidth = 0.1f; 
@@ -277,7 +309,7 @@ void initShaders() {
     myoffset = ConstAttrib2f(0.0f, 0.0f);
     
     myscale.name("myscale");
-    myscale = 5.0f; 
+    myscale = ConstAttrib2f(5.0f, 5.0f); 
 
     edge.name("edge");
     edge = 0.01;
@@ -333,7 +365,7 @@ void initShaders() {
 
         Point2f pos = texcoord * myscale + myoffset;
 
-        Attrib1f scaled_eps = eps * myscale;
+        Attrib2f scaled_eps = eps * myscale;
         Attrib1f SH_DECL(inGrid) = 0.0f;
         Attrib1f SH_DECL(inEdge) = 0.0f;
         Attrib1f SH_DECL(inCurve) = 0.0f; 
@@ -347,7 +379,7 @@ void initShaders() {
         pnormal(1) = 1.0f;
         pnormal = normalize(pnormal);
         Attrib1f pfdelta = pos(1) - val; 
-        inCurve = abs(pfdelta * pnormal(1)) < myscale * curveWidth; 
+        inCurve = abs(pfdelta * pnormal(1)) < myscale(0) * curveWidth; 
 
         // check if in range
 
@@ -406,7 +438,7 @@ void initShaders() {
 
 
         // check if in grid
-        inGrid = (abs(pos(0)) < scaled_eps) + (abs(pos(1)) < scaled_eps); 
+        inGrid = (abs(pos(0)) < scaled_eps(0)) + (abs(pos(1)) < scaled_eps(1)); 
 
         color = lerp(inGrid, gridColor, 
             lerp(inEdge, edgeColor, lerp(inCurve, funcColor, lerp(inRange, rangeColor, bkgdColor))));
@@ -496,12 +528,17 @@ void motion(int x, int y)
   bool changed = false;
   
   if (buttons[GLUT_LEFT_BUTTON] == GLUT_DOWN) {
-    myoffset(0) -= (x - cur_x) / factor * myscale;
-    myoffset(1) += (y - cur_y) / factor * myscale;
+    myoffset(0) -= (x - cur_x) / factor * myscale(0);
+    myoffset(1) += (y - cur_y) / factor * myscale(1);
     changed = true;
   }
   if (buttons[GLUT_MIDDLE_BUTTON] == GLUT_DOWN) {
     myscale *= 1.0 + (y - cur_y) / sfactor; 
+    changed = true;
+  }
+
+  if (buttons[GLUT_RIGHT_BUTTON] == GLUT_DOWN) {
+    myscale(1) *= 1.0 + (y - cur_y) / sfactor; 
     changed = true;
   }
 

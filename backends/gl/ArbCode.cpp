@@ -259,6 +259,7 @@ void ArbCode::generate()
   transform.expand_inverse_hyperbolic();
   transform.handleDbgOps();
   dump(m_shader, "arbcode_done");
+  SH_DEBUG_PRINT("arb done stmtcount: " << m_shader->statement_count());
  
   if (transform.changed()) {
     optimize(m_shader);

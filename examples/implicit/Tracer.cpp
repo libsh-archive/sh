@@ -13,6 +13,9 @@
 
 #include "wx/splitter.h"
 
+#define DISTFUNC GaussianPF
+//#define DISTFUNC InvPF 
+
 
 #include <cassert>
 #include <complex>
@@ -68,6 +71,11 @@ const char* RangeModeName[] = {
   "Interval Arithmetic"
 };
 
+ostream& operator<<(ostream & out, const wxString & str) {
+  out << str.mb_str();
+  return out;
+} 
+
 
 
 Timer timer;
@@ -89,9 +97,21 @@ void printElapsed(string msg) {
 // `Main program' equivalent, creating windows and returning main app frame
 bool TracerApp::OnInit()
 {
+
+  bool singleCanvas = false;
+  bool noBackground = false;
+  wxSize framesize(1024, 1024); 
+  for(int i = 0; i < argc; ++i) {
+    if(wxString(argv[i]) == wxT("-single")) singleCanvas = true;
+    if(wxString(argv[i]) == wxT("-white")) noBackground = true;
+    if(wxString(argv[i]) == wxT("-cap")) {
+      framesize = wxSize(512, 512);
+      singleCanvas = noBackground = true;
+    }
+  }
     // Create the main frame window
     m_frame = new TracerFrame(NULL, wxT("Implicit Ray-Tracer"),
-        wxDefaultPosition, wxSize(1280, 1024));
+        wxDefaultPosition, framesize, wxDEFAULT_FRAME_STYLE, singleCanvas, noBackground);
 
 
     /* Show the m_frame */
@@ -105,8 +125,11 @@ IMPLEMENT_APP(TracerApp)
 enum
 {
     // our menu items
-    Preset_Spheres = 100,
+    Preset_Sphere = 100,
+    Preset_Spheres,
+    Preset_Line,
     Preset_Torus,
+    Preset_H2O,
 
     // standard menu items
     Preset_Quit = wxID_EXIT,
@@ -119,42 +142,55 @@ enum
 
 
 BEGIN_EVENT_TABLE(TracerFrame, wxFrame)
+    EVT_MENU(Preset_Sphere, TracerFrame::OnPreset)
     EVT_MENU(Preset_Spheres, TracerFrame::OnPreset)
+    EVT_MENU(Preset_Line, TracerFrame::OnPreset)
     EVT_MENU(Preset_Torus, TracerFrame::OnPreset)
+    EVT_MENU(Preset_H2O, TracerFrame::OnPreset)
 END_EVENT_TABLE()
 
 /* Tracer frame constructor */
 TracerFrame::TracerFrame(wxFrame *frame, const wxString& title, const wxPoint& pos,
-    const wxSize& size, long style)
-    : wxFrame(frame, wxID_ANY, title, pos, size, style)
+    const wxSize& size, long style, bool singleCanvas, bool noBackground)
+    : wxFrame(frame, wxID_ANY, title, pos, size, style),
+      backgroundColor(noBackground ? ConstColor3f(1, 1, 1) : ConstColor3f(.25, .25, .25))
 {
     initParams();
 
     /* Make a menubar */
     m_presetMenu = new wxMenu;
 
+    m_presetMenu->Append(Preset_Sphere, wxT("&Sphere"));
     m_presetMenu->Append(Preset_Spheres, wxT("&Spheres"));
+    m_presetMenu->Append(Preset_Line, wxT("&Line"));
     m_presetMenu->Append(Preset_Torus, wxT("&Torus"));
+    m_presetMenu->Append(Preset_H2O, wxT("&H2O"));
     m_menuBar = new wxMenuBar;
     m_menuBar->Append(m_presetMenu, wxT("&Preset"));
     SetMenuBar(m_menuBar);
 
-    m_split = new wxSplitterWindow(this); 
-    m_rightSplit = new wxSplitterWindow(m_split); 
-    for(int i = 0; i < numCanvas; ++i) {
-      DebugMode debugMode = NORMAL;
-      switch(i) {
-        case 0: debugMode = NORMAL; break;
-        case 1: debugMode = LOOP; break;
-        case 2: debugMode = TRACE; break;
+    if(singleCanvas) {
+      numCanvas = 1;
+      m_canvas[0] = new TracerGLCanvas(NORMAL, this, *this, wxID_ANY, wxDefaultPosition, wxSize(1024, 1024), wxNO_BORDER); 
+    } else {
+      numCanvas = 3;
+      m_split = new wxSplitterWindow(this); 
+      m_rightSplit = new wxSplitterWindow(m_split); 
+      for(int i = 0; i < numCanvas; ++i) {
+        DebugMode debugMode = NORMAL;
+        switch(i) {
+          case 0: debugMode = NORMAL; break;
+          case 1: debugMode = PLOT; break;
+          case 2: debugMode = TRACE; break;
+        }
+        wxSize size = i == 0 ? wxSize(768, 1024) : wxSize(512, 512); 
+        m_canvas[i] = new TracerGLCanvas(debugMode, i == 0 ? m_split : m_rightSplit, 
+            *this, wxID_ANY, wxDefaultPosition,
+            size, /*wxSUNKEN_BORDER*/ wxNO_BORDER);
       }
-      wxSize size = i == 0 ? wxSize(768, 1024) : wxSize(512, 512); 
-      m_canvas[i] = new TracerGLCanvas(debugMode, i == 0 ? m_split : m_rightSplit, 
-          *this, wxID_ANY, wxDefaultPosition,
-          size, /*wxSUNKEN_BORDER*/ wxNO_BORDER);
+      m_split->SplitVertically(m_canvas[0], m_rightSplit); 
+      m_rightSplit->SplitHorizontally(m_canvas[1], m_canvas[2]);
     }
-    m_split->SplitVertically(m_canvas[0], m_rightSplit); 
-    m_rightSplit->SplitHorizontally(m_canvas[1], m_canvas[2]);
 
     //this->SetCanvas(m_canvas);
 }
@@ -192,7 +228,7 @@ void TracerFrame::initParams() {
   eps = 1e-5;
 
   traceEps.name("traceEpsilon");
-  traceEps = 1e-5;
+  traceEps = 1e-3;
 
   traceDiff = 0.0f;
   traceDiff.name("traceDiff");
@@ -226,8 +262,11 @@ void TracerFrame::OnPreset( wxCommandEvent& event )
 {
   ClearModels();
   switch(event.GetId()) {
+    case Preset_Sphere: ShowSphere(); break;
     case Preset_Spheres: ShowSpheres(); break;
+    case Preset_Line: ShowLine(); break;
     case Preset_Torus: ShowTorus(); break;
+    case Preset_H2O: ShowH2O(); break;
     default:
       cerr << "Unknown preset" << event.GetId() << endl; 
   }
@@ -335,30 +374,62 @@ void TracerFrame::ClearModels() {
       fscl[j] = ConstAttrib1f(1);
       pfs[j] = 0; 
     }
-    pfs[0] = new GaussianPF(new Dist2SpherePF(color[0]));
+    pfs[0] = new DISTFUNC(new Dist2SpherePF(color[0]));
   }
+}
+
+void TracerFrame::ShowSphere() {
+  float side = 1.25;
+  pfs[0] = new DISTFUNC(new Dist2SpherePF(color[0]));
 }
 
 void TracerFrame::ShowSpheres() {
   float side = 1.25;
-  pfs[0] = new GaussianPF(new Dist2SpherePF(color[0]));
+  pfs[0] = new DISTFUNC(new Dist2SpherePF(color[0]));
   trans[0] = Vector3f(-side, -side * 0.5 * sqrt(3), 0);
-  pfs[1] = new GaussianPF(new Dist2SpherePF(color[1]));
+  pfs[1] = new DISTFUNC(new Dist2SpherePF(color[1]));
   trans[1] = Vector3f(side, -side * 0.5 * sqrt(3), 0);
-  pfs[2] = new GaussianPF(new Dist2SpherePF(color[2]));
+  pfs[2] = new DISTFUNC(new Dist2SpherePF(color[2]));
   trans[2] = Vector3f(0, side * 0.5 * sqrt(3), 0);
+}
+
+void TracerFrame::ShowLine() {
+  pfs[0] = new DISTFUNC(new Dist2LinePF(color[0]));
+  fscl[0] = 0.52; 
+  //fscl[0] = ; 
 }
 
 void TracerFrame::ShowTorus() {
   float side = 1.69;
-  pfs[0] = new GaussianPF(new Dist2TorusPF(color[0]));
+  pfs[0] = new DISTFUNC(new Dist2TorusPF(color[0]));
   /*
   trans[0] = Vector3f(-side, -side * 0.5 * sqrt(3), 0);
-  pfs[1] = new GaussianPF(new Dist2TorusPF(color[1]));
+  pfs[1] = new DISTFUNC(new Dist2TorusPF(color[1]));
   trans[1] = Vector3f(side, -side * 0.5 * sqrt(3), 0);
-  pfs[2] = new GaussianPF(new Dist2TorusPF(color[2]));
+  pfs[2] = new DISTFUNC(new Dist2TorusPF(color[2]));
   trans[2] = Vector3f(0, side * 0.5 * sqrt(3), 0);
   */
+}
+
+void TracerFrame::ShowH2O() {
+  /* umm, should just read in some pdb or cml file */ 
+  /* bond angles of water = 109.47 */
+  ConstVector3f trans(0, 1, 0); 
+  ConstVector3f rotAxis(0, 0, 1); 
+  ConstAttrib1f bondAngle(0.95530596607909624);
+
+  pfs[0] = new DISTFUNC(new Dist2TorusPF(color[0]));
+
+  pfs[1] = new TransformPF(new DISTFUNC(new Dist2SpherePF(color[1])),
+               translate(4 * trans) * rotate(rotAxis, -bondAngle)); 
+  pfs[2] = new TransformPF(new DISTFUNC(new Dist2SpherePF(color[1])),
+               translate(4 * trans) * rotate(rotAxis, bondAngle)); 
+
+  pfs[3] = new TransformPF(new DISTFUNC(new Dist2LinePF(color[2], 3)), 
+               translate(trans) * rotate(rotAxis, bondAngle)); 
+  pfs[4] = new TransformPF(new DISTFUNC(new Dist2LinePF(color[2], 3)),
+               translate(trans) * rotate(rotAxis, -bondAngle)); 
+  level = 1.9;  
 }
 
 void TracerFrame::InitShaders() {
@@ -388,11 +459,6 @@ void TracerFrame::OnCharAll(wxKeyEvent& event)
   bool reinit = false;
   switch(k)
     {
-    case 'q':
-    case 'Q':
-      exit(0);
-      break;
-
     case 'k': sphereRadius -= 0.1f; break;
     case 'K': sphereRadius += 0.1f; break;
 
@@ -425,13 +491,19 @@ void TracerFrame::OnCharAll(wxKeyEvent& event)
       if(loop_highlight.getValue(0) > loop_cutoff.getValue(0)) loop_highlight = loop_cutoff;
       break;
 
-    case 'g': graphScale /= 1.1; break;
-    case 'G': graphScale *= 1.1; break;
 
     case 's': 
      if(selected > 0) {
        int idx = selected - 1;
-       pfs[idx] = new GaussianPF(new Dist2SpherePF(color[idx])); 
+       pfs[idx] = new DISTFUNC(new Dist2SpherePF(color[idx])); 
+       reinit = true;
+     }
+     break;
+
+    case 'i': 
+     if(selected > 0) {
+       int idx = selected - 1;
+       pfs[idx] = new DISTFUNC(new Dist2LinePF(color[idx])); 
        reinit = true;
      }
      break;
@@ -439,7 +511,7 @@ void TracerFrame::OnCharAll(wxKeyEvent& event)
     case 'c': 
      if(selected > 0) {
        int idx = selected - 1;
-       pfs[idx] = new GaussianPF(new Dist2CylinderPF(color[idx])); 
+       pfs[idx] = new DISTFUNC(new Dist2CylinderPF(color[idx])); 
        reinit = true;
      }
      break;
@@ -447,7 +519,7 @@ void TracerFrame::OnCharAll(wxKeyEvent& event)
     case 't': 
      if(selected > 0) {
        int idx = selected - 1;
-       pfs[idx] = new GaussianPF(new Dist2TorusPF(color[idx])); 
+       pfs[idx] = new DISTFUNC(new Dist2TorusPF(color[idx])); 
        //pfs[idx] = new Dist2TorusPF(color[idx]); 
        reinit = true;
      }
@@ -456,7 +528,7 @@ void TracerFrame::OnCharAll(wxKeyEvent& event)
     case 'p': 
      if(selected > 0) {
        int idx = selected - 1;
-       pfs[idx] = new GaussianPF(new DistPlanePF(color[idx])); 
+       pfs[idx] = new DISTFUNC(new DistPlanePF(color[idx])); 
        reinit = true;
      }
      break;
@@ -464,15 +536,23 @@ void TracerFrame::OnCharAll(wxKeyEvent& event)
     case 'd':
      if(selected > 0) {
        int idx = selected - 1;
-       pfs[idx] = new GaussianPF(new DropPF(color[idx])); 
+       pfs[idx] = new DISTFUNC(new DropPF(color[idx])); 
        reinit = true;
      }
      break;
 
-    case 'i': 
+    case 'g': 
      if(selected > 0) {
        int idx = selected - 1;
-       pfs[idx] = new MitchellPF(color[idx]); 
+       pfs[idx] = new GumdropTorusPF(color[idx]); 
+       reinit = true;
+     }
+     break;
+
+    case 'q': 
+     if(selected > 0) {
+       int idx = selected - 1;
+       pfs[idx] = new SuperquadricPF(color[idx], 0.75); 
        reinit = true;
      }
      break;
@@ -492,7 +572,7 @@ void TracerFrame::OnCharAll(wxKeyEvent& event)
     case 'h':
      if(selected > 0) {
        int idx = selected - 1;
-       pfs[idx] = new GaussianPF(new HeightFieldPF("heightfield.png", color[idx]));
+       pfs[idx] = new DISTFUNC(new HeightFieldPF("heightfield.png", color[idx]));
        reinit = true;
      }
      break;
@@ -531,6 +611,7 @@ void TracerFrame::OnCharAll(wxKeyEvent& event)
     case 'w':
       showAaDebug = !showAaDebug;
       Context::current()->set_flag("aa_disable_debug", !showAaDebug);
+      reinit = true;
       break;
 
     case WXK_LEFT:  dbgCoords(0) -= 0.01; break;
@@ -553,7 +634,6 @@ void TracerFrame::OnCharAll(wxKeyEvent& event)
      // print out help
      cout << "Available Interaction:" << endl;
      cout << endl; 
-     cout << "  q             Quit" << endl;
      cout << "  m/M           Change rendering mode" << endl;
      cout << "  z/Z           Change range arithmetic mode" << endl;
      cout << "  k/K           Change bounding sphere radius" << endl;
@@ -561,7 +641,7 @@ void TracerFrame::OnCharAll(wxKeyEvent& event)
      cout << "  e/E           Change epsilon (determines when to end tracing iterations)" << endl;
      cout << "  f/F           Change trace epsilon (determines how close to level set value roots must be)" << endl; 
      cout << "  l/L           Change loop count loop_cutoff in Loop Cutoff mode" << endl; 
-     cout << "  g/G           Change graph y scale in Trace mode" << endl; 
+     //cout << "  g/G           Change graph y scale in Trace mode" << endl; 
      cout << "  w             Show debug" << endl;
      cout << "  x             Show timings" << endl;
      cout << "  up/down/left/right  Move trace point" << endl;
@@ -576,11 +656,14 @@ void TracerFrame::OnCharAll(wxKeyEvent& event)
      cout << endl;
      cout << "Object Manipulation Mode" << endl;
      cout << "  s             Make object a sphere (point generator)" << endl;
+     cout << "  i             Make line segment (line segment generator) " << endl;
      cout << "  c             Make object a cylinder (line generator)" << endl;
      cout << "  t             Make object a torus (circle generator)" << endl;
      cout << "  d             Make object a drop" << endl;
-     cout << "  i             Make Mitchell function" << endl;
+     cout << "  g             Make gumdrop torus function" << endl;
+     cout << "  q             Make superquadric function" << endl;
      cout << "  p             Make object a plane (plane generator)" << endl;
+     cout << "  D             Distort with a twist" << endl; 
      //cout << "  h             Make object a texture mapped heightfield (SLOW)" << endl;
      //cout << "  a             Make object a julia fractal (SLOW!!)" << endl;
      cout << "  n             Make object empty" << endl;
@@ -676,14 +759,14 @@ void TracerGLCanvas::OnPaint( wxPaintEvent& WXUNUSED(event) )
         glTexCoord2f(0.0, 0.0f);
         glVertex2f(-1.0f, -1.0f);
 
-        glTexCoord2f(1.0f, 0.0f);
-        glVertex2f(1.0f, -1.0f);
+        glTexCoord2f(0.0f, 1.0f);
+        glVertex2f(-1.0f, 1.0f);
 
         glTexCoord2f(1.0f, 1.0f);
         glVertex2f(1.0f, 1.0f);
 
-        glTexCoord2f(0.0f, 1.0f);
-        glVertex2f(-1.0f, 1.0f);
+        glTexCoord2f(1.0f, 0.0f);
+        glVertex2f(1.0f, -1.0f);
       glEnd();
     } else {
       GLUquadric* sph;
@@ -792,16 +875,17 @@ void TracerGLCanvas::InitGL()
     if(!do_init) return;
     do_init = false;
     glEnable(GL_DEPTH_TEST);
-    glClearColor(0.2, 0.2, 0.2, 1.0);
     glEnable(GL_VERTEX_PROGRAM_ARB);
     glEnable(GL_FRAGMENT_PROGRAM_ARB);
     glEnable(GL_CULL_FACE);
     // stupid hack - we only need one surface of the sphere anyway, so let's
     // enable front face culling (more chance we'll get part of the sphere, even if viewpoint is inside */ 
-    //glCullFace(GL_FRONT);
-    glCullFace(GL_BACK);
+    glCullFace(GL_FRONT);
+    //glCullFace(GL_BACK);
 
-    glClearColor(0.25, 0.25, 0.25, 1.0);
+    float bgcolor[3];
+    m_tframe.backgroundColor.getValues(bgcolor);
+    glClearColor(bgcolor[0], bgcolor[1], bgcolor[2], 1.0);
 
     try {
       InitShaders();
@@ -854,6 +938,7 @@ void TracerGLCanvas::InitShaders()
     }
 
     Program func = plotfunc->funcProgram("posm");
+    func.name(plotfunc->name());
     Program gradient = plotfunc->gradProgram("posm");
     Program colorFunc = plotfunc->colorProgram("posm");
 
@@ -892,13 +977,15 @@ void TracerGLCanvas::InitShaders()
       cout << "Building tracer" << endl;
       Program tracer = trace(func)(m_tframe.eyeposm, dir);
       tracer = add<Attrib1f>() << -m_tframe.level << tracer;
+      tracer.name("tracer_" + plotfunc->name());
       if(showAaDebug) {
-        tracer.node()->dump("tracer");
+        tracer.node()->dump("tracer_" + plotfunc->name());
       }
       Program foo = affine_inclusion_syms(tracer);
+      foo.name("aa_tracer_" + plotfunc->name());
       placeAaSyms(foo.node(), true);
       if(showAaDebug) {
-        foo.node()->dump("aa_tracer");
+        foo.node()->dump("aa_tracer_" + plotfunc->name());
       }
 
       cout << "Building firsthit" << endl;
@@ -920,7 +1007,11 @@ void TracerGLCanvas::InitShaders()
 
 
       if(debugMode == NORMAL) {
-        kill(!hashit && !inDbg);
+        if(showAaDebug) {
+          kill(!hashit && !inDbg);
+        } else {
+          kill(!hashit); 
+        }
         Point3f SH_DECL(hitp) = mad(hit, dir, m_tframe.eyeposm);
 
         OutputNormal3f SH_DECL(normal);
@@ -938,8 +1029,10 @@ void TracerGLCanvas::InitShaders()
         normal = faceforward(lightVec, normal); 
 
         OutputColor3f SH_DECL(kd) = colorFunc(hitp);
-        kd = lerp(inDbg, TufteOrange, kd);
-        normal = lerp(inDbg, lightVec, normal);
+        if(showAaDebug) {
+          kd = lerp(inDbg, TufteOrange, kd);
+          normal = lerp(inDbg, lightVec, normal);
+        }
       } else {
         OutputColor3f SH_DECL(color);
         switch(debugMode) {

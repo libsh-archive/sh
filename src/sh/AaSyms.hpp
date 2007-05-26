@@ -34,7 +34,7 @@
 #include "DllExport.hpp"
 
 // enable this to turn on all AA debugging
-//#define DBG_AA
+// #define DBG_AA
 
 namespace SH {
 
@@ -172,6 +172,9 @@ struct AaSyms {
 
   // Returns whether all index sets are empty 
   bool empty() const;
+
+  // Returns syms from all elements
+  AaIndexSet all() const;
 
   /* Set Ops (union, intesrection, difference) 
    * @{ */

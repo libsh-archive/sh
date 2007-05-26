@@ -82,9 +82,9 @@ struct DropPF: PlotFunc {
 };
 
 /* drop shape */ 
-struct MitchellPF: PlotFunc {
+struct GumdropTorusPF: PlotFunc {
   Color3f &m_color;
-  MitchellPF(Color3f& color): PlotFunc("mitchell"), m_color(color) {}
+  GumdropTorusPF(Color3f& color): PlotFunc("mitchell"), m_color(color) {}
   Attrib1f func(Point3f point) {
     Attrib1f result; 
     Attrib1f xyz = point | point;
@@ -114,6 +114,25 @@ struct MitchellPF: PlotFunc {
   }
   Color3f color(Point3f point) { return m_color; }
 };
+
+struct SuperquadricPF: PlotFunc {
+  Color3f &m_color;
+  Attrib1f m_power;
+  SuperquadricPF(Color3f& color, float power): PlotFunc("superquad"), m_color(color), m_power(power) {}
+  Attrib1f func(Point3f point) {
+    Attrib3f ap = abs(point);
+    return sum(SH::pow(ap, m_power));
+  }
+
+  Attrib3f grad(Point3f point) {
+    Attrib3f ap = abs(point);
+    Attrib3f result = SH::pow(ap, m_power - 1) * m_power;
+    result *= sign(ap); 
+    return result;
+  }
+  Color3f color(Point3f point) { return m_color; }
+};
+
 
 /* (1-r^2)^n function that mike mentioned  
  * Look up the proper source for this distance function */
@@ -247,6 +266,41 @@ struct Dist2CylinderPF: PlotFunc {
   Color3f color(Point3f point) { return m_color; } 
 };
 
+/* Line segment generator (vertical line from (0,0) to (0,end))*/ 
+struct Dist2LinePF: PlotFunc {
+  Color3f &m_color;
+  float m_end;
+  Dist2LinePF(Color3f& color, float end=1) : PlotFunc("line"), m_color(color), m_end(end) {}
+  Attrib1f func(Point3f point) { 
+    Attrib1f useStart = point(1) < 0; 
+    Attrib1f useEnd = point(1) > m_end; 
+
+    Vector3f dstart = point; 
+    Vector3f dend = point - ConstPoint3f(0, m_end, 0);
+
+    Attrib1f result = point(0,2) | point(0,2);
+    Attrib1f startResult = dstart | dstart; 
+    Attrib1f endResult = dend | dend; 
+
+    return lerp(useStart, startResult, lerp(useEnd, endResult, result)); 
+  }
+
+  Attrib3f grad(Point3f point) {
+    Attrib1f useStart = point(1) < 0; 
+    Attrib1f useEnd = point(1) > m_end; 
+
+
+    Attrib3f result = ConstAttrib3f(0,0,0); 
+    result(0,2) = 2 * point(0,2);
+    Vector3f dstart = point; 
+    Vector3f dend = point - ConstPoint3f(0, m_end, 0);
+    Vector3f startResult = 2 * dstart; 
+    Vector3f endResult = 2 * dend; 
+    return lerp(useStart, startResult, lerp(useEnd, endResult, result)); 
+  }
+  Color3f color(Point3f point) { return m_color; } 
+};
+
 /* Torus Generator 
  * (No parameters. Use point scaling and function scaling ops later to change
  * inner/outer radii) */ 
@@ -310,7 +364,7 @@ struct InvPF: PlotFunc {
 
 /* Gaussian - Blinn's original blobby function */ 
 struct GaussianPF: PlotFunc {
-  GaussianPF(PlotFuncPtr pf): PlotFunc("gaussian_" + pf->name()), m_pf(pf) {}
+  GaussianPF(PlotFuncPtr pf): PlotFunc("gs_" + pf->name()), m_pf(pf) {}
   Attrib1f func(Point3f point) { return 2 * exp(-m_pf->func(point)); }
 
   Attrib3f grad(Point3f point) { 
@@ -335,11 +389,49 @@ struct NullPF: PlotFunc {
     PlotFuncPtr m_pf;
 };
 
+/* Twist along y-axis 
+ * twist(f)(x, y, z) = f(x', y, z') 
+ * where x' = x cos(4y) - z sin(4y)
+ * and y' = x sin(4y) + z cos(4y)
+ * */ 
+struct TwistPF: PlotFunc {
+  float m_amount;
+  TwistPF(PlotFuncPtr pf, float amount): PlotFunc("tw_" + pf->name()), m_pf(pf), m_amount(amount) {}
+  Attrib1f func(Point3f point) { 
+    Point3f pp; 
+    Attrib1f angle = m_amount * point(1);
+    Attrib1f ca = cos(angle);
+    Attrib1f sa = sin(angle);
+    pp(0) = point(0) * ca - point(2) * sa; 
+    pp(1) = point(1);
+    pp(2) = point(0) * sa + point(2) * ca;
+    return m_pf->func(pp);
+  }
+
+  /* Use chain rule twist'(f)(x, y, z) = f'(x', y, z') * x'' * z'' */  
+  Attrib3f grad(Point3f point) { 
+    Attrib3f result;
+
+    Point3f pp; 
+    Attrib1f angle = m_amount * point(1);
+    Attrib1f ca = cos(angle);
+    Attrib1f sa = sin(angle);
+    pp(0) = point(0) * ca - point(2) * sa; 
+    pp(1) = point(1);
+    pp(2) = point(0) * sa + point(2) * ca;
+    return result;
+  }
+
+  Color3f color(Point3f point) { return m_pf->color(point); }
+  protected:
+    PlotFuncPtr m_pf;
+};
+
 /* should just allow arbitrary matrices */
 /* Translates any other generator */
 struct TranslatePF: PlotFunc {
   TranslatePF(PlotFuncPtr pf, Vector3f& trans)  
-    : PlotFunc("trans_" + pf->name()), m_pf(pf), m_trans(trans) {}
+    : PlotFunc("t_" + pf->name()), m_pf(pf), m_trans(trans) {}
   Attrib1f func(Point3f point) { return m_pf->func(point - m_trans); } 
   Attrib3f grad(Point3f point) { return m_pf->grad(point - m_trans); } 
   Color3f color(Point3f point) { return m_pf->color(point - m_trans); }
@@ -361,13 +453,24 @@ struct ScalePF: PlotFunc {
 
 struct FuncScalePF: PlotFunc {
   FuncScalePF(PlotFuncPtr pf, Attrib1f& scl)  
-    : PlotFunc("funcscl_" + pf->name()), m_pf(pf), m_scl(scl) {}
+    : PlotFunc("fs_" + pf->name()), m_pf(pf), m_scl(scl) {}
   Attrib1f func(Point3f point) { return m_scl * m_pf->func(point); } 
   Attrib3f grad(Point3f point) { return m_scl * m_pf->grad(point); } 
   Color3f color(Point3f point) { return m_pf->color(point); }
   protected:
     PlotFuncPtr m_pf;
     Attrib1f &m_scl;
+};
+
+struct TransformPF: PlotFunc {
+  TransformPF(PlotFuncPtr pf, Matrix4x4f init=Matrix4x4f())
+    : PlotFunc("tf_" + pf->name()), m(init), m_pf(pf) {}
+  Attrib1f func(Point3f point) { return m_pf->func(m | point); } 
+  Attrib3f grad(Point3f point) { return m_pf->grad(m | point); } 
+  Color3f color(Point3f point) { return m_pf->color(m | point); }
+  Matrix4x4f m; 
+  protected: 
+    PlotFuncPtr m_pf;
 };
 
 /* Sums up a set of plot functions */
@@ -418,6 +521,7 @@ struct SumPF: PlotFunc {
 
   void add(PlotFuncPtr pf) {
     m_pfvec.push_back(pf);
+    m_name += "__" + pf->name();
   }
 
   protected:
