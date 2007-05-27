@@ -907,7 +907,7 @@ AaVariable aaSNE(const AaVariable& a, const AaVariable& b, const AaSyms &newsyms
 }
 
 AaVariable aaABS(const AaVariable& a, const AaSyms& newsyms) {
-  AaVariable result(new AaVariableNode(*a.node(), a.use()));
+  AaVariable result(new AaVariableNode(*a.node(), a.use() | newsyms));
   result.name("aopABSt");
 
   Variable lo, hi, hiNeg, loPos, spansZero; 
@@ -925,12 +925,16 @@ AaVariable aaABS(const AaVariable& a, const AaSyms& newsyms) {
   result.ASN(a);
   result.COND(hiNeg, a.NEG());
 
-  AaVariable zeroResult(new AaVariableNode(*a.node(), a.use()));
-  Variable alpha, beta, delta;
+  AaVariable zeroResult(new AaVariableNode(*a.node(), a.use() | newsyms));
+  Variable width, alpha, beta, delta;
+  width = a.temp("aopABSwidth");
   alpha = a.temp("aopABSalpha");
   beta = a.temp("aopABSbeta");
   delta = a.temp("aopABSdelta");
 
+  shADD(width, hi, -lo); 
+  shADD(alpha, hi, lo); // lo < 0, abs(lo) = -lo, so abs(hi) - abs(lo) = hi + lo 
+  shDIV(alpha, alpha, width);
   shMAD(beta, -alpha, hi, hi);
   shMUL(beta, beta, HALF.repeat(beta.size()));
   shASN(delta, beta);
