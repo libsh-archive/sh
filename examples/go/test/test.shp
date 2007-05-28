@@ -1,0 +1,11 @@
+r config.shp
+@Attrib2i_f init = @Attrib2i_d(-2, 2, -2, 2)
+p f
+@InAttrib2f x
+@OutAttrib1f y
+# @Attrib2f x2 = x * x
+y = x(0) * x(0) + x(1) *  x(1) 
+p
+dot f
+ioptimize f init 1 1e-8
+

@@ -1,0 +1,8 @@
+@Attrib2i_f init = @Attrib2i_f(-2, 2, -2, 2)
+p f
+@InAttrib2f x
+@OutAttrib1f y
+@Attrib2f x2 = x * x
+y = x2 | x2
+p
+

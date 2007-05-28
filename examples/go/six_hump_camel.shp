@@ -1,0 +1,19 @@
+r config.shp
+#debug
+@Attrib2i_f init = @Attrib2i_f(-5,5,  -5,5)
+p f
+@InAttrib2f x
+@OutAttrib1f y
+@Attrib1f x0 = x(0)
+@Attrib1f x1 = x(1)
+@Attrib1f x02 = x0 * x0
+@Attrib1f x04 = x02 * x02
+@Attrib1f x06 = x02 * x04
+@Attrib1f x12 = x1 * x1
+@Attrib1f x14 = x12 * x12
+
+y = 4 * x02 - 2.1 * x04 + x06 * (1.0/ 3.0) + x0 * x1 - 4 * x12 + 4 * x14 
+p
+dot f
+optimize f init 2 1e-6
+
