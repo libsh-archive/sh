@@ -28,8 +28,8 @@ enum DebugMode {
 };
 
 enum RangeMode {
-  AA, /* affine arithmetic */
-  AA_NOUC, /* affine arithmetic, no unique condensation */
+  AAUC, /* affine arithmetic */
+  AA, /* affine arithmetic, no unique condensation */
   IA /* interval arithmetic */
 }; 
 
@@ -49,6 +49,7 @@ class TracerApp: public wxApp
 
 class TracerFrame: public wxFrame
 {
+  friend class TracerApp;
   public:
     TracerFrame(wxFrame *frame, const wxString& title, const wxPoint& pos,
         const wxSize& size, long style = wxDEFAULT_FRAME_STYLE, bool singleCanvas=false, bool noBackground=false);
@@ -62,11 +63,11 @@ class TracerFrame: public wxFrame
 
     /* some presets */
     void OnPreset(wxCommandEvent& event);
-    void ShowSphere();
-    void ShowSpheres();
-    void ShowLine();
-    void ShowTorus();
+    void ShowSphere(int numSpheres);
+    void ShowLine(int numLines);
+    void ShowTorus(int numTorus);
     void ShowH2O();
+    void InitTrans(int numObjs);
     void ClearModels();
     void InitShaders(); 
 
@@ -87,8 +88,6 @@ class TracerFrame: public wxFrame
     Attrib1f graphScale;
     Vector2f graphOffset;
     Attrib2f dbgCoords; // debug point in spherical coordinates 
-    bool showTiming; 
-    bool showAaDebug; 
     RangeMode rangeMode;
 
     /* the implicit functions */

@@ -37,7 +37,14 @@ struct Man: public SH::Program {
 
   /* Constructors */
   Man(): m_in(-1), m_out(-1) {}
-  Man(const SH::Program& p, const std::string& n="man") { operator=(p); name(n); }
+  Man(const SH::Program& p, const std::string& n) { operator=(p); name(n); }
+  Man(const SH::Program& p) { 
+    operator=(p); 
+    if(p.node()->name() != "") 
+      name(p.node()->name());
+    else
+      name("man");
+  }
 
   Man(const SH::Variable& value): m_in(0), m_out(value.size()) {
     buildProgram(value);

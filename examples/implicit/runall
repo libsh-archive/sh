@@ -1,0 +1,20 @@
+#! /bin/bash
+# runs all the test cases needed for the thesis examples
+
+./loopall
+
+#MODE=-test\ -debug
+MODE=-test 
+export MODE
+RESULT=~/work/thesis/data/impl_timing.csv
+
+#make testclean
+
+./doall >& impl_timing.csv
+
+grep '^timing:render' impl_timing.csv | head -n1 > $RESULT 
+grep '^timing:render,' impl_timing.csv >> $RESULT
+
+./capall
+./csvall
+

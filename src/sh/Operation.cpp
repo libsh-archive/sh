@@ -30,6 +30,7 @@ namespace SH {
  * @see Operation
  */
 const OperationInfo opInfo[] = {
+// name, arity, result_source,   aa_keep, aa_add, commutative 
   {"ASN", 1, OperationInfo::LINEAR, true, false, false},
   
   {"NEG", 1, OperationInfo::LINEAR, true, false, false},
@@ -126,8 +127,8 @@ const OperationInfo opInfo[] = {
 
   {"PAL", 2, OperationInfo::EXTERNAL, true, true, false},
 
-  {"LO", 1, OperationInfo::LINEAR, true, false, false},
-  {"HI", 1, OperationInfo::LINEAR, true, false, false},
+  {"LO", 1, OperationInfo::LINEAR, false, false, false},
+  {"HI", 1, OperationInfo::LINEAR, false, false, false},
   {"WIDTH", 1, OperationInfo::LINEAR, false, false, false},
   {"RADIUS", 1, OperationInfo::LINEAR, false, false, false},
   {"CENTER", 1, OperationInfo::LINEAR, false, false, false},

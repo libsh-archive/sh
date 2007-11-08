@@ -17,6 +17,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
+#include <iostream>
 #include "Context.hpp"
 #include "Debug.hpp"
 #include "TypeInfo.hpp"
@@ -107,6 +108,13 @@ bool Context::get_flag(const std::string& name) const{
 bool Context::is_bound(const std::string& target)
 {
   return bound_program(target);
+}
+
+std::ostream& Context::dump_stats(std::ostream& out) const {
+  for(std::map<std::string, float>::const_iterator S = m_stat.begin(); S != m_stat.end(); ++S) {
+    out << S->first << ": " << S->second << std::endl;
+  }
+  return out;
 }
 
 ProgramNodePtr Context::bound_program(const std::string& target)

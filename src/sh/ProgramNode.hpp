@@ -38,6 +38,18 @@ namespace SH {
 class BackendCode;
 class Backend;
 
+struct
+SH_DLLEXPORT StmtCsvData: public RefCountable {
+  virtual ~StmtCsvData() {}
+  virtual std::string header() = 0;
+  virtual std::string operator()(const Statement& stmt) = 0;
+};
+typedef Pointer<StmtCsvData> StmtCsvDataPtr;
+
+/* Dump both kinds of data */
+SH_DLLEXPORT
+StmtCsvDataPtr combine(StmtCsvDataPtr a, StmtCsvDataPtr b);
+
 /** A particular Sh program.
  */
 class
@@ -90,6 +102,15 @@ public:
   /** Describes all of the above to the file filename.vars and
    * dumps a DOT version of the cfg to filename.ps */
   void dump(std::string filename) const;
+
+  /** Does a flat csv dump of all statements in the following format
+   *
+   * index, op, dest ptr, dest size, src0 ptr, src0 size, ... , src2 size, 
+   *
+   * adds CsvData::header() to header row
+   * and CsvData::operator()(Statement &stmt) result for each statement
+   */
+  void csvdump(std::string filename, StmtCsvDataPtr csvdata);
   
   /** Obtain the code for currently active backend.  This operation
    * will fail if this program does not have a particular target. */
@@ -191,6 +212,9 @@ public:
 
   /// Prints a statement count
   int statement_count();
+
+  /// statement count, multiplied by the maximum source variable size per statement 
+  int scalar_statement_count();
 
   /// Print a description of a list of variables
   static std::ostream& print(std::ostream& out, const VarList& list);

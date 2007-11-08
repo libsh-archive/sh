@@ -57,6 +57,7 @@ namespace {
 using namespace SH;
 using namespace std;
 
+AaStmtTypeTag common_tag(AA_STMT_COMMON);
 ConstAttrib1f ZERO(0.0f);
 ConstAttrib1f HALF(0.5f);
 ConstAttrib1f ONE(1.0f);
@@ -72,6 +73,15 @@ ConstAttrib1f LN2_INV(1.0/M_LN2);
 ConstAttrib1f LN10_INV(1.0/M_LN10);
 ConstAttrib1f LOG2_LN2(-0.5287663729448977); 
 ConstAttrib1f LOG10_LN10(0.36221568869946325);
+
+void startCommon() {
+  Tag::dup();
+  Tag::replace<AaStmtTypeTag>(&common_tag);
+}
+
+void endCommon() {
+  Tag::pop();
+}
 
 /* Returns a variable holding whether each range includes a given value */
 Variable affineHasValue(const AaVariable& a, const Variable& value) { 
@@ -197,56 +207,60 @@ struct __aaop {
 template<typename F>
 void convexApprox(AaVariable &dest, const AaVariable &src, const AaSyms &newsyms)
 {
-  // Translated directly from AffineImpl.hpp
-  Variable lo, hi; 
-  src.lohi(lo, hi);
+    // Translated directly from AffineImpl.hpp
+    Variable lo, hi; 
+    src.lohi(lo, hi);
 
-  /* @todo this shouldn't be here...  */
-  shADD(lo, lo, -EPS.repeat(lo.size()));
-  shADD(hi, hi, EPS.repeat(hi.size()));
+    startCommon();
 
-  if(F::fix_range) {
-    F::fix(lo, hi); /* compute the approximation only on this range */
-  }
+    /* @todo this shouldn't be here...  */
+    shADD(lo, lo, -EPS.repeat(lo.size()));
+    shADD(hi, hi, EPS.repeat(hi.size()));
 
-  Variable flo = src.temp("fhi"); 
-  Variable fhi = src.temp("flo"); 
-  F::f(flo, lo);
-  F::f(fhi, hi);
+    if(F::fix_range) {
+      F::fix(lo, hi); /* compute the approximation only on this range */
+    }
 
-  Variable alpha, ss, bpd, bmd, beta, delta; 
-  alpha = src.temp("alpha");
+    Variable flo = src.temp("fhi"); 
+    Variable fhi = src.temp("flo"); 
+    F::f(flo, lo);
+    F::f(fhi, hi);
 
-  //Variable width = src.width(); 
-  Variable width = src.temp("width");
-  shADD(width, hi, -lo); 
-  shMAX(width, width, EPS.repeat(width.size()));
+    Variable alpha, ss, bpd, bmd, beta, delta; 
+    alpha = src.temp("alpha");
 
-  Variable fhiflo = src.temp("fhi-flo");
-  shADD(fhiflo, fhi, -flo);
-  shDIV(alpha, fhiflo, width);
-  ss = src.temp("ss");
-  F::dfinv(ss, alpha, lo, hi);
+    //Variable width = src.width(); 
+    Variable width = src.temp("width");
+    shADD(width, hi, -lo); 
+    shMAX(width, width, EPS.repeat(width.size()));
 
-  //if(lo > ss || hi < ss) std::cout << "  WARNING - ss out of bounds" << std::endl;
-  bmd = src.temp("bmd"); 
-  shMAD(bmd, -alpha, lo, flo);
+    Variable fhiflo = src.temp("fhi-flo");
+    shADD(fhiflo, fhi, -flo);
+    shDIV(alpha, fhiflo, width);
+    ss = src.temp("ss");
+    F::dfinv(ss, alpha, lo, hi);
 
-  bpd = src.temp("bpd");
-  Variable fdfinv = src.temp("fdfinv");
-  if(F::use_fdf) {
-    F::fdfinv(fdfinv, alpha, lo, hi);
-  } else {
-    F::f(fdfinv, ss);
-  }
-  shMAD(bpd, -alpha, ss, fdfinv); 
+    //if(lo > ss || hi < ss) std::cout << "  WARNING - ss out of bounds" << std::endl;
+    bmd = src.temp("bmd"); 
+    shMAD(bmd, -alpha, lo, flo);
 
-  beta = src.temp("beta");
-  shLRP(beta, HALF, bpd, bmd);
-  delta = src.temp("delta");
-  shLRP(delta, HALF, bpd, -bmd);
+    bpd = src.temp("bpd");
+    Variable fdfinv = src.temp("fdfinv");
+    if(F::use_fdf) {
+      F::fdfinv(fdfinv, alpha, lo, hi);
+    } else {
+      F::f(fdfinv, ss);
+    }
+    shMAD(bpd, -alpha, ss, fdfinv); 
 
-  shABS(delta, delta);
+    beta = src.temp("beta");
+    shLRP(beta, HALF, bpd, bmd);
+    delta = src.temp("delta");
+    shLRP(delta, HALF, bpd, -bmd);
+
+    shABS(delta, delta);
+  endCommon();
+
   affineApprox(dest, src, alpha, beta, delta, newsyms);
 }
 
@@ -296,8 +310,7 @@ AaVariable aaADD(const AaVariable& a, const AaVariable& b)
   AaVariable result(makeMergeNode("aopADDt", a, b));
   AaSyms isct = a.use() & b.use();
   AaSyms bonly = b.use() - a.use(); 
-  SH_DEBUG_PRINT_AOP("Set Ops: a=" << a.use() << " b=" << b.use() 
-      << " isct=" << isct << " bonly=" << bonly);
+  //SH_DEBUG_PRINT_AOP("Set Ops: a=" << a.use() << " b=" << b.use() << " isct=" << isct << " bonly=" << bonly);
   result.ASN(a);
   result.ASN(b, bonly, false);
   result.ADD(b, isct, true); 
@@ -315,11 +328,17 @@ AaVariable aaADD(const AaVariable& a, const Variable& b)
 AaVariable aaMUL(const AaVariable &a, const AaVariable &b,
            const AaSyms &newsyms)
 {
+  if(b.use().empty()) {
+    return aaMUL(a, b.center(), newsyms);
+  } else if (a.use().empty()) {
+    return aaMUL(b, a.center(), newsyms);
+  }
   string mulName = "aopMULt";
   AaVariable result(makeMergeNode(mulName, a, b, newsyms));
 
   // @see AffineImpl.hpp
   // This is just a vectorized copy of operator* from AffineImpl
+  startCommon();
   Variable alpha(result.temp(mulName + "alpha"));
   shASN(alpha, b.center()); 
 
@@ -328,12 +347,22 @@ AaVariable aaMUL(const AaVariable &a, const AaVariable &b,
 
   Variable gamma(result.temp(mulName + "gamma"));
   Variable delta(result.temp(mulName + "delta"));
+  endCommon();
 
   shMUL(delta, a.radius(), b.radius());
   affineApprox(result, a, b, alpha, beta, gamma, delta, newsyms);
   Variable resultCenter = result.center();
   shMUL(resultCenter, alpha, beta);
   return result;
+}
+
+AaVariable aaMUL(const AaVariable &a, const Variable &b, const AaSyms &newsyms)
+{
+  AaVariable result(new AaVariableNode(*a.node(), a.use() | newsyms));
+  result.name("aopMULvart");
+  result.ZERO();
+  result.ASN(a);
+  return result.MUL(b);
 }
 
 AaVariable aaMUL(const AaVariable &a, const Variable &b)
@@ -361,6 +390,7 @@ AaVariable aaPOS(const AaVariable& a, const AaSyms& newsyms)
   Variable aCenter = a.center();
   Variable aRadius = a.radius(); 
 
+  startCommon();
   Variable aLo = a.temp(a.name() + "_lo");
   Variable aHi = a.temp(a.name() + "_hi");
   shADD(aLo, aCenter, -aRadius);
@@ -368,6 +398,7 @@ AaVariable aaPOS(const AaVariable& a, const AaSyms& newsyms)
 
   AaVariable result(new AaVariableNode(*a.node(), a.use() | newsyms));
   result.name("aopPOSt");
+  result.ZERO();
   result.ASN(a);
 
   // if lo < 0 && hi > 0, scale radius to hi / 2 and center = hi / 2
@@ -386,6 +417,7 @@ AaVariable aaPOS(const AaVariable& a, const AaSyms& newsyms)
   Variable scaledResultCenter = scaledResult.center();
   shASN(scaledResultCenter, halfHi);
   scaledResult.setErr(halfHi, newsyms);
+  endCommon();
   result.COND(loLtZero, scaledResult);
 
   Variable hiLtZero = a.temp(a.name() + "_hi-lt-0");
@@ -415,9 +447,39 @@ AaVariable aaNORM(const AaVariable& a, const AaSyms& newsyms)
   return aaMUL(a, normSq.repeat(a.size()), mulSyms);
 }
 
+/* @todo might want to fix invalid values *properly* */ 
+struct __aaop_pow: public __aaop<false, true> {
+  static Variable power;  
+  static void f(Variable& r, Variable& x) { 
+    shPOW(r, x, power); 
+  }
+  static void dfinv(Variable& r, Variable& x, Variable& lo, Variable& hi) { 
+    Variable pm1(power.node()->clone(SH_TEMP, power.size()));
+    shADD(pm1, power, -ONE.repeat(power.size()));
+    shRCP(pm1, pm1);
+    shDIV(r, x, power);
+    shPOW(r, r, pm1);
+  }
+
+  static void fix(Variable& lo, Variable& hi) { 
+    shMAX(lo, lo, ZERO.repeat(lo.size()));
+  }
+};
+
+Variable __aaop_pow::power;
+
 AaVariable aaPOW(const AaVariable& a, const AaVariable& b, const AaSyms& newsyms)
 {
-  return aaEXP(aaMUL(aaLOG(a, newsyms), b, newsyms), newsyms);
+  if(b.use().empty()) {
+    AaVariable result(new AaVariableNode(*a.node(), a.use() | newsyms));
+    result.name("aopPOWt");
+
+    __aaop_pow::power = b.center();
+    convexApprox<__aaop_pow>(result, a, newsyms); 
+    return result;
+  } else {
+    return aaEXP(aaMUL(aaLOG(a, newsyms), b, newsyms), newsyms);
+  }
 }
 
 /* Make sure 0 is not in the range first */
@@ -557,6 +619,7 @@ AaVariable aaSIN(const AaVariable& a, const AaSyms& newsyms) {
   Variable isSamePeriod = a.temp("aaSIN_isSamePeriod"); /* lo, hi in same period - chance result should not be [-1, 1] */
   Variable pi_inv = PI_INV.repeat(N);
 
+  startCommon();
   shMUL(flr_lo, lo, pi_inv); 
   shFRAC(frac_lo, flr_lo);
   shFLR(flr_lo, flr_lo); 
@@ -569,10 +632,11 @@ AaVariable aaSIN(const AaVariable& a, const AaSyms& newsyms) {
 
   shADD(flr_diff, flr_hi, -flr_lo);
   shSEQ(isSamePeriod, flr_diff, one); 
+  endCommon();
 
   convexApprox<__aaop_sin>(result, a, newsyms); 
 
-  /* if in the same period, compute the interval result 
+  /* if in adjacent periods, compute the interval result 
    * if frac_lo <= 0.5, then the min/max in it's period is included in the range
    * if frac_hi >= 0.5, then similarly the min/max in it's period is included in the range */
   AaVariable resultSamePeriod(new AaVariableNode(*a.node(), a.use() | newsyms));
@@ -584,6 +648,7 @@ AaVariable aaSIN(const AaVariable& a, const AaSyms& newsyms) {
   Variable hi_cond = a.temp("hi_cond");
   Variable minf = a.temp("minf");
   Variable maxf = a.temp("maxf");
+  startCommon();
   shSIN(flo, lo);
   shSIN(fhi, hi);
 
@@ -611,6 +676,7 @@ AaVariable aaSIN(const AaVariable& a, const AaSyms& newsyms) {
   Variable rspDelta = a.temp("rspDelta");
   shADD(rspDelta, maxf, -minf);
   shMUL(rspDelta, rspDelta, half);
+  endCommon();
   resultSamePeriod.setErr(rspDelta, newsyms);
 
   /* otherwise, it's not going to work out, just use 0 + 1 \varepsilon_n */ 
@@ -829,6 +895,7 @@ AaVariable aaSLE(const AaVariable& a, const AaVariable& b, const AaSyms &newsyms
   Variable no = a.temp("aaSLEno");
   Variable maybe = a.temp("aaSLEmaybe");
 
+  startCommon();
   shSLE(yes, ahi, blo);
   shSGT(no, alo, bhi); 
   shADD(maybe, yes, no);
@@ -839,6 +906,7 @@ AaVariable aaSLE(const AaVariable& a, const AaVariable& b, const AaSyms &newsyms
   shCOND(resultCenter, no, ZERO.repeat(result.size()), resultCenter); 
   Variable delta = a.temp("aaSLEdelta");
   shCOND(delta, maybe, HALF.repeat(result.size()), ZERO.repeat(result.size()));
+  endCommon();
   result.ASN(delta, newsyms);
   return result;
 }
@@ -856,6 +924,7 @@ AaVariable aaSGT(const AaVariable& a, const AaVariable& b, const AaSyms &newsyms
   Variable no = a.temp("aaSGTno");
   Variable maybe = a.temp("aaSGTmaybe");
 
+  startCommon();
   shSGT(yes, alo, bhi);
   shSLE(no, ahi, blo); 
   shADD(maybe, yes, no);
@@ -866,6 +935,7 @@ AaVariable aaSGT(const AaVariable& a, const AaVariable& b, const AaSyms &newsyms
   shCOND(resultCenter, no, ZERO.repeat(result.size()), resultCenter); 
   Variable delta = a.temp("aaSGTdelta");
   shCOND(delta, maybe, HALF.repeat(result.size()), ZERO.repeat(result.size()));
+  endCommon();
   result.ASN(delta, newsyms);
   return result;
 }
@@ -884,6 +954,7 @@ AaVariable aaSGE(const AaVariable& a, const AaVariable& b, const AaSyms &newsyms
   Variable no = a.temp("aaSGEno");
   Variable maybe = a.temp("aaSGEmaybe");
 
+  startCommon();
   shSGE(yes, alo, bhi);
   shSLT(no, ahi, blo); 
   shADD(maybe, yes, no);
@@ -894,6 +965,7 @@ AaVariable aaSGE(const AaVariable& a, const AaVariable& b, const AaSyms &newsyms
   shCOND(resultCenter, no, ZERO.repeat(result.size()), resultCenter); 
   Variable delta = a.temp("aaSGEdelta");
   shCOND(delta, maybe, HALF.repeat(result.size()), ZERO.repeat(result.size()));
+  endCommon();
   result.ASN(delta, newsyms);
   return result;
 }
@@ -916,10 +988,12 @@ AaVariable aaABS(const AaVariable& a, const AaSyms& newsyms) {
   loPos = a.temp("aopABSloPos");
   spansZero = a.temp("aopABSspansZero");
 
+  startCommon();
   shSLE(hiNeg, hi, ZERO.repeat(hi.size()));
   shSGE(loPos, lo, ZERO.repeat(lo.size()));
   shADD(spansZero, hiNeg, loPos);
   shADD(spansZero, ONE.repeat(spansZero.size()), -spansZero);
+  endCommon();
 
   result.ZERO();
   result.ASN(a);
@@ -932,12 +1006,14 @@ AaVariable aaABS(const AaVariable& a, const AaSyms& newsyms) {
   beta = a.temp("aopABSbeta");
   delta = a.temp("aopABSdelta");
 
+  startCommon();
   shADD(width, hi, -lo); 
   shADD(alpha, hi, lo); // lo < 0, abs(lo) = -lo, so abs(hi) - abs(lo) = hi + lo 
   shDIV(alpha, alpha, width);
   shMAD(beta, -alpha, hi, hi);
   shMUL(beta, beta, HALF.repeat(beta.size()));
   shASN(delta, beta);
+  endCommon();
 
   affineApprox(zeroResult, a, alpha, beta, delta, newsyms);
   result.COND(spansZero, zeroResult); 
@@ -1042,10 +1118,12 @@ AaVariable aaFLR(const AaVariable& a, const AaSyms& newsyms)
 
   Variable flr_lo = a.temp("aaFLR_loflr");
   Variable keep = a.temp("aaFLR_keep");
+  startCommon();
   shFLR(flr_lo, lo); 
   shADD(keep, hi, -flr_lo);
   Variable one = ONE.repeat(a.size());
   shSGE(keep, keep, one); 
+  endCommon();
 
   // come up with the two options
   AaVariable result(new AaVariableNode(*a.node(), a.use() | newsyms));
@@ -1073,10 +1151,12 @@ AaVariable aaFRAC(const AaVariable& a, const AaSyms& newsyms)
 
   Variable flr_lo = a.temp("aaFRAC_loflr");
   Variable keep = a.temp("aaFRAC_keep");
+  startCommon();
   shFLR(flr_lo, lo); 
   shADD(keep, hi, -flr_lo);
   Variable one = ONE.repeat(a.size());
   shSGE(keep, keep, one); 
+  endCommon();
 
   // come up with the two options
   AaVariable result(new AaVariableNode(*a.node(), a.use() | newsyms));
@@ -1245,7 +1325,9 @@ AaVariable aaESCJOIN(const AaVariable& a, const AaSyms& destsyms, const AaSyms& 
   result.ASN(a, isct, true); 
 
   Variable joinerr = result.temp(a.name() + "_joinerr");
+  shASN(joinerr, ZERO.repeat(joinerr.size()));
   for(int i = 0; i < a.size(); ++i) {
+    if(joinSyms[i].empty()) continue;
     Variable erri = a.err(i, joinSyms[i]);
     Variable absErri = a.node()->makeTemp(erri.size(), "_jointemp");
     shABS(absErri, erri); 
@@ -1302,13 +1384,17 @@ AaVariable aaFROMIVAL(const Variable& a, const AaSyms& newsyms)
 
 AaVariable aaUNION(const AaVariable& a, const AaVariable& b, const AaSyms& newsyms)
 {
-  SH_DEBUG_PRINT("a.size=" << a.size() << " b.size=" << b.size());
+  //SH_DEBUG_PRINT("a.size=" << a.size() << " b.size=" << b.size());
   AaVariable result(makeMergeNode("aopUNIONt", a, b, newsyms));
+  AaVariable diff(makeMergeNode("aopUNIONdiff", a, b, newsyms));
   Variable delta = result.temp("aaUNIONdelta");
 
+#if 0
   AaSyms common = a.use() & b.use();
   shADD(delta, a.center(), -b.center());
   shABS(delta, delta);
+
+  shMUL(delta, delta, HALF.repeat(delta.size()));
   for(int i = 0; i < a.size(); ++i) {
     SH_DEBUG_PRINT("i=" << i << " common=" << common[i]);
     if(common[i].empty()) continue;
@@ -1332,6 +1418,29 @@ AaVariable aaUNION(const AaVariable& a, const AaVariable& b, const AaSyms& newsy
   result.MUL(HALF.repeat(result.size()));
   result.setErr(delta, newsyms);
   return result;
+#else
+  diff.ZERO();
+  diff.ADD(a);
+  diff.ADD(b.NEG());
+  diff.MUL(HALF.repeat(result.size()));
+  shABS(delta, diff.center());
+  for(int i = 0; i < a.size(); ++i) {
+    Variable diffi = diff.err(i);
+    Variable temp(diffi.node()->clone(SH_TEMP, diffi.size()));
+    Variable sum(temp.node()->clone(SH_TEMP, 1));
+    shABS(temp, diffi);
+    shCSUM(sum, temp);
+    Variable deltai = delta(i);
+    shADD(deltai, deltai, sum);
+  }
+
+  result.ZERO();
+  result.ADD(a);
+  result.ADD(b);
+  result.MUL(HALF.repeat(result.size()));
+  result.setErr(delta, newsyms);
+  return result;
+#endif
 }
 
 Variable aaTOIVAL(const AaVariable& a)

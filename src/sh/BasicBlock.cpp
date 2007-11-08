@@ -21,6 +21,7 @@
 #include "BasicBlock.hpp"
 #include "Info.hpp"
 #include "Utility.hpp"
+#include "Tag.hpp"
 
 namespace SH {
 
@@ -64,6 +65,24 @@ void BasicBlock::addStatement(const Statement& stmt)
 void BasicBlock::prependStatement(const Statement& stmt)
 {
   m_statements.push_front(stmt);
+}
+
+// Place all the elements of l before the iterator I and removes them
+// from l
+void BasicBlock::splice(iterator I, StmtList &l) { 
+  Tag::cloneToIt(l.begin(), l.end());
+  m_statements.splice(I, l); 
+}
+
+// Places all the elements starting from lI in l before the iterator I and
+// removes them from l
+void BasicBlock::splice(iterator I, StmtList &l, iterator lI) {
+  Tag::cloneToIt(lI, l.end());
+  m_statements.splice(I, l, lI, l.end());
+}
+
+void BasicBlock::insert(iterator I, const Statement& stmt) { 
+  Tag::cloneTo(*m_statements.insert(I, stmt)); 
 }
 
 }

@@ -79,7 +79,7 @@ Timer::~Timer(void)
 float Timer::value(void)
 {
   float sec = (float)t.tv_sec*1000;
-  float msec = (float)t.tv_usec/1000;
+  float msec = (float)t.tv_usec/1000.0;
   return (sec + msec);
 }
 

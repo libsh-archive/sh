@@ -25,7 +25,7 @@ ManMatrix ManMatrix::resize_inputs(int size) const {
   assert(size >= m_in);
   if(size > m_in) {
     int* swiz = new int[m_in];
-    for(int i = 0; i < size; ++i) swiz[i] = i; 
+    for(int i = 0; i < m_in; ++i) swiz[i] = i; 
     SH::Program swizzer = SH_BEGIN_PROGRAM() {
       Variable in = var(SH_INPUT, size);
       if(m_in > 0) {

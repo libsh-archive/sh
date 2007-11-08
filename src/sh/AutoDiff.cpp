@@ -61,6 +61,16 @@ struct AutoDiffBase: public TransformerParent {
     this->var = var;
   }
 
+ void handlePaletteList(ProgramNode::PaletteList &palettelist) {
+   ProgramNode::VarList foo(palettelist.begin(), palettelist.end());
+   handleVarList(foo, SH_PALETTE);
+ }
+
+ void handleTexList(ProgramNode::TexList &texlist) {
+   ProgramNode::VarList foo(texlist.begin(), texlist.end());
+   handleVarList(foo, SH_TEXTURE);
+ }
+
   void handleVarList(ProgramNode::VarList &varlist, BindingType type) {
     /* Build variables and add initialization code (step 1)
      *
@@ -72,11 +82,12 @@ struct AutoDiffBase: public TransformerParent {
         case SH_CONST:
           copy = Variable((*I)->clone());
           break;
-        case SH_TEXTURE:
         case SH_STREAM:
-        case SH_PALETTE:
           SH_DEBUG_ASSERT(false);
           break;
+        case SH_TEXTURE:
+        case SH_PALETTE:
+          cout << "copying tex/pal" << endl; 
         default:
           copy = Variable((*I)->clone(SH_TEMP));
           copy.name((*I)->name() + "'");
@@ -107,8 +118,7 @@ struct AutoDiffBase: public TransformerParent {
 
   /* Gets the variable for the derivative corresponding to v */
   Variable d(const Variable& v, BasicBlock::StmtList &extras, bool copy=true) {
-    SH_DEBUG_ASSERT_PRINT(diff.find(v.node()) != diff.end(), 
-      v.name());
+    SH_DEBUG_ASSERT_PRINT(diff.find(v.node()) != diff.end(), v.name());
     Variable dv(diff[v.node()], v.swizzle(), v.neg()); 
     if(copy) {
       Variable dv_copy(dv.node()->clone(SH_TEMP, dv.size()));
@@ -137,6 +147,7 @@ struct AutoDiffBase: public TransformerParent {
     Variable result = d(dest, extras, false);
     Variable one = ConstAttrib1f(1.0).repeat(result.size()); 
     Variable half = ConstAttrib1f(0.5).repeat(result.size()); 
+    Variable zero = ConstAttrib1f(0.0).repeat(result.size()); 
     switch(stmt.op) {
       case OP_ASN: // a' = a'
       case OP_NEG: // (-a)' = -(a')
@@ -286,6 +297,13 @@ struct AutoDiffBase: public TransformerParent {
         extras.push_back(Statement(result, OP_RSQ, a)); 
         extras.push_back(Statement(result, OP_MUL, result, half)); 
         extras.push_back(Statement(result, OP_MUL, result, da)); 
+        break;
+      }
+      case OP_TEX: 
+      case OP_TEXI: // @todo range make this work in general
+                    // would need to generate one tex per texcoord to represent d tex / d coord_i
+      case OP_PAL: { // derivative is zero or infinity at points of discontinuity (nearest-neighbor filtering) 
+        extras.push_back(Statement(result, OP_ASN, zero)); 
         break;
       }
         

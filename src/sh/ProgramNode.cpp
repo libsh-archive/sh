@@ -31,34 +31,36 @@
 #include "Error.hpp"
 #include "Internals.hpp"
 #include "Transformer.hpp"
+#include "Inclusion.hpp"
 
 #define CLEAN_DECLS true 
 
+using namespace SH;
+using namespace std;
+
 namespace {
 
-using namespace SH;
-
-std::string describe(const ProgramNode::VarList &varlist)
+string describe(const ProgramNode::VarList &varlist)
 {
-  std::ostringstream os;
+  ostringstream os;
   for (ProgramNode::VarIt I = varlist.begin(); I != varlist.end(); ++I) {
-    os << "  " << (*I)->nameOfType() << " " << (*I)->name() << std::endl;
+    os << "  " << (*I)->nameOfType() << " " << (*I)->name() << endl;
   }
   return os.str();
 }
 
-std::string describe(const ProgramNode::TexList &texlist)
+string describe(const ProgramNode::TexList &texlist)
 {
-  std::ostringstream os;
+  ostringstream os;
   for (ProgramNode::TexList::const_iterator I = texlist.begin(); I != texlist.end(); ++I) {
-    os << "  " << (*I)->nameOfType() << " " << (*I)->name() << std::endl;
+    os << "  " << (*I)->nameOfType() << " " << (*I)->name() << endl;
   }
   return os.str();
 }
 
-std::string describe_stats(const ProgramNode::VarList &varlist) {
-  std::ostringstream os;
-  std::vector<int> sizecount;
+string describe_stats(const ProgramNode::VarList &varlist) {
+  ostringstream os;
+  vector<int> sizecount;
   for(ProgramNode::VarIt I = varlist.begin(); I != varlist.end(); ++I) {
     if((*I)->size() > static_cast<int>(sizecount.size())) {
       sizecount.resize((*I)->size());
@@ -67,7 +69,7 @@ std::string describe_stats(const ProgramNode::VarList &varlist) {
   }
   for(size_t i = 0; i < sizecount.size(); ++i) {
     if(sizecount[i] == 0) continue;
-    os << "size " << i + 1 << sizecount[i] << std::endl;
+    os << "size " << i + 1 << sizecount[i] << endl;
   }
   return os.str();
 }
@@ -98,11 +100,96 @@ struct StatementCounterBase: public TransformerParent {
   }
 };
 typedef DefaultTransformer<StatementCounterBase> StatementCounter;
+
+struct ScalarStatementCounterBase: public TransformerParent {
+  /* Splits a statement.  Returns whether the operator requires splicing in a new program
+   * fragment. 
+   */
+  int count;
+  ScalarStatementCounterBase(): count(0) {}
+  bool handleStmt(BasicBlock::StmtList::iterator& I, CtrlGraphNode* node)
+  {
+    const Statement& stmt = *I;
+    int inc = 0;
+    for(int i = 0; i < opInfo[stmt.op].arity; ++i) {
+      inc = std::max(inc, stmt.src[i].size());
+    }
+    count += inc;
+    return false;
+  }
+};
+typedef DefaultTransformer<ScalarStatementCounterBase> ScalarStatementCounter;
+
+struct StatementDumperBase: public TransformerParent {
+  StatementDumperBase() {} 
+  void init(StmtCsvDataPtr csvdata, const std::string& filename) {
+    this->csvdata = csvdata;
+    this->filename = filename;
+    curVarIdx = 0;
+    curStmtIdx = 0;
+  }
+  void start(const ProgramNodePtr& program) { 
+    TransformerParent::start(program);
+    sout << "filename,seq,index,op,dest,dest_name,dest_size";
+    for(int i = 0; i < 3; ++i) {
+      sout << ",src" << i << ",src" << i << "_name,src" << i << "_size"; 
+    }
+    sout << this->csvdata->header() << endl;
+    add_stmt_indices(Program(program));
+  }
+
+  void dumpVar(const Variable& v) {
+    if(varIdx.find(v.node()) == varIdx.end()) {
+      varIdx[v.node()] = curVarIdx++;
+    }
+    sout << "," <<  varIdx[v.node()]; 
+    if(v.null()) sout << ",";
+    else sout << ",\"" <<  v.name() << "\"";
+    sout << "," << v.size(); 
+  }
+
+  bool handleStmt(BasicBlock::StmtList::iterator& I, CtrlGraphNode* node)
+  {
+    Statement& stmt = *I;
+    sout << "\"" << filename << "\",";
+    sout << curStmtIdx++ << ",";
+    sout << stmt.get_info<StmtIndex>()->index() << ","; 
+    sout << opInfo[stmt.op].name;
+    dumpVar(stmt.dest);
+    for(int i = 0; i < 3; ++i) dumpVar(stmt.src[i]);
+    sout << (*this->csvdata)(stmt);
+    sout << endl;
+    return false;
+  }
+  ostringstream sout;
+  StmtCsvDataPtr csvdata;
+  int curVarIdx;
+  int curStmtIdx;
+  string filename;
+  map<VariableNodePtr, int> varIdx; 
+};
+typedef DefaultTransformer<StatementDumperBase> StatementDumper;
+
+struct ComboCsvData: public StmtCsvData {
+  StmtCsvDataPtr a, b;
+  ComboCsvData(StmtCsvDataPtr a, StmtCsvDataPtr b): a(a), b(b) {}
+  virtual std::string header() {
+    return a->header() + b->header();
+  }
+  virtual std::string operator()(const Statement& stmt) {
+    return (*a)(stmt) + (*b)(stmt);
+  }
+};
+
 }
 
 namespace SH {
 
-ProgramNode::ProgramNode(const std::string& target)
+StmtCsvDataPtr combine(StmtCsvDataPtr a, StmtCsvDataPtr b) {
+  return new ComboCsvData(a, b); 
+}
+
+ProgramNode::ProgramNode(const string& target)
   : m_backend_name(""), m_target(target), m_finished(false),
     m_assigned_var(0)
 {
@@ -118,7 +205,7 @@ void ProgramNode::compile(const Pointer<Backend>& backend)
   compile(m_target, backend);
 }
 
-void ProgramNode::compile(const std::string& target, const Pointer<Backend>& backend)
+void ProgramNode::compile(const string& target, const Pointer<Backend>& backend)
 {
   if (!backend) return;
   if (target.empty()) error(Exception("Empty Program target"));
@@ -137,7 +224,7 @@ void ProgramNode::compile(const std::string& target, const Pointer<Backend>& bac
   }
   Context::current()->exit();
   if (code) {
-    m_code[std::make_pair(target, backend)] = code;
+    m_code[make_pair(target, backend)] = code;
     m_backend_name = backend->name();
   }
 }
@@ -149,23 +236,23 @@ bool ProgramNode::is_compiled() const
   return is_compiled(m_target, Backend::get_backend(m_target));
 }
 
-bool ProgramNode::is_compiled(const std::string& target) const
+bool ProgramNode::is_compiled(const string& target) const
 {
   if (target.empty()) error( Exception( "Invalid compilation target" ) );
 
   return is_compiled(target, Backend::get_backend(target));
 }
 
-bool ProgramNode::is_compiled(const std::string& target, const Pointer<Backend>& backend) const
+bool ProgramNode::is_compiled(const string& target, const Pointer<Backend>& backend) const
 {
   // Try for a perfect match first
-  if (m_code.find(std::make_pair(target, backend)) != m_code.end()) return true;
+  if (m_code.find(make_pair(target, backend)) != m_code.end()) return true;
 
   // Look for a derived target
-  std::list<std::string> derived_targets = Backend::derived_targets(target);
-  for (std::list<std::string>::const_iterator i = derived_targets.begin(); 
+  list<string> derived_targets = Backend::derived_targets(target);
+  for (list<string>::const_iterator i = derived_targets.begin(); 
        i != derived_targets.end(); i++) {
-    if (m_code.find(std::make_pair(*i, backend)) != m_code.end()) return true;
+    if (m_code.find(make_pair(*i, backend)) != m_code.end()) return true;
   }
 
   return false;
@@ -183,132 +270,142 @@ Pointer<BackendCode> ProgramNode::code(const Pointer<Backend>& backend)
   return code(m_target, backend);
 }
 
-Pointer<BackendCode> ProgramNode::code(const std::string& target, const Pointer<Backend>& backend)
+Pointer<BackendCode> ProgramNode::code(const string& target, const Pointer<Backend>& backend)
 {
   if (!backend) return 0;
 
-  if (m_code.find(std::make_pair(target, backend)) == m_code.end()) compile(target, backend);
+  if (m_code.find(make_pair(target, backend)) == m_code.end()) compile(target, backend);
 
-  return m_code[std::make_pair(target, backend)];
+  return m_code[make_pair(target, backend)];
 }
 
-std::string ProgramNode::describe_interface() const
+string ProgramNode::describe_interface() const
 {
-  std::ostringstream os;
+  ostringstream os;
   os << "Interface for ";
   if (has_name()) {
     os << name();
   } else {
     os << "<anonymous program>";
   }
-  os << std::endl;
-  os << std::endl;
-  os << "Inputs:" << std::endl;
-  os << describe(inputs) << std::endl;
-  os << "Outputs:" << std::endl;
-  os << describe(outputs) << std::endl;
-  os << "Uniforms:" << std::endl;
-  os << describe(all_uniforms) << std::endl;
-  os << "Arrays:" << std::endl;
-  os << describe(textures) << std::endl;
+  os << endl;
+  os << endl;
+  os << "Inputs:" << endl;
+  os << describe(inputs) << endl;
+  os << "Outputs:" << endl;
+  os << describe(outputs) << endl;
+  os << "Uniforms:" << endl;
+  os << describe(all_uniforms) << endl;
+  os << "Arrays:" << endl;
+  os << describe(textures) << endl;
 
   return os.str();
 }
 
-std::string ProgramNode::describe_vars() const
+string ProgramNode::describe_vars() const
 {
-  std::ostringstream os;
+  ostringstream os;
   os << describe_interface(); 
-  os << "Temps:" << std::endl;
-  os << describe(temps) << std::endl;
-  os << "Constants:" << std::endl;
-  os << describe(constants) << std::endl;
+  os << "Temps:" << endl;
+  os << describe(temps) << endl;
+  os << "Constants:" << endl;
+  os << describe(constants) << endl;
   return os.str();
 }
 
-std::string ProgramNode::describe_decls() const
+string ProgramNode::describe_decls() const
 {
-  std::ostringstream os;
-  os << "Temp Declarations:" << std::endl;
+  ostringstream os;
+  os << "Temp Declarations:" << endl;
   for (VarSet::const_iterator I = tempDecls.begin(); I != tempDecls.end(); ++I) {
-    os << (*I)->nameOfType() << " " << (*I)->name() << std::endl;
+    os << (*I)->nameOfType() << " " << (*I)->name() << endl;
   }
   return os.str();
 }
 
-std::string ProgramNode::describe_bindings()
+string ProgramNode::describe_bindings()
 {
-  std::ostringstream os;
+  ostringstream os;
   os << "Bindings for ";
   if (has_name()) {
     os << name();
   } else {
     os << "<anonymous program>";
   }
-  os << std::endl;
-  os << std::endl;
+  os << endl;
+  os << endl;
   code()->describe_bindings(os);
   return os.str();
 }
 
-std::string ProgramNode::describe_bindings(const std::string& target)
+string ProgramNode::describe_bindings(const string& target)
 {
-  std::ostringstream os;
+  ostringstream os;
   os << "Bindings for ";
   if (has_name()) {
     os << name();
   } else {
     os << "<anonymous program>";
   }
-  os << std::endl;
-  os << std::endl;
+  os << endl;
+  os << endl;
   BackendPtr backend = Backend::get_backend(target);
   code(target, backend)->describe_bindings(os);
   return os.str();
 }
-std::string ProgramNode::describe_counts() 
+string ProgramNode::describe_counts() 
 {
-  std::ostringstream os;
+  ostringstream os;
   // input counts
-  os << "inputs:" << std::endl << std::endl;
+  os << "inputs:" << endl << endl;
   describe_stats(inputs);
 
   // output counts
-  os << "outputs:" << std::endl << std::endl;
+  os << "outputs:" << endl << endl;
   describe_stats(outputs);
   
   // total instruction count, distribution
   OpStats ops;
   collect_stats(ops);
-  os << "ops:" << std::endl;
+  os << "ops:" << endl;
   int total = 0;
   for(OpStats::iterator I = ops.begin(); I != ops.end(); ++I) {
-    os << opInfo[I->first].name << ": " << I->second << std::endl; 
+    os << opInfo[I->first].name << ": " << I->second << endl; 
     total += I->second;
   }
   os << "total: " << total;
   return os.str();
 }
 
-void ProgramNode::dump(std::string filename) const
+void ProgramNode::dump(string filename) const
 {
   SH_DEBUG_PRINT("Dumping " << filename);
-  std::string varfile = filename + ".vars";
-  std::ofstream varout(varfile.c_str());
+  string varfile = filename + ".vars";
+  ofstream varout(varfile.c_str());
   varout << "Program "; 
   varout << describe_vars(); 
   varout << describe_decls();
 
-  std::ostringstream sout;
+  ostringstream sout;
   ctrlGraph->graphviz_dump(sout);
 
-#if 1
-  std::ofstream fout((filename + ".dot").c_str());
+#if 0
+  ofstream fout((filename + ".dot").c_str());
   fout << sout.str();
   fout.close();
 #else
   dotGen(sout.str(), filename);
 #endif
+}
+
+void ProgramNode::csvdump(string filename, StmtCsvDataPtr csvdata) {
+  StatementDumper sd;
+  sd.init(csvdata, filename);
+  sd.transform(this);
+
+  ofstream fout(filename.c_str());
+  fout << sd.sout.str();
+  fout.close();
 }
 
 void ProgramNode::updateUniform(const VariableNodePtr& uniform)
@@ -449,7 +546,7 @@ void ProgramNode::collect_dependent_uniform(const VariableNodePtr& var)
   if (var->evaluator()) {
     for (VarIt I = var->evaluator()->uniforms.begin();
          I != var->evaluator()->uniforms.end(); ++I) {
-      if (std::find(all_uniforms.begin(), all_uniforms.end(), *I) == all_uniforms.end()) {
+      if (find(all_uniforms.begin(), all_uniforms.end(), *I) == all_uniforms.end()) {
         collect_dependent_uniform(*I);
       }
     }
@@ -460,7 +557,7 @@ void ProgramNode::collect_var(const VariableNodePtr& var)
 {
   if (!var) return;
   if (var->uniform()) {
-    if (std::find(uniforms.begin(), uniforms.end(), var) == uniforms.end()) {
+    if (find(uniforms.begin(), uniforms.end(), var) == uniforms.end()) {
       uniforms.push_back(var);
       collect_dependent_uniform(var);
     }
@@ -471,23 +568,23 @@ void ProgramNode::collect_var(const VariableNodePtr& var)
     // Taken care of by VariableNode constructor
     break;
   case SH_TEMP:
-    if (std::find(temps.begin(), temps.end(), var) == temps.end()) {
+    if (find(temps.begin(), temps.end(), var) == temps.end()) {
       temps.push_back(var);
     }
     break;
   case SH_CONST:
-    if (std::find(constants.begin(), constants.end(), var) == constants.end()) {
+    if (find(constants.begin(), constants.end(), var) == constants.end()) {
       constants.push_back(var);
     }
     break;
   case SH_TEXTURE:
-    if (std::find(textures.begin(), textures.end(),
+    if (find(textures.begin(), textures.end(),
                   shref_dynamic_cast<TextureNode>(var)) == textures.end()) {
       textures.push_back(shref_dynamic_cast<TextureNode>(var));
     }    
     break;
   case SH_PALETTE:
-    if (std::find(palettes.begin(), palettes.end(),
+    if (find(palettes.begin(), palettes.end(),
                   shref_dynamic_cast<PaletteNode>(var)) == palettes.end()) {
       palettes.push_back(shref_dynamic_cast<PaletteNode>(var));
     }
@@ -505,12 +602,12 @@ void ProgramNode::collect_var_decl(const VariableNodePtr& var)
   if(tempDecls.find(var) != tempDecls.end()) usedTempDecls.insert(var);
 }
 
-std::ostream& ProgramNode::print(std::ostream& out,
+ostream& ProgramNode::print(ostream& out,
                                    const ProgramNode::VarList& varList) {
   return print(out, varList.begin(), varList.size());
 }
 
-std::ostream& ProgramNode::print(std::ostream& out, const VarIt& begin, size_t size) {
+ostream& ProgramNode::print(ostream& out, const VarIt& begin, size_t size) {
   out << "(";
   size_t i = 0;
   for (VarIt it = begin; i < size; ++it, ++i) {
@@ -548,6 +645,12 @@ int ProgramNode::statement_count() {
   StatementCounter sc;
   sc.transform(this);
   return sc.count;
+}
+
+int ProgramNode::scalar_statement_count() {
+  ScalarStatementCounter ssc;
+  ssc.transform(this);
+  return ssc.count;
 }
 
 void ProgramNode::finish()

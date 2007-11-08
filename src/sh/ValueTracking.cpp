@@ -33,7 +33,7 @@
 #include "ProgramNode.hpp"
 
 // Uncomment to enable use-def chain debugging 
-// #define SH_DEBUG_VALUETRACK
+//#define SH_DEBUG_VALUETRACK
 
 #ifdef SH_DEBUG_OPTIMIZER
 #ifndef SH_DEBUG_VALUETRACK
@@ -393,9 +393,9 @@ struct UdDuDumper {
       }
       SH_DEBUG_PRINT("Valuetracking for " << *I);
       for (int i = 0; i < opInfo[I->op].arity; i++) {
-        //SH_DEBUG_PRINT("  src ud" << i << "\n" << vt->defs[i]);
+        SH_DEBUG_PRINT("  src ud" << i << "\n" << vt->defs[i]);
       }
-      //SH_DEBUG_PRINT("  dest du" << vt->uses);
+      SH_DEBUG_PRINT("  dest du" << vt->uses);
     }
   }
 

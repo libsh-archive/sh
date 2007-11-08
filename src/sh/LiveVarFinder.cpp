@@ -29,19 +29,24 @@
 #include "Debug.hpp"
 #include "Context.hpp"
 #include "ProgramNode.hpp"
+#include "Transformer.hpp"
 
 /* This is very much based on the existing ValueTracking stuff */
+using namespace SH;
+using namespace std;
 
 namespace {
-using namespace SH;
 
 
 /* initializes use/def sets 
  * def = set of variable tuple elements defined before any use in B
  * use = set of variable tuple elements used before def in B */
 struct InitUseDef {
+  ReachingDefs* rchDef;
+  InitUseDef(ReachingDefs* rchDef): rchDef(rchDef) {}
+
   /* Adds variable (or elements in variable) that are not in check into the set s */ 
-  void addCheck(const Variable& var, const LiveVars::ElementSet& check, LiveVars::ElementSet& s) {
+  static void addCheck(const Variable& var, const LiveVars::ElementSet& check, LiveVars::ElementSet& s) {
     if(var.null()) return;
 
     BitSet result(var.node()->size());
@@ -65,22 +70,37 @@ struct InitUseDef {
   void operator()(CtrlGraphNode* node)
   {
     LiveVars* alive = new LiveVars(); 
+    node->destroy_info<LiveVars>();
     node->add_info(alive);
 
-    if (!node) return;
-    BasicBlockPtr block = node->block;
-
-    if(block) {
-      for(BasicBlock::StmtList::iterator I = block->begin(); I != block->end(); ++I) {
-        /* add srcs to use, if not yet defined */
-        for(size_t i = 0; i < I->src.size(); ++i) {
-          addCheck(I->src[i], alive->def, alive->use);
+    /* initialize rchout */
+    SH_DEBUG_ASSERT(rchDef->out.find(node) != rchDef->out.end());
+    const BitSet& nodeOut = rchDef->out[node];
+    for(size_t i = 0; i < rchDef->defs.size(); ++i) {
+      ReachingDefs::Definition &d = rchDef->defs[i];
+      if(alive->rchout.find(d.varnode) == alive->rchout.end()) alive->rchout[d.varnode] = BitSet(d.varnode->size());
+      BitSet& bits = alive->rchout[d.varnode];
+      for(int j = 0; j < d.size(); ++j) {
+        if(nodeOut[d.off(j)]) {
+          bits[j] = true;
         }
-
-        /* add dest to def, if not yet used */
-        addCheck(I->dest, alive->use, alive->def);
       }
+      if(bits.empty()) alive->rchout.erase(d.varnode);
     }
+
+    BasicBlockPtr block = node->block;
+    if(!block) return;
+
+    for(BasicBlock::StmtList::iterator I = block->begin(); I != block->end(); ++I) {
+      /* add srcs to use, if not yet defined */
+      for(size_t i = 0; i < I->src.size(); ++i) {
+        addCheck(I->src[i], alive->def, alive->use);
+      }
+
+      /* add dest to def, if not yet used */
+      addCheck(I->dest, alive->use, alive->def);
+    }
+
   }
 };
 
@@ -102,16 +122,18 @@ struct LiveIter {
 
   typedef LiveVars::ElementSet ElmSet; 
 
-  /* Takes a union b and puts result in a, setting changed = true if a changes*/ 
-  void unionIntoA(ElmSet& a, const ElmSet &b) {
+  /* Takes a = a union (b isct c) and puts result in a, setting changed = true if a changes*/ 
+  void unionIsct(ElmSet& a, const ElmSet &b, const ElmSet& c) {
     for(ElmSet::const_iterator B = b.begin(); B != b.end(); ++B) {
+      if(c.find(B->first) == c.end()) continue;
+      BitSet bandc = B->second & c.find(B->first)->second;
       if(a.find(B->first) != a.end()) {
         size_t oldcount = a[B->first].count(); 
-        a[B->first] |= B->second;
+        a[B->first] |= bandc; 
         changed |= (a[B->first].count() != oldcount);
       } else {
         changed = true;
-        a[B->first] = B->second;
+        a[B->first] = bandc; 
       }
     }
   }
@@ -144,11 +166,11 @@ struct LiveIter {
     LiveVars* alive = node->get_info<LiveVars>(); 
     for(CtrlGraphNode::SuccessorConstIt S = node->successors_begin(); S != node->successors_end(); ++S) {
       LiveVars* salive = S->node->get_info<LiveVars>();
-      unionIntoA(alive->out, salive->in); 
+      unionIsct(alive->out, salive->in, alive->rchout); 
     }
     if(node->follower()) {
       LiveVars* falive = node->follower()->get_info<LiveVars>();
-      unionIntoA(alive->out, falive->in); 
+      unionIsct(alive->out, falive->in, alive->rchout); 
     }
     if(alive->in.empty()) {
       alive->in = alive->use;
@@ -164,10 +186,95 @@ std::ostream& print(std::ostream& out, const SH::LiveVars::ElementSet& es) {
   return out;
 }
 
+struct StatementLiveFinder {
+  void operator()(CtrlGraphNode* node)
+  {
+    LiveVars* alive = node->get_info<LiveVars>(); 
+    if(!node->block) return;
+    BasicBlockPtr block = node->block;
+    LiveVars* last_alive = 0;
+    bool changed; /* doesn't actually matter */
+    LiveIter li(changed);
+    for(BasicBlock::StmtList::reverse_iterator I = block->rbegin(); I != block->rend(); ++I) {
+      Statement& stmt = *I;
+      LiveVars* stmt_alive = new LiveVars(); 
+      stmt.destroy_info<LiveVars>();
+      stmt.add_info(stmt_alive);
+
+      if(I == block->rbegin()) { /* initialize from alive->out */
+        stmt_alive->out = alive->out;
+      } else { /* propagate from previous */
+        stmt_alive->out = last_alive->in;
+      }
+      /* set up ->use, ->def */
+      for(size_t i = 0; i < stmt.src.size(); ++i) {
+        InitUseDef::addCheck(stmt.src[i], stmt_alive->def, stmt_alive->use);
+      }
+      InitUseDef::addCheck(stmt.dest, stmt_alive->use, stmt_alive->def);
+
+      stmt_alive->in = stmt_alive->use;
+      li.unionSub(stmt_alive->in, stmt_alive->out, stmt_alive->def);
+      last_alive = stmt_alive;
+    }
+  }
+};
 
 }
 
 namespace SH {
+
+LiveVarCsvDataBase::LiveVarCsvDataBase() {
+  total_live = scalar_total_live = max_live = max_scalar_live = stmt_count = 0;
+}
+
+void LiveVarCsvDataBase::finish() {
+  Program p(m_program);
+  insert_branch_instructions(p);
+  find_statement_live_vars(p);
+  remove_branch_instructions(p);
+}
+
+std::string LiveVarCsvDataBase::header() {
+  return ",live_vars,live_scalar_vars";
+}
+
+std::string LiveVarCsvDataBase::operator()(const Statement& stmt) {
+  const LiveVars* alive = stmt.get_info<LiveVars>();
+  int live_vars = 0;
+  int scalar_live_vars = 0;
+
+
+  LiveVars::const_iterator I;
+  for(I = alive->out.begin(); I != alive->out.end(); ++I) {
+    switch(I->first->kind()) {
+      case SH_CONST:
+      case SH_TEXTURE:
+      case SH_STREAM:
+      case SH_PALETTE:
+      case BINDINGTYPE_END:
+        continue;
+      case SH_TEMP:
+        if(I->first->uniform()) continue;
+      case SH_INPUT:
+      case SH_OUTPUT:
+      case SH_INOUT:
+        break;
+    }
+    if(!I->second.empty()) {
+      live_vars += 1;
+      scalar_live_vars += I->second.count();
+    }
+  }
+
+  ostringstream sout;
+  sout << "," << live_vars << "," << scalar_live_vars; 
+  scalar_total_live += scalar_live_vars;
+  total_live += live_vars;
+  max_live = std::max(max_live, live_vars);
+  max_scalar_live = std::max(max_scalar_live, scalar_live_vars);
+  stmt_count++;
+  return sout.str();
+}
 
 Info* LiveVars::clone() const  
 {
@@ -185,13 +292,19 @@ std::ostream& operator<<(std::ostream& out, const LiveVars& lvs)
   print(out, lvs.out) << std::endl;
   out << "def:" << std::endl; 
   print(out, lvs.def) << std::endl;
+  out << "rchout:" << std::endl; 
+  print(out, lvs.rchout) << std::endl;
   return out;
 }
 
 void find_live_vars(Program& p)
 {
+  add_value_tracking(p);
+  ReachingDefs* rchdef = p.node()->get_info<ReachingDefs>(); 
+
   CtrlGraphPtr graph = p.node()->ctrlGraph;
-  InitUseDef init;
+
+  InitUseDef init(rchdef);
   graph->dfs(init);
 
   bool changed;
@@ -202,6 +315,20 @@ void find_live_vars(Program& p)
   } while(changed);
 }
 
+void find_statement_live_vars(Program& p)
+{
+  CtrlGraphPtr graph = p.node()->ctrlGraph;
+  find_live_vars(p);
+  StatementLiveFinder slf;
+  graph->dfs(slf);
+}
 
+/* Runs find_statement_live_Vars and tags statements with number of live variables */ 
+SH_DLLEXPORT 
+StmtCsvDataPtr getLiveVarCsvData(ProgramNodePtr p) {
+  LiveVarCsvData* lvcd = new LiveVarCsvData();
+  lvcd->transform(p);
+  return lvcd;
+}
 
 }

@@ -26,7 +26,7 @@
 #include "CtrlGraph.hpp"
 #include "Debug.hpp"
 
-// #define STRUCTURAL_DEBUG
+//#define STRUCTURAL_DEBUG
 
 #ifdef STRUCTURAL_DEBUG
 #  define SH_STR_DEBUG_PRINT(x) SH_DEBUG_PRINT(x)
@@ -203,6 +203,7 @@ std::ostream& StructuralNode::dump(std::ostream& out, int noedges) const
       out << gvname(this) << " ";
       if (cfg_node->block) {
         out << "[label=\"";
+        out << "object=" << this << "\\n";
         cfg_node->block->graphviz_dump(out);
         out << "\", shape=box]";
       } else {
@@ -213,7 +214,8 @@ std::ostream& StructuralNode::dump(std::ostream& out, int noedges) const
       out << "subgraph " << gvname(this) << " {" << std::endl;
       out << "subgraph " << gvname(this) << "_entry { ";
       out << "  " << gvname(this) << "_entry_node [label=\"\",shape=box,fillcolor=green,style=filled];";
-      out << "  label=\"\";" << std::endl;
+      //out << "  label=\"\";" << std::endl;
+      out << "  label=\"object=" << this << "\";" << std::endl;
       out << " }" << std::endl;
       for (StructNodeList::const_iterator I = structnodes.begin(); I != structnodes.end(); ++I) {
         (*I)->dump(out, 1);
@@ -360,10 +362,10 @@ Structural::Structural(const CtrlGraphPtr& graph)
     build_postorder(m_head);
 
     while (!m_postorder.empty()) {
-      SH_STR_DEBUG_PRINT("Considering a node");
       
       StructuralNode* node = m_postorder.front();
       m_postorder.pop_front();
+      SH_STR_DEBUG_PRINT("Considering a node " << node);
       
       typedef StructuralNode::StructNodeList NodeSet;
       NodeSet nodeset;
@@ -418,7 +420,7 @@ Structural::Structural(const CtrlGraphPtr& graph)
             nodeset.erase(nodeset.begin(), F);
             SH_STR_DEBUG_PRINT("FOUND SECTION of size " << nodeset.size());
             for (NodeSet::iterator I = nodeset.begin(); I != nodeset.end(); ++I) {
-              SH_STR_DEBUG_PRINT("  node " << I->object());
+              SH_STR_DEBUG_PRINT("  node " << (*I));
             }
             break;
           }
@@ -458,9 +460,6 @@ Structural::Structural(const CtrlGraphPtr& graph)
 
           if(blockS != blockE) {
             SH_STR_DEBUG_PRINT("FOUND BLOCK of size " << nodeset.size());
-            for (NodeSet::iterator I = blockS; I != blockE; ++I) { 
-              SH_STR_DEBUG_PRINT("  node " << I->object());
-            }
             nodeset.erase(nodeset.begin(), blockS);
             nodeset.erase(blockE, nodeset.end());
             newnode = create_structural_node(StructuralNode::BLOCK);
@@ -547,7 +546,9 @@ Structural::Structural(const CtrlGraphPtr& graph)
         changed = true;
         newnode->structnodes = nodeset;
 
+        SH_STR_DEBUG_PRINT("  newnode=" << newnode);
         for (NodeSet::iterator N = nodeset.begin(); N != nodeset.end(); ++N) {
+          SH_STR_DEBUG_PRINT("    child node " << (*N));
           (*N)->container = newnode;
         }
 
@@ -605,22 +606,25 @@ Structural::Structural(const CtrlGraphPtr& graph)
 
         // Remove duplicate successors from newnode
         for (StructuralNode::SuccessorList::iterator J = newnode->succs.begin();
-             J != newnode->succs.end(); ++J) {
+             J != newnode->succs.end();) {
           StructuralNode::SuccessorList::iterator K = J;
+          bool incJ = true;
           for (K++; K != newnode->succs.end(); ++K) {
             if (K->second == J->second) {
               // Favour conditional edges for deletion in order to
               // keep the non-conditional edges if possible
               if (J->first.node()) {
                 J = newnode->succs.erase(J);
-                if (J != newnode->succs.begin()) --J;
+                incJ = false;
+                break; /* continue to the next J */
               } else {
                 K = newnode->succs.erase(K);
-                J = newnode->succs.begin(); // The previous erase has invalidated J
+                //J = newnode->succs.begin(); // The previous erase has invalidated J
+                // J should be okay since J != K
               }
-              break;
             }
           }
+          if(incJ) J++;
         }
 
         SH_STR_DEBUG_PRINT("Replace parent of children");
@@ -676,8 +680,12 @@ Structural::Structural(const CtrlGraphPtr& graph)
           }
         }
         
-        SH_STR_DEBUG_PRINT("Add to postorder");
-        m_postorder.push_back(newnode);
+        SH_STR_DEBUG_PRINT("Add to postorder " << newnode);
+        //m_postorder.push_back(newnode);
+
+        // To keep the invariant that everything after the current node in progress is irreducible,
+        // we need to check newnode right away before moving along in the postorder
+        m_postorder.push_front(newnode);
 
         if (nodeset.front() == m_head) {
           SH_STR_DEBUG_PRINT("Replace head");

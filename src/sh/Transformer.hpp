@@ -253,6 +253,10 @@ struct TransformerParent {
  void handlePaletteList(ProgramNode::PaletteList &palettelist) {}
  void handleNode(CtrlGraphNode* node) {}
 
+ /* Note that I's tags are pushed right before this call and popped immediately after,
+  * so any splicing ops will also clone tags.
+  *
+  * To prevent this, push some empty tags */
  bool handleStmt(BasicBlock::StmtList::iterator &I, CtrlGraphNode* node) { return false; }
  void finish() {}
  bool changed() 

@@ -22,6 +22,7 @@
 
 #include <string>
 #include <map>
+#include <iosfwd>
 #include "DllExport.hpp"
 #include "Program.hpp"
 
@@ -53,6 +54,15 @@ public:
   // by default all flags are true
   void set_flag(const std::string& name, bool value);
   bool get_flag(const std::string& name) const; 
+
+  /// Set float statistic
+  void set_stat(const char* name, float value) { m_stat[name] = value; }
+  float get_stat(const char* name) const {
+    std::map<std::string, float>::const_iterator S = m_stat.find(name); 
+    if(S == m_stat.end()) return 0;
+    return S->second;
+  }
+  std::ostream& dump_stats(std::ostream& out) const;
 
   bool is_bound(const std::string& target);
   ProgramNodePtr bound_program(const std::string& target);
@@ -94,6 +104,7 @@ public:
   /// Set the current context to the given one 
   static void setContext(Context* c) { m_instance = c; }
 
+
   
 private:
   Context();
@@ -106,6 +117,8 @@ private:
 
   std::set<std::string> m_disabled_optimizations;
   std::set<std::string> m_flags;
+
+  std::map<std::string, float> m_stat;
   
   static Context* m_instance;
   typedef std::vector<Context*> ContextVec; 

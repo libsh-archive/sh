@@ -44,7 +44,9 @@ void lock_in_uniforms(Program& p) {
   }
   p.binding_spec.clear();
   p.uniform_inputs.clear();
+  ProgramNodePtr oldp = p.node();
   p = p << binding_map;
+  static_cast<Meta*>(p.node().object())->operator=(*oldp.object()); // @todo put this in a function 
 }
 
 }

@@ -35,8 +35,10 @@ template<int Rows, int Cols, BindingType Binding, typename T>
 Matrix<Rows, Cols, Binding, T>::Matrix()
 { 
   if (Binding != SH_INPUT) {
-    for (int i = 0; i < std::min(Rows, Cols); i++)
+    for (int i = 0; i < std::min(Rows, Cols); i++) {
+      m_data[i] = fillcast<Cols>(0.0);
       m_data[i][i] = 1.0;
+    }
   }
 }
 

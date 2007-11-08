@@ -125,9 +125,9 @@ BitSet& BitSet::operator^=(const BitSet& other)
 
 BitSet& BitSet::operator-=(const BitSet& other)
 {
-  if (m_size != other.m_size) error( Exception( "BitSet operands of ^= must be the same size." ) );
+  if (m_size != other.m_size) error( Exception( "BitSet operands of -= must be the same size." ) );
   for (std::size_t i = 0; i < wordsize(m_size); i++)
-    m_data[i] -= other.m_data[i];
+    m_data[i] = m_data[i] ^ (m_data[i] & other.m_data[i]);
   return *this;
 }
 

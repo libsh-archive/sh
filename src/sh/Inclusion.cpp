@@ -24,7 +24,10 @@
 // 3. This notice may not be removed or altered from any source
 // distribution.
 //////////////////////////////////////////////////////////////////////////////
+#include <set>
 #include <map>
+#include <queue>
+#include <list>
 #include <iterator>
 #include <algorithm>
 #include <fstream>
@@ -43,11 +46,19 @@
 #include "Transformer.hpp"
 #include "CtrlGraphWranglers.hpp"
 
+using namespace std;
+
 namespace {
 
 using namespace SH;
 
 //#define SH_DEBUG_INCL
+
+#ifdef SH_DEBUG_INCL 
+#  define SH_INCL_DEBUG_PRINT(x) SH_DEBUG_PRINT(x)
+#else
+#  define SH_INCL_DEBUG_PRINT(x)
+#endif
 
 void dump(Program a, std::string name) {
 #ifdef SH_DEBUG_INCL
@@ -115,9 +126,26 @@ struct StmtIndexAdderBase: public TransformerParent {
 };
 typedef DefaultTransformer<StmtIndexAdderBase> StmtIndexAdder;
 
-void add_stmt_indices(Program a) {
+void add_stmt_indices(Program a, bool reset) {
+  if(reset) {
+    StmtIndex::reset();
+  }
   StmtIndexAdder sia;
   sia.transform(a.node());
+}
+
+struct StmtIndexClearerBase: public TransformerParent {
+  bool handleStmt(BasicBlock::StmtList::iterator &I, CtrlGraphNode* cfg_node)
+  {
+    I->destroy_info<StmtIndex>();
+    return false;
+  }
+};
+typedef DefaultTransformer<StmtIndexClearerBase> StmtIndexClearer;
+
+void clear_stmt_indices(Program a) {
+  StmtIndexClearer sic;
+  sic.transform(a.node());
 }
 
 struct StmtIndexGathererBase: public TransformerParent {
@@ -150,6 +178,219 @@ IndexStmtMap gather_indices(Program a) {
  * texture class
  */
 
+/** Zeroth step -
+ * Improves on wholeseale conversion to range types by marking first only
+ * those variables involved in range computations. 
+ *
+ * This way, variables that only depend on computation with non-range uniforms
+ * for example will not need to be turned into range variables. 
+ *
+ * Algorithm is a simple dataflow, where initially only the non-bound
+ * inputs are marked as range variables, and propagation happens through
+ * du chains to stmt dests which have range srcs (except for a few key ops).
+ *
+ * Variables that escape control flow constructs with range condition variables 
+ * also need to be considered.
+ * Using structural analysis, variables in a control flow construct that
+ * need to be turned into range variables are marked.  
+ */
+struct RangeFinder {
+  /* Produces a map of OPTBRA statement to a set of statements.
+   * If the condition of the branch turns out to be range, then so must the variables
+   * in the set of statements */
+  typedef set<Statement*> StmtSet;
+
+  StmtSet branchStmts;
+  StmtSet markStmts; 
+  StmtSet nodeStmts;
+  bool gatherPhase;
+  typedef map<Statement*, StmtSet> FlowMarkMap;
+  FlowMarkMap flowMark;
+  void findFlowMarks(StructuralNode* node) {
+    SH_INCL_DEBUG_PRINT("findFlowMarks " << node);
+    StructuralNode* branchNode = 0;
+    switch(node->type) {
+      case StructuralNode::IF: 
+      case StructuralNode::IFELSE:
+      case StructuralNode::SELFLOOP:
+      case StructuralNode::WHILELOOP:
+        branchNode = *node->structnodes.begin();
+        break;
+
+      case StructuralNode::UNREDUCED:
+      case StructuralNode::BLOCK:
+      default:
+        break;
+    }
+    if(branchNode) {
+
+      SH_INCL_DEBUG_PRINT("Found a branch node " << branchNode);
+
+      /* otherwise need to mark.  First get branch statements, then DFS and get exits */
+      branchStmts.clear();
+      markStmts.clear();
+      nodeStmts.clear();
+
+      StructuralNode::CfgMatchList matches;
+      branchNode->getExits(matches);
+      for(StructuralNode::CfgMatchList::iterator M = matches.begin(); M != matches.end(); ++M) {
+        if(M->S != M->from->successors_end()) { /* we have a branch, grab its statement */
+          SH_INCL_DEBUG_PRINT("  cond cfg node = " << M->from);
+          SH_INCL_DEBUG_PRINT("    branch variable = " << M->S->cond.name()); 
+          SH_DEBUG_ASSERT(M->from->block && !M->from->block->empty());
+          Statement& last = *M->from->block->rbegin();
+          SH_DEBUG_ASSERT(last.op == OP_OPTBRA);
+          branchStmts.insert(&last);
+          SH_INCL_DEBUG_PRINT("Branch stmt = " << last);
+        }
+      }
+
+      SH_DEBUG_ASSERT(!branchStmts.empty());
+
+      /* Only look for writes in the branch nodes for IF, in all child nodes for loops
+       * In loops the cond node may also be fuzzy), but for an IF the cond node
+       * always executes */
+      gatherPhase = true;
+      for(StructuralNode::StructNodeList::iterator S = node->structnodes.begin(); S != node->structnodes.end(); ++S) {
+        if(S == node->structnodes.begin() && (node->type == StructuralNode::IF || node->type == StructuralNode::IFELSE)) {
+          continue;
+        }
+        (*S)->struct_dfs(*this);
+      }
+      gatherPhase = false;
+      for(StructuralNode::StructNodeList::iterator S = node->structnodes.begin(); S != node->structnodes.end(); ++S) {
+        if(S == node->structnodes.begin() && (node->type == StructuralNode::IF || node->type == StructuralNode::IFELSE)) {
+          continue;
+        }
+        (*S)->struct_dfs(*this);
+      }
+
+      if(!markStmts.empty()) {
+        for(StmtSet::iterator B = branchStmts.begin(); B != branchStmts.end(); ++B) {
+          SH_INCL_DEBUG_PRINT("Flow mark branch stmt = " << **B); 
+          flowMark[*B].insert(markStmts.begin(), markStmts.end());
+          for(StmtSet::iterator M = markStmts.begin(); M != markStmts.end(); ++M) {
+              SH_INCL_DEBUG_PRINT("    escaping stmt = " << **M); 
+          }
+        }
+      }
+    }
+
+    SH_INCL_DEBUG_PRINT("Checking " << node->structnodes.size() << " structnodes {");
+    for(StructuralNode::StructNodeList::iterator C = node->structnodes.begin(); C != node->structnodes.end(); ++C) {
+      findFlowMarks(*C);
+    }
+    SH_INCL_DEBUG_PRINT("} done with structnodes");
+  }
+
+  /* Performs marking */
+ 
+  void finish(const StructuralNode* node) {}
+  void operator()(const StructuralNode* node) {
+      if(node->type != StructuralNode::UNREDUCED || !node->cfg_node || !node->cfg_node->block) return; 
+      BasicBlockPtr block = node->cfg_node->block;
+      for(BasicBlock::StmtList::iterator S = block->begin(); S != block->end(); ++S) {
+        if(gatherPhase) {
+          nodeStmts.insert(&*S); 
+        } else {
+          const ValueTracking* vt = S->get_info<ValueTracking>();
+          bool marked = false;
+          for(ValueTracking::TupleDefUseChain::const_iterator I = vt->uses.begin(); !marked && I != vt->uses.end(); ++I) {
+            for(ValueTracking::DefUseChain::const_iterator U = I->begin(); U != I->end(); ++U) {
+              if(U->kind == ValueTracking::Use::SH_OUTPUT ||
+                 nodeStmts.find(U->stmt) == nodeStmts.end()) { /* use outside node */
+                marked = true;
+                break;
+              } 
+            }
+          }
+          if(marked) {
+            markStmts.insert(&*S);
+          }
+        }
+      }
+  }
+
+  void mark(Program &p) { 
+      rangeVars.clear();
+
+      /** Initialize the flow marks map */
+
+      //SH_INCL_DEBUG_PRINT("Starting to mark program " << p.name());
+      insert_branch_instructions(p);
+      add_value_tracking(p);
+
+      /* Initially mark only the inputs and outputs as range variables */  
+      rangeVars.insert(p.begin_free_inputs(), p.end_inputs());
+      p.node()->ctrlGraph->dfs(*this);
+
+      /* Compute variables that need to be marked if control flow conditionals turn into range variables */
+      Structural structural(p.node()->ctrlGraph);
+      SH_INCL_DEBUG_PRINT("Dumping " << p.name() + "_incl_structural.dot");
+#ifdef SH_DEBUG_INCL
+      ofstream stout((p.name() + "_incl_structural.dot").c_str());
+      structural.dump(stout);
+      stout.close();
+#endif
+      findFlowMarks(structural.head());
+
+      /* propagate */
+      while(!worklist.empty()) {
+        Statement* stmt = worklist.back();
+        //SH_INCL_DEBUG_PRINT("stmt " << *stmt);
+        worklist.pop_back();
+        rangeVars.insert(stmt->dest.node());
+        stmtHit.insert(stmt);
+
+        /* Check uses, with special handling for OPTBRAs */
+        ValueTracking* vt = stmt->get_info<ValueTracking>();
+        set<Statement*> todo;
+        //SH_INCL_DEBUG_PRINT("uses: " << vt->uses);
+        for(ValueTracking::TupleDefUseChain::iterator I = vt->uses.begin(); I != vt->uses.end(); ++I) {
+          for(ValueTracking::DefUseChain::iterator U = I->begin(); U != I->end(); ++U) {
+            if(U->kind == ValueTracking::Use::SH_OUTPUT) continue;
+            if(stmtHit.find(U->stmt) != stmtHit.end()) continue;
+            todo.insert(U->stmt);
+            if(U->stmt->op == OP_OPTBRA && flowMark.find(U->stmt) != flowMark.end()) { /* Also turn flow marked stmts into range */
+              StmtSet& needmark = flowMark[U->stmt]; 
+              todo.insert(needmark.begin(), needmark.end());
+            }
+            //SH_INCL_DEBUG_PRINT("    Adding to worklist: " << *U->stmt);
+          }
+        }
+        worklist.insert(worklist.end(), todo.begin(), todo.end()); 
+      }
+      remove_branch_instructions(p);
+
+      /* @todo range
+       * may not be necessary (But currently all range outputs may be expected,
+       * because that's how it used to be.  So for now mark all outputs as range
+       * as well) */
+      rangeVars.insert(p.begin_outputs(), p.end_outputs());
+  }
+
+  void operator()(CtrlGraphNode* node) {
+    if (!node || !node->block) return;
+    BasicBlockPtr block = node->block;
+    for (BasicBlock::StmtList::iterator I = block->begin(); I != block->end(); ++I) {
+      Statement &stmt = *I;
+      for(int i = 0; i < opInfo[stmt.op].arity; ++i) {
+        if(rangeVars.find(stmt.src[i].node()) != rangeVars.end()) {
+          worklist.push_back(&stmt);
+          break;
+        }
+      }
+    }
+  }
+  
+  list<Statement*> worklist; 
+
+  typedef set<VariableNodePtr> VarSet; 
+  VarSet rangeVars;
+  StmtSet stmtHit;
+};
+
+
 /** First step - Change all regular variables to interval variables,
  * Change all texture lookups to interval texture lookups or a constant range
  * from the texture.
@@ -160,6 +401,8 @@ template<typename F>
 struct FloatToRangeBase: public TransformerParent {
   const Program* f;
   Program* rangef;
+  bool doMarking;
+  RangeFinder marker;  
 
   FloatToRangeBase() 
     : prog(Context::current()->parsing())
@@ -167,10 +410,14 @@ struct FloatToRangeBase: public TransformerParent {
     prog->collectAll();
   }
 
-  void setPrograms(const Program& f, Program& rangef) {
+  void init(const Program& f, Program& rangef, bool doMarking) {
     this->f = &f;
     this->rangef = &rangef;
+    this->doMarking = doMarking;
     rangef.clone_bindings_from(f);
+    if(doMarking) {
+      marker.mark(rangef);
+    }
   }
 
   void handleVarList(ProgramNode::VarList &varlist, BindingType type)
@@ -195,7 +442,10 @@ struct FloatToRangeBase: public TransformerParent {
 
     BindingType kind = node->kind();
     if(kind == SH_TEMP) {
-      if(node->uniform() || !prog->hasDecl(node)) {
+      if(node->uniform() || !prog->hasDecl(node) ) {
+        return false;
+      }
+      if(doMarking && marker.rangeVars.find(node) == marker.rangeVars.end()) {
         return false;
       }
     } else if (kind == SH_CONST || kind == SH_TEXTURE || kind == SH_STREAM) return false;
@@ -212,10 +462,8 @@ struct FloatToRangeBase: public TransformerParent {
 
     varmap[node] = node->clone(BINDINGTYPE_END, 0, rangeType, SEMANTICTYPE_END, false, true);
     varmap[node]->name(F::Prefix + node->name());
-#ifdef SH_DEBUG_INCL
-    SH_DEBUG_PRINT("Mapped variable " << node->nameOfType() << " " << node->name() << " -> " << 
+    SH_INCL_DEBUG_PRINT("Mapped variable " << node->nameOfType() << " " << node->name() << " -> " << 
                                          varmap[node]->nameOfType() << " " << varmap[node]->name());
-#endif
     return true;
   }
 
@@ -348,43 +596,47 @@ typedef DefaultTransformer<AffineOutputToIntervalBase> AffineOutputToInterval;
 
 // expects to Context::current()->parsing() == p.  Applies
 // FloatToIntervalConverter to p 
-Program inclusion(Program a)
+Program inclusion(Program a, bool doMarking)
 {
-  add_stmt_indices(a);
+  add_stmt_indices(a, true);
   Program result(a.node()->clone()); 
   result.name(a.name() + "_ia_incl");
+#ifdef SH_DEBUG_INCL
   dump(result, a.name() + "_inclusion_start");
+#endif
 
   Context::current()->enter(result.node());
     FloatToIntervalConverter ftic;
-    ftic.setPrograms(a, result);
+    ftic.init(a, result, doMarking);
     ftic.transform(result.node());
     fixRangeBranches(result);
     optimize(result);
   Context::current()->exit();
 
+#ifdef SH_DEBUG_INCL
   dump(result, a.name() + "_inclusion_done");
+#endif
   return result;
 }
 
-Program affine_inclusion(Program a)
+Program affine_inclusion(Program a, bool doMarking)
 {
-  Program result = affine_inclusion_syms(a);
+  Program result = affine_inclusion_syms(a, doMarking);
   affine_to_interval_inputs(result);
   affine_to_interval_outputs(result);
   return result;
 }
 
-Program affine_inclusion_syms(Program a)
+Program affine_inclusion_syms(Program a, bool doMarking)
 {
-  add_stmt_indices(a);
+  add_stmt_indices(a, true);
   Program result(a.node()->clone());
   result.name(a.name() + "_ia_incl");
   dump(result, a.name() + "_aaincl_start");
 
   Context::current()->enter(result.node());
     FloatToAffineConverter ftac;
-    ftac.setPrograms(a, result);
+    ftac.init(a, result, doMarking);
     ftac.transform(result.node());
   dump(result, a.name() + "_aaincl_ftac");
     fixRangeBranches(result);

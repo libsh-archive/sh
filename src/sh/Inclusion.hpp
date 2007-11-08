@@ -62,6 +62,7 @@ struct StmtIndex: public Info
 
   long long index() const;
   bool operator<(const StmtIndex& other) const;
+  static void reset() { cur_index = 0; }
 
   private:
     unsigned long long m_index;
@@ -69,15 +70,18 @@ struct StmtIndex: public Info
 };
 
 /** Adds statement indices to a program for statements that do not already have
- * an index */
-void add_stmt_indices(Program a);
+ * an index 
+ *
+ * Reset starts from 0 */
+void add_stmt_indices(Program a, bool reset=false);
+void clear_stmt_indices(Program a);
 
 typedef std::map<StmtIndex, Statement*> IndexStmtMap;
 IndexStmtMap gather_indices(Program a);
 
 /** Makes a clone of the control graph in a and turns all regular float computation to interval computation */
 SH_DLLEXPORT
-Program inclusion(Program a);
+Program inclusion(Program a, bool doMarking=true);
 
 /** Makes a clone of the control graph in a and turns all regular flot
  * computations to affine computations.
@@ -94,7 +98,7 @@ Program inclusion(Program a);
  * with affine arithmetic.
  */
 SH_DLLEXPORT
-Program affine_inclusion(Program a);
+Program affine_inclusion(Program a, bool doMarking=true);
 
 /** Similar to affine_inclusion, except that the outputs are affine and
  * have a center + tuples for error symbols 
@@ -107,15 +111,15 @@ Program affine_inclusion(Program a);
  * channel of affine values.
  */
 SH_DLLEXPORT
-Program affine_inclusion_syms(Program a);  
+Program affine_inclusion_syms(Program a, bool doMarking=true);  
 
 /** Alters the given program so any affine inputs become interval inputs */
 SH_DLLEXPORT 
-void affine_to_interval_inputs(Program a); 
+void affine_to_interval_inputs(Program a);
 
 /** Alters the given program so any affine outputs become interval outputs */
 SH_DLLEXPORT 
-void affine_to_interval_outputs(Program a); 
+void affine_to_interval_outputs(Program a);
 
 }
 

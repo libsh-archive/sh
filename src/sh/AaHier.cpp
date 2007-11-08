@@ -28,25 +28,39 @@
 #include <map>
 #include "Transformer.hpp"
 #include "Optimizations.hpp"
-#include "Section.hpp"
 #include "Inclusion.hpp"
 #include "AaHier.hpp"
 
 #ifdef DBG_AA
-#define DBG_AAHIER
-#endif
-// #define DBG_AAHIER
-
-#ifdef DBG_AAHIER
-#define SH_DEBUG_PRINT_AH(x) { SH_DEBUG_PRINT(x); }
+bool AhierDebugOn = true;
 #else
-#define SH_DEBUG_PRINT_AH(x) {}
+bool AhierDebugOn = false; 
 #endif
+
+#define SH_DEBUG_PRINT_AH(x) { if(AhierDebugOn) {SH_DEBUG_PRINT(x);} }
 
 using namespace SH;
 using namespace std;
 
 namespace {
+
+struct StructWrites {
+  std::set<VariableNodePtr> vars; 
+
+  // adds usage info from the cfg node to this
+  void operator()(StructuralNode* node) 
+  {
+    if(!node->cfg_node) return;
+    if(!node->cfg_node->block) return;
+    BasicBlockPtr block = node->cfg_node->block;
+    for (BasicBlock::StmtList::iterator I = block->begin(); I != block->end(); ++I) {
+      if(isAffine(I->dest.valueType())) {
+        vars.insert(I->dest.node());
+      } 
+    }
+  }
+  void finish(StructuralNode* node) {}
+};
 
 struct EscStmtInserter
 {
@@ -59,17 +73,26 @@ struct EscStmtInserter
    * instead of at the exit node, but it probably makes no difference */
   void operator()(StructuralNode* structnode) {
     BasicBlock::StmtList::iterator I;
+    SH_DEBUG_PRINT_AH("Looking at structnode=" << structnode);
     switch(structnode->type) {
       case StructuralNode::SECTION:
       case StructuralNode::SELFLOOP:
       case StructuralNode::WHILELOOP: {
+        SH_DEBUG_PRINT_AH("Found a matching node type.  Checking escaping variables.");
+        curDepth++; 
         StructuralNode::CfgMatchList cfgExits; 
+
+        SH_DEBUG_PRINT_AH("Finding writes within the structure");
+        StructWrites structWrites;
+        structnode->struct_dfs(structWrites);
 
         /* Find live variables at each exit CFG node and insert OP_ESCJOIN */   
         structnode->getExits(cfgExits);
         for(StructuralNode::CfgMatchList::iterator C = cfgExits.begin(); C != cfgExits.end(); ++C) {
           CtrlGraphNode* cfgNode = C->from;
+          SH_DEBUG_PRINT_AH("    Exiting CFG node =" << cfgNode);
           LiveVars *alive = cfgNode->get_info<LiveVars>();
+          SH_DEBUG_PRINT_AH("    Live Vars =" << *alive);
 
           if(!cfgNode->block) {
             cfgNode->block = new BasicBlock();
@@ -79,17 +102,23 @@ struct EscStmtInserter
           for(LiveVars::ElementSet::iterator O = alive->out.begin(); O != alive->out.end(); ++O) {
             VariableNodePtr varNode = O->first;
             if(!isAffine(varNode->valueType())) continue;
+            if(structWrites.vars.find(varNode) == structWrites.vars.end()) continue;
 
             Variable var(varNode);
             Statement escJoin = Statement(var, OP_ESCJOIN, var);
-            escJoin.add_info(new StmtDepth(curDepth));
+          //  escJoin.add_info(new StmtDepth(curDepth));
             escStmts.push_back(escJoin);
+            SH_DEBUG_PRINT_AH("    Adding ESCJOIN stmt=" << escJoin);
           }
 
           I = cfgNode->block->end(); 
-          if(I != cfgNode->block->begin() && I->op == OP_ENDSEC) --I;     
+          /* also insert before any existing ESCJOINs that might be at the end */
+          while (I != cfgNode->block->begin()) {
+            --I;
+            if (I->op == OP_ENDSEC || I->op == OP_ESCJOIN) continue;
+            else break;
+          }
           cfgNode->block->splice(I, escStmts); 
-          curDepth++; 
         }
         break;
       }
@@ -102,7 +131,7 @@ struct EscStmtInserter
     if(structnode->cfg_node && structnode->cfg_node->block) {
       BasicBlockPtr block = structnode->cfg_node->block;
       for(I = block->begin(); I != block->end(); ++I) {
-        if(I->op == OP_ESCJOIN) continue;
+        //if(I->op == OP_ESCJOIN) continue;
         I->destroy_info<StmtDepth>();
         I->add_info(new StmtDepth(curDepth));
       }
@@ -131,6 +160,8 @@ struct EscStmtInserter
 namespace SH {
 
 void liveVarAnalysis(Structural &pstruct, Program& p) {
+  AhierDebugOn = !Context::current()->get_flag("aa_disable_debug"); 
+
   // insert value tracking 
   insert_branch_instructions(p);
   find_live_vars(p);
@@ -139,7 +170,7 @@ void liveVarAnalysis(Structural &pstruct, Program& p) {
   // Add special statements, and extra outputs.
   Context::current()->enter(p.node());
   EscStmtInserter esi;
-  pstruct.dfs(esi);
+  pstruct.struct_dfs(esi);
   Context::current()->exit();
 }
 

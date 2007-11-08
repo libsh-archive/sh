@@ -142,10 +142,16 @@ std::ostream& SectionTree::dump(std::ostream& out)
 
 void SectionTree::makeSection(const StructuralNodePtr& structNode, SectionNodePtr section) 
 {
-  if(structNode->type == StructuralNode::SECTION) {
-    SectionNodePtr newSection = new SectionNode(structNode); 
-    section->addChild(newSection);
-    section = newSection;
+  switch(structNode->type) {
+    case StructuralNode::SECTION:
+    case StructuralNode::SELFLOOP:
+    case StructuralNode::WHILELOOP: { /* put loops and sections into tree */
+      SectionNodePtr newSection = new SectionNode(structNode); 
+      section->addChild(newSection);
+      section = newSection;
+      break;
+    }
+    default: break;
   }
 
   if(structNode->cfg_node) section->addCfg(structNode->cfg_node);

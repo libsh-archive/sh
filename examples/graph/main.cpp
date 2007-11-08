@@ -49,9 +49,9 @@ enum GraphMode {
   GR_BLINN1, // blinn blobby breakdown 
   GR_BLINN2, // blinn blobby breakdown 
   GR_BLINN3, // blinn blobby breakdown 
-  GR_NORM, // norm
-  /*
+  //GR_NORM, // norm
   GR_NOISE, // perlin noise
+  /*
   GR_TEX, // texture lookup (1D)
   GR_TEXI, // texture lookup (RECT)
   */
@@ -59,7 +59,7 @@ enum GraphMode {
   GR_MAX, // max of EXP and LOG 
   GR_MIN, // min of EXP and LOG 
   GR_LRP  // lerp between EXP and LOG (LRP, EXP, LOG)
-} mode = GR_ABS; 
+} mode = GR_NOISE; 
 const int NUMGRAPHS = (int)(GR_LRP) + 1;
 
 const char* GraphModeName[] = {
@@ -90,9 +90,9 @@ const char* GraphModeName[] = {
   "blinn1",
   "blinn2",
   "blinn3",
-  "norm",
-  /*
+  //"norm",
   "noise",
+  /*
   "tex",
   "texi",
   */
@@ -103,6 +103,7 @@ const char* GraphModeName[] = {
 };
 
 Attrib1f rangeWidth;
+Attrib1f rangeOffset;
 Attrib1f eps;
 Attrib2f myoffset;
 Attrib2f myscale;
@@ -252,13 +253,15 @@ struct PlotFunction {
             value = invpp;
           }
           break;
+          /*
           case GR_NORM:
             value = normalize(t); break;
+            */
+
+          case GR_NOISE:
+            value = perlin<1>(t, false); break;
 
 /*
-          case GR_NOISE:
-            value = perlin<1>(t); break;
-
           case GR_TEX:
             {
               value = tex(t); break; 
@@ -294,10 +297,13 @@ void initShaders() {
     vsh = KernelLib::vsh(id, id);
     vsh = vsh << extract("lightPos") << ConstAttrib3f(0, 0, 0);
     //Context::current()->optimization(0);
-    Context::current()->set_flag("aa_disable_debug", false);
+    //Context::current()->set_flag("aa_disable_debug", false);
 
     rangeWidth.name("rangeWidth");
     rangeWidth = 0.1f; 
+
+    rangeOffset.name("rangeOffset");
+    rangeOffset = 0.0f;
 
     curveWidth.name("curveWidth");
     curveWidth = 0.001f;
@@ -331,7 +337,6 @@ void initShaders() {
 
     Color3f SH_DECL(aaColor) = ColorFinder::color(ColorFinder::Dark2, 3, 0); 
     Color3f SH_DECL(iaColor) = ColorFinder::color(ColorFinder::Dark2, 3, 1); 
-    cout << aaColor << endl << iaColor << endl;
 
     // take plot function, find if there's an intersection,
     // kill if no isct
@@ -383,8 +388,8 @@ void initShaders() {
 
         // check if in range
 
-        Attrib1f start = floor(pos(0) / rangeWidth) * rangeWidth; 
-        Attrib1f end = ceil(pos(0) / rangeWidth) * rangeWidth; 
+        Attrib1f start = (floor(pos(0) / rangeWidth - rangeOffset) + rangeOffset) * rangeWidth; 
+        Attrib1f end = (ceil(pos(0) / rangeWidth - rangeOffset) + rangeOffset) * rangeWidth; 
         Attrib1a_f SH_DECL(range) = make_interval(start, end);
         Attrib1f SH_DECL(center) = range_center(range);
 
@@ -567,6 +572,8 @@ void keyboard(unsigned char k, int x, int y)
         break;
       case 'r': rangeWidth /= 1.01f; break;
       case 'R': rangeWidth *= 1.01f; break;
+      case 't': rangeOffset += .1; break;
+      case 'T': rangeOffset -= .1; break;
       case 'e': eps /= 1.1f; break;
       case 'E': eps *= 1.1f; break;
 
@@ -619,7 +626,6 @@ void keyboard(unsigned char k, int x, int y)
       case 'g': curveWidth *= 1.05f; break;
       case 'b': curveWidth /= 1.05f; break; 
     }
-    cout << coeff << endl;
   glutPostRedisplay();
 }
 

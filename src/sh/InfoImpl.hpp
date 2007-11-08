@@ -49,6 +49,30 @@ const T* InfoHolder::get_info() const
 }
 
 template<typename T>
+std::list<T*> InfoHolder::get_all() {
+  std::list<T*> result;
+  for (InfoList::const_iterator I = info.begin(); I != info.end(); ++I) {
+    T* item = dynamic_cast<T*>(*I);
+    if (item) {
+      result.push_back(item);
+    }
+  }
+  return result;
+}
+
+template<typename T>
+std::list<const T*> InfoHolder::get_all() const {
+  std::list<const T*> result;
+  for (InfoList::const_iterator I = info.begin(); I != info.end(); ++I) {
+    const T* item = dynamic_cast<const T*>(*I);
+    if (item) {
+      result.push_back(item);
+    }
+  }
+  return result;
+}
+
+template<typename T>
 void InfoHolder::destroy_info()
 {
   for (InfoList::iterator I = info.begin(); I != info.end();) {

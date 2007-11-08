@@ -20,7 +20,8 @@
 #include "FBOStreams.hpp"
 
 /// Turn this on if you want timings on std::cerr
-//#define SH_DO_FBO_TIMING
+#define SH_DO_FBO_TIMING
+#define SH_PRINT_FBO_TIMING false 
 
 // Turn this on to debug the fragment programs.
 //#define SH_DEBUG_PBS_PRINTFP
@@ -32,6 +33,7 @@
 #include <set>
 
 #include "sh.hpp"
+#include "Timer.hpp"
 #include "Optimizations.hpp"
 #include "Exception.hpp"
 #include "Error.hpp"
@@ -51,27 +53,6 @@ namespace shgl {
 
 using namespace SH;
 using namespace std;
-
-#ifdef SH_DO_FBO_TIMING
-
-class Timer {
-public:
-  Timer() { start(); }
-
-  void start() { gettimeofday(&startval, 0); }
-
-  long diff() {
-    timeval endval;
-    gettimeofday(&endval, 0);
-    return (endval.tv_sec - startval.tv_sec)*1000
-      + (endval.tv_usec/1000 - startval.tv_usec/1000);
-  }
-
-private:
-  timeval startval;
-};
-
-#endif
 
 class FBOStreamException : public Exception {
 public:
@@ -136,22 +117,22 @@ void FBOStreams::init()
   }
 }
 
-#ifdef DO_PBUFFER_TIMING
+#ifdef SH_DO_FBO_TIMING
 int indent = 0;
 Timer supertimer;
 
 void fillin()
 {
-  long sd = supertimer.diff();
+  double sd = supertimer.diff();
   supertimer.start();
-  if (indent) for (int j = 0; j < sd; j++) {
+  if (indent && SH_PRINT_FBO_TIMING) for (int j = 0; j < sd / 100; j++) {
     for (int i = 0; i < indent; i++) std::cerr << "| ";
     std::cerr << std::endl;
   }
 }
 
-#define DECLARE_TIMER(t) Timer pbtime_ ## t; do { fillin(); for (int i = 0; i < indent; i++) std::cerr << "| "; std::cerr << "^ " << # t << " starts" << std::endl; indent++;} while (0)
-#define TIMING_RESULT(t) do {long d = pbtime_ ## t.diff(); fillin(); indent--; for (int i = 0; i < indent; i++) std::cerr << "| "; std::cerr << "v " << # t << " took " << d << " ms" << std::endl; supertimer.start(); } while (0)
+#define DECLARE_TIMER(t) glFinish(); StatTimer pbtime_ ## t("fbo_" # t); do { if(SH_PRINT_FBO_TIMING) {fillin(); for (int i = 0; i < indent; i++) std::cerr << "| "; std::cerr << "^ " << # t << " starts" << std::endl; indent++; }} while (0)
+#define TIMING_RESULT(t) do {glFinish(); double d = pbtime_ ## t.diff(); fillin(); if(SH_PRINT_FBO_TIMING) {indent--; for (int i = 0; i < indent; i++) std::cerr << "| "; std::cerr << "v " << # t << " took " << d << " ms" << std::endl; supertimer.start();}} while (0)
 #else
 #define DECLARE_TIMER(t)
 #define TIMING_RESULT(t) 
@@ -324,7 +305,6 @@ static void draw_1d_stream(int size, const BaseTexture& tex, bool indexed,
     draw_rectangle(0, full_lines_start, size,
                    full_lines_end - full_lines_start, coords);
   }
-
   TIMING_RESULT(render);    
 }
 
@@ -381,8 +361,11 @@ static void draw_2d_stream(int dest_width, int dest_height, const BaseTexture& t
   SH_GL_CHECK_ERROR(glViewport(0, 0, dest_width, dest_height));
   SH_GL_CHECK_ERROR(glEnable(GL_SCISSOR_TEST));
 
+  DECLARE_TIMER(render);
+
   draw_rectangle(dest_offset[0], dest_offset[1],
                  dest_stride[0]*dest_count[0], dest_stride[1]*dest_count[1], coords);
+  TIMING_RESULT(render);    
 }
 
 static void check_stream(const Stream& stream, TextureDims dims)
@@ -603,6 +586,7 @@ void FBOStreams::execute(const Program& program,
   ProgramVersionCache::iterator I;
   // Run each fragment program
   for (I = program_cache.begin(); I != program_cache.end(); ++I) {
+    DECLARE_TIMER(texbind_output);
 
     std::vector<GLuint> draw_buffers;    
     Stream::iterator dest_tex;
@@ -631,6 +615,8 @@ void FBOStreams::execute(const Program& program,
     
     (*I)->update_uniforms(program.uniform_inputs);
     (*I)->update_channels(program.stream_inputs, *dest_tex);
+
+    TIMING_RESULT(texbind_output);
 
 #ifdef SH_DEBUG_FBOS_PRINTFP
     {

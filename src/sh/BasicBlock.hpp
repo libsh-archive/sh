@@ -73,15 +73,12 @@ public:
 
   // Place all the elements of l before the iterator I and removes them
   // from l
-  void splice(iterator I, StmtList &l) { m_statements.splice(I, l); }
+  void splice(iterator I, StmtList &l); 
 
   // Places all the elements starting from lI in l before the iterator I and
   // removes them from l
-  void splice(iterator I, StmtList &l, iterator lI) {
-    m_statements.splice(I, l, lI, l.end());
-  }
-
-  void insert(iterator I, const Statement& stmt) { m_statements.insert(I, stmt); }
+  void splice(iterator I, StmtList &l, iterator lI); 
+  void insert(iterator I, const Statement& stmt); 
   
   StmtList m_statements;
 //private:

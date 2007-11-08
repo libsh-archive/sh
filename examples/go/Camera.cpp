@@ -34,7 +34,12 @@ using namespace SH;
 
 Camera::Camera()
 {
+  reset();
+}
+
+void Camera::reset() {
   proj = perspective(45, 1, (double).1f, 100);
+  trans = rots = Matrix4x4f();
 }
 
 void printMatrix(std::ostream& out, const Matrix4x4f& mat)
@@ -84,14 +89,22 @@ void Camera::glProjection(float aspect)
   glMultMatrixf(values);
 }
 
+void Camera::glOrtho(float width, float height)
+{
+  proj = ortho(width, height, .1f, 100);
+  float values[16];
+  for (int i = 0; i < 16; i++) proj[i%4](i/4).getValues(&values[i]);
+  glMultMatrixf(values);
+}
+
 Matrix4x4f Camera::modelView()
 {
-  return (trans | rots);
+  return trans | rots;
 }
 
 Matrix4x4f Camera::modelViewProjection(Matrix4x4f viewport)
 {
-  return (viewport | (proj | (trans | rots)));
+  return (viewport | (proj | modelView()));
 }
 
 void Camera::move(float x, float y, float z)
@@ -163,5 +176,14 @@ Matrix4x4f Camera::perspective(float fov, float aspect, float znear, float zfar)
   ret[3](2) = -1.0;
   ret[3](3) = 0.0;
 
+  return ret;
+}
+
+Matrix4x4f Camera::ortho(float width, float height, float znear, float zfar)
+{
+  Matrix4x4f ret;
+  ret[0](0) = 2.0 / width;
+  ret[1](1) = 2.0 / height;
+  ret[2](2) = -2 / (zfar - znear);
   return ret;
 }

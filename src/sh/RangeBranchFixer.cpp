@@ -117,7 +117,11 @@ struct UsageInfo {
     if(!node || !node->block) return;
     BasicBlockPtr block = node->block;
     for (BasicBlock::StmtList::iterator I = block->begin(); I != block->end(); ++I) {
-      addToMap(write, I->dest);
+      if(isRange(I->dest.valueType())) {
+          addToMap(write, I->dest);
+      } else {
+        SH_RBF_DEBUG_PRINT("Warning! Ignoring " << I->dest.name() << " in range branch fix unions!"); 
+      }
   //    addToMap(use, I->dest);
    //   for(int i = 0; i < opInfo[I->op].arity; ++i) addToMap(use, I->src[i]); 
     }
@@ -237,6 +241,7 @@ struct RangeBranchFixer {
         break;
       case StructuralNode::IF: 
       case StructuralNode::IFELSE:
+      case StructuralNode::ELSE:
         SH_RBF_DEBUG_PRINT("fix IFELSE");
         fixIf(node, usageInfo);
         break;
@@ -250,8 +255,10 @@ struct RangeBranchFixer {
         SH_RBF_DEBUG_PRINT("fix While loop");
         fixWhileloop(node, usageInfo);
         break;
+
       default:
-        SH_DEBUG_ERROR("Unknonw Structural Node type");
+        SH_DEBUG_ERROR("Unknonw Structural Node type" << node->type);
+        SH_DEBUG_ASSERT(false);
 
     }
   }
@@ -286,8 +293,10 @@ struct RangeBranchFixer {
     StructuralNode::StructNodeList::iterator R = node->structnodes.begin();
     StructuralNode *condNode, *thenNode, *elseNode; 
     bool ifOnly = node->type == StructuralNode::IF;
+    bool elseOnly = node->type == StructuralNode::ELSE;
     condNode = *R; ++R; 
-    thenNode = *R; ++R; 
+    thenNode = elseOnly ? 0 : *R; 
+    if(!elseOnly) ++R;
     elseNode = ifOnly ? 0 : *R;
     UsageInfo thenUsage, elseUsage;
 
@@ -296,7 +305,7 @@ struct RangeBranchFixer {
     fix(condNode, usageInfo);
 
     SH_RBF_DEBUG_PRINT("  fixing then");
-    fix(thenNode, thenUsage);
+    if(!elseOnly) fix(thenNode, thenUsage);
 
     SH_RBF_DEBUG_PRINT("  fixing else");
     if(!ifOnly) fix(elseNode, elseUsage);
@@ -328,28 +337,28 @@ struct RangeBranchFixer {
     //   condNode 
     //   
     //   condProgram {
-    //     trueVar = cond may be true 
-    //     falseVar = cond may be false
+    //     maybeTrue = cond may be true 
+    //     maybeFalse = cond may be false
     //   }
     //
     //   S' = S 
     //   IF-ELSE { // thenStruct
-    //      if trueVar, do thenNode (with S replaced by S')
+    //      if maybeTrue, do thenNode (with S replaced by S')
     //      else null cfg node 
     //   }
-    //   // if trueVar, S' contains then result, else S' = S 
+    //   // if maybeTrue, S' contains then result, else S' = S 
     //   IF-ELSE { // elseStruct
-    //      if falseVar, do elseNode 
+    //      if maybeFalse, do elseNode 
     //      else null cfg node 
     //   }
-    //   // if falseVar, S contains the else result 
+    //   // if maybeFalse, S contains the else result 
     //
     //   merge S' and S into S' 
-    //   S = cond(trueVar, S, S')
+    //   S = cond(maybeTrue, S, S')
     // } 
     UsageMap save;
     merge(save, thenUsage.write);
-    //merge(save, elseUsage.write); 
+    merge(save, elseUsage.write); 
     SH_RBF_DEBUG_PRINT("Intersected usage maps:");
     SH_RBF_DEBUG_PRINT( save << endl);
 
@@ -358,13 +367,13 @@ struct RangeBranchFixer {
 
     // use Program to specify the graph transformation
     Program newGraph = SH_BEGIN_PROGRAM() {
-      // generate code to assign to trueVar, falseVar 
-      Attrib1f SH_NAMEDECL(trueVar, cond.name() + "_maybetrue");
-      Attrib1f SH_NAMEDECL(falseVar, cond.name() + "_maybefalse");
+      // generate code to assign to maybeTrue, maybeFalse 
+      Attrib1f SH_NAMEDECL(maybeTrue, cond.name() + "_maybetrue");
+      Attrib1f SH_NAMEDECL(maybeFalse, cond.name() + "_maybefalse");
 
-      shHI(trueVar, cond);
-      shLO(falseVar, cond);
-      falseVar = falseVar <= 0.0f;
+      shHI(maybeTrue, cond);
+      shLO(maybeFalse, cond);
+      maybeFalse = maybeFalse <= 0.0f;
 
       // generate records representing the variables that need to be saved 
       Record saved, savedCopy, temp;
@@ -374,13 +383,15 @@ struct RangeBranchFixer {
 
       // if condition may be true, save variables and execute then branch 
       savedCopy = saved; // assigns all vars in record
-      SH_IF(trueVar) {
-        makeCfgHolder(thenEntry, thenExit);
-      } SH_ENDIF;
+      if(!elseOnly) {
+        SH_IF(maybeTrue) {
+          makeCfgHolder(thenEntry, thenExit);
+        } SH_ENDIF;
+      }
 
       if(!ifOnly) {
         // if condition may be false, execute else branch
-        SH_IF(falseVar) {
+        SH_IF(maybeFalse) {
           // swap saved and savedCopy  
           temp = saved;
           saved = savedCopy;
@@ -392,7 +403,7 @@ struct RangeBranchFixer {
 
       // now if only one branch executed, the results are in saved, and
       // we're okay.  if both branches exeuted, then we need to merge
-      SH_IF(trueVar && falseVar) {
+      SH_IF(maybeTrue && maybeFalse) {
         recUnion(saved, savedCopy);
       } SH_ENDIF;
     } SH_END;
@@ -403,6 +414,7 @@ struct RangeBranchFixer {
     StructuralNode* newHead = newStruct.head();
     CtrlGraphNode* newEntry = newGraph.node()->ctrlGraph->entry();
     CtrlGraphNode* newExit = newGraph.node()->ctrlGraph->exit();
+    SH_RBF_DEBUG_PRINT( "newGraph: " << newGraph.node()->ctrlGraph.object() << endl);
     SH_RBF_DEBUG_PRINT( "newEntry: " << newEntry << endl);
     SH_RBF_DEBUG_PRINT( "newExit: " << newExit << endl);
     SH_RBF_DEBUG_PRINT( "thenEntry: " << thenEntry << endl);
@@ -421,10 +433,12 @@ struct RangeBranchFixer {
       SH_RBF_DEBUG_PRINT("done");
     }
 
-    SH_RBF_DEBUG_PRINT("replace exits then");
-    structReplaceExits(thenNode, thenExit, newExit);
-    SH_RBF_DEBUG_PRINT("struct split then");
-    structSplit(condNode, thenNode, newEntry, thenEntry);
+    if(!elseOnly) {
+      SH_RBF_DEBUG_PRINT("replace exits then");
+      structReplaceExits(thenNode, thenExit, newExit);
+      SH_RBF_DEBUG_PRINT("struct split then");
+      structSplit(condNode, thenNode, newEntry, thenEntry);
+    }
 
 
     // add newHead to the region
@@ -437,7 +451,7 @@ struct RangeBranchFixer {
     newHead->parent = node; 
 
     merge(usageInfo, thenUsage);
-    //merge(usageInfo, elseUsage);
+    merge(usageInfo, elseUsage);
 
     SH_RBF_DEBUG_PRINT("Usage Info");
     SH_RBF_DEBUG_PRINT( usageInfo);
@@ -506,9 +520,9 @@ struct RangeBranchFixer {
 
     // use Program to specify the graph transformation
     Program newGraph = SH_BEGIN_PROGRAM() {
-      // generate code to assign to trueVar, falseVar 
-      Attrib1f SH_NAMEDECL(maybeVar, cond.name() + "_maybe"); // may be true
-      Attrib1f SH_NAMEDECL(trueVar, cond.name() + "_true"); // must be true 
+      // generate code to assign to alwaysTrue, falseVar 
+      Attrib1f SH_NAMEDECL(maybeFalse, cond.name() + "_maybe"); // may be true
+      Attrib1f SH_NAMEDECL(alwaysTrue, cond.name() + "_true"); // must be true 
       Attrib1f SH_DECL(first) = 1.0f;
 
       // generate records representing the variables that need to be saved 
@@ -517,20 +531,23 @@ struct RangeBranchFixer {
       makeUsageBackup(result, "_result", selfUsage.write);
 
       SH_DO {
-        makeCfgHolder(selfEntry, selfExit);
+        SH_BEGIN_SECTION("selfloop") {
+            makeCfgHolder(selfEntry, selfExit);
 
-        shHI(maybeVar, cond);
-        shLO(trueVar, cond);
-        SH_IF(maybeVar) { // if could exit loop, then need to merge output with results
-          // could unroll instead of doing this
-          SH_IF(first) {
-            result = saved;
-            first = 0.0f;
-          } SH_ELSE {
-            recUnion(result, saved);
-          } SH_ENDIF;
-        } SH_ENDIF;
-      } SH_UNTIL(trueVar) // must be true
+            shHI(maybeFalse, cond);
+            maybeFalse = maybeFalse <= 0.0f;
+            shLO(alwaysTrue, cond);
+            SH_IF(maybeFalse) { // if could exit loop, then need to merge output with results
+              // could unroll instead of doing this
+              SH_IF(first) {
+                result = saved;
+                first = 0.0f;
+              } SH_ELSE {
+                recUnion(result, saved);
+              } SH_ENDIF;
+            } SH_ENDIF;
+        } SH_END_SECTION;
+      } SH_UNTIL(alwaysTrue) // must be true
       saved = result;
     } SH_END;
 
@@ -649,24 +666,25 @@ struct RangeBranchFixer {
       // internals like this
       Attrib1f SH_DECL(first) = 1.0f;
       bool arg = SH_PUSH_ARG_QUEUE && SH_PUSH_ARG; // beginning of while
-        makeCfgHolder(condEntry, condExit);
-        shLO(maybeVar, cond);
-        maybeVar = maybeVar <= 0.0;
-        shHI(falseVar, cond);
-        falseVar = falseVar <= 0.0;
+        SH_BEGIN_SECTION("whileloop") {
+          makeCfgHolder(condEntry, condExit);
+          shLO(maybeVar, cond);
+          maybeVar = maybeVar <= 0.0;
+          shHI(falseVar, cond);
+          falseVar = falseVar <= 0.0;
 
-        SH_IF(maybeVar) {
-          SH_IF(first) {
-            result = saved;
-            first = 0.0;
-          } SH_ELSE {
-            recUnion(result, saved);
+          SH_IF(maybeVar) {
+            SH_IF(first) {
+              result = saved;
+              first = 0.0;
+            } SH_ELSE {
+              recUnion(result, saved);
+            } SH_ENDIF;
           } SH_ENDIF;
-        } SH_ENDIF;
 
-        bool internal_cond; // dummy var since we're parsing
-        arg = arg && SH_PROCESS_ARG(falseVar, &internal_cond);
-
+          bool internal_cond; // dummy var since we're parsing
+          arg = arg && SH_PROCESS_ARG(falseVar, &internal_cond);
+        } SH_END_SECTION;
       SH::internal_while(arg); {
         makeCfgHolder(bodyEntry, bodyExit);
       } ::SH::endWhile();
@@ -719,16 +737,36 @@ bool fixRangeBranches(ProgramNodePtr p) {
   p->ctrlGraph->dfs(rbc);
   if(!rbc.needfix()) return false;
 
+  SH_RBF_DEBUG_PRINT("fixRangeBranches {");
+#ifdef RBF_DEBUG
+  p->dump(p->name() + "_rbf");
+#endif
+  SH_RBF_DEBUG_PRINT("Structural analysis");
   Structural structural(p->ctrlGraph.object());
+#ifdef RBF_DEBUG
+  ofstream stout((p->name() + "_structural.dot").c_str());
+  structural.dump(stout);
+  stout.close();
+#endif
   UsageInfo ui;
   int oldOpt = Context::current()->optimization();
   Context::current()->optimization(0);
+  SH_RBF_DEBUG_PRINT("Fixing branches");
   CtrlGraph::disable_delete();
+  CtrlGraph::force_owner(p->ctrlGraph.object());
     RangeBranchFixer rbf(p->ctrlGraph.object(), structural);
     rbf.fix(structural.head(), ui);
+  CtrlGraph::force_owner(0);
   CtrlGraph::enable_delete();
+#ifdef RBF_DEBUG
+  p->dump(p->name() + "_rbf_preopt");
+#endif
+  SH_RBF_DEBUG_PRINT("Optimizing");
   Context::current()->optimization(oldOpt);
   optimize(p);
+
+  p->dump(p->name() + "_rbf_done");
+  SH_RBF_DEBUG_PRINT("} done");
 
   return true;
 }

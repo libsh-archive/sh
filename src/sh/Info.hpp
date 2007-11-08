@@ -78,6 +78,13 @@ public:
   template<typename T>
   const T* get_info() const;
   // @}
+  
+  // Returns all the infos whos type matches T
+  template<typename T>
+  std::list<T*> get_all(); 
+
+  template<typename T>
+  std::list<const T*> get_all() const; 
 
   // Delete and remove all info entries matching the given type.
   template<typename T>

@@ -94,7 +94,7 @@ std::ostream& CtrlGraphNode::graphviz_dump(std::ostream& out) const
   mark();
   out << "\"" << this << "\" ";
   out << " [label=\"";
-  /*
+#if 1
   out << "object: " << this << "\\n";
   out << "owner: " << m_owner<< "\\n";
   out << "follower: " << m_follower << "\\n";
@@ -111,7 +111,7 @@ std::ostream& CtrlGraphNode::graphviz_dump(std::ostream& out) const
     }
     out << S->node << "\\n"; 
   }
-  */
+#endif
 
 
   if(!m_decls.empty()) {
@@ -293,6 +293,8 @@ void CtrlGraphNode::change_owner(CtrlGraph *new_owner, bool recursive)
   // It is also an easy way to avoid looping endlessly in the cfg.
   if (new_owner == m_owner) return;
 
+  //SH_DEBUG_PRINT("Changing owner from " << m_owner << " to " << new_owner);
+
   // Don't allow us to be deleted (naturally) as we're inserting ourselves into a new list
   m_owner->release_owned_node(this, false);
   m_owner = new_owner;
@@ -354,6 +356,7 @@ CtrlGraphNode * CtrlGraphNode::clone(CloneMap *clone_map) const
 }
 
 bool CtrlGraph::delete_enabled = true;
+CtrlGraph* CtrlGraph::forced_owner = 0;
 
 void CtrlGraph::clear_marked() const
 {
@@ -376,6 +379,7 @@ CtrlGraphNode * CtrlGraphNode::clone() const
 CtrlGraph::CtrlGraph(CtrlGraphNode* head, CtrlGraphNode* tail)
   : m_entry(head), m_exit(tail)
 {
+  //SH_DEBUG_PRINT("Creating CtrlGraph with given head/tail " << this);
   // Take ownership of the given graph
   m_entry->change_owner(this, true);
 
@@ -385,6 +389,7 @@ CtrlGraph::CtrlGraph(CtrlGraphNode* head, CtrlGraphNode* tail)
 
 CtrlGraph::CtrlGraph(const BlockListPtr& blocks)
 {
+  //SH_DEBUG_PRINT("Creating CtrlGraph " << this);
   m_entry = new CtrlGraphNode(this);
   m_exit = new CtrlGraphNode(this);
 
@@ -404,6 +409,7 @@ CtrlGraph::CtrlGraph(const BlockListPtr& blocks)
 
 CtrlGraph::~CtrlGraph()
 {
+  //SH_DEBUG_PRINT("Deleting CtrlGraph " << this);
   release_all_owned_nodes();
 }
 

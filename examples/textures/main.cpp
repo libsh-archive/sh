@@ -41,8 +41,10 @@ Point3f lightPos;
 Camera camera;
 ProgramSet* shaders;
 
-MIPFilter<Texture2D<Color3fub> > kd(512, 512);
-NoMIPFilter<Texture2D<Color3fub> > ks(512, 512);
+//MIPFilter<Texture2D<Color3fub> > kd(texsize, texsize);
+const int texsize = 16;
+TableRect<Color3f> ks(texsize, texsize);
+TableRect<Color3f> kd(texsize, texsize);
 
 int gprintf(int x, int y, char* fmt, ...);
 
@@ -59,17 +61,31 @@ TypedImage<FracUByte> ks_images[2];
 
 void rustTexture()
 {
-  kd.memory(kd_images[0].memory(), 0);
-  kd.build_mipmaps();
-  ks.memory(ks_images[0].memory(), 0);
+  //kd.memory(kd_images[0].memory(), 0);
+  //kd.build_mipmaps();
+  HostMemoryPtr mem = new HostMemory(texsize * texsize * 3 * sizeof(float), SH_FLOAT);
+  float* data = reinterpret_cast<float*>(mem->hostStorage()->data());
+  for(size_t i = 0; i < texsize; ++i) for(size_t j = 0; j < texsize; ++j) for(size_t k = 0; k < 3; ++k) {
+    data[(i * texsize + j) * 3 + k] = i / (texsize * 0.5) + j / (texsize * 4);
+  }
+  kd.memory(mem);
+  ks.memory(mem);
+  //ks.memory(ks_images[0].memory(), 0);
 }
 
 void xTexture()
 {
-  for (int i=0; i < MIPMAP_LEVELS; i++) {
+  /*for (int i=0; i < MIPMAP_LEVELS; i++) {
     kd.memory(kd_images[1 + i].memory(), i);
+  } */
+  HostMemoryPtr mem = new HostMemory(texsize * texsize * 3 * sizeof(float), SH_FLOAT);
+  float* data = reinterpret_cast<float*>(mem->hostStorage()->data());
+  for(size_t i = 0; i < texsize; ++i) for(size_t j = 0; j < texsize; ++j) for(size_t k = 0; k < 3; ++k) {
+    data[(i * texsize + j) * 3 + k] = i / (texsize * 0.5) + j / (texsize * 4);
   }
-  ks.memory(ks_images[1].memory(), 0);
+  kd.memory(mem);
+  ks.memory(mem);
+  //ks.memory(ks_images[1].memory(), 0);
 }
 
 void initShaders()
@@ -107,7 +123,8 @@ void initShaders()
     Vector3f vv = normalize(-posv);
     Vector3f hv = normalize(lightv + vv);
     Normal3f nv = normal;
-    color += color*kd(u) + ks(u)*pow(pos(hv | nv), exponent);
+    //color += color*kd[u * texsize] + ks(u)*pow(pos(hv | nv), exponent);
+    color = kd[u * texsize];
   } SH_END;
 
   shaders = new ProgramSet(vsh, fsh);
@@ -128,9 +145,26 @@ void display()
 
   bind(*shaders);
   
+#if 0
   glFrontFace(GL_CW);
   glutSolidTeapot(2.5);
   glFrontFace(GL_CCW);
+#else
+  glBegin(GL_QUADS);
+  glNormal3f(0, 0, 1);
+  glTexCoord2f(1, 1);
+  glVertex3f(4, 4, 0);
+
+  glTexCoord2f(1, 0);
+  glVertex3f(4, -4, 0);
+
+  glTexCoord2f(0, 0);
+  glVertex3f(-4, -4, 0);
+
+  glTexCoord2f(0, 1);
+  glVertex3f(-4, 4, 0);
+  glEnd();
+#endif
 
   unbind(*shaders);
   
@@ -311,14 +345,14 @@ int main(int argc, char** argv)
     Util::load_PNG(ks_images[1], filename);
     delete [] filename;
 #else
-    ShUtil::load_PNG(kd_images[0], "tex_rustkd.png");
-    ShUtil::load_PNG(ks_images[0], "tex_rustks.png");
-    ShUtil::load_PNG(kd_images[1], "tex_kd.png");
-    ShUtil::load_PNG(ks_images[1], "tex_ks.png");
+    ShUtil::load_PNG(kd_images[0], "rustkd.png");
+    ShUtil::load_PNG(ks_images[0], "rustks.png");
+    ShUtil::load_PNG(kd_images[1], "kd.png");
+    ShUtil::load_PNG(ks_images[1], "ks.png");
 
     for (int i=1; i < MIPMAP_LEVELS; i++) {
       stringstream s;
-      s << "tex_kd" << i << ".png";
+      s << "kd" << i << ".png";
       ShUtil::load_PNG(kd_images[1 + i], s.str());
     }
 #endif

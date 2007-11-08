@@ -34,6 +34,7 @@
 #include "Transformer.hpp"
 #include "CtrlGraphWranglers.hpp"
 #include "Optimizations.hpp"
+#include "Tag.hpp"
 #include "AaSyms.hpp"
 #include "AaSymPlacer.hpp"
 #include "AaVariable.hpp"
@@ -195,6 +196,7 @@ struct SymAllocator {
  */
 Program getProgram(Statement& stmt, SymAllocator& alloc) {
   const AaStmtSyms *stmtSyms = stmt.get_info<AaStmtSyms>();
+  const StmtIndex *stmtIdx = stmt.get_info<StmtIndex>();
   if(!stmtSyms) {
     SH_DEBUG_PRINT("No stmtSyms for " << stmt);
     SH_DEBUG_ASSERT(0);
@@ -205,6 +207,11 @@ Program getProgram(Statement& stmt, SymAllocator& alloc) {
   /* handle special cases first - ops that assign to non-affine variables, or
    * sourced from non-affine variables */
   bool special = true;
+  AaStmtTypeTag compute_tag(AA_STMT_COMPUTE);
+  AaStmtTypeTag merge_tag(AA_STMT_MERGE);
+  AaOldStmtTag old_tag(stmtIdx->index(), stmt.op); 
+  Tag::push(&compute_tag);
+  Tag::add(&old_tag);
   Program result = SH_BEGIN_PROGRAM() {
     // make a section
     ostringstream secOut;
@@ -240,6 +247,20 @@ Program getProgram(Statement& stmt, SymAllocator& alloc) {
             shASN(stmt.dest, aaLASTERR(alloc(stmt.src[0], stmtSyms->src[0]), stmtSyms->src[1])); 
           }
           break;
+        case OP_TEX:
+        case OP_TEXI: /* Handle non-affine texture lookups */ 
+          if(isAffine(stmt.dest.valueType()) && isAffine(stmt.src[1].valueType())) { /* handled below */
+            special = false;
+          } else if (!isAffine(stmt.src[1].valueType())) { /* do a normal texture lookup */
+            Variable lookupResult(stmt.src[0].node()->clone(SH_TEMP, 0, VALUETYPE_END, SEMANTICTYPE_END, true, false));
+            Statement texStmt(lookupResult, stmt.src[0], stmt.op, stmt.src[1]);
+            Context::current()->parsing()->tokenizer.blockList()->addStatement(texStmt);
+            alloc(stmt.dest).ASN(lookupResult, stmtSyms->newdest);
+          } else {
+            SH_DEBUG_PRINT("Unhandled case");
+            SH_DEBUG_ASSERT(0); /* Pretty sure this can't happen */
+          }
+          break;
         case OP_ASN:
           if(isAffine(stmt.dest.valueType())) {
             ValueType srcvt = stmt.src[0].valueType();
@@ -273,7 +294,10 @@ Program getProgram(Statement& stmt, SymAllocator& alloc) {
       }
     } SH_END_SECTION;
   } SH_END;
-  if(special) return result;
+  if(special) { 
+    Tag::pop();
+    return result;
+  }
  
   /* handle all affine ops */
   result = SH_BEGIN_PROGRAM() {
@@ -407,8 +431,11 @@ Program getProgram(Statement& stmt, SymAllocator& alloc) {
         case AA_DEFAULT:
           break;
         case AA_MERGE: {
+            Tag::push(&merge_tag); 
+            Tag::add(&old_tag); 
             AaVariable mergeDest = alloc(stmt.dest);
             aaUNIQUE_MERGE(mergeDest, dest, stmtSyms); 
+            Tag::pop();
           }
           break;
         case IA_MERGE:
@@ -417,6 +444,7 @@ Program getProgram(Statement& stmt, SymAllocator& alloc) {
       }
     } SH_END_SECTION;
   } SH_END;
+  Tag::pop(); // compute_tag
   return result; 
 }
 
@@ -497,7 +525,7 @@ bool handleAaOps(ProgramNodePtr programNode) {
   bool changed = false;
   bool disableHier = !Context::current()->get_flag("aa_enable_hier"); 
   bool disableUniqMerge = !Context::current()->get_flag("aa_enable_um"); 
-  AohDebugOn = !Context::current()->get_flag("aa_disable_debug"); 
+  AohDebugOn = !Context::current()->get_flag("aho_disable_debug"); 
 
   ostringstream idout;
   idout << programNode->name() /*<< "_" << programNode.object()*/;
@@ -552,12 +580,15 @@ bool handleAaOps(ProgramNodePtr programNode) {
   changed |= sos.transform(programNode);
 
   dump(programNode, "_aho-2-opfix");
+  if(AohDebugOn) programNode->csvdump(dumpPrefix + "_aho_tags.csv", getTagCsvData(programNode));  
 
   Context::current()->exit();
   Context::current()->optimization(oldOptimization);
+#if 0
   optimize(programNode); // should do this here since there are likely lots of program fragments that could use straightening start later work
 
   dump(programNode, "_aho-3-opfix_opt");
+#endif
 
   // Clean up symbol assignments, since they're almost certainly no longer valid
   clearAaSyms(programNode);
@@ -566,7 +597,9 @@ bool handleAaOps(ProgramNodePtr programNode) {
   SectionRemover sr;
   sr.transform(programNode);
 
+#if 0
   optimize(programNode); // should do this here since there are likely lots of program fragments that could use straightening start later work
+#endif
   dump(programNode, "_aho-4-sectremove_opt");
 
   // Now here's the process

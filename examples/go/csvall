@@ -1,0 +1,14 @@
+#! /bin/bash
+# takes all csv tag dumps and merges them  
+
+# multiple torii twisted 
+for i in *part_opt_tags.csv; do
+  head -n 1 $i > all_tags.csv
+done
+
+for i in *part_opt_tags.csv; do
+  grep '^"' $i >> all_tags.csv 
+done
+
+cp all_tags.csv ~/work/thesis/data/go/
+

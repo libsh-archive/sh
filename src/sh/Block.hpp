@@ -54,7 +54,9 @@ public:
   bool isArgument();
 
   /// Add a simple "three variable" statement.
+  /// Clones current active tag set to statement if it is non-empty.
   void addStatement(const Statement& statement);
+
   /// Add a generic block.
   void addBlock(const BlockPtr& statement);
 

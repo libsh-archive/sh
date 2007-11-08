@@ -31,6 +31,7 @@
 #include "AaOpHandler.hpp"
 #include "Transformer.hpp"
 #include "TextureNode.hpp"
+#include "Tag.hpp"
 
 // #define DBG_TRANSFORMER
 
@@ -359,6 +360,7 @@ struct StatementSplitter {
         return; 
       }
     }
+    Tag::push(stmt);
     changed = true;
     BasicBlock::StmtList newStmts;
     VarVec srcVec[3];
@@ -369,6 +371,7 @@ struct StatementSplitter {
     // remove old statmeent and splice in new statements
     stit = block->erase(stit);
     block->splice(stit, newStmts);
+    Tag::pop();
   }
 
   int maxTuple;
@@ -560,7 +563,9 @@ struct TextureLookupConverter {
     BasicBlockPtr block = node->block;
     if (!block) return;
     for (BasicBlock::StmtList::iterator I = block->begin(); I != block->end(); ++I) {
+      Tag::push(*I);
       convert(block, I);
+      Tag::pop();
     }
   }
 

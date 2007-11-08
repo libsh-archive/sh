@@ -11,7 +11,7 @@ void Trackball::resize(float w, float h)
   m_height = h;
 }
 
-Matrix4x4f Trackball::rotate(float sx, float sy, float ex, float ey) const
+Matrix4x4f Trackball::rotate(float sx, float sy, float ex, float ey, bool twod) const
 {
   // we get into trouble if we are passed in the same
   // point so ignore it
@@ -54,6 +54,11 @@ Matrix4x4f Trackball::rotate(float sx, float sy, float ex, float ey) const
       
   // get our axis of rotation and the amount of rotation
   Point3f A = normalize(cross(S, T));
+  if(twod) {
+    A(0,1) *= 0.0f; 
+    if(A.getValue(2) < SH_EPSILON) return Matrix4x4f();
+    A = normalize(A);
+  }
 
   Attrib1f theta = 2.0 * sqrt(dot(S-T, S-T));
   float thetad;

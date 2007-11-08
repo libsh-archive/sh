@@ -274,6 +274,8 @@ private:
   /* Statistics counters for AA
    * @todo stick these where they make sense */
   int m_max_temps;
+  int m_max_scalar_temps;
+  int m_cur_scalar_temps;
 };
 
 typedef SH::Pointer<ArbCode> ArbCodePtr;

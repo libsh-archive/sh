@@ -88,8 +88,8 @@ Program firsthit(Program tracer, bool use_aa, DebugMode debugMode, TracerFrame& 
     ostringstream sout;
     switch(rangeMode) {
         case IA: sout << "IA_"; break;
-        case AA: sout << "AA_"; break;
-        case AA_NOUC: sout << "AA-nouc_"; break;
+        case AAUC: sout << "AAUC_"; break;
+        case AA: sout << "AAUC-nouc_"; break;
     }
     sout << DebugModeName[debugMode] << "_";
     sout << "symfile.csv";
@@ -112,8 +112,8 @@ Program firsthit(Program tracer, bool use_aa, DebugMode debugMode, TracerFrame& 
     Attrib1f SH_DECL(mid) = lerp(0.5f, start, end); 
     Attrib1f SH_DECL(rangeWidth) = range_width(range);
     Attrib1i_f SH_DECL(resultRangeIA);
-    Attrib1i_f SH_DECL(resultRangeAA);
-    Attrib3f SH_DECL(extraDebug) = ConstColor3f(0.75f, 0.75f, 0.75f);
+    Attrib1i_f SH_DECL(resultRangeAAUC);
+    Attrib3f SH_DECL(extraDebug) = ConstColor3f(0, 0, 0);
 
     Attrib1f SH_DECL(count) = 0.0f;
 
@@ -141,11 +141,12 @@ Program firsthit(Program tracer, bool use_aa, DebugMode debugMode, TracerFrame& 
 #endif
       count += 1.0f;
 
+      extraDebug = ConstColor3f(0, 0, 0);
       if(use_aa || debugMode == TRACE) {
         Attrib1a_f SH_DECL(traceRange) = make_interval(start - tframe.traceEps, mid + tframe.traceEps);
         Attrib1a_f SH_DECL(traceResult);
         traceResult = aa_tracer(traceRange);
-        resultRangeAA = traceResult;
+        resultRangeAAUC = traceResult;
         if(use_aa) {
           Attrib1f SH_DECL(resultCenter) = range_center(traceResult);
           Attrib1f SH_DECL(resultRadius) = range_radius(traceResult);
@@ -163,10 +164,13 @@ Program firsthit(Program tracer, bool use_aa, DebugMode debugMode, TracerFrame& 
           Attrib1f slopeZero = abs(inError) < tframe.traceEps; 
           Attrib1f nextStart, nextEnd;
           hitcond = 0.0f;
+          hitcond = resultLo < tframe.traceEps && -tframe.traceEps < resultHi;
+          extraDebug(0) = hitcond;
           SH_IF(slopeZero || otherError > 1e2) {
-            hitcond = resultLo < tframe.traceEps && -tframe.traceEps < resultHi;
+            //hitcond = resultLo < tframe.traceEps && -tframe.traceEps < resultHi;
             nextStart = start;
             nextEnd = mid;
+            extraDebug(1) = 1.0f; 
           } SH_ELSE { /* use parallelograms */
             Attrib1f isct1 =  isct_zero(inError, resultCenter + otherError);  
             Attrib1f isct2 =  isct_zero(inError, resultCenter - otherError);  
@@ -185,12 +189,14 @@ Program firsthit(Program tracer, bool use_aa, DebugMode debugMode, TracerFrame& 
             Attrib1f slopePositive = inError > 0;
             Attrib1f zeroStart = lerp(slopePositive, startp, startn);
             Attrib1f zeroEnd = lerp(slopePositive, midp, midn);
+            //hitcond = resultLo < tframe.traceEps && -tframe.traceEps < resultHi;
             hitcond = zeroStart < zeroEnd; 
 
             ConstAttrib1f HALF(0.5f);
             //extraDebug(0) = zeroStart > 0;
             //extraDebug(1) = zeroEnd > 0;
             //extraDebug(2) = hitcond;
+            extraDebug(2) = 1;
             nextStart = lerp(mad(zeroStart, HALF, HALF), mid, start); 
             nextEnd = lerp(mad(zeroEnd, HALF, HALF), mid, start); 
           } SH_ENDIF;
@@ -292,9 +298,9 @@ Program firsthit(Program tracer, bool use_aa, DebugMode debugMode, TracerFrame& 
         /* range graph in middle */
         Attrib1f dv = abs(dy(v));
         Attrib1f vv = ((v - graphStart2) / graphHeight - 0.5) * tframe.graphScale;
-        Attrib1f inRangeAA = vv + dv > range_lo(resultRangeAA) && vv - dv < range_hi(resultRangeAA); 
+        Attrib1f inRange = vv + dv > range_lo(resultRangeAAUC) && vv - dv < range_hi(resultRangeAAUC); 
         Attrib1f inRangeIA = vv + dv > range_lo(resultRangeIA) && vv - dv < range_hi(resultRangeIA); 
-        Attrib1f inRangeBoth = inRangeAA && inRangeIA; 
+        Attrib1f inRangeBoth = inRange && inRangeIA; 
         Attrib1f inZero = abs(vv) < tframe.graphScale / 200.0;
 
         /* stack count graph on top */
@@ -315,7 +321,7 @@ Program firsthit(Program tracer, bool use_aa, DebugMode debugMode, TracerFrame& 
         Color3f bkgndColor = lerp(inHighlight, TufteOrange, extraDebug); 
         Color3f domainColor = lerp(insm, smColor, lerp(inme, meColor, bkgndColor)); 
         Color3f rangeColor = lerp(inRangeBoth, bothColor, 
-                             lerp(inRangeAA, smColor,
+                             lerp(inRange, smColor,
                              lerp(inRangeIA, meColor, bkgndColor)));
         rangeColor = lerp(inZero, rangeColor * 0.75, rangeColor);
 #if USE_STACK
@@ -343,8 +349,8 @@ Program firsthit(Program tracer, bool use_aa, DebugMode debugMode, TracerFrame& 
 #if USE_STACK
     } SH_ENDWHILE;
 #else
-    //} SH_ENDWHILE;
     } SH_ENDWHILE;
+    //} SH_ENDWHILE;
 #endif
 
     switch(debugMode) {

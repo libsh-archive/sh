@@ -53,7 +53,7 @@
 // @todo range Change this to use a wrapper like AaVariable for cleaner code. 
 
 // @todo debug
-// #define SH_DEBUG_ICONV
+//#define SH_DEBUG_ICONV
 namespace {
 
 using namespace SH;
@@ -359,6 +359,18 @@ Program intervalLRP(int N, ValueType valueType)
   return result; 
 }
 
+Program intervalPOW(int N, ValueType valueType)
+{
+  Program result = SH_BEGIN_PROGRAM() {
+    VariablePair a(SH_INPUT, N, valueType);
+    VariablePair b(SH_INPUT, N, valueType);
+    VariablePair r(SH_OUTPUT, N, valueType);
+    shASN(r.lo, a.lo);
+  }SH_END;
+  SH_DEBUG_ASSERT(false);
+  return result;
+}
+
 
 Program intervalRCP(int N, ValueType valueType)
 {
@@ -402,6 +414,22 @@ Program intervalSIN(int N, ValueType valueType)
     r.record() = cosN(temp.record());
   } SH_END;
   return result;
+}
+
+Program intervalSQRT(int N, ValueType valueType)
+{
+  Program rooter = SH_BEGIN_PROGRAM() {
+    VariablePair a(SH_INPUT, N, valueType);
+    VariablePair r(SH_OUTPUT, N, valueType);
+
+    ConstAttrib1f ZERO(0.0f);
+    VariablePair temp(SH_TEMP, N, valueType);
+    shMAX(temp.lo, a.lo, ZERO.repeat(N));
+    shMAX(temp.hi, a.hi, ZERO.repeat(N));
+    shSQRT(r.lo, temp.lo);
+    shSQRT(r.hi, temp.hi);
+  } SH_END;
+  return rooter;
 }
 
 
@@ -519,12 +547,13 @@ Program getProgram(Operation op, int N, ValueType valueType) {
     case OP_LRP:   return intervalLRP(N, valueType);
     case OP_MAX:   return intervalBinaryMonotonic<OP_MAX>(N, valueType);
     case OP_MIN:   return intervalBinaryMonotonic<OP_MIN>(N, valueType);
+    case OP_POW:   return intervalPOW(N, valueType);
     case OP_RSQ:   return intervalBinaryMonotonic<OP_RSQ>(N, valueType);
     case OP_RCP:   return intervalRCP(N, valueType);
     case OP_RND:   return intervalBinaryMonotonic<OP_RND>(N, valueType);
     case OP_SIN:    return intervalSIN(N, valueType);
     case OP_SGN:   return intervalBinaryMonotonic<OP_SGN>(N, valueType);
-    case OP_SQRT:   return intervalBinaryMonotonic<OP_SQRT>(N, valueType);
+    case OP_SQRT:   return intervalSQRT(N, valueType);
 
     case OP_UNION:   return intervalUNION(N, valueType);
     case OP_ISCT:   return intervalISCT(N, valueType);

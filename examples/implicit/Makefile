@@ -17,8 +17,11 @@ all: $(MAIN)
 
 depend: $(DEPENDS)
 
+testclean:
+	rm *.csv *.dot *.vars *.ps; rm [^h]*.png
+
 clean:
-	rm -f -- *.o *.d $(MAIN) *.png *.vars *.ps *.dot *.csv *0x*
+	rm -f -- *.o *.d $(MAIN) [^h]*.png *.vars *.ps *.dot *.csv *0x*
 
 $(MAIN): $(OBJECTS)
 	libtool --mode=link $(CXX) -o $@ $(OBJECTS) $(LDFLAGS)

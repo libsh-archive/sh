@@ -1,3 +1,20 @@
+2007-10-27 Bryan Chan <b8chan@cgl.uwaterloo.ca>
+	* A bunch of changes to the examples 
+
+	* very simple benchmark test for gathering 
+		how # of live temps changes threads in flight on current GPUs 
+
+	* many of program stats counters (live (vector/scalar) temporaries, (vector/scalar)
+	  instruction counts, noise symbol distribution stats)
+
+	* src/sh/Structural.cpp:
+	Fixed iterator movement during dupe successor detection,
+	and visiting order of new nodes during post-order structural analysis.
+
+	* src/sh/backend/gl/FBOCache.hpp, FBOCache.cpp:
+	Fixed some issues with reusing cached FBOs.
+	(old + attached + incompatible textures messing with framebuffer completeness)
+
 2007-05-14 Bryan Chan <b8chan@cgl.uwaterloo.ca>
 	* examples/sh/go:
 		Switched to wxWidgets,

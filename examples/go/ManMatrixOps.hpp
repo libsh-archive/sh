@@ -11,6 +11,9 @@
 ManMatrix m_scale(const Man& s); 
 ManMatrix m_translate(const Man& t); 
 ManMatrix m_rotate(const Man& axis, const Man& angle); 
+ManMatrix m_rotatex(const Man& angle); 
+ManMatrix m_rotatey(const Man& angle); 
+ManMatrix m_rotatez(const Man& angle); 
 ManMatrix mul(const ManMatrix& a, const ManMatrix& b);
 
 

@@ -29,6 +29,7 @@
 #include "Statement.hpp"
 #include "BaseTexture.hpp"
 #include "BitSet.hpp"
+#include "Transformer.hpp"
 
 // Uncomment this to turn on optimizer debugging using dot.
 // Warning: This is very verbose!
@@ -67,6 +68,12 @@ void add_value_tracking(Program& prg);
 // Branch instructions should be present
 SH_DLLEXPORT
 void find_live_vars(Program& prg);
+
+// Finds live variables, per CFG node and then per statement 
+// If it already exists, overwrite it
+// Branch instructions should be present
+SH_DLLEXPORT
+void find_statement_live_vars(Program& prg);
 
 /// Insert instructions representing each conditional branch
 SH_DLLEXPORT
@@ -133,7 +140,6 @@ ValueTracking : public Info {
       return stmt->dest.swizzle()[index];
     }
 
-    friend std::ostream& operator<<(std::ostream& out, const Def& def);
   };
 
   struct Use {
@@ -170,7 +176,6 @@ ValueTracking : public Info {
       return stmt->src[source].swizzle()[index];
     }
 
-    friend std::ostream& operator<<(std::ostream& out, const Use& use);
 
     Kind kind;
     VariableNodePtr node;
@@ -184,7 +189,6 @@ ValueTracking : public Info {
   typedef std::vector<DefUseChain> TupleDefUseChain;
   TupleDefUseChain uses;
 
-  friend std::ostream& operator<<(std::ostream& out, const TupleDefUseChain& tdu);
   
   // For each tuple element in each of our sources, track all the
   // definition points.
@@ -193,42 +197,67 @@ ValueTracking : public Info {
   typedef std::vector<TupleUseDefChain> TupleUseDefChainVec;
   TupleUseDefChainVec defs;
 
-  friend std::ostream& operator<<(std::ostream& out, const TupleUseDefChain& tud);
 };
+std::ostream& operator<<(std::ostream& out, const ValueTracking::Def& def);
+std::ostream& operator<<(std::ostream& out, const ValueTracking::Use& use);
+std::ostream& operator<<(std::ostream& out, const ValueTracking::TupleDefUseChain& tdu);
+std::ostream& operator<<(std::ostream& out, const ValueTracking::TupleUseDefChain& tud);
 
 /* du chains for all inputs in a program */
 struct InputValueTracking: public Info 
 {
   Info* clone() const;
-  
-  friend std::ostream& operator<<(std::ostream& out, const InputValueTracking& ivt);
 
   typedef std::map<VariableNodePtr, ValueTracking::TupleDefUseChain> InputTupleDefUseChain; 
   InputTupleDefUseChain inputUses;
 };
+std::ostream& operator<<(std::ostream& out, const InputValueTracking& ivt);
 
 /* ud chains for all outputs in a program */
 struct OutputValueTracking: public Info 
 {
   Info* clone() const;
 
-  friend std::ostream& operator<<(std::ostream& out, const OutputValueTracking& ovt);
-
   typedef std::map<VariableNodePtr, ValueTracking::TupleUseDefChain> OutputTupleUseDefChain; 
   OutputTupleUseDefChain outputDefs;
 };
+std::ostream& operator<<(std::ostream& out, const OutputValueTracking& ovt);
 
 /* Holds the live variable sets (by tuple element) for each CFG node  
  * Built in much the same way as ValueTracking information
+ *
+ * (Can also be attached to statements for even more detail) 
  */
 struct 
 SH_DLLEXPORT
 LiveVars: public Info {
   typedef std::map<VariableNodePtr, BitSet> ElementSet;
-  ElementSet in, use, out, def;
+  typedef ElementSet::iterator iterator;
+  typedef ElementSet::const_iterator const_iterator;
+  ElementSet in, use, out, def, rchout;
   Info* clone() const;
   friend std::ostream& operator<<(std::ostream& out, const LiveVars& lvs);
 };
+
+struct 
+SH_DLLEXPORT LiveVarCsvDataBase: public StmtCsvData, public TransformerParent {
+  int total_live;
+  int scalar_total_live;
+  int max_live;
+  int max_scalar_live;
+  int stmt_count;
+
+  LiveVarCsvDataBase(); 
+  void finish(); 
+  std::string header(); 
+  std::string operator()(const Statement& stmt); 
+};
+typedef DefaultTransformer<LiveVarCsvDataBase> LiveVarCsvData;
+typedef Pointer<LiveVarCsvData> LiveVarCsvDataPtr;
+
+/* Runs find_statement_live_Vars and tags statements with number of live variables */ 
+SH_DLLEXPORT 
+StmtCsvDataPtr getLiveVarCsvData(ProgramNodePtr p); 
 
 // Data related to doing reaching definitions
 struct ReachingDefs: public Info {

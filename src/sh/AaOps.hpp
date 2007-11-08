@@ -56,6 +56,8 @@ AaVariable aaADD(const AaVariable& src0, const Variable& src1);
 SH_DLLEXPORT 
 AaVariable aaMUL(const AaVariable& src0, const AaVariable& src1, const AaSyms &newsyms); 
 SH_DLLEXPORT 
+AaVariable aaMUL(const AaVariable& src0, const Variable& src1, const AaSyms &newsyms);
+SH_DLLEXPORT 
 AaVariable aaMUL(const AaVariable& src0, const Variable& src1);
 // @todo range - special case for non-aa src
 

@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# set up MODE variable
+
+# multiple torii twisted 
+for ((i=1;i<=2;++i)); do
+  ./shimpl $MODE -torus$i 
+  ./shimpl $MODE -torus$i -bumpx 
+  ./shimpl $MODE -torus$i -bumpy 
+  ./shimpl $MODE -torus$i -bumpz 
+  ./shimpl $MODE -torus$i -twistx 
+  ./shimpl $MODE -torus$i -twisty 
+  ./shimpl $MODE -torus$i -bumpy -bumpx
+  ./shimpl $MODE -torus$i -twisty -twisty
+  ./shimpl $MODE -torus$i -twistx -twistx
+done
+./shimpl $MODE -torus1 -bumpz -bumpy -bumpx 
+./shimpl $MODE -torus1 -bumpx -bumpz -bumpy -bumpx
+
+# increasing series of the same op 
+./shimpl $MODE -torus1 -twisty -twisty -twisty 
+./shimpl $MODE -torus1 -twisty -twisty -twisty -twisty 
+
+# multiple spheres
+for ((i=1;i<=8;++i)); do
+  ./shimpl $MODE -sphere$i 
+done
+
+for ((i=1;i<=5;++i)); do
+  ./shimpl $MODE -sphere$i -bumpx
+  ./shimpl $MODE -sphere$i -bumpy -bumpx
+done

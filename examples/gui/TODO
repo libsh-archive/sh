@@ -1,0 +1,36 @@
+1) Section display
+  -do input/escape analysis
+    -for each section, draw inputs on the left, outputs on the right
+  -draw graph
+    -add node for each IR op
+    -group nodes into subgraphs for 
+      -cfg nodes
+      -section nodes
+    -add edges between 
+      -IR nodes if in same section
+      -IR node and section input/escape where necessary
+  3 hours
+
+2) Clean up framework
+  2 hours (sort of done)
+
+3) Automatic selection
+  * Generate a length count for each section
+    (could generalize to a more suitable metric)
+  2 hours
+
+4) Simplification
+  *  
+  2 hours
+
+5) Hierarchical AA Handling
+  * output max error for statements not   
+  2 hours
+
+
+* use b-spline curves for edges
+* show nested graphs - and expand nodes to the right size 
+* data flow edges
+  -don't worry too much about names for now
+* hierarchical AA - also output max errors for sections/statements inside
+* unified selection mechanism

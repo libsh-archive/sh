@@ -42,6 +42,7 @@
 #include "Error.hpp"
 #include "Structural.hpp"
 #include "Section.hpp"
+#include "Tag.hpp"
 
 
 namespace shgl {
@@ -117,7 +118,9 @@ ArbCode::ArbCode(const ProgramNodeCPtr& shader, const string& unit,
     m_numTextures(0), m_programId(0), m_environment(0), m_max_label(0),
     m_address_register(new VariableNode(SH_TEMP, 1, SH_FLOAT)),
     m_indent(0),
-    m_max_temps(-1)
+    m_max_temps(-1),
+    m_max_scalar_temps(-1),
+    m_cur_scalar_temps(0)
 {
   m_originalShader =  const_cast<ProgramNode*>(shader.object());
 
@@ -237,6 +240,8 @@ void ArbCode::generate()
   Context::current()->enter(m_shader);
   Transformer transform(m_shader);
 
+  Context::current()->disable_optimization("forward substitution");
+  //Context::current()->disable_optimization("forward placement");
   dump(m_shader, "arbcode_start");
   transform.handleDbgOps();
   dump(m_shader, "arbcode_dbg");
@@ -259,7 +264,22 @@ void ArbCode::generate()
   transform.expand_inverse_hyperbolic();
   transform.handleDbgOps();
   dump(m_shader, "arbcode_done");
-  SH_DEBUG_PRINT("arb done stmtcount: " << m_shader->statement_count());
+
+  //SH_DEBUG_PRINT("arb done before opt stmtcount: " << m_shader->statement_count());
+
+  m_shader->csvdump("arbcode_" + m_originalShader->name() + "_tags.csv", 
+    combine(getTagCsvData(m_shader), getLiveVarCsvData(m_shader)));  
+  if(transform.changed()) {
+    optimize(m_shader);
+  }
+
+  //SH_DEBUG_PRINT("arb done partial opt stmtcount: " << m_shader->statement_count());
+  m_shader->csvdump("arbcode_" + m_originalShader->name() + "_part_opt_tags.csv",
+    combine(getTagCsvData(m_shader), getLiveVarCsvData(m_shader)));  
+
+  Context::current()->enable_optimization("forward substitution");
+  //Context::current()->enable_optimization("forward placement");
+
  
   if (transform.changed()) {
     optimize(m_shader);
@@ -270,6 +290,18 @@ void ArbCode::generate()
     Context::current()->exit();
     Context::current()->enter(m_shader);
   }
+  dump(m_shader, "arbcode_done_opt");
+
+  Context::current()->set_stat("arb_instr_count", m_shader->statement_count());
+  Context::current()->set_stat("arb_scalar_instr_count", m_shader->scalar_statement_count());
+  //SH_DEBUG_PRINT("arb done after opt stmtcount: " << m_shader->statement_count());
+  LiveVarCsvDataPtr lvcd = shref_dynamic_cast<LiveVarCsvData>(getLiveVarCsvData(m_shader));
+  m_shader->csvdump("arbcode_" + m_originalShader->name() + "_optimized_tags.csv", 
+    combine(getTagCsvData(m_shader), lvcd)); 
+  Context::current()->set_stat("arb_num_live", lvcd->max_live);
+  Context::current()->set_stat("arb_num_scalar_live", lvcd->max_scalar_live);
+  Context::current()->set_stat("arb_avg_num_live", lvcd->total_live / static_cast<float>(lvcd->stmt_count));
+  Context::current()->set_stat("arb_avg_num_scalar_live", lvcd->scalar_total_live/ static_cast<float>(lvcd->stmt_count));
 
   try {
     if (m_environment & ARB_NVFP2) {
@@ -310,6 +342,8 @@ bool ArbCode::allocateRegister(const VariableNodePtr& var)
 
   int idx = m_tempRegs.front();
   m_max_temps = std::max(m_max_temps, idx);
+  m_cur_scalar_temps += var->size();
+  m_max_scalar_temps = std::max(m_max_scalar_temps, m_cur_scalar_temps);
   m_tempRegs.pop_front();
   if (var->valueType() == SH_HALF) {
     if (idx + 1 > m_numHalfTemps) m_numHalfTemps = idx + 1;
@@ -328,6 +362,8 @@ void ArbCode::freeRegister(const VariableNodePtr& var)
   if (!var) return;
   if (var->kind() != SH_TEMP) return;
   if (var->uniform()) return;
+
+  m_cur_scalar_temps -= var->size();
 
   SH_DEBUG_ASSERT(m_registers.find(var) != m_registers.end());
   m_tempRegs.push_front(m_registers[var]->index);
@@ -348,6 +384,7 @@ void ArbCode::upload()
   ofstream fout((m_originalShader->name() + "_arb.asm").c_str());
   fout << text;
   fout.close();
+  SH_DEBUG_PRINT(text);
 #endif
   glProgramStringARB(arbTarget(m_unit), GL_PROGRAM_FORMAT_ASCII_ARB,
                        (GLsizei)text.size(), text.c_str());
@@ -1156,7 +1193,9 @@ void ArbCode::allocRegs()
     if (halfSupport) {
       allocTemps(limits, true);
     }
-    SH_DEBUG_PRINT("Temporaries in ShProgram " << m_shader->name() << " " << m_max_temps);
+    SH_DEBUG_PRINT("Temporaries in ShProgram " << m_shader->name() << " " << m_max_temps << " scalar=" << m_max_scalar_temps);
+    Context::current()->set_stat("arb_num_temps", m_max_temps);
+    Context::current()->set_stat("arb_num_scalar_temps", m_max_scalar_temps);
   } catch (int) {
     ostringstream os;
     os << "Out of temporary registers (" << limits.temps()
@@ -1631,6 +1670,7 @@ void ArbCode::allocTemps(const ArbLimits& limits, bool half)
     m_tempRegs.push_back(i);
   }
   
+  m_cur_scalar_temps = 0;
   allocator.allocate();
   
   m_tempRegs.clear();

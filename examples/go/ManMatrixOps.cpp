@@ -51,6 +51,54 @@ ManMatrix m_rotate(const Man& axis, const Man& angle) {
   return result;
 }
 
+ManMatrix m_rotatex(const Man& angle) {
+  assert(angle.output_matches(1));
+  Program p = SH_BEGIN_PROGRAM() {
+    Variable in_angle = angle.outsize_var(SH_INPUT);
+    ManMatrix::OutType out;
+    Attrib1f c, s; 
+    shCOS(c, in_angle);
+    shSIN(s, in_angle);
+    out[1](1) = c;
+    out[1](2) = s; 
+    out[2](1) = -s; 
+    out[2](2) = c; 
+  } SH_END;
+  return p << angle; 
+}
+
+ManMatrix m_rotatey(const Man& angle) {
+  assert(angle.output_matches(1));
+  Program p = SH_BEGIN_PROGRAM() {
+    Variable in_angle = angle.outsize_var(SH_INPUT);
+    ManMatrix::OutType out;
+    Attrib1f c, s; 
+    shCOS(c, in_angle);
+    shSIN(s, in_angle);
+    out[0](0) = c;
+    out[0](2) = -s; 
+    out[2](0) = s; 
+    out[2](2) = c; 
+  } SH_END;
+  return p << angle; 
+}
+
+ManMatrix m_rotatez(const Man& angle) {
+  assert(angle.output_matches(1));
+  Program p = SH_BEGIN_PROGRAM() {
+    Variable in_angle = angle.outsize_var(SH_INPUT);
+    ManMatrix::OutType out;
+    Attrib1f c, s; 
+    shCOS(c, in_angle);
+    shSIN(s, in_angle);
+    out[0](0) = c;
+    out[0](1) = s; 
+    out[1](0) = -s; 
+    out[1](1) = c; 
+  } SH_END;
+  return p << angle; 
+}
+
 ManMatrix mul(const ManMatrix& a, const ManMatrix& b) {
   int maxIn = max(a.input_size(), b.input_size());
   ManMatrix af = a.resize_inputs(maxIn);

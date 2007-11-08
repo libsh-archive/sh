@@ -24,11 +24,32 @@ struct PlotFunc: public RefCountable {
   }
 
   Program gradProgram(std::string inName="in", std::string outName="out") {
+    Program f = funcProgram(inName, outName);
+    Variable p = *f.begin_inputs();  
+    Program dfdx = differentiate(f, p(0));  
+    Program dfdy = differentiate(f, p(1));  
+    Program dfdz = differentiate(f, p(2));  
+
     Program result = SH_BEGIN_PROGRAM() {
       InputPoint3f SH_NAMEDECL(in, inName);
       OutputAttrib3f SH_NAMEDECL(out, outName);
-      out = grad(in);
+      out(0) = dfdx(in); 
+      out(1) = dfdy(in); 
+      out(2) = dfdz(in); 
+      out = normalize(out);
     } SH_END;
+
+    return result;
+  }
+
+  template<typename T>
+  Program nullProgram(std::string inName, const T& value) { 
+    Program result = SH_BEGIN_PROGRAM() {
+      InputPoint3f SH_NAMEDECL(in, inName);
+      typename T::OutputType out;
+      out = value;
+    } SH_END;
+
     return result;
   }
 
@@ -42,7 +63,6 @@ struct PlotFunc: public RefCountable {
   }
 
   virtual Attrib1f func(Point3f p) = 0; 
-  virtual Attrib3f grad(Point3f p) = 0; 
   virtual Color3f color(Point3f p) = 0; 
 
   protected:
@@ -53,9 +73,8 @@ typedef Pointer<PlotFunc> PlotFuncPtr;
 /* Unit Sphere generator v = x^2 + y^2 + z^2 */
 struct Dist2SpherePF: PlotFunc {
   Color3f &m_color;
-  Dist2SpherePF(Color3f& color): PlotFunc("dist2_sphere"), m_color(color) {}
+  Dist2SpherePF(Color3f& color): PlotFunc("sphere"), m_color(color) {}
   Attrib1f func(Point3f point) { return point | point; }
-  Attrib3f grad(Point3f point) { return 2 * point; }
   Color3f color(Point3f point) { return m_color; }
 };
 
@@ -71,13 +90,6 @@ struct DropPF: PlotFunc {
     return result;
   }
 
-  Attrib3f grad(Point3f point) {
-    Attrib3f result = 2 * point;
-    Attrib1f z = point(2);
-    Attrib1f omz = 1 - z;
-    result(2) = -(omz * omz * omz - 3 * (1 + z) * omz * omz); 
-    return result;
-  }
   Color3f color(Point3f point) { return m_color; }
 };
 
@@ -97,21 +109,6 @@ struct GumdropTorusPF: PlotFunc {
     return result;
   }
 
-  Attrib3f grad(Point3f point) {
-    Attrib3f result; 
-    Attrib1f xyz = point | point;
-    Attrib1f yz = point(1,2) | point(1, 2);
-    Attrib1f x = point(0); 
-    Attrib1f y = point(1); 
-    Attrib1f z = point(2); 
-    Attrib1f x2 = x * x;
-    Attrib1f x3 = x * x2; 
-
-    result(0) = 16 * x3 +  34 * x * yz - 40 * x ;
-    result(1) = 16 * yz  * y + 34 * x2 * y - 40 * y;
-    result(2) = 16 * yz * z + 34 * x2 * z - 40 * z; 
-    return result;
-  }
   Color3f color(Point3f point) { return m_color; }
 };
 
@@ -124,12 +121,6 @@ struct SuperquadricPF: PlotFunc {
     return sum(SH::pow(ap, m_power));
   }
 
-  Attrib3f grad(Point3f point) {
-    Attrib3f ap = abs(point);
-    Attrib3f result = SH::pow(ap, m_power - 1) * m_power;
-    result *= sign(ap); 
-    return result;
-  }
   Color3f color(Point3f point) { return m_color; }
 };
 
@@ -146,36 +137,33 @@ struct MikeSpherePF: PlotFunc {
     return oneMinusR * oneMinusR * oneMinusR; 
   }
 
-  Attrib3f grad(Point3f point) { 
-    Attrib3f r2 = point * point;
-    Attrib3f oneMinusR = ConstAttrib3f(1, 1, 1) - r2; 
-    return 2 * oneMinusR * oneMinusR * -2 * r2; 
-  }
-
   protected:
     Attrib1f &m_n;
 };
 #endif
 
-/* treats x, y as the real/im in juliabrot
- * result is the real part after max_level iterations
- * (cuts off early if magnitude > julia_max)
+/* 4D Julia set
  *
- * @todo this is really slow and doesn't really work...
  */
 struct JuliaPF: PlotFunc {
-  JuliaPF(Attrib1f &maxlvl, Attrib1f &julia_max, Attrib2f &c, Color3f &color): 
+  JuliaPF(Attrib1f maxlvl, Attrib1f julia_max, Attrib4f c, Color3f color): 
     PlotFunc("julia"), m_maxlvl(maxlvl), m_julia_max(julia_max), m_c(c), m_color(color) {}
 
   /* some complex julia set code taken from shrike */ 
   Attrib1f func(Point3f point) {
-    Attrib2f SH_DECL(z) = point(0,1);
+    Attrib4f SH_DECL(z); 
+    /* use 0,1,2 as weights for 3 4D  basis vectors  instead */
+    z(0,1,2) = point;
+    z(3) = 0;
+
     //Attrib1f SH_DECL(count) = 0.0f;
     //SH_DO {
-    for(int i = 0; i < 5; ++i) {
-      Attrib2f zp;
-      zp(0) = z(0) * z(0) - z(1) * z(1); 
-      zp(1) = 2 * z(0) * z(1);
+    for(int i = 0; i < 3; ++i) {
+      Attrib4f zp;
+      zp(0) = z(0) * z(0) - z(1,2,3) | z(1,2,3); 
+      zp(1) = 2 * z(0) * z(1);  
+      zp(2) = 2 * z(0) * z(2);  
+      zp(3) = 2 * z(0) * z(3);  
       z = zp + m_c;
     }
     // can't do a count variable in here cause it gets turned into an interval
@@ -183,18 +171,15 @@ struct JuliaPF: PlotFunc {
     return z | z; 
   }
 
-  Attrib3f grad(Point3f point) { 
-    return ConstAttrib3f(1,0,0);
-  }
   Color3f color(Point3f point) {
     return m_color; 
   }
 
   protected:
-    Attrib1f &m_maxlvl;
-    Attrib1f &m_julia_max;
-    Attrib2f &m_c;
-    Color3f &m_color;
+    Attrib1f m_maxlvl;
+    Attrib1f m_julia_max;
+    Attrib4f m_c;
+    Color3f m_color;
 };
 
 /* Euclidean Distance from textured square 
@@ -217,18 +202,6 @@ struct HeightFieldPF: PlotFunc {
     return m_tex[tc] - point(2);
   }
 
-  Attrib3f grad(Point3f point) {
-    Attrib3f grad;
-    TexCoord2f tc = (size * 0.25) *  (point(0,1) + ConstAttrib2f(0.5f, 0.5f));
-
-    // @todo instead of just putting 512 here use the height and stuff
-    Attrib1f val = m_tex[tc];
-    grad(0) = (size * 0.25) * (val - m_tex[tc + ConstAttrib2f(1, 0)]);
-    grad(1) = (size * 0.25) * (val - m_tex[tc + ConstAttrib2f(0, 1)]); 
-    grad(2) = ConstAttrib1f(1.0);
-    // @todo
-    return grad;
-  }
   Color3f color(Point3f point) { 
     return m_color; 
   }
@@ -256,13 +229,8 @@ struct HeightFieldPF: PlotFunc {
 /* Unit Cylinder Generator (Infinite length) v = x^2 + y^2 */ 
 struct Dist2CylinderPF: PlotFunc {
   Color3f &m_color;
-  Dist2CylinderPF(Color3f& color) : PlotFunc("cylinder"), m_color(color) {}
+  Dist2CylinderPF(Color3f& color) : PlotFunc("cyl"), m_color(color) {}
   Attrib1f func(Point3f point) { return point(0,1) | point(0,1);  }
-  Attrib3f grad(Point3f point) { 
-    Attrib3f result = ConstAttrib3f(0,0,0);
-    result(0,1) = 2 * point(0,1); 
-    return result;
-  }
   Color3f color(Point3f point) { return m_color; } 
 };
 
@@ -285,19 +253,6 @@ struct Dist2LinePF: PlotFunc {
     return lerp(useStart, startResult, lerp(useEnd, endResult, result)); 
   }
 
-  Attrib3f grad(Point3f point) {
-    Attrib1f useStart = point(1) < 0; 
-    Attrib1f useEnd = point(1) > m_end; 
-
-
-    Attrib3f result = ConstAttrib3f(0,0,0); 
-    result(0,2) = 2 * point(0,2);
-    Vector3f dstart = point; 
-    Vector3f dend = point - ConstPoint3f(0, m_end, 0);
-    Vector3f startResult = 2 * dstart; 
-    Vector3f endResult = 2 * dend; 
-    return lerp(useStart, startResult, lerp(useEnd, endResult, result)); 
-  }
   Color3f color(Point3f point) { return m_color; } 
 };
 
@@ -319,19 +274,6 @@ struct Dist2TorusPF: PlotFunc {
     return pp - 2 * sqrt(ppxy) + 1;
   }
 
-  Attrib3f grad(Point3f point) { 
-    Attrib1f pp = point | point;
-    Attrib1f ppxy = point(0,1) | point(0,1);
-    /*
-    Attrib1f ppPlusRadius = pp + radiusSquared; 
-    Attrib3f result = 4 * ppPlusRadius * point;
-    result(0,1) -= 8 * radiusSquared * point(0,1);
-    return result;
-    */
-    Attrib3f result = 2 * point;
-    result(0, 1) -= 2 * rsqrt(ppxy) * point(0, 1); 
-    return result;
-  }
   Color3f color(Point3f point) { return m_color; } 
 };
 
@@ -340,7 +282,6 @@ struct DistPlanePF: PlotFunc {
   Color3f &m_color;
   DistPlanePF(Color3f& color) : PlotFunc("plane"), m_color(color) {}
   Attrib1f func(Point3f point) { return point(2); }
-  Attrib3f grad(Point3f point) { return ConstAttrib3f(0,0,1); }
   Color3f color(Point3f point) { return m_color; } 
 };
 
@@ -348,15 +289,6 @@ struct DistPlanePF: PlotFunc {
 struct InvPF: PlotFunc {
   InvPF(PlotFuncPtr pf): PlotFunc("inv_" + pf->name()), m_pf(pf) {}
   Attrib1f func(Point3f point) { return rcp(m_pf->func(point)); }
-
-  /* Use quotient rule (f/g)' = (g'f - f'g) / g^2 
-   * Here f = 1 */ 
-  Attrib3f grad(Point3f point) { 
-    Attrib1f invg = func(point);
-    Attrib3f gp = m_pf->grad(point);
-    return gp * invg * invg; 
-  }
-
   Color3f color(Point3f point) { return m_pf->color(point); }
   protected:
     PlotFuncPtr m_pf;
@@ -364,26 +296,16 @@ struct InvPF: PlotFunc {
 
 /* Gaussian - Blinn's original blobby function */ 
 struct GaussianPF: PlotFunc {
-  GaussianPF(PlotFuncPtr pf): PlotFunc("gs_" + pf->name()), m_pf(pf) {}
+  GaussianPF(PlotFuncPtr pf): PlotFunc("G" + pf->name()), m_pf(pf) {}
   Attrib1f func(Point3f point) { return 2 * exp(-m_pf->func(point)); }
-
-  Attrib3f grad(Point3f point) { 
-    Attrib1f gpf = func(point);
-    Attrib3f gp = m_pf->grad(point);
-    return -gpf * gp; 
-  }
-
   Color3f color(Point3f point) { return m_pf->color(point); }
   protected:
     PlotFuncPtr m_pf;
 };
 
 struct NullPF: PlotFunc {
-  NullPF(PlotFuncPtr pf): PlotFunc("null_" + pf->name()), m_pf(pf) {}
+  NullPF(PlotFuncPtr pf): PlotFunc("N" + pf->name()), m_pf(pf) {}
   Attrib1f func(Point3f point) { return m_pf->func(point); } 
-
-  Attrib3f grad(Point3f point) { return m_pf->grad(point); }
-
   Color3f color(Point3f point) { return m_pf->color(point); }
   protected:
     PlotFuncPtr m_pf;
@@ -391,49 +313,89 @@ struct NullPF: PlotFunc {
 
 /* Twist along y-axis 
  * twist(f)(x, y, z) = f(x', y, z') 
- * where x' = x cos(4y) - z sin(4y)
- * and y' = x sin(4y) + z cos(4y)
+ * where x' = x cos(4 pi y) - z sin(4 pi y)
+ * and y' = x sin(4 pi y) + z cos(4 pi y)
  * */ 
 struct TwistPF: PlotFunc {
-  float m_amount;
-  TwistPF(PlotFuncPtr pf, float amount): PlotFunc("tw_" + pf->name()), m_pf(pf), m_amount(amount) {}
-  Attrib1f func(Point3f point) { 
+  protected:
+    PlotFuncPtr m_pf;
+    int m_axis;
+    float m_amount;
+  public:
+  TwistPF(PlotFuncPtr pf, int axis, float amount): PlotFunc("Tw" + pf->name()), m_pf(pf), m_axis(axis), m_amount(amount) {}
+  
+  Point3f getpp(const Point3f& p) {
     Point3f pp; 
-    Attrib1f angle = m_amount * point(1);
+    Attrib1f angle = m_amount * p(m_axis);
     Attrib1f ca = cos(angle);
     Attrib1f sa = sin(angle);
-    pp(0) = point(0) * ca - point(2) * sa; 
-    pp(1) = point(1);
-    pp(2) = point(0) * sa + point(2) * ca;
-    return m_pf->func(pp);
+    switch(m_axis) {
+      case 0: // rotate around x
+          pp(0) = p(0);
+          pp(1) = p(1) * ca + p(2) * sa; 
+          pp(2) = -p(1) * sa + p(2) * ca;
+
+          break;
+      case 1: // rotate around y
+          pp(0) = p(0) * ca - p(2) * sa; 
+          pp(1) = p(1);
+          pp(2) = p(0) * sa + p(2) * ca;
+
+          break;
+
+      case 2: // rotate around z
+          pp(0) = p(0) * ca + p(1) * sa; 
+          pp(1) = -p(0) * sa + p(1) * ca;
+          pp(2) = p(2);
+          break;
+    }
+    return pp;
   }
 
-  /* Use chain rule twist'(f)(x, y, z) = f'(x', y, z') * x'' * z'' */  
-  Attrib3f grad(Point3f point) { 
-    Attrib3f result;
-
-    Point3f pp; 
-    Attrib1f angle = m_amount * point(1);
-    Attrib1f ca = cos(angle);
-    Attrib1f sa = sin(angle);
-    pp(0) = point(0) * ca - point(2) * sa; 
-    pp(1) = point(1);
-    pp(2) = point(0) * sa + point(2) * ca;
-    return result;
+  Attrib1f func(Point3f point) { 
+    return m_pf->func(getpp(point));
   }
 
   Color3f color(Point3f point) { return m_pf->color(point); }
+};
+
+/* Sin distortion 
+ * sin(f)(p) = f(p')
+ * where p' = p except
+ * p'.y = p.y + amount * sin(scale * p.x) * sin(scale * p.z); 
+ */
+struct SinPF: PlotFunc {
   protected:
     PlotFuncPtr m_pf;
+    int m_axis;
+    float m_amount;
+    float m_scale;
+  public:
+  SinPF(PlotFuncPtr pf, int axis, float amount, float scale): PlotFunc("Sin" + pf->name()), m_pf(pf), m_axis(axis), m_amount(amount), m_scale(scale) {}
+
+  Point3f getpp(const Point3f& p) {
+    Point3f pp = p;
+    int i = (m_axis + 2) % 3;
+    int j = (m_axis + 1) % 3;
+
+    pp(m_axis) += m_amount * sin(m_scale * p(i)) * sin(m_scale * p(j)); 
+    return pp;
+  }
+
+  Attrib1f func(Point3f point) { 
+    Point3f pp = getpp(point);
+    return m_pf->func(pp);
+  }
+
+  Color3f color(Point3f point) { return m_pf->color(getpp(point)); }
 };
 
 /* should just allow arbitrary matrices */
 /* Translates any other generator */
 struct TranslatePF: PlotFunc {
   TranslatePF(PlotFuncPtr pf, Vector3f& trans)  
-    : PlotFunc("t_" + pf->name()), m_pf(pf), m_trans(trans) {}
+    : PlotFunc("T" + pf->name()), m_pf(pf), m_trans(trans) {}
   Attrib1f func(Point3f point) { return m_pf->func(point - m_trans); } 
-  Attrib3f grad(Point3f point) { return m_pf->grad(point - m_trans); } 
   Color3f color(Point3f point) { return m_pf->color(point - m_trans); }
   protected:
     PlotFuncPtr m_pf;
@@ -442,9 +404,8 @@ struct TranslatePF: PlotFunc {
 
 struct ScalePF: PlotFunc {
   ScalePF(PlotFuncPtr pf, Attrib3f& scl)  
-    : PlotFunc("scl_" + pf->name()), m_pf(pf), m_scl(scl) {}
+    : PlotFunc("S" + pf->name()), m_pf(pf), m_scl(scl) {}
   Attrib1f func(Point3f point) { return m_pf->func(point * m_scl); } 
-  Attrib3f grad(Point3f point) { return m_scl * m_pf->grad(point * m_scl); } 
   Color3f color(Point3f point) { return m_pf->color(point * m_scl); }
   protected:
     PlotFuncPtr m_pf;
@@ -453,9 +414,8 @@ struct ScalePF: PlotFunc {
 
 struct FuncScalePF: PlotFunc {
   FuncScalePF(PlotFuncPtr pf, Attrib1f& scl)  
-    : PlotFunc("fs_" + pf->name()), m_pf(pf), m_scl(scl) {}
+    : PlotFunc("F" + pf->name()), m_pf(pf), m_scl(scl) {}
   Attrib1f func(Point3f point) { return m_scl * m_pf->func(point); } 
-  Attrib3f grad(Point3f point) { return m_scl * m_pf->grad(point); } 
   Color3f color(Point3f point) { return m_pf->color(point); }
   protected:
     PlotFuncPtr m_pf;
@@ -464,18 +424,28 @@ struct FuncScalePF: PlotFunc {
 
 struct TransformPF: PlotFunc {
   TransformPF(PlotFuncPtr pf, Matrix4x4f init=Matrix4x4f())
-    : PlotFunc("tf_" + pf->name()), m(init), m_pf(pf) {}
+    : PlotFunc("Tr" + pf->name()), m(init), m_pf(pf) {}
   Attrib1f func(Point3f point) { return m_pf->func(m | point); } 
-  Attrib3f grad(Point3f point) { return m_pf->grad(m | point); } 
   Color3f color(Point3f point) { return m_pf->color(m | point); }
   Matrix4x4f m; 
   protected: 
     PlotFuncPtr m_pf;
 };
 
+struct NoisePF: PlotFunc {
+  NoisePF(PlotFuncPtr pf, const Attrib1f& scl)  
+    : PlotFunc("Pn" + pf->name()), m_pf(pf), m_scl(scl) {}
+  Point3f perturb(Point3f point) { return point + m_scl * sperlin<3>(point, false); }
+  Attrib1f func(Point3f point) { return m_pf->func(perturb(point)); } 
+  Color3f color(Point3f point) { return m_pf->color(perturb(point)); }
+  protected:
+    PlotFuncPtr m_pf;
+    Attrib1f m_scl;
+};
+
 /* Sums up a set of plot functions */
 struct SumPF: PlotFunc {
-  SumPF(Attrib1f& level): PlotFunc("sum"), level(level)  {}
+  SumPF(Attrib1f& level): PlotFunc("Sum"), level(level)  {}
 
   Attrib1f func(Point3f point) {
     Attrib1f result; 
@@ -484,18 +454,6 @@ struct SumPF: PlotFunc {
         result = (*I)->func(point);
       } else {
         result += (*I)->func(point);
-      }
-    }
-    return result;
-  }
-
-  Attrib3f grad(Point3f point) {
-    Attrib3f result; 
-    for(PfVec::iterator I = m_pfvec.begin(); I != m_pfvec.end(); ++I) {
-      if(I == m_pfvec.begin()) {
-        result = (*I)->grad(point);
-      } else {
-        result += (*I)->grad(point);
       }
     }
     return result;

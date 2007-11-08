@@ -83,6 +83,7 @@
 #include "AaSyms.hpp"
 #include "AaVariable.hpp"
 #include "Hacks.hpp"
+#include "ProgramCounter.hpp"
 //#include "AaScanCore.hpp"
 //#include "AaScanErr.hpp"
 

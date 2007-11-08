@@ -298,6 +298,14 @@ public:
   static void disable_delete() { delete_enabled = false; }
   static void enable_delete() { delete_enabled = true; }
 
+  /// Hmm, adding this is as well is probably even safer 
+  ///
+  /// Forces all new nodes to be owned by the given ctrl graph 
+  /// Useful for mangling together bits and pieces of several newly minted graphs
+  /// into another known control graph.
+  /// Owner swapping just gets too confusing to make correct.
+  static void force_owner(CtrlGraph* graph=0) { forced_owner = graph; }
+
   int owned_count() { return m_owned_nodes.size(); }
 
 private:
@@ -308,7 +316,13 @@ private:
   NodeSet m_owned_nodes;
 
   /// Owner reference management functions
-  void add_owned_node(CtrlGraphNode *node) { m_owned_nodes.insert(node); 
+  void add_owned_node(CtrlGraphNode *node) { 
+    if(forced_owner && this != forced_owner) {
+      node->m_owner = forced_owner;
+      forced_owner->add_owned_node(node);
+      //SH_DEBUG_PRINT("Forcing owner: " << this << " on node: " << node);
+    }
+    m_owned_nodes.insert(node); 
   //SH_DEBUG_PRINT("owner: " << this << " node: " << node);
   }
   void release_all_owned_nodes();
@@ -317,6 +331,7 @@ private:
   friend class CtrlGraphNode;  
 
   static bool delete_enabled;
+  static CtrlGraph* forced_owner;
 };
 
 typedef Pointer<CtrlGraph> CtrlGraphPtr;

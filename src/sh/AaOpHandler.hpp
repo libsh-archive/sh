@@ -27,11 +27,57 @@
 #ifndef SHAAOPHANDLER_HPP
 #define SHAAOPHANDLER_HPP
 
+#include <string>
+#include <sstream>
 #include "Program.hpp"
 #include "AaVariable.hpp"
 #include "DllExport.hpp"
+#include "Tag.hpp"
 
 namespace SH {
+
+/* Used to tag the purpose of a statement 
+ * (Might want even finger granularity - i.e. split up compute more?) */
+enum AaStmtType {
+  AA_STMT_NOTAA,
+  AA_STMT_COMPUTE,
+  AA_STMT_COMMON,
+  AA_STMT_MERGE
+};
+
+struct AaStmtTypeTag: public Tag {
+  AaStmtType type;
+  AaStmtTypeTag(AaStmtType t): type(t) {}
+  Info* clone() const { return new AaStmtTypeTag(type); }
+  std::string toHeader() const {
+    return "aa_stmt_type";
+  }
+  std::string toString() const {
+    switch(type) {
+      case AA_STMT_NOTAA: return "non-aa";
+      case AA_STMT_COMPUTE: return "compute";
+      case AA_STMT_COMMON: return "common";
+      case AA_STMT_MERGE: return "merge";
+    }
+    return "";
+  }
+};
+
+/* Used to tag the original stmt index the result corresponds to */
+struct AaOldStmtTag: public Tag {
+  long long idx;
+  Operation op;
+  AaOldStmtTag(long long idx, Operation op): idx(idx), op(op) {}
+  Info* clone() const { return new AaOldStmtTag(idx, op); }
+  std::string toHeader() const {
+    return "aa_oldstmt_idx,aa_oldstmt_op";
+  }
+  std::string toString() const {
+    std::ostringstream sout; 
+    sout << idx << "," << opInfo[op].name;
+    return sout.str();
+  }
+};
 
 /** @file AaOpHandler.hpp
  * Classes used to turn a Program involving affine arithmetic types

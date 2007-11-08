@@ -71,6 +71,15 @@ public:
   typedef std::list<PredecessorEdge> PredecessorList;
   PredecessorList preds;
 
+  template<class F>
+  void struct_dfs(F& functor) {
+    functor(this);
+    for(StructNodeList::iterator S = structnodes.begin(); S != structnodes.end(); ++S) {
+      (*S)->struct_dfs(functor);
+    }
+    functor.finish(this);
+  }
+
   // Functions to access underlying CFG structure
   
   /** Flags whether entry is marked by a STARTSEC and
@@ -155,6 +164,11 @@ public:
   template<class F>
   void dfs(F& functor) {
     m_head->dfs(functor);
+  }
+
+  template<class F>
+  void struct_dfs(F& functor) {
+    m_head->struct_dfs(functor);
   }
 
   

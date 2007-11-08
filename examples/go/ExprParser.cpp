@@ -574,12 +574,11 @@ Variable ExprParser::makeVar(string shtype) {
 }
 
 Stream ExprParser::varToStream(Variable& var) {
-  DOUT("Converting var --> stream " << var.node()->nameOfType() << " " << var.name());
   SH_DEBUG_ASSERT(var.node()->hasValues());
   VariantPtr variant = var.node()->getVariant();
   MemoryPtr mem = new HostMemory(var.size() * variant->datasize(), variant->array(), var.valueType());
   TextureNodePtr channel = new TextureNode(SH_TEXTURE_1D, var.size(), var.valueType(), ArrayTraits(), 1);
-  channel->memory(mem, 1);
+  channel->memory(mem, 0);
   return Stream(BaseTexture(channel));
 }
 

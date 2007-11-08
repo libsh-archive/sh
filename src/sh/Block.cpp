@@ -21,6 +21,7 @@
 #include "Block.hpp"
 #include "Statement.hpp"
 #include "BasicBlock.hpp"
+#include "Tag.hpp"
 
 namespace SH {
 
@@ -54,6 +55,7 @@ void BlockList::addStatement(const Statement& statement)
     m_blocks.push_back(BlockPtr(basicBlock));
   }
   basicBlock->addStatement(statement);
+  Tag::cloneTo(*basicBlock->rbegin());
 }
 
 void BlockList::addBlock(const BlockPtr& statement)

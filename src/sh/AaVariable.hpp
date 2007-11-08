@@ -114,7 +114,7 @@ struct AaVariableNode: public RefCountable {
   Variable center() { return m_center; }
 
   /** Returns the radius */
-  Variable radius();
+  //Variable radius();
 
   /** Returns the error sym variable for tuple element i */
   Variable operator[](int i) { return (m_packed ? m_symvar[0](i) : m_symvar[i]); }

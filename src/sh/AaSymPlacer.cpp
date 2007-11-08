@@ -32,7 +32,7 @@
 #include "Debug.hpp"
 #include "Transformer.hpp"
 #include "Structural.hpp"
-#include "Section.hpp"
+//#include "Section.hpp"
 #include "Optimizations.hpp"
 #include "Inclusion.hpp"
 #include "AaHier.hpp"
@@ -44,6 +44,8 @@ bool AaspDebugOn = true;
 #else
 bool AaspDebugOn = false; 
 #endif
+
+static int UNIQUE_ASP_COUNTER = 0;
 
 
 #define SH_DEBUG_PRINT_ASP(x) { if (AaspDebugOn) {SH_DEBUG_PRINT(x);} }
@@ -110,7 +112,7 @@ struct IntervalPullerBase: public TransformerParent
 
     ValueTracking* vt = stmt.get_info<ValueTracking>();
     Variable aaDup(0);
-    for(size_t i = 0; i < stmt.dest.size(); ++i) {
+    for(int i = 0; i < stmt.dest.size(); ++i) {
       ValueTracking::DefUseChain::iterator U = vt->uses[i].begin();
       for(;U != vt->uses[i].end(); ++U) {
         if(U->kind != ValueTracking::Use::STMT) continue;
@@ -207,7 +209,6 @@ struct SymTransferBase: public TransformerParent
     for(AaSyms::const_iterator I = syms.begin(); I != syms.end(); ++I) {
       levelSyms[level] |= *I;
     }
-    SH_DEBUG_PRINT_ASP("Inserting level " << level << " syms=" << syms);
   }
 
 
@@ -280,12 +281,11 @@ struct SymTransferBase: public TransformerParent
     // not necessar - handled in updateDest now
     //  stmtSyms->dest = stmtSyms->newdest;
 
-      // insert ESCJOIN new syms up one level
-      if(stmt.op == OP_ESCJOIN) {
-        insertSyms(level - 1, stmtSyms->newdest); 
-      } else {
-        insertSyms(level, stmtSyms->newdest); 
-      }
+      //if(stmt.op == OP_ESCJOIN) { /* ESCJOIN's are now created one level up */
+      //  insertSyms(level, stmtSyms->newdest); 
+      //} else {
+      insertSyms(level, stmtSyms->newdest); 
+      //}
       const StmtIndex* sidx = stmt.get_info<StmtIndex>();
       if(sidx) {
         psyms->stmts[*sidx] = stmtSyms->newdest;
@@ -384,7 +384,7 @@ struct SymTransferBase: public TransformerParent
     updateDest(stmtSyms, levelSyms);
   }
 
-  SectionTree* sectionTree;
+  //SectionTree* sectionTree;
   AaProgramSyms* psyms;
   int cur_index;
 
@@ -453,12 +453,14 @@ struct SymTransferBase: public TransformerParent
         SH_DEBUG_PRINT_ASP("    ESCJOIN");
         SH_DEBUG_ASSERT(size == src[0].size());
         unsigned int myLevel = stmtSyms->level;
-        if(myLevel < levelSyms.size()) {
+        if(myLevel  + 1 < levelSyms.size()) {
           for(int i = 0; i < size; ++i) {
-            dest.merge(i, src[0][i] - levelSyms[myLevel]);
+            dest.merge(i, src[0][i] - levelSyms[myLevel + 1]);
           }
         }
       } else if(stmt->op == OP_ESCSAV) {
+        SH_DEBUG_ASSERT(false);
+        /* not used any more
         // only keep symbols generated at the current nesting level
         // We'll pick up the association between ESCSAV'd symbols and the new
         // symbols generated for ESCJOIN later in the processing.
@@ -470,6 +472,7 @@ struct SymTransferBase: public TransformerParent
             dest.merge(i, src[0][i] & levelSyms[myLevel]);
           }
         }
+        */
       } else if(opInfo[stmt->op].affine_keep) {
         OperationInfo::ResultSource result_source = opInfo[stmt->op].result_source;
         // special case certain EXTERNAL statements
@@ -1034,6 +1037,14 @@ struct SymCount
     return sout.str();
   }
 
+  int totalCount() const {
+    int result = 0;
+    for(SymCountMap::const_iterator I = count.begin(); I != count.end(); ++I) {
+      result += I->second;
+    }
+    return result;
+  }
+
   private:
     template<int DELTA>
     void update(const ValueTracking::Def& def) 
@@ -1161,9 +1172,13 @@ struct StmtSymDumperBase: public TransformerParent {
   AaProgramSyms* psyms;
   map<string, string> tempmap; /* map for temporary names */
   int tempidx; 
+  bool destOnly; /* show destination syms only */
+  bool leftAlign; /* do not use columns for noise symbol index - just show distribution */
 
-  void init(AaProgramSyms* psyms) {
+  void init(AaProgramSyms* psyms, bool destOnly, bool leftAlign) {
     this->psyms = psyms;
+    this->destOnly = destOnly;
+    this->leftAlign = leftAlign;
     tempidx = 0;
   }
 
@@ -1203,6 +1218,7 @@ struct StmtSymDumperBase: public TransformerParent {
 
     if(!syms || syms->mergeDest.empty()) return false; 
     AaIndexSet all = syms->dest.all();
+    all |= syms->mergeDest.all();
     for(size_t i = 0; i < syms->src.size(); ++i) {
       all |= syms->src[i].all();
     }
@@ -1215,10 +1231,48 @@ struct StmtSymDumperBase: public TransformerParent {
     return false;
   }
 
-  string dump(const Statement& stmt) {
-    /* build up live noise symbol information */
+  StateVec buildState(const Statement& stmt) {
     const LiveDef* ld = stmt.get_info<LiveDef>();
     StateVec state(symmap.size(), DEAD);
+
+    const AaStmtSyms* syms = stmt.get_info<AaStmtSyms>();
+    if(syms) {
+      if(destOnly) {
+        mark(state, syms->dest.all(), LIVE); 
+      } else {
+        AaIndexSet alive;
+        for(DefSet::const_iterator D = ld->out.begin(); D != ld->out.end(); ++D) {
+          if(D->kind == ValueTracking::Def::SH_INPUT) {
+            if(isAffine(D->node->valueType())) {
+              SH_DEBUG_ASSERT(psyms->inputs.find(D->node) != psyms->inputs.end());
+              alive |= psyms->inputs[D->node][D->absIndex()];
+            }
+          } else {
+            const AaStmtSyms* dsyms = D->stmt->get_info<AaStmtSyms>(); 
+            alive |= dsyms->mergeDest.all(); 
+          }
+        }
+        mark(state, alive, LIVE);
+      }
+
+      /* mark others */
+      mark(state, syms->newdest.all(), NEW); 
+      for(int i = 0; i < syms->mergeRep.size(); ++i) {
+        if(!syms->mergeRep[i].empty()) {
+          mark(state, syms->unique[i] & syms->dest[i], MERGED_UM); 
+          mark(state, syms->mergeRep[i], MERGED_REP);
+        }
+      }
+      if(stmt.op == OP_ESCJOIN) {
+        mark(state, syms->src[0].all() - syms->mergeDest.all(), MERGED_HIER); 
+      }
+    }
+    return state;
+  }
+
+  string dump(const Statement& stmt, int tableWidth = 0) {
+    /* build up live noise symbol information */
+    //const LiveDef* ld = stmt.get_info<LiveDef>();
 
     ostringstream sout; 
 //    sout << "<TD ALIGN=\"LEFT\">" << stmt << "</TD>";
@@ -1233,48 +1287,43 @@ struct StmtSymDumperBase: public TransformerParent {
       dumpVar(sout, stmt.src[i]);
     }
     sout << "</TD>";
-
     
+    const StmtDepth* sd = stmt.get_info<StmtDepth>();
+    if(sd) {
+      sout << "<TD>" << sd->depth() << "</TD>";
+    } else {
+      sout << "<TD>" << "</TD>";
+    }
+
     /* mark live */
-    const AaStmtSyms* syms = stmt.get_info<AaStmtSyms>();
-    if(syms) {
-      AaIndexSet alive;
-      for(DefSet::const_iterator D = ld->out.begin(); D != ld->out.end(); ++D) {
-        if(D->kind == ValueTracking::Def::SH_INPUT) {
-          if(isAffine(D->node->valueType())) {
-            SH_DEBUG_ASSERT(psyms->inputs.find(D->node) != psyms->inputs.end());
-            alive |= psyms->inputs[D->node][D->absIndex()];
-          }
-        } else {
-          const AaStmtSyms* dsyms = D->stmt->get_info<AaStmtSyms>(); 
-          alive |= dsyms->mergeDest.all(); 
-        }
-      }
-      mark(state, alive, LIVE);
+    StateVec state = buildState(stmt);
 
-      /* mark others */
-      mark(state, syms->newdest.all(), NEW); 
-      for(int i = 0; i < syms->mergeRep.size(); ++i) {
-        if(!syms->mergeRep[i].empty()) {
-          mark(state, syms->unique[i] & syms->dest[i], MERGED_UM); 
-          mark(state, syms->mergeRep[i], MERGED_REP);
-        }
-      }
-      if(stmt.op == OP_ESCJOIN) {
-        mark(state, syms->src[0].all() - syms->mergeDest.all(), MERGED_HIER); 
-      }
-    }
-
-    sout << "<TD><TABLE BGCOLOR=\"#dddddd\" BORDER=\"0\" CELLBORDER=\"0\" CELLPADDING=\"2\"><TR>"; 
-    for(size_t i = 0; i < state.size(); ++i) {
-      const char* color = StateColour[static_cast<int>(state[i])]; 
-      if(color[0]) {
-        sout << "<TD WIDTH=\"10\" BGCOLOR=\"" << color << "\"> </TD>";
+    if(state.size() > 0) {
+      if(leftAlign) {
+          sout << "<TD><TABLE BGCOLOR=\"#dddddd\" BORDER=\"0\" CELLBORDER=\"0\" CELLPADDING=\"0\"><TR>"; 
       } else {
-        sout << "<TD WIDTH=\"10\"> </TD>";
+          sout << "<TD><TABLE BGCOLOR=\"#dddddd\" BORDER=\"0\" CELLBORDER=\"0\" CELLPADDING=\"1\"><TR>"; 
       }
+      size_t pad = 0;
+      for(size_t i = 0; i < state.size(); ++i) {
+        const char* color = StateColour[static_cast<int>(state[i])]; 
+        if(color[0]) {
+          sout << "<TD WIDTH=\"10\" BGCOLOR=\"" << color << "\"> </TD>";
+        } else {
+          if(!leftAlign) {
+              sout << "<TD WIDTH=\"10\"> </TD>";
+          } else {
+              pad++;
+          }
+        }
+      }
+      for(size_t i = 0; i < pad; ++i) {
+          sout << "<TD WIDTH=\"0\"></TD>";
+      }
+      sout << "</TR></TABLE></TD>";
+    } else {
+      sout << "<TD> </TD>";
     }
-    sout << "</TR></TABLE></TD>";
     return sout.str();
   }
 
@@ -1288,13 +1337,121 @@ struct StmtSymDumperBase: public TransformerParent {
 };
 typedef DefaultTransformer<StmtSymDumperBase> StmtSymDumper;
 
-void symdump(ProgramNodePtr p, AaProgramSyms* psyms, string name) {
+void symdump(ProgramNodePtr p, AaProgramSyms* psyms, string name, bool destOnly, bool leftAlign) {
   ostringstream dout;
   StmtSymDumper ssd;
-  ssd.init(psyms);
+  ssd.init(psyms, destOnly, leftAlign);
   ssd.transform(p);
 
   p->ctrlGraph->graphviz_dump(dout, ssd);
+  dotGen(dout.str(), dumpPrefix + name);
+}
+
+/* Dumps the number of live scalar variables at each statement due to partial deviations */    
+struct LiveDumperBase: public TransformerParent {
+  SymCount symCount;
+  std::map<const Statement*, SymCount> stmtSymCount; 
+  map<string, string> tempmap; /* map for temporary names */
+  AaProgramSyms* psyms;
+  int tempidx; 
+  int maxcount;
+
+  void init(AaProgramSyms* psyms) { 
+    this->psyms = psyms;
+    tempidx = 0;
+    maxcount = 0; 
+  }
+
+  /* special versions of statement dumping from Statement.cpp - shortens temps */ 
+  std::ostream& dumpVar(std::ostream &out, const Variable& var)
+  {
+    if(var.null()) {
+      out << "[null]";
+    } else {
+      out << (var.neg() ? "-" : "");
+
+      /* shorten temporary names (i.e. those that are in the form prefix + digits) */
+      string name = var.name(); 
+      static const char* prefix[] = { "aa_t", "ut" }; /* t's may be branch variables.. */ 
+      for(int i = 0; i < 2; ++i) {
+        if(var.name().find(prefix[i]) != 0) continue;
+        if(var.name().length() == strlen(prefix[i])) continue;
+        if(var.name().find_first_not_of("0123456789", strlen(prefix[i])) != string::npos) continue;
+        if(tempmap.find(var.name()) == tempmap.end()) {
+          ostringstream tout;
+          tout << prefix[i] << tempidx++;
+          tempmap[var.name()] = tout.str();
+        }
+        name = tempmap[var.name()];
+      }
+      out << name << var.swizzle();
+    }
+    return out;
+  }
+
+  bool handleStmt(BasicBlock::StmtList::iterator& I, CtrlGraphNode* node)
+  {
+    Statement& stmt = *I;
+
+    LiveDef* liveDef = stmt.get_info<LiveDef>();
+    //AaStmtSyms* syms = stmt.get_info<AaStmtSyms>();
+
+    SH_DEBUG_ASSERT(liveDef);
+
+    if(I == node->block->begin()) {
+      symCount.init(liveDef->in, psyms);
+    }
+
+    symCount.inc(liveDef->def);
+    symCount.dec(liveDef->dead);
+    stmtSymCount[&stmt] = symCount;
+    int mycount = symCount.totalCount(); 
+    if(mycount > maxcount) maxcount = mycount;
+
+    return false;
+  }
+
+  string dump(const Statement& stmt, int tableWidth = 0) {
+    /* build up live noise symbol information */
+    ostringstream sout; 
+//    sout << "<TD ALIGN=\"LEFT\">" << stmt << "</TD>";
+//         << "<TD>" << *syms << "</TD>";
+//         << "<TD>" << *ld << "</TD>"; 
+    sout << "<TD ALIGN=\"RIGHT\">";         
+    dumpVar(sout, stmt.dest) << " = ";
+    sout << "</TD><TD ALIGN=\"LEFT\">";
+    if(stmt.op != OP_ASN) sout << opInfo[stmt.op].name << " ";
+    for(int i = 0; i < opInfo[stmt.op].arity; ++i) {
+      if(i > 0) sout << ", "; 
+      dumpVar(sout, stmt.src[i]);
+    }
+    sout << "</TD>";
+    
+    const SymCount& mySymCount = stmtSymCount[&stmt];
+    int mycount = mySymCount.totalCount(); 
+    sout << "<TD><TABLE BGCOLOR=\"#dddddd\" BORDER=\"0\" CELLBORDER=\"0\" CELLPADDING=\"0\"><TR>"; 
+    int i;
+    for(i = 0; i < mycount; ++i) {
+      const char* color = StateColour[3];
+      sout << "<TD WIDTH=\"10\" BGCOLOR=\"" << color << "\"> </TD>";
+    }
+    for(; i < maxcount; ++i) {
+      sout << "<TD WIDTH=\"10\"> </TD>";
+    }
+
+    sout << "</TR></TABLE></TD>";
+    return sout.str();
+  }
+};
+typedef DefaultTransformer<LiveDumperBase> LiveDumper;
+
+void livedump(ProgramNodePtr p, AaProgramSyms* psyms, string name) { 
+  ostringstream dout;
+  LiveDumper ld;
+  ld.init(psyms);
+  ld.transform(p);
+
+  p->ctrlGraph->graphviz_dump(dout, ld);
   dotGen(dout.str(), dumpPrefix + name);
 }
 
@@ -1339,7 +1496,7 @@ struct UniqueMergerBase: TransformerParent
     if(csvSyms) {
       ostringstream idout;
       idout << symfile;
-      idout << "_it" << iteration;
+      idout << "_it" << iteration << ".csv";
       sout.open(idout.str().c_str());
       sout << "um=" << !disableMerge << endl;  
     }
@@ -1476,7 +1633,13 @@ void addUniqueMerge(ProgramNodePtr programNode, SymTransfer& st, bool dumpStats,
   umb.init(&st, sf.special, dumpStats, disableMerge, symfile);
   while(umb.transform(programNode));
   // dump syms 
-  symdump(programNode, st.psyms, "_asp-4-um");
+  if(AaspDebugOn) {
+      symdump(programNode, st.psyms, "_asp-4-um_destsyms", true, false);
+      symdump(programNode, st.psyms, "_asp-4-um_destsyms_la", true, true);
+      symdump(programNode, st.psyms, "_asp-4-um_livesyms", false, false);
+      symdump(programNode, st.psyms, "_asp-4-um_livesyms_la", false, true);
+      livedump(programNode, st.psyms, "_asp-4-um_live_counts");
+  }
 }
 
 /* Set inputs syms, and given completed AaStmtsyms info at each statement,
@@ -1711,7 +1874,8 @@ void placeAaSyms(ProgramNodePtr programNode, const AaVarSymsMap& inputs, bool sh
   Program program(programNode);
 
   ostringstream idout;
-  idout << programNode->name() /*<< "_" << programNode.object()*/;
+  idout << programNode->name() << "_" /*<< "_" << programNode.object()*/;
+  idout << UNIQUE_ASP_COUNTER++ << "_";
   if(disableHier) idout << "_nohier";
   if(disableUniqMerge) idout << "_noum";
   idout << "_";
@@ -1741,17 +1905,14 @@ void placeAaSyms(ProgramNodePtr programNode, const AaVarSymsMap& inputs, bool sh
 
   SH_DEBUG_PRINT_ASP("Hierarchical Initialization");  
   Structural programStruct(programNode->ctrlGraph);
-  /*
-  SectionTree sectionTree(programStruct);
   if(AaspDebugOn) {
     ostringstream sout;
-    sectionTree.dump(sout);
-    dotGen(sout.str(), dumpPrefix + "_asp-0-stree");
+    programStruct.dump(sout);
+    dotGen(sout.str(), dumpPrefix + "_asp-0.5-struct");
   }
-  */
 
   if(!disableHier) {
-    SH_DEBUG_PRINT_ASP("Hierarchical disabled. Skipping escape analysis");
+    SH_DEBUG_PRINT_ASP("Hierarchical enabled. Doing escape analysis");
     liveVarAnalysis(programStruct, program);
     dump(programNode, "_asp-1-inesc");
   }
@@ -1762,7 +1923,7 @@ void placeAaSyms(ProgramNodePtr programNode, const AaVarSymsMap& inputs, bool sh
 
 
   SH_DEBUG_PRINT_ASP("Filling in empty stmt indices");
-  add_stmt_indices(program);
+  add_stmt_indices(program, true);
 
   // Place error symbols where they're needed,
   // and add defs to the worklist if they insert an extra error symbol
@@ -1778,7 +1939,13 @@ void placeAaSyms(ProgramNodePtr programNode, const AaVarSymsMap& inputs, bool sh
 
   addLiveDef(programNode);
 
-  symdump(programNode, st.psyms, "_asp-2-syms");
+  if(AaspDebugOn) {
+      symdump(programNode, st.psyms, "_asp-2-dest_syms", true, false);
+      symdump(programNode, st.psyms, "_asp-2-dest_syms_la", true, true);
+      symdump(programNode, st.psyms, "_asp-2-live_syms", false, false);
+      symdump(programNode, st.psyms, "_asp-2-live_syms_la", false, true);
+      livedump(programNode, st.psyms, "_asp-2-live_counts");
+  }
   addUniqueMerge(programNode, st, showStats, disableUniqMerge, symfile);
 
 
@@ -1788,6 +1955,7 @@ void placeAaSyms(ProgramNodePtr programNode, const AaVarSymsMap& inputs, bool sh
   sg.transform(programNode);
 
   remove_branch_instructions(program);
+  SH_DEBUG_PRINT_ASP("Done ASP");
 }
 
 

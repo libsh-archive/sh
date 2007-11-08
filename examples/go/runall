@@ -1,0 +1,12 @@
+#!/bin/bash
+
+make testclean
+
+./shgo two_bumpy_spheres.goo dist quit | grep "^bbtime" > runall.csv 
+./shgo noum two_bumpy_spheres.goo dist quit | grep "^bbtime,[^ ]" >> runall.csv 
+#./shgo ia two_bumpy_spheres.goo dist quit | grep "^bbtime,[^ ]" >> runall.csv 
+./shgo fusilli_wineglass.goo dist quit | grep "^bbtime,[^ ]" >> runall.csv 
+./shgo noum fusilli_wineglass.goo dist quit | grep "^bbtime,[^ ]" >> runall.csv 
+#./shgo ia fusilli_wineglass.goo dist quit | grep "^bbtime,[^ ]" >> runall.csv 
+
+cp runall.csv ~/work/thesis/data/

@@ -29,6 +29,7 @@
 #include "Eval.hpp"
 #include "TypeInfo.hpp"
 #include "Transformer.hpp"
+#include "Tag.hpp"
 
 #define DBG_TRANSFORMER
 
@@ -156,7 +157,9 @@ void DefaultTransformer<T>::operator()(CtrlGraphNode* node) {
   if (!block) return;
 
   for (BasicBlock::StmtList::iterator I = block->begin(); I != block->end();) {
+    Tag::push(*I);
     if(!T::handleStmt(I, node)) ++I;
+    Tag::pop();
   }
 }
 

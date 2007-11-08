@@ -21,6 +21,7 @@
 #include <iostream>
 #include <fstream>
 
+#include "Timer.hpp"
 #include "StorageType.hpp"
 #include "Optimizations.hpp"
 
@@ -93,6 +94,9 @@ void GlslCode::generate()
   Context::current()->enter(m_shader);
 
   Transformer transform(m_shader);
+
+  Context::current()->disable_optimization("forward substitution");
+  //Context::current()->disable_optimization("forward placement");
   transform.handleDbgOps();
   VarTransformMap* original_vars = new VarTransformMap;
   transform.convertInputOutput(original_vars);
@@ -125,6 +129,20 @@ void GlslCode::generate()
   transform.handleDbgOps();
   //transform.texd_to_texlod();
 
+  //SH_DEBUG_PRINT("glsl done before opt stmtcount: " << m_shader->statement_count());
+  m_shader->csvdump("glslcode_" + m_originalShader->name() + "_tags.csv", 
+    combine(getTagCsvData(m_shader), getLiveVarCsvData(m_shader)));  
+
+  if(transform.changed()) {
+    optimize(m_shader);
+  }
+
+  m_shader->csvdump("glslcode_" + m_originalShader->name() + "_part_opt_tags.csv",
+    combine(getTagCsvData(m_shader), getLiveVarCsvData(m_shader)));  
+
+  Context::current()->enable_optimization("forward substitution");
+  //Context::current()->enable_optimization("forward placement");
+
   if (transform.changed()) {
     optimize(m_shader);
   } else {
@@ -133,6 +151,17 @@ void GlslCode::generate()
     Context::current()->exit();
     Context::current()->enter(m_shader);
   }
+
+  //SH_DEBUG_PRINT("glsl done partial opt stmtcount: " << m_shader->statement_count());
+  LiveVarCsvDataPtr lvcd = shref_dynamic_cast<LiveVarCsvData>(getLiveVarCsvData(m_shader));
+  m_shader->csvdump("glslcode_" + m_originalShader->name() + "_optimized_tags.csv", 
+    combine(getTagCsvData(m_shader), lvcd)); 
+  Context::current()->set_stat("glsl_instr_count", m_shader->statement_count());
+  Context::current()->set_stat("glsl_scalar_instr_count", m_shader->scalar_statement_count());
+  Context::current()->set_stat("glsl_num_live", lvcd->max_live);
+  Context::current()->set_stat("glsl_num_scalar_live", lvcd->max_scalar_live);
+  Context::current()->set_stat("glsl_avg_num_live", lvcd->total_live / (float)(lvcd->stmt_count));
+  Context::current()->set_stat("glsl_avg_num_scalar_live", lvcd->scalar_total_live / (float)(lvcd->stmt_count));
 
   // Initialize the extensions map
   m_glsl_extensions.clear();
@@ -860,14 +889,21 @@ void GlslCode::bind_textures()
 {
   if (!m_bound) return;
   
+  char timebuf[100]; 
+  sprintf(timebuf, "glslcode_bindtex_0_");
+  int count = 0;
   for (ProgramNode::TexList::const_iterator i = m_shader->textures.begin();
        i != m_shader->textures.end(); i++) {
     TextureNodePtr texture = *i;
 
+    timebuf[17] = '0' + (count++); 
+    sprintf(&timebuf[19], "find"); 
+    StatTimer findtime(timebuf);
     if (m_texture_units.find(texture) == m_texture_units.end()) {
       cerr << "Texture '" << texture->name() << "' has no assigned unit." << endl;
       continue;
     }
+    findtime.diff();
     
     const GlslVariable& var(m_varmap->variable(shref_dynamic_cast<VariableNode>(texture)));
     GLint location = glGetUniformLocationARB(m_bound, var.name().c_str());
@@ -877,9 +913,12 @@ void GlslCode::bind_textures()
 
       SH_GL_CHECK_ERROR(glUniform1iARB(location, index));
       
+      sprintf(&timebuf[19], "bind"); 
+      StatTimer bindtime(timebuf);
       if (!m_texture_units[texture].preset) {
 	m_texture->bindTexture(texture, GL_TEXTURE0 + index, false);
       }
+      bindtime.diff();
     } else {
       cerr << "Cannot find uniform texture named '" << var.name() << "'." << endl;
     }

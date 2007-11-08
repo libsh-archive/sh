@@ -81,6 +81,8 @@ class  ExprParser {
 
     SH::Variable parse_expr(std::string expr); 
 
+    static SH::Stream varToStream(SH::Variable& var);
+
   private:
     typedef std::map<std::string, SH::Variable> VarMap;
     VarMap m_vars; // user defined variables
@@ -125,7 +127,6 @@ class  ExprParser {
     void restore(); 
     SH::Variable makeVar(std::string shtype); 
 
-    SH::Stream varToStream(SH::Variable& var);
 
     void debugEnter(std::string node);
     void debugExit();

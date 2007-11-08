@@ -105,6 +105,7 @@ void AaVariableNode::varlistInsert(ProgramNode::VarList& varlist, ProgramNode::V
   }
 }
 
+#if 0
 Variable AaVariableNode::radius() {
   Variable result = makeTemp(size(), "_radius");
   ConstAttrib1f ZERO(0.f);
@@ -120,7 +121,8 @@ Variable AaVariableNode::radius() {
         Variable resulti = result(i);
         ostringstream eout;
         eout << "_radius_err" << i;
-        Variable symAbs = makeTemp(m_symvar[i].size(), eout.str()); 
+        Variable erri = err(i);
+        Variable symAbs(erri.node()->clone(SH_TEMP));
         shABS(symAbs, m_symvar[i]);
         shCSUM(resulti, symAbs); 
       }
@@ -128,6 +130,7 @@ Variable AaVariableNode::radius() {
   }
   return result;
 }
+#endif
 
 Variable AaVariableNode::makeTemp(int size, const string& suffix) {
   Variable result(m_center.node()->clone(SH_TEMP, size,
@@ -439,8 +442,26 @@ AaVariable& AaVariable::addErr(const Variable& other, const AaSyms &used) {
 }
 
 // Returns radius in a variable
+//Variable AaVariable::radius() const {
+//  Variable result = m_node->radius()(m_swizzle); 
+//  return result;
+//}
+
 Variable AaVariable::radius() const {
-  Variable result = m_node->radius()(m_swizzle); 
+  Variable result = makeTemp("_radius");
+  ConstAttrib1f ZERO(0.f);
+  shASN(result, ZERO.repeat(size())); 
+  for(int i = 0; i < size(); ++i) { 
+    if(use(i).empty()) {
+      continue;
+    } else {
+      Variable erri = err(i);
+      Variable resulti = result(i);
+      Variable symAbs(erri.node()->clone(SH_TEMP, erri.size()));
+      shABS(symAbs, erri); 
+      shCSUM(resulti, symAbs); 
+    }
+  }
   return result;
 }
 

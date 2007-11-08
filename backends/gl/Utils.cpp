@@ -142,6 +142,7 @@ SplitProgram2D::SplitProgram2D(FloatExtension float_extension,
 
   Program fragment_program = epilogue(program) << Program(program) << prologue;
   fragment_program.meta("opengl:binding", "generic");  
+  fragment_program.node()->name(program->name());
   m_program_set = new ProgramSet(vertex_program, fragment_program);
 }
 
@@ -270,6 +271,7 @@ SplitProgram1DRecalculate::SplitProgram1DRecalculate(FloatExtension float_extens
 
   Program fragment_program = epilogue(program) << Program(program) << prologue;
   fragment_program.meta("opengl:binding", "generic");  
+  fragment_program.node()->name(program->name());
   m_program_set = new ProgramSet(vertex_program, fragment_program);
 }
 
@@ -408,6 +410,7 @@ SplitProgram2DRecalculate::SplitProgram2DRecalculate(FloatExtension float_extens
 
   Program fragment_program = epilogue(program) << Program(program) << prologue;
   fragment_program.meta("opengl:binding", "generic");  
+  fragment_program.node()->name(program->name());
   m_program_set = new ProgramSet(vertex_program, fragment_program);
 }
 
@@ -499,6 +502,7 @@ void ProgramVersionCache::split_program(ProgramNode* program,
     }
     Program p = swizzle(chunk) << Program(program);
     p.node()->target() = target;
+    p.node()->name(program->name());
     split_programs.push_back(p.node());
   }
 }

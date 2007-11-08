@@ -34,7 +34,7 @@
 #include <fstream>
 
 // Uncomment to enable constant/uniform propagation debugging (verbose!)
-// #define SH_DEBUG_CONSTPROP
+//#define SH_DEBUG_CONSTPROP
 
 #ifdef SH_DEBUG_OPTIMIZER
 #ifndef SH_DEBUG_CONSTPROP

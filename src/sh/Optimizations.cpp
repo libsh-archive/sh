@@ -32,6 +32,12 @@
 
 //#define SH_DEBUG_OPTIMIZER
 
+#ifdef SH_DEBUG_OPTIMIZER 
+#define SH_OPT_DEBUG_PRINT(x) SH_DEBUG_PRINT(x)
+#else
+#define SH_OPT_DEBUG_PRINT(x)
+#endif
+
 namespace {
 
 using namespace SH;
@@ -594,21 +600,17 @@ void optimize(Program& p, int level)
     return;
   }
 
-#ifdef SH_DEBUG_OPTIMIZER
-  SH_DEBUG_PRINT("After collecting declarations");
-  SH_DEBUG_PRINT(p.node()->describe_decls());
-#endif
+  SH_OPT_DEBUG_PRINT("After collecting declarations");
+  SH_OPT_DEBUG_PRINT(p.node()->describe_decls());
 
-#ifdef SH_DEBUG_OPTIMIZER
   int pass = 0;
-  SH_DEBUG_PRINT("Begin optimization for program with target " << p.node()->target());
-#endif
+  SH_OPT_DEBUG_PRINT("Begin optimization for program with target " << p.node()->target());
   
   bool changed;
   do {
 
 #ifdef SH_DEBUG_OPTIMIZER
-    SH_DEBUG_PRINT("---Optimizer pass " << pass << " BEGIN---");
+    SH_OPT_DEBUG_PRINT("---Optimizer pass " << pass << " BEGIN---");
     std::ostringstream s;
     s << p.name() << "_opt_" << pass;
     p.node()->dump(s.str());
@@ -617,21 +619,26 @@ void optimize(Program& p, int level)
     changed = false;
 
     if (!Context::current()->optimization_disabled("copy propagation")) {
+      SH_OPT_DEBUG_PRINT("copy propagation");
       copy_propagate(p, changed);
     }
     if (!Context::current()->optimization_disabled("forward substitution")) {
+      SH_OPT_DEBUG_PRINT("forward substitution");
       forward_substitute(p, changed);
     }
 
     if (!Context::current()->optimization_disabled("remove_empty_blocks")) {
+      SH_OPT_DEBUG_PRINT("remove empty blocks");
       remove_empty_blocks(p, changed);
     }
 
     if (!Context::current()->optimization_disabled("straightening")) {
+      SH_OPT_DEBUG_PRINT("straightening");
       straighten(p, changed);
     }
 
     if (!Context::current()->optimization_disabled("remove_redundant_edges")) {
+      SH_OPT_DEBUG_PRINT("remove redundant edges");
       remove_redundant_edges(p, changed);
     }
 
@@ -639,11 +646,13 @@ void optimize(Program& p, int level)
 
     if (level >= 2 &&
         !Context::current()->optimization_disabled("propagation")) {
+      SH_OPT_DEBUG_PRINT("constant propagation");
       add_value_tracking(p);
       propagate_constants(p);
     }
 
     if (!Context::current()->optimization_disabled("deadcode")) {
+      SH_OPT_DEBUG_PRINT("dead code removal");
       add_value_tracking(p); // TODO: Really necessary?
       remove_dead_code(p, changed);
     }
@@ -651,13 +660,12 @@ void optimize(Program& p, int level)
     remove_branch_instructions(p);
 
     if (!Context::current()->optimization_disabled("forward placement")) {
+      SH_OPT_DEBUG_PRINT("forward placement");
       forward_placement(p);
     }
 
-#ifdef SH_DEBUG_OPTIMIZER
-    SH_DEBUG_PRINT("---Optimizer pass " << pass << " END---");
+    SH_OPT_DEBUG_PRINT("---Optimizer pass " << pass << " END---");
     pass++;
-#endif
   } while (changed);
   p.node()->collectDecls();
   p.node()->collectVariables();

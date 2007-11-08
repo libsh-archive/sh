@@ -4,11 +4,14 @@
 #include <cassert>
 #include <cstdarg>
 
+#include <sstream>
 #include <iostream>
 #include <fstream>
 #include <sh/sh.hpp>
 #include "man.hpp"
 #include "BranchBound.hpp"
+#include "ExprParser.hpp"
+#include "Timer.hpp"
 
 
 /* Global minimization operator (all input parameters assumed to range between 0 and 1) 
@@ -18,74 +21,111 @@
  *
  * Returns only one minimum  
  * */
+#define MANDIST_DEBUG false
+
+#define DUMP_COUNT 100000
 
 template<int N>
-void minimize(SH::Generic<N, float>& result, const Man& objective, int splitLevel=1, float eps=1e-5, bool use_aa=true) {
-  SH::ConstAttrib1i_f bounds(SH::Interval<float>(0.0f, 1.0f));
+struct Minimizer {
   typedef SH::Attrib<N, SH::SH_TEMP, float> InType;
   typedef SH::Attrib1f OutType;
-  assert(objective.size_matches(N, 1));
-
-
-  SH::Program ifunc = use_aa ? affine_inclusion(objective) : inclusion(objective);
-  ifunc.node()->dump("ifunc");
-  if(use_aa) {
-    SH::Program foo(ifunc.node()->clone());
-    placeAaSyms(foo.node(), true);
-  }
-
+  SH::Program ifunc;
 
   typedef BranchBound<InType, OutType> BBParams;
   typedef BranchBoundIterator<BBParams> BBIterator;
   typedef typename BBParams::IntervalDomain IDomain;
   typedef typename BBParams::IntervalRange IRange; 
   typedef typename BBParams::DomainArray DomainArray;
-  typedef std::vector<typename BBParams::ResultType> ResultVec;
+  //typedef std::vector<typename BBParams::State> ResultVec;
 
   BBParams bb;
   BBIterator bbIt; 
-  ResultVec results;
   IDomain initialBounds; 
-  for(int i = 0; i < initialBounds.size(); ++i) initialBounds(i) = bounds;
-  bb = BBParams(ifunc, splitLevel, eps); 
-  bbIt = BBIterator(bb, initialBounds);
-  std::ofstream bbout("bbout");
-  try {
-    while(!bbIt.done()) {
-      std::cout << "Iteration " << (results.size() + 1) << std::endl;
-      bbIt.iterate();
-      results.push_back(bbIt.current());
-#if 1
-      // get ranges and display them
-      typename BBParams::ResultType r = results.back();
-      int count = r.domain.count();
-      std::cout << "After iteration " << results.size(); 
-      std::cout << "  count=" << count << std::endl;
-      std::cout << "  first five results:" << std::endl;
-      bbout << "Iteration " << results.size() << " count=" << count << std::endl;
-      for(int i = 0; i < count; ++i) {
-        if(i < 5) {
-          std::cout << "  [" << r.domain.lo(i) << "," << r.domain.hi(i) << "] ->  [" 
-                    << r.range.lo(i) << "," << r.range.hi(i) << "]" << std::endl; 
-        }
-        bbout << "  [" << r.domain.lo(i) << "," << r.domain.hi(i) << "] ->  [" 
-                  << r.range.lo(i) << "," << r.range.hi(i) << "]" << std::endl; 
-      }
-#endif
-    }
-  } catch(const SH::Exception &e) {
-    std::cout << "Error: " << e.message() << std::endl;
-  } catch(...) {
-    std::cout << "Caught unknown error: " << std::endl;
-  }
-  bbout.close();
 
-  DomainArray temp(results.back().domain.lo(0) + results.back().domain.hi(0));
-  temp *= 0.5;
-  for(int i = 0; i < result.size(); ++i) {
-    result(i) = temp[i];
+  int splitLevel;
+  float eps;
+
+
+  Minimizer() {}
+  Minimizer(const Man& objective, float eps=1e-4, bool use_aa=true, bool doSort=false, int splitLevel=1, float range_eps = 1e-2)
+    : splitLevel(splitLevel), eps(eps) 
+  {
+      assert(objective.size_matches(N, 1));
+      ifunc = use_aa ? affine_inclusion(objective) : inclusion(objective);
+      ifunc.name((use_aa ? "aa_" : "ia_") + objective.name());
+
+      if(MANDIST_DEBUG) ifunc.node()->dump("ifunc");
+      if(use_aa) {
+        SH::Program foo(ifunc.node()->clone());
+        placeAaSyms(foo.node(), true);
+      }
+
+      bb = BBParams(objective, ifunc, doSort, splitLevel, eps); 
   }
-}
+
+  /* Performs minimization based on current uniform settings in the ifunc */
+  SH::Generic<N, float> doit() {
+    //ResultVec results;
+    SH::Attrib<N, SH::SH_TEMP, float> result;
+    SH::ConstAttrib1i_f bounds(SH::Interval<float>(0.0f, 1.0f));
+    for(int i = 0; i < initialBounds.size(); ++i) initialBounds(i) = bounds;
+    std::cout << "constructing iterator" << std::endl;
+    bbIt = BBIterator(bb, initialBounds);
+    std::cout << "done constructing iterator" << std::endl;
+    //std::ofstream bbout("bbout");
+    Timer start = Timer::now();
+    try {
+      int it = 0;
+      while(!bbIt.done()) {
+        bbIt.iterate();
+   //     results.push_back(bbIt.current());
+   //     dump(it, bbIt);
+        it += 1;
+      }
+
+    } catch(const SH::Exception &e) {
+      std::cout << "Error: " << e.message() << std::endl;
+    } catch(...) {
+      std::cout << "Caught unknown error: " << std::endl;
+    }
+    double elapsed = (Timer::now() - start).value() / 1000.0;
+    std::cerr << "total time: " << elapsed << "s" << std::endl;
+   // bbout.close();
+   //dump(0, bbIt);
+
+    return bbIt.singleResult();
+  }
+
+  void dump(int i, BBIterator& bbIt) {
+#if DUMP_COUNT > 0 
+        float prob = 1.0;
+        std::ostringstream doutname;
+        doutname << "mandist" << i << ".csv";
+        std::ofstream dout(doutname.str().c_str());
+
+        // get ranges and display them
+        typename BBParams::State r = bbIt.current();
+        int count = r.domain.count();
+        if(DUMP_COUNT < count) {
+          prob = float(DUMP_COUNT) / count;
+        }
+
+        for(size_t j = 0; j < r.domain.lo(0).size(); ++j) dout << (j > 0 ? "," : "") << "domain" << j; 
+        dout << ",range\n";
+
+        //int k = 0; 
+        for(int i = 0; i < count; ++i) {
+          if(drand48() > prob) continue;
+          //dout << k++;
+          for(size_t j = 0; j < r.domain.lo(i).size(); ++j) {
+            dout << (j > 0 ? "," : "")<< (r.domain.lo(i)[j] + r.domain.hi(i)[j]) * 0.5;
+          }
+          dout << "," << (r.range.lo(i)[0] + r.range.hi(i)[0]) * 0.5 << "\n"; 
+        }
+#endif
+  }
+};
+
 
 struct HostManUpdater: public SH::RefCountable {
   virtual ~HostManUpdater() {}
@@ -110,58 +150,119 @@ struct HostMan: public Man {
 
 template<int A, int B, int N> 
 struct nearest_points_updater: public HostManUpdater {
+public:
   const Man& a; 
   const Man& b; 
 
   SH::Program p;
   Man objective;
   typedef typename SH::Attrib<N, SH::SH_TEMP, float, SH::SH_POINT> PointNf;
-  PointNf apoint, bpoint;
+  typedef typename SH::Attrib<N, SH::SH_OUTPUT, float, SH::SH_POINT> OutputPointNf;
+  typename SH::Attrib<A + B, SH::SH_TEMP, float> minparms;
   int aswiz[A];
   int bswiz[B];
+  int nswiz[N];
+  Minimizer<A + B> minimizer;
+  float domain_eps;
+  bool use_aa;
 
 
-  nearest_points_updater(const Man& a, const Man& b): a(a), b(b) {
+  nearest_points_updater(const Man& a, const Man& b, float domain_eps, bool use_aa): a(a), b(b), domain_eps(domain_eps), use_aa(use_aa) {
     typedef typename SH::Attrib<A + B, SH::SH_INPUT, float> InType; 
     typedef typename SH::Attrib<A, SH::SH_INPUT, float> InTypeA; 
     typedef typename SH::Attrib<A, SH::SH_INPUT, float> InTypeB; 
-    typedef typename SH::Attrib<N, SH::SH_OUTPUT, float> OutType; 
+    typedef typename SH::Attrib<4, SH::SH_OUTPUT, float> OutType; 
 
-    a.node()->dump("npu_a");
-    b.node()->dump("npu_b");
+    if(MANDIST_DEBUG) a.node()->dump("npu_a");
+    if(MANDIST_DEBUG) b.node()->dump("npu_b");
 
-    assert(A+B > 0); 
+    assert(A+B > 0 && N <= 3); 
 
     for(int i = 0; i < A; ++i) aswiz[i] = i;
     for(int i = 0; i < B; ++i) bswiz[i] = A + i;
+    for(int i = 0; i < N; ++i) nswiz[i] = i; 
 
     SH::Program foo = SH_BEGIN_PROGRAM() {
       InType SH_DECL(in);
       SH::OutputAttrib1f SH_DECL(dist);
 
-      typename OutType::TempType pa, pb, diffab;
+      typename OutputPointNf::TempType pa, pb, diffab;
       pa = A > 0 ? a(in.template swiz<A>(aswiz)) : a; 
       pb = B > 0 ? b(in.template swiz<B>(bswiz)) : b; 
       //dist = SH::distance(pa, pb); 
       diffab = pa - pb;
-      dist = diffab | diffab; 
+      dist = sqrt(diffab | diffab); 
     } SH_END;
     objective = foo;
+    objective.name("dist_" + a.name() + "_" + b.name());
 
-    p = lerp(m_u(0), m_(apoint), m_(bpoint)); 
+    p = SH_BEGIN_PROGRAM() {
+      SH::InputAttrib1f SH_DECL(t);
+      PointNf apoint, bpoint;
+      OutType result;
+      apoint = A > 0 ? a(minparms.template swiz<A>(aswiz)) : a; 
+      bpoint = B > 0 ? b(minparms.template swiz<B>(bswiz)) : b; 
+      /* Using the color ramp version of the plotting function */
+      result = SH::fillcast<4>(0.0f);
+      result.template swiz<N>(nswiz) = lerp(t, apoint, bpoint);
+      result(3) = 0.0f;
+    } SH_END;
+
+    minimizer = Minimizer<A + B>(objective, domain_eps, use_aa);
   }
 
   virtual const SH::Program& getProgram() { return p; }
 
   /* updates the nearest points by running the global optimization again */
   virtual void update(SH::Program& p) {
-    typename SH::Attrib<A + B, SH::SH_TEMP, float> minparms;
-    minimize(minparms, objective);
-    apoint = A > 0 ? a(minparms.template swiz<A>(aswiz)) : a; 
-    bpoint = B > 0 ? b(minparms.template swiz<B>(bswiz)) : b; 
+    minparms = minimizer.doit(); 
     std::cout << "minimize result = " << minparms << std::endl;
-    std::cout << "  apoint=" << apoint << std::endl;
-    std::cout << "  bpoint=" << bpoint << std::endl;
+  };
+
+};
+
+template<int A, int B, int N> 
+struct distance_graph_updater: public nearest_points_updater<A, B, N> {
+  typename SH::Attrib<A + B, SH::SH_TEMP, float> maxparms;
+  Minimizer<A + B> maximizer;
+
+  distance_graph_updater(const Man& a, const Man& b, float domain_eps, bool use_aa) 
+    : nearest_points_updater<A, B, N>(a, b, domain_eps, use_aa) { 
+    typedef typename SH::Attrib<A + B, SH::SH_INPUT, float> InType; 
+    typedef typename SH::Attrib<A + B, SH::SH_TEMP, float> TempType; 
+    typedef typename SH::Attrib<4, SH::SH_OUTPUT, float> OutType; 
+    typedef typename nearest_points_updater<A, B, N>::PointNf PointNf;
+
+    assert(A + B <= 2);
+    this->p = SH_BEGIN_PROGRAM() {
+      InType in;
+      OutType result;
+      PointNf apoint, bpoint;
+      SH::Attrib1f minVal, maxVal, valRatio, val;
+      apoint = A > 0 ? a(this->minparms.template swiz<A>(this->aswiz)) : a; 
+      bpoint = B > 0 ? b(this->minparms.template swiz<B>(this->bswiz)) : b; 
+      val = this->objective(in);
+      if(A + B == 1) {
+        result(0) = in(0) - 0.5f;
+        result(1) = val * 0.1f; 
+        result(2) = 0.0f;
+      } else if (A + B == 2) {
+        result(0, 2) = in(0,1) - 0.5f;
+        result(1) = val * 0.1f; 
+      }
+      minVal = this->objective(this->minparms);
+      maxVal = this->objective(this->maxparms);
+      valRatio = (val - minVal) / (maxVal - minVal);
+      result(3) = valRatio;
+    } SH_END;
+    maximizer = Minimizer<A + B>(-this->objective, domain_eps * 10, use_aa);
+  }
+
+  /* updates the nearest points by running the global optimization again */
+  virtual void update(SH::Program& p) {
+    nearest_points_updater<A, B, N>::update(p);
+    maxparms = maximizer.doit();
+    std::cout << "maximize result = " << maxparms << std::endl;
   };
 };
 
@@ -171,8 +272,15 @@ struct nearest_points_updater: public HostManUpdater {
  * For now, you need to specify the dimensions of a and b's inputs and 
  * both have output size N */ 
 template<int A, int B, int N>
-HostMan nearest_points(const Man& a, const Man& b) {
-  return HostMan(new nearest_points_updater<A, B, N>(a, b)); 
+HostMan nearest_points(const Man& a, const Man& b, float domain_eps, bool use_aa=true) {
+  return HostMan(new nearest_points_updater<A, B, N>(a, b, domain_eps, use_aa)); 
+}
+
+/* Alternative to nearest_points that plots the distance graph 
+ * (Currently hacked to fit 3D vis methods by using a 4th output coordinate to indicate where the minimum is)*/
+template<int A, int B, int N>
+HostMan distance_graph(const Man& a, const Man& b, float domain_eps, bool use_aa=true) {
+  return HostMan(new distance_graph_updater<A, B, N>(a, b, domain_eps, use_aa)); 
 }
 
 #endif

@@ -18,9 +18,20 @@
 // MA  02110-1301, USA
 //////////////////////////////////////////////////////////////////////////////
 #include "GlslCode.hpp"
+#include "Timer.hpp"
 #include <iostream>
 
 //#define SH_DEBUG_GLSL_BACKEND
+
+#define SH_DO_GLSL_TIMING 
+
+#ifdef SH_DO_GLSL_TIMING
+#define TIMER(t) StatTimer time_ ## t(# t);
+#define TIMING_RESULT(t) do {double d = time_ ## t.diff();} while(0)
+#else
+#define TIMER(t) 
+#define TIMING_RESULT(t) 
+#endif
 
 namespace shgl {
 
@@ -199,6 +210,8 @@ void GlslSet::bind()
 {
   if (!m_linked) link();
 
+  TIMER(glsl_bind);
+
   if (current() && current() != this) current()->unbind();
   
   SH_GL_CHECK_ERROR(glUseProgramObjectARB(m_arb_program));
@@ -215,16 +228,34 @@ void GlslSet::bind()
   }
 #endif
 
+  TIMER(glsl_bind_core);
+  char timebuf[100]; 
+  sprintf(timebuf, "glsl_0_");
   for (int i = 0; i < 2; i++) {
     if (!m_shaders[i]) continue;
+    timebuf[5] = i + '0';
     GlslCodePtr shader = m_shaders[i];
-    shader->set_bound(m_arb_program);
 
+    sprintf(&timebuf[7], "set_bound"); 
+    StatTimer sbtime(timebuf);
+    shader->set_bound(m_arb_program);
+    sbtime.diff();
+
+    sprintf(&timebuf[7], "up_uniform"); 
+    StatTimer unitime(timebuf);
     shader->upload_uniforms();
+    unitime.diff();
+
+    sprintf(&timebuf[7], "bind_tex"); 
+    StatTimer textime(timebuf);
     shader->bind_textures();
+    textime.diff();
   }
+  TIMING_RESULT(glsl_bind_core);
 
   m_current = this;
+
+  TIMING_RESULT(glsl_bind);
 }
 
 void GlslSet::unbind()

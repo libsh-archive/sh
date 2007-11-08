@@ -181,6 +181,10 @@ Program combine(const Program &pa, const Program &pb)
     }
   }
 
+  /* Clone b (probably only necessary when a == b) */ 
+  Program bclone(pb.clone(true));
+  b = bclone.node();
+
   ProgramNodePtr program = new ProgramNode(rtarget);
 
   // Create a new CFG from the two programs
@@ -189,7 +193,7 @@ Program combine(const Program &pa, const Program &pb)
   program->ctrlGraph = new_graph;
 
   ProgramNode::VarIt a_free_inputs = pa.begin_free_inputs(); 
-  ProgramNode::VarIt b_free_inputs = pb.begin_free_inputs(); 
+  ProgramNode::VarIt b_free_inputs = bclone.begin_free_inputs(); 
   std::copy(a->inputs.begin(), a_free_inputs, std::back_inserter(program->inputs));
   std::copy(b->inputs.begin(), b_free_inputs, std::back_inserter(program->inputs));
   std::copy(a_free_inputs, a->inputs.end(), std::back_inserter(program->inputs));
@@ -202,7 +206,7 @@ Program combine(const Program &pa, const Program &pb)
 
   Program prg(program);  
   prg.clone_bindings_from(pa);
-  prg.append_bindings_from(pb);
+  prg.append_bindings_from(bclone);
   return prg;
 }
 
@@ -323,7 +327,9 @@ Program renameInput(const Program& a, const std::string& oldName,
       }
     }
   } SH_END;
-  return connect(renamer, a);
+  Program result = connect(renamer, a);
+  static_cast<Meta*>(result.node().object())->operator=(*a.node().object());
+  return result;
 }
 
 // TODO factor out common code from renameInput, renameOutput
@@ -344,7 +350,9 @@ Program renameOutput(const Program &a, const std::string& oldName,
       }
     }
   } SH_END;
-  return connect(a, renamer);
+  Program result = connect(a, renamer);
+  static_cast<Meta*>(result.node().object())->operator=(*a.node().object());
+  return result;
 }
 
 Program namedAlign(const Program &a, const Program &b)
@@ -356,7 +364,9 @@ Program namedAlign(const Program &a, const Program &b)
     ordering((*I)->name());
   }
 
-  return ordering << a; 
+  Program result = ordering << a; 
+  static_cast<Meta*>(result.node().object())->operator=(*a.node().object()); // @todo put this in a function 
+  return result;
 }
 
 Program operator<<(const Program& a, const Program& b)

@@ -41,7 +41,7 @@ Man Man::operator-() const {
     Variable inout = outsize_var(SH_INOUT); 
     shASN(inout, -inout);
   } SH_END;
-  return negger << *this;
+  return Man(negger << *this).name("-" + name());
 }
 
 Man Man::operator()(int i0) const {
@@ -50,7 +50,9 @@ Man Man::operator()(int i0) const {
     Variable out = var(SH_OUTPUT, 1);
     SH::shASN(out, in(i0));
   } SH_END;
-  return swizzer << *this;
+  ostringstream iout; 
+  iout << "(" << i0 << ")";
+  return Man(swizzer << *this).name(name() + iout.str());
 };
 
 Man Man::operator()(int i0, int i1) const {
@@ -59,7 +61,9 @@ Man Man::operator()(int i0, int i1) const {
     Variable out = var(SH_OUTPUT, 2);
     SH::shASN(out, in(i0, i1));
   } SH_END;
-  return swizzer << *this;
+  ostringstream iout; 
+  iout << "(" << i0 << "," << i1 << ")";
+  return Man(swizzer << *this).name(name() + iout.str());
 };
 
 Man Man::operator()(int i0, int i1, int i2) const {
@@ -68,7 +72,9 @@ Man Man::operator()(int i0, int i1, int i2) const {
     Variable out = var(SH_OUTPUT, 3);
     SH::shASN(out, in(i0, i1, i2));
   } SH_END;
-  return swizzer << *this;
+  ostringstream iout;
+  iout << "(" << i0 << "," << i1 << "," << i2 << ")";
+  return Man(swizzer << *this).name(name() + iout.str());
 };
 
 Man Man::operator()(int i0, int i1, int i2, int i3) const {
@@ -77,7 +83,9 @@ Man Man::operator()(int i0, int i1, int i2, int i3) const {
     Variable out = var(SH_OUTPUT, 4);
     SH::shASN(out, in(i0, i1, i2, i3));
   } SH_END;
-  return swizzer << *this;
+  ostringstream iout;
+  iout << "(" << i0 << "," << i1 << "," << i2 << "," << i3 << ")";
+  return Man(swizzer << *this).name(name() + iout.str());
 };
 
 Man Man::repeat(int size) const {
@@ -91,7 +99,7 @@ Man Man::repeat(int size) const {
       shASN(out, in(size, swiz));
     } SH_END;
     delete[] swiz;
-    return swizzer << *this;
+    return Man(swizzer << *this).name(name());
   } else {
     return *this;
   }
@@ -110,7 +118,7 @@ Man Man::fill(int size) const {
       shASN(out_prefix, in); 
     } SH_END;
     delete[] swiz;
-    return swizzer << *this;
+    return Man(swizzer << *this).name(name());
   } else {
     return *this;
   }
@@ -129,7 +137,7 @@ Man Man::resize_inputs(int size) const {
       }
     } SH_END;
     delete[] swiz;
-    return *this << swizzer;
+    return Man(*this << swizzer).name(name());
   } else {
     return *this;
   }

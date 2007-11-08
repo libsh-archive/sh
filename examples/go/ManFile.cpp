@@ -5,6 +5,7 @@
 #include <sstream>
 #include <vector>
 #include <libxml++/libxml++.h>
+#include <sh/sh.hpp>
 #include "man.hpp"
 #include "ManFile.hpp"
 
@@ -21,22 +22,102 @@ namespace {
 /* Reads all paths in the SVG file and build a curve */
 class PathFinder : public xmlpp::SaxParser
 {
+  bool pathdone; 
   public:
-    PathFinder() {}
+    PathFinder(): pathdone(false) {}
     virtual ~PathFinder() {}
 
     Man allPaths() {
-      return m_uniform_concat(m_paths, 0);
+      size_t numCP = m_conpoint.size();
+      size_t numCurves = (numCP - 1) / 3;
+      ArrayRect<Point2f> control_point(numCurves, 4);
+      HostMemoryPtr mem = new HostMemory(numCurves * 4 * 2 * sizeof(float), SH_FLOAT);
+      float* data = reinterpret_cast<float*>(mem->hostStorage()->data());
+      //Palette<Point2f> control_point(numCP);
+      for(size_t i = 0; i < numCurves; ++i) {
+        for(size_t j = 0; j < 4; ++j) {
+          //cout << m_conpoint[i * 3 + j] << endl;
+//          data[(i * 4 + j) * 2] = m_conpoint[i * 3 + j].getValue(0); 
+//          data[(i * 4 + j) * 2 + 1] = m_conpoint[i * 3 + j].getValue(1); 
+          data[(j * numCurves + i) * 2] = m_conpoint[i * 3 + j].getValue(0); 
+          data[(j * numCurves + i) * 2 + 1] = m_conpoint[i * 3 + j].getValue(1); 
+        }
+        // control_point[i] = m_conpoint[i];
+      }
+      /*
+      for(size_t i = 0; i < numCurves * 4 * 2; ++i) {
+        cout << i << " " << data[i] << endl;
+      }
+      */
+      //cout << endl;
+      control_point.memory(mem);
+      Program result = SH_BEGIN_PROGRAM() {
+        InputAttrib1f SH_DECL(t); 
+        OutputPoint2f SH_DECL(p); 
+#if 0
+        //p = m_conpoint.front();
+        p = lerp(t < 0.5314159, m_conpoint.front(), m_conpoint.back()); 
+
+        Attrib1f SH_DECL(i) = 0;
+        Attrib2f SH_DECL(idx);
+        t *= numCurves;
+        SH_WHILE(i < numCurves) {
+          idx(0) = i; 
+          SH_IF((t >= i) && (t <= i + 1)) {
+            Attrib1f SH_DECL(tt) = t - i;
+            Attrib4f SH_DECL(bt) = bernstein<4>(tt);
+            for(int j = 0; j < 4; ++j) {
+                //p += bt(j) * control_point[i * 3 + j]; 
+                idx(1) = j; 
+                Point2f SH_DECL(inc) = bt(j) * control_point[idx];
+                if(j == 0) p = inc; 
+                else p += inc; 
+            }
+          } SH_ENDIF;
+          i += 1;
+        } SH_ENDWHILE;
+#else
+        //p = m_conpoint.front();
+        p = m_conpoint.front();
+
+        Attrib1f SH_DECL(i) = 0;
+        Attrib2f SH_DECL(idx);
+        t *= numCurves;
+        SH_WHILE(i < numCurves) {
+        //for(int i = 0; i < numCurves; ) {
+          idx(0) = i; 
+          SH_IF(t < i - 1) {
+          } SH_ELSE {
+            SH_IF(t > i) {
+              Attrib1f SH_DECL(tt) = t - i;
+              Attrib4f SH_DECL(bt) = bernstein<4>(tt);
+              for(int j = 0; j < 4; ++j) {
+                  //p += bt(j) * control_point[i * 3 + j]; 
+                  idx(1) = j; 
+                  Point2f SH_DECL(inc) = bt(j) * control_point[idx];
+                  if(j == 0) p = inc; 
+                  else p += inc; 
+              }
+            } SH_ENDIF;
+          } SH_ENDIF;
+          i += 1;
+        //}
+        } SH_ENDWHILE;
+#endif
+      } SH_END;
+
+      return Man(result)(m_u(0)); 
     }
 
   protected:
     //overrides:
     virtual void on_start_element(const Glib::ustring& name,
                                   const AttributeList& attributes) {
-      if(name == "path") {
+      if(name == "path" && !pathdone) {
         for(xmlpp::SaxParser::AttributeList::const_iterator iter = attributes.begin(); iter != attributes.end(); ++iter) {
           if(iter->name == "d") addPath(iter->value);
         }
+        pathdone = true;
       }
     }
 
@@ -51,14 +132,15 @@ class PathFinder : public xmlpp::SaxParser
       pin >> x;
       pin.ignore(256, ',');
       pin >> y;
-      return ConstPoint2f(x, y);
+      /* reflect y to match OpenGL */
+      return ConstPoint2f(x, -y);
     }
 
     /* Split up the elements in the string into curves and add them to the PathVec */
     void addPath(const Glib::ustring& s) {
       istringstream pin(s);
       bool done = false;
-      ConstPoint2f first, last;
+      ConstPoint2f last, end;
       for(int i = 0;!done; ++i) {
         char command;
         pin >> skipws >> command; 
@@ -66,38 +148,43 @@ class PathFinder : public xmlpp::SaxParser
 
         /* Make sure we get *new* constants for each segment 
          * (instead of reusing th esame uniform - which causes big problems) */
-        ConstPoint2f p1, p2, end; /* parameters used in different curves */
         ConstPoint2f lastCopy = last;
 
         switch(command) {
           case 'M': /* moveto */
-            first = last = end = getPoint(pin); 
+            assert(m_conpoint.empty());
+            end = last = getPoint(pin); 
+            m_conpoint.push_back(last);
             break;
 
           case 'L': /* lineto */
             end = getPoint(pin);
-            m_paths.push_back(lerp(m_u(0), m_(end), m_(lastCopy)));
+            m_conpoint.push_back(last);
+            //m_conpoint.push_back(lerp(0.25, end, last)); 
+            //m_conpoint.push_back(lerp(0.75, end, last)); 
+            m_conpoint.push_back(end);
+            m_conpoint.push_back(end);
             break;
 
           case 'H': /* horizontal line */
             end = last;
             end(0) = getScalar(pin);
-            m_paths.push_back(lerp(m_u(0), m_(end), m_(lastCopy)));
+            m_conpoint.push_back(lerp(0.25, end, last)); 
+            m_conpoint.push_back(lerp(0.75, end, last)); 
+            m_conpoint.push_back(end);
             break;
 
           case 'V': /* vertical line */
             end = last;
             end(1) = getScalar(pin);
-            m_paths.push_back(lerp(m_u(0), m_(end), m_(lastCopy)));
+            m_conpoint.push_back(lerp(0.25, end, last)); 
+            m_conpoint.push_back(lerp(0.75, end, last)); 
+            m_conpoint.push_back(end);
             break;
 
           case 'C': /* cubic bezier to */ {
-              Point2D p[4]; 
-              p[0] = last;
-              p[1] = getPoint(pin);
-              p[2] = getPoint(pin);
-              end = p[3] = getPoint(pin);
-              m_paths.push_back(m_cubic_bezier(m_u(0), p));
+              for(int i = 0; i < 3; ++i) m_conpoint.push_back(getPoint(pin));
+              end = m_conpoint.back();
               break;
             }
           case 'Z': /* done*/
@@ -108,8 +195,10 @@ class PathFinder : public xmlpp::SaxParser
       }
     }
 
-    typedef vector<Man> PathVec;
-    PathVec m_paths;
+    //typedef vector<Man> PathVec;
+    //PathVec m_paths;
+    typedef vector<Point2f> ControlPointVec;
+    ControlPointVec m_conpoint;
 };
 }
 
@@ -132,6 +221,7 @@ Surface3D m_read_tea_surface(const char* filename) {
 
   /* read in patch indices */
   fin >> count;
+  
   typedef vector<int> veci;
   typedef vector<veci> vecvi; 
   vecvi patch_index; 

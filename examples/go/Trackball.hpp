@@ -38,7 +38,7 @@ public:
   ~Trackball() {}
 
   void resize(float width, float height);
-  Matrix4x4f rotate(float sx, float sy, float ex, float ey) const;
+  Matrix4x4f rotate(float sx, float sy, float ex, float ey, bool twod=false) const;
 
 private:
   float m_width, m_height;

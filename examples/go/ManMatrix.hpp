@@ -46,6 +46,23 @@ struct ManMatrix: public SH::Program {
 
   ManMatrix operator()(const Man& input) const { return connect(input, *this); }
 
+  template<typename T>
+  Man mul(const Man& x) {
+    assert(x.output_matches(T::typesize));
+    int maxIn = std::max(input_size(), x.input_size());
+    ManMatrix mf = resize_inputs(maxIn);
+    Man xf = x.resize_fill(maxIn, T::typesize);
+    SH::Program p = SH_BEGIN_PROGRAM() {
+      ManMatrix::OutType::InputType SH_DECL(inMatrix);
+      typename T::InOutType SH_DECL(x);
+      x = inMatrix | x;
+    } SH_END;
+    SH::Program result = p << (mf & xf); 
+    if(maxIn > 0) result = result << SH::dup(); 
+    result.node()->dump("mul");
+    return result;
+  }
+
   private:
     void setCount(); 
     int m_in;
@@ -54,20 +71,5 @@ struct ManMatrix: public SH::Program {
 template<SH::BindingType Binding>
 ManMatrix m_(const SH::Matrix<4, 4, Binding, float>& value) { return ManMatrix(value); }
 
-template<typename T>
-Man mul(const ManMatrix& m, const Man& x) {
-  assert(x.output_matches(T::typesize));
-  int maxIn = std::max(m.input_size(), x.input_size());
-  ManMatrix mf = m.resize_inputs(maxIn);
-  Man xf = x.resize_fill(maxIn, T::typesize);
-  SH::Program p = SH_BEGIN_PROGRAM() {
-    ManMatrix::OutType::InputType SH_DECL(inMatrix);
-    typename T::InOutType SH_DECL(in);
-    in = inMatrix | in;
-  } SH_END;
-  SH::Program result = p << (mf & xf); 
-  if(maxIn > 0) return result << SH::dup(); 
-  return result;
-}
 
 #endif

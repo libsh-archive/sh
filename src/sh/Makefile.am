@@ -38,7 +38,9 @@ libsh_la_SOURCES += Parser.hpp RefCount.hpp Statement.hpp
 libsh_la_SOURCES += Swizzle.hpp SwizzleImpl.hpp Syntax.hpp Token.hpp Tokenizer.hpp
 libsh_la_SOURCES += Utility.hpp Variable.hpp VariableNode.hpp sh.hpp shmacros.hpp
 libsh_la_SOURCES += Hacks.hpp Hacks.cpp 
+libsh_la_SOURCES += ProgramCounter.hpp ProgramCounter.cpp 
 incinc_HEADERS += Hacks.hpp
+incinc_HEADERS += ProgramCounter.hpp
 libsh_la_SOURCES += HashMap.hpp 
 libsh_la_SOURCES += Graph.hpp GraphImpl.hpp 
 libsh_la_SOURCES += Instructions.hpp Instructions.cpp
@@ -55,6 +57,7 @@ libsh_la_SOURCES += Lp.hpp LpImpl.hpp
 incinc_HEADERS   += Lp.hpp
 libsh_la_SOURCES += MultiArray.hpp
 incinc_HEADERS   += MultiArray.hpp
+incinc_HEADERS   += Timer.hpp
 
 # Backend
 libsh_la_SOURCES += Backend.cpp Backend.hpp 
@@ -67,6 +70,8 @@ incinc_HEADERS   += Transformer.hpp BitSet.hpp
 libsh_la_SOURCES += TypeConvertTransformer.cpp 
 libsh_la_SOURCES += TransformerImpl.hpp 
 incinc_HEADERS	 += TransformerImpl.hpp 
+libsh_la_SOURCES += Tag.hpp Tag.cpp
+incinc_HEADERS   += Tag.hpp 
 libsh_la_SOURCES += IntervalConverter.cpp 
 libsh_la_SOURCES += AaSyms.hpp AaSyms.cpp 
 incinc_HEADERS   += AaSyms.hpp 

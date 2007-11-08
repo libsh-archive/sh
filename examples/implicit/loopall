@@ -1,0 +1,12 @@
+#! /bin/bash
+# runs all the test cases needed for the thesis examples
+
+export MODE=-cap\ -loop
+
+./doall
+
+echo -n "" > loop.csv
+
+for i in loop_*.png; do
+    ./loopcount.py $i >> loop.csv
+done

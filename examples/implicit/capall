@@ -1,0 +1,10 @@
+#! /bin/bash
+# runs all the test cases needed for the thesis examples
+
+export MODE=-cap
+
+./doall
+
+for i in sphere*.png torus*.png; do
+  cp $i ~/work/thesis/data/impl/apps_impl_$i;
+done

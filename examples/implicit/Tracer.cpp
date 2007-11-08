@@ -17,6 +17,7 @@
 //#define DISTFUNC InvPF 
 
 
+#include <cstdlib>
 #include <cassert>
 #include <complex>
 #include <vector>
@@ -49,8 +50,81 @@ using namespace ShUtil;
 string defaultBackend = "arb";
 bool showTiming = true;
 bool showAaDebug = false;
+bool showDot = false;
+bool testMode = false; /* complete test of all cases */
+bool testMode2 = false; /* test case specified from command line, run numTestFrames, then quit */
+bool showGradient = true;
+bool screenCap = false;
+string caseName;
+int twistCount = 0;
+int bumpCount = 0;
+int objCount = 0;
+int testRun = 0;
+int testCase = 0;
+int testRange = AAUC;
+int testFrame = 0;
+DebugMode mainDebugMode = NORMAL; 
+float testFpsTotal = 0;
+const int numTestFrames = 4;
+const int numRuns = 3;
+const int testSize = 512;
+
+map<string, float> savedLoopCount; /* used to compute giga-instructions per second, only on the AAUC case */     
+
+vector<string> split(const string& str, char delim) {
+  vector<string> result;
+  size_t s, e;
+  size_t len = str.length();
+  for(s = 0; s < len; s = e) {
+    for(;s < len && str[s] == delim; ++s);
+    if(s == len) break;
+    for(e = s + 1; e < len && str[e] != delim; ++e); 
+    result.push_back(str.substr(s, e - s));
+  }
+  return result;
+}
+
+struct ProgramStats {
+  string prefix;
+  int temps, scalar_temps;
+  int instr_count, scalar_instr_count;
+  int live, scalar_live;
+  float avg_live, avg_scalar_live;
+  ProgramStats(string prefix=""): prefix(prefix), temps(-1), scalar_temps(-1), instr_count(-1), scalar_instr_count(-1),
+    live(-1), scalar_live(-1), avg_live(-1), avg_scalar_live(-1) {}
+
+  void update() {
+      instr_count = Context::current()->get_stat((defaultBackend + "_instr_count").c_str());
+      scalar_instr_count = Context::current()->get_stat((defaultBackend + "_scalar_instr_count").c_str());
+      temps = Context::current()->get_stat((defaultBackend + "_num_temps").c_str());
+      scalar_temps = Context::current()->get_stat((defaultBackend + "_num_scalar_temps").c_str());
+      live = Context::current()->get_stat((defaultBackend + "_num_live").c_str());
+      scalar_live = Context::current()->get_stat((defaultBackend + "_num_scalar_live").c_str());
+      avg_live = Context::current()->get_stat((defaultBackend + "_avg_num_live").c_str());
+      avg_scalar_live = Context::current()->get_stat((defaultBackend + "_avg_num_scalar_live").c_str());
+  }
+
+  string header() {
+    ostringstream sout;
+    sout << "," << prefix << "instr_count," << prefix << "scalar_instr_count," << prefix << "temps," << prefix << "scalar_temps," << prefix << "live," << prefix << "scalar_live," << prefix 
+         << "avg_live," << prefix << "avg_scalar_live";
+    return sout.str();
+  }
+
+  string csv() {
+    ostringstream sout;
+    sout << "," <<instr_count<< "," <<scalar_instr_count<< "," <<temps<< "," <<scalar_temps<< "," <<live<< "," <<scalar_live<< "," <<avg_live<< "," <<avg_scalar_live;
+    return sout.str();
+  }
+};
+ProgramStats tracer_stats("tracer");
+ProgramStats firsthit_stats("firsthit");
+ProgramStats fsh_stats;
+
 
 ConstColor3f TufteOrange = ConstColor3f(1.0f, 0.62f, .035f);
+string timingCase; 
+string arithmeticName;
 
 const char* DebugModeName[] = {
   "debug_start",
@@ -71,6 +145,12 @@ const char* RangeModeName[] = {
   "Interval Arithmetic"
 };
 
+const char* RangeModeShortName[] = {
+  "AAUC",
+  "AA",
+  "IA"
+};
+
 ostream& operator<<(ostream & out, const wxString & str) {
   out << str.mb_str();
   return out;
@@ -82,53 +162,48 @@ Timer timer;
 
 void startTimer(string msg) {
   timer = Timer::now();
-  if(showTiming) {
-    std::cout << "Timer " << msg << " "; 
-  }
 }
 
-void printElapsed(string msg) {
+double printElapsed(string msg) {
   double elapsed = (Timer::now() - timer).value() / 1000; 
   if(showTiming) {
-    cout << " elapsed " << msg << " " << elapsed << " = " << (1.0 / elapsed) << "Hz" << endl;
+    cout << "timing:" << msg << "," << timingCase << "," << arithmeticName << "," << elapsed << "," << (1.0 / elapsed) << endl;
+    cout.flush();
   }
+  return elapsed;
 }
-
-// `Main program' equivalent, creating windows and returning main app frame
-bool TracerApp::OnInit()
-{
-
-  bool singleCanvas = false;
-  bool noBackground = false;
-  wxSize framesize(1024, 1024); 
-  for(int i = 0; i < argc; ++i) {
-    if(wxString(argv[i]) == wxT("-single")) singleCanvas = true;
-    if(wxString(argv[i]) == wxT("-white")) noBackground = true;
-    if(wxString(argv[i]) == wxT("-cap")) {
-      framesize = wxSize(512, 512);
-      singleCanvas = noBackground = true;
-    }
-  }
-    // Create the main frame window
-    m_frame = new TracerFrame(NULL, wxT("Implicit Ray-Tracer"),
-        wxDefaultPosition, framesize, wxDEFAULT_FRAME_STYLE, singleCanvas, noBackground);
-
-
-    /* Show the m_frame */
-    m_frame->Show(true);
-    return true;
+double getElapsed() {
+  return (Timer::now() - timer).value() / 1000; 
 }
-
-IMPLEMENT_APP(TracerApp)
 
 // IDs for the controls and the menu commands
 enum
 {
     // our menu items
-    Preset_Sphere = 100,
-    Preset_Spheres,
-    Preset_Line,
-    Preset_Torus,
+    Preset_Sphere1 = 100,
+    Preset_Sphere2,
+    Preset_Sphere3,
+    Preset_Sphere4,
+    Preset_Sphere5,
+    Preset_Sphere6,
+    Preset_Sphere7,
+    Preset_Sphere8,
+    Preset_Line1,
+    Preset_Line2,
+    Preset_Line3,
+    Preset_Line4,
+    Preset_Line5,
+    Preset_Line6,
+    Preset_Line7,
+    Preset_Line8,
+    Preset_Torus1,
+    Preset_Torus2,
+    Preset_Torus3,
+    Preset_Torus4,
+    Preset_Torus5,
+    Preset_Torus6,
+    Preset_Torus7,
+    Preset_Torus8,
     Preset_H2O,
 
     // standard menu items
@@ -140,12 +215,130 @@ enum
     Preset_About = wxID_ABOUT
 };
 
+// `Main program' equivalent, creating windows and returning main app frame
+bool TracerApp::OnInit()
+{
+
+  bool singleCanvas = false;
+  bool noBackground = false;
+  wxSize framesize(1280, 768); 
+
+  /*  read in saved loop count */
+  char buf[1000];
+  ifstream fin("loop.csv");
+  for(;fin.getline(buf, 1000);) {
+    if(fin.eof()) break;
+    vector<string> toks = split(buf, ',');
+    string name = toks[0].substr(5, toks[0].length() - 9); /* ignore loop_ prefix, .png suffix */
+    float avg_count;
+    sscanf(toks[1].c_str(), "%f", &avg_count);
+    savedLoopCount[name] = avg_count;
+    cerr << name << "=" << avg_count << endl; 
+  }
+
+  /* Handle cmd line args */
+  for(int i = 0; i < argc; ++i) {
+    string foo = static_cast<const char*>(wxString(argv[i]).mb_str());
+    if(foo == "-single") {
+      framesize = wxSize(testSize, testSize);
+      singleCanvas = true;
+    }
+    if(foo == "-white")  noBackground = true;
+    if(foo == "-test") {
+      testMode2 = true; 
+      framesize = wxSize(testSize, testSize);
+      singleCanvas = noBackground = true;
+    }
+    if(foo == "-cap") {
+      screenCap = true; 
+      framesize = wxSize(testSize, testSize);
+      singleCanvas = noBackground = true;
+    }
+    if(foo == "-nograd") {
+      showGradient = false;
+    }
+    if(foo.substr(0,7) == "-sphere") caseName = foo.substr(1); 
+    if(foo.substr(0,6)  == "-torus") caseName = foo.substr(1); 
+    if(foo == "-debug") {
+      showAaDebug = true;
+      cerr << "debug on!" << endl;
+    }
+    if(foo == "-loop") {
+      mainDebugMode = LOOP;
+    }
+  }
+
+    // Create the main frame window
+    m_frame = new TracerFrame(NULL, wxT("shimpl"),
+        wxDefaultPosition, framesize, wxDEFAULT_FRAME_STYLE, singleCanvas, noBackground);
+
+  if(caseName != "") {
+    int count = caseName[caseName.length() - 1] - '1'; 
+    int preset = (caseName[0] == 's' ? Preset_Sphere1 : Preset_Torus1) + count;
+    wxCommandEvent evt(0, preset);
+    m_frame->OnPreset(evt);
+  }
+
+  for(int i = 0; i < argc; ++i) {
+    string foo = static_cast<const char*>(wxString(argv[i]).mb_str());
+    if(foo == "-twistx" || foo == "-twisty" || foo == "-twistz") {
+      int axis = foo == "-twistx" ? 0 : foo == "-twisty" ? 1 : 2;
+      for(int i = 0; i < 9; ++i) {
+        if(m_frame->pfs[i]) m_frame->pfs[i] = new TwistPF(m_frame->pfs[i], axis, 1);
+      }
+      caseName += foo; 
+      twistCount++;
+    }
+    if(foo == "-bumpx" || foo == "-bumpy" || foo == "-bumpz") {
+      int axis = foo == "-bumpx" ? 0 : foo == "-bumpy" ? 1 : 2;
+      for(int i = 0; i < 9; ++i) {
+        if(m_frame->pfs[i]) m_frame->pfs[i] = new SinPF(m_frame->pfs[i], axis, 0.2, 4);
+      }
+      caseName += foo; 
+      bumpCount++;
+    }
+  }
+  if(mainDebugMode == LOOP) {
+    caseName = "loop_" + caseName;
+  }
+
+    /* Show the m_frame */
+    m_frame->Show(true);
+    return true;
+}
+
+IMPLEMENT_APP(TracerApp)
+
+
 
 BEGIN_EVENT_TABLE(TracerFrame, wxFrame)
-    EVT_MENU(Preset_Sphere, TracerFrame::OnPreset)
-    EVT_MENU(Preset_Spheres, TracerFrame::OnPreset)
-    EVT_MENU(Preset_Line, TracerFrame::OnPreset)
-    EVT_MENU(Preset_Torus, TracerFrame::OnPreset)
+    EVT_MENU(Preset_Sphere1, TracerFrame::OnPreset)
+    EVT_MENU(Preset_Sphere2, TracerFrame::OnPreset)
+    EVT_MENU(Preset_Sphere3, TracerFrame::OnPreset)
+    EVT_MENU(Preset_Sphere4, TracerFrame::OnPreset)
+    EVT_MENU(Preset_Sphere5, TracerFrame::OnPreset)
+    EVT_MENU(Preset_Sphere6, TracerFrame::OnPreset)
+    EVT_MENU(Preset_Sphere7, TracerFrame::OnPreset)
+    EVT_MENU(Preset_Sphere8, TracerFrame::OnPreset)
+
+    EVT_MENU(Preset_Line1, TracerFrame::OnPreset)
+    EVT_MENU(Preset_Line2, TracerFrame::OnPreset)
+    EVT_MENU(Preset_Line3, TracerFrame::OnPreset)
+    EVT_MENU(Preset_Line4, TracerFrame::OnPreset)
+    EVT_MENU(Preset_Line5, TracerFrame::OnPreset)
+    EVT_MENU(Preset_Line6, TracerFrame::OnPreset)
+    EVT_MENU(Preset_Line7, TracerFrame::OnPreset)
+    EVT_MENU(Preset_Line8, TracerFrame::OnPreset)
+
+    EVT_MENU(Preset_Torus1, TracerFrame::OnPreset)
+    EVT_MENU(Preset_Torus2, TracerFrame::OnPreset)
+    EVT_MENU(Preset_Torus3, TracerFrame::OnPreset)
+    EVT_MENU(Preset_Torus4, TracerFrame::OnPreset)
+    EVT_MENU(Preset_Torus5, TracerFrame::OnPreset)
+    EVT_MENU(Preset_Torus6, TracerFrame::OnPreset)
+    EVT_MENU(Preset_Torus7, TracerFrame::OnPreset)
+    EVT_MENU(Preset_Torus8, TracerFrame::OnPreset)
+
     EVT_MENU(Preset_H2O, TracerFrame::OnPreset)
 END_EVENT_TABLE()
 
@@ -155,31 +348,52 @@ TracerFrame::TracerFrame(wxFrame *frame, const wxString& title, const wxPoint& p
     : wxFrame(frame, wxID_ANY, title, pos, size, style),
       backgroundColor(noBackground ? ConstColor3f(1, 1, 1) : ConstColor3f(.25, .25, .25))
 {
-    initParams();
 
     /* Make a menubar */
     m_presetMenu = new wxMenu;
 
-    m_presetMenu->Append(Preset_Sphere, wxT("&Sphere"));
-    m_presetMenu->Append(Preset_Spheres, wxT("&Spheres"));
-    m_presetMenu->Append(Preset_Line, wxT("&Line"));
-    m_presetMenu->Append(Preset_Torus, wxT("&Torus"));
-    m_presetMenu->Append(Preset_H2O, wxT("&H2O"));
+    m_presetMenu->Append(Preset_Sphere1, wxT("&1 Sphere"));
+    m_presetMenu->Append(Preset_Sphere2, wxT("&2 Spheres"));
+    m_presetMenu->Append(Preset_Sphere3, wxT("&3 Spheres"));
+    m_presetMenu->Append(Preset_Sphere4, wxT("&4 Spheres"));
+    m_presetMenu->Append(Preset_Sphere5, wxT("&5 Spheres"));
+    m_presetMenu->Append(Preset_Sphere6, wxT("&6 Spheres"));
+    m_presetMenu->Append(Preset_Sphere7, wxT("&7 Spheres"));
+    m_presetMenu->Append(Preset_Sphere8, wxT("&8 Spheres"));
+    m_presetMenu->Append(Preset_Line1, wxT("1 &Line"));
+    m_presetMenu->Append(Preset_Line2, wxT("2 &Lines"));
+    m_presetMenu->Append(Preset_Line3, wxT("3 &Lines"));
+    m_presetMenu->Append(Preset_Line4, wxT("4 &Lines"));
+    m_presetMenu->Append(Preset_Line5, wxT("5 &Lines"));
+    m_presetMenu->Append(Preset_Line6, wxT("6 &Lines"));
+    m_presetMenu->Append(Preset_Line7, wxT("7 &Lines"));
+    m_presetMenu->Append(Preset_Line8, wxT("8 &Lines"));
+    m_presetMenu->Append(Preset_Torus1, wxT("1 &Torus"));
+    m_presetMenu->Append(Preset_Torus2, wxT("2 &Torii"));
+    m_presetMenu->Append(Preset_Torus3, wxT("3 &Torii"));
+    m_presetMenu->Append(Preset_Torus4, wxT("4 &Torii"));
+    m_presetMenu->Append(Preset_Torus5, wxT("5 &Torii"));
+    m_presetMenu->Append(Preset_Torus6, wxT("6 &Torii"));
+    m_presetMenu->Append(Preset_Torus7, wxT("7 &Torii"));
+    m_presetMenu->Append(Preset_Torus8, wxT("8 &Torii"));
+    m_presetMenu->Append(Preset_H2O, wxT("H2O"));
     m_menuBar = new wxMenuBar;
     m_menuBar->Append(m_presetMenu, wxT("&Preset"));
-    SetMenuBar(m_menuBar);
+    if(!(screenCap||testMode2)) {
+      SetMenuBar(m_menuBar);
+    }
 
     if(singleCanvas) {
       numCanvas = 1;
-      m_canvas[0] = new TracerGLCanvas(NORMAL, this, *this, wxID_ANY, wxDefaultPosition, wxSize(1024, 1024), wxNO_BORDER); 
+      m_canvas[0] = new TracerGLCanvas(mainDebugMode, this, *this, wxID_ANY, wxDefaultPosition, wxSize(1024, 1024), wxNO_BORDER); 
     } else {
       numCanvas = 3;
       m_split = new wxSplitterWindow(this); 
       m_rightSplit = new wxSplitterWindow(m_split); 
       for(int i = 0; i < numCanvas; ++i) {
-        DebugMode debugMode = NORMAL;
+        DebugMode debugMode = mainDebugMode;
         switch(i) {
-          case 0: debugMode = NORMAL; break;
+          case 0: debugMode = mainDebugMode; break;
           case 1: debugMode = PLOT; break;
           case 2: debugMode = TRACE; break;
         }
@@ -191,13 +405,15 @@ TracerFrame::TracerFrame(wxFrame *frame, const wxString& title, const wxPoint& p
       m_split->SplitVertically(m_canvas[0], m_rightSplit); 
       m_rightSplit->SplitHorizontally(m_canvas[1], m_canvas[2]);
     }
+    initParams();
+    RefreshAll();
 
     //this->SetCanvas(m_canvas);
 }
 
 void TracerFrame::initParams() {
   selected = 0;
-  ShowTorus();
+  ClearModels();
 
   // set up names
   for(int i = 0; i < 9; ++i) {
@@ -234,27 +450,28 @@ void TracerFrame::initParams() {
   traceDiff.name("traceDiff");
 
   loop_cutoff.name("loop_cutoff");
-  loop_cutoff = 64.0f;
+  loop_cutoff = 255.0f;
 
   loop_highlight.name("loop_highlight");
   loop_highlight = 0.0f;
 
   eyeposm.name("eyeposm");
 
-  sphereRadius = 8.0;
+  sphereRadius = 10.0;
   graphScale = sphereRadius * 2; 
   graphOffset = ConstVector2f(0.0, 0.0);
 
   dbgCoords = Attrib2f(0.0, 0.0);
 
-  camera.move(0.0, 0.0, -15.0);
+  camera.move(0.0, 0.0, -7.0);
   lightPos = Point3f(5.0, 5.0, 5.0);
   lightPos.name("lightPos");
 
   showTiming = true;
-  showAaDebug = false;
+  showDot = false;
 
-  rangeMode = AA;
+  rangeMode = AAUC;
+  arithmeticName = RangeModeShortName[rangeMode]; 
 }
 
 /* Intercept menu commands */
@@ -262,13 +479,39 @@ void TracerFrame::OnPreset( wxCommandEvent& event )
 {
   ClearModels();
   switch(event.GetId()) {
-    case Preset_Sphere: ShowSphere(); break;
-    case Preset_Spheres: ShowSpheres(); break;
-    case Preset_Line: ShowLine(); break;
-    case Preset_Torus: ShowTorus(); break;
+    case Preset_Sphere1: 
+    case Preset_Sphere2: 
+    case Preset_Sphere3: 
+    case Preset_Sphere4: 
+    case Preset_Sphere5: 
+    case Preset_Sphere6: 
+    case Preset_Sphere7: 
+    case Preset_Sphere8: 
+        ShowSphere(event.GetId() - Preset_Sphere1 + 1); break;
+
+    case Preset_Line1: 
+    case Preset_Line2: 
+    case Preset_Line3: 
+    case Preset_Line4: 
+    case Preset_Line5: 
+    case Preset_Line6: 
+    case Preset_Line7: 
+    case Preset_Line8: 
+        ShowLine(event.GetId() - Preset_Line1 + 1); break;
+
+    case Preset_Torus1: 
+    case Preset_Torus2: 
+    case Preset_Torus3: 
+    case Preset_Torus4: 
+    case Preset_Torus5: 
+    case Preset_Torus6: 
+    case Preset_Torus7: 
+    case Preset_Torus8: 
+        ShowTorus(event.GetId() - Preset_Torus1 + 1); break;
+
     case Preset_H2O: ShowH2O(); break;
     default:
-      cerr << "Unknown preset" << event.GetId() << endl; 
+      cout << "Unknown preset" << event.GetId() << endl; 
   }
   InitShaders();
 }
@@ -376,39 +619,60 @@ void TracerFrame::ClearModels() {
     }
     pfs[0] = new DISTFUNC(new Dist2SpherePF(color[0]));
   }
+  level = 1.0;
 }
 
-void TracerFrame::ShowSphere() {
-  float side = 1.25;
-  pfs[0] = new DISTFUNC(new Dist2SpherePF(color[0]));
+void TracerFrame::InitTrans(int numObj) {
+  objCount = numObj;
+  float side = 1.0;
+  if(numObj > 1) {
+    float foo = side * sqrt(3);
+    trans[0] = Vector3f(-side, -0.5 * foo, 0);
+    trans[1] = Vector3f(side, -0.5 * foo, 0);
+    trans[2] = Vector3f(0, 0.5 * foo, 0);
+
+    trans[3] = Vector3f(-side, 0.75 * foo, side);
+    trans[4] = Vector3f(side, 0.75 * foo, side);
+    trans[5] = Vector3f(0, -0.75 * foo, side);
+
+    trans[6] = Vector3f(foo, 0, 0);
+    trans[7] = Vector3f(-foo, 0, 0);
+  } else {
+    scl[0] = ConstAttrib3f(0.8, 0.8, 0.8);
+  }
 }
 
-void TracerFrame::ShowSpheres() {
-  float side = 1.25;
-  pfs[0] = new DISTFUNC(new Dist2SpherePF(color[0]));
-  trans[0] = Vector3f(-side, -side * 0.5 * sqrt(3), 0);
-  pfs[1] = new DISTFUNC(new Dist2SpherePF(color[1]));
-  trans[1] = Vector3f(side, -side * 0.5 * sqrt(3), 0);
-  pfs[2] = new DISTFUNC(new Dist2SpherePF(color[2]));
-  trans[2] = Vector3f(0, side * 0.5 * sqrt(3), 0);
+void TracerFrame::ShowSphere(int numSpheres) {
+  for(int i = 0; i < numSpheres; ++i) {
+      pfs[i] = new DISTFUNC(new Dist2SpherePF(color[i]));
+  }
+  InitTrans(numSpheres);
+  ostringstream sout;
+  sout << "sphere" << numSpheres;
+  timingCase = sout.str();
 }
 
-void TracerFrame::ShowLine() {
-  pfs[0] = new DISTFUNC(new Dist2LinePF(color[0]));
-  fscl[0] = 0.52; 
+void TracerFrame::ShowLine(int numLines) {
+  for(int i = 0; i < numLines; ++i) {
+    pfs[i] = new DISTFUNC(new Dist2LinePF(color[i]));
+    fscl[i] = 0.52; 
+  }
   //fscl[0] = ; 
+  InitTrans(numLines);
+  ostringstream sout;
+  sout << "line" << numLines;
+  timingCase = sout.str();
 }
 
-void TracerFrame::ShowTorus() {
-  float side = 1.69;
-  pfs[0] = new DISTFUNC(new Dist2TorusPF(color[0]));
-  /*
-  trans[0] = Vector3f(-side, -side * 0.5 * sqrt(3), 0);
-  pfs[1] = new DISTFUNC(new Dist2TorusPF(color[1]));
-  trans[1] = Vector3f(side, -side * 0.5 * sqrt(3), 0);
-  pfs[2] = new DISTFUNC(new Dist2TorusPF(color[2]));
-  trans[2] = Vector3f(0, side * 0.5 * sqrt(3), 0);
-  */
+void TracerFrame::ShowTorus(int numTorus) {
+  for(int i = 0; i < numTorus; ++i) {
+      pfs[i] = new DISTFUNC(new Dist2TorusPF(color[i]));
+      if(numTorus >= 2) fscl[i] = 0.7; 
+  }
+  InitTrans(numTorus);
+  ostringstream sout;
+  sout << "torus" << numTorus;
+  timingCase = sout.str();
 }
 
 void TracerFrame::ShowH2O() {
@@ -430,6 +694,7 @@ void TracerFrame::ShowH2O() {
   pfs[4] = new TransformPF(new DISTFUNC(new Dist2LinePF(color[2], 3)),
                translate(trans) * rotate(rotAxis, -bondAngle)); 
   level = 1.9;  
+  timingCase = "h2o";
 }
 
 void TracerFrame::InitShaders() {
@@ -459,6 +724,7 @@ void TracerFrame::OnCharAll(wxKeyEvent& event)
   bool reinit = false;
   switch(k)
     {
+    case ',': break;
     case 'k': sphereRadius -= 0.1f; break;
     case 'K': sphereRadius += 0.1f; break;
 
@@ -525,14 +791,35 @@ void TracerFrame::OnCharAll(wxKeyEvent& event)
      }
      break;
 
+
     case 'p': 
      if(selected > 0) {
        int idx = selected - 1;
+       /*
        pfs[idx] = new DISTFUNC(new DistPlanePF(color[idx])); 
+       */
+       pfs[idx] = new NoisePF(pfs[idx], ConstAttrib1f(0.1f));
        reinit = true;
      }
      break;
 
+    case 'T':
+     if(selected > 0) {
+       int idx = selected - 1;
+       pfs[idx] = new TwistPF(pfs[idx], 1, 1);  
+       reinit = true;
+     }
+     break;
+
+    case 'S':
+     if(selected > 0) {
+       int idx = selected - 1;
+       pfs[idx] = new SinPF(pfs[idx], 1, 0.1, 4);  
+       reinit = true;
+     }
+     break;
+
+/*
     case 'd':
      if(selected > 0) {
        int idx = selected - 1;
@@ -540,6 +827,7 @@ void TracerFrame::OnCharAll(wxKeyEvent& event)
        reinit = true;
      }
      break;
+     */
 
     case 'g': 
      if(selected > 0) {
@@ -556,17 +844,18 @@ void TracerFrame::OnCharAll(wxKeyEvent& event)
        reinit = true;
      }
      break;
-#if 0
+
+    case 'j':
      if(selected > 0) {
        int idx = selected - 1;
        // some constants taken from shrike;
        Attrib1f maxlvl=5;
        Attrib1f julia_max = 2.0;
-       Attrib2f c(0.54,-0.51);
+       Attrib4f c(-0.08,0.0,-0.8,-0.03); /* from pbourke's site*/
        pfs[idx] = new JuliaPF(maxlvl, julia_max, c, color[idx]);
        reinit = true;
      }
-#endif
+     break;
 
 /*
     case 'h':
@@ -587,20 +876,22 @@ void TracerFrame::OnCharAll(wxKeyEvent& event)
 
     case 'y': // resets view
      camera.reset();
-     camera.move(0.0, 0.0, -15.0);
+     camera.move(0.0, 0.0, -7.0);
      for(int i = 0; i < numCanvas; ++i) m_canvas[i]->SetupView();
      break;
 
     
     case 'z':
-     if(rangeMode == AA) rangeMode = IA;
+     if(rangeMode == AAUC) rangeMode = IA;
      else rangeMode = static_cast<RangeMode>(rangeMode - 1);
+     arithmeticName = RangeModeShortName[rangeMode]; 
      reinit = true;
      break;
 
     case 'Z':
-     if(rangeMode == IA) rangeMode = AA;
+     if(rangeMode == IA) rangeMode = AAUC;
      else rangeMode = static_cast<RangeMode>(rangeMode + 1);
+     arithmeticName = RangeModeShortName[rangeMode]; 
      reinit = true;
      break;
 
@@ -613,6 +904,27 @@ void TracerFrame::OnCharAll(wxKeyEvent& event)
       Context::current()->set_flag("aa_disable_debug", !showAaDebug);
       reinit = true;
       break;
+
+    case 'd':
+      showDot = !showDot;
+      cout << "Showing dot " << showDot << endl;
+      //Context::current()->set_flag("aa_disable_debug", !showAaDebug);
+      reinit = true;
+      break;
+
+    case '`': {
+        testMode = true;
+        // initialize test mode
+        testRun = 0;
+        testCase = Preset_Sphere1;
+        testRange = AAUC;
+        testFrame = 0;
+        testFpsTotal = 0;
+        wxCommandEvent evt(0, testCase);
+        OnPreset(evt);
+        break;
+    }
+      
 
     case WXK_LEFT:  dbgCoords(0) -= 0.01; break;
     case WXK_RIGHT: dbgCoords(0) += 0.01; break;
@@ -644,6 +956,7 @@ void TracerFrame::OnCharAll(wxKeyEvent& event)
      //cout << "  g/G           Change graph y scale in Trace mode" << endl; 
      cout << "  w             Show debug" << endl;
      cout << "  x             Show timings" << endl;
+     cout << "  d             Show dot" << endl;
      cout << "  up/down/left/right  Move trace point" << endl;
      cout << "  y             Reset view" << endl;
      cout << "  0             Change to view mode (deselect object)" << endl;
@@ -659,18 +972,27 @@ void TracerFrame::OnCharAll(wxKeyEvent& event)
      cout << "  i             Make line segment (line segment generator) " << endl;
      cout << "  c             Make object a cylinder (line generator)" << endl;
      cout << "  t             Make object a torus (circle generator)" << endl;
-     cout << "  d             Make object a drop" << endl;
+     //cout << "  d             Make object a drop" << endl;
      cout << "  g             Make gumdrop torus function" << endl;
      cout << "  q             Make superquadric function" << endl;
      cout << "  p             Make object a plane (plane generator)" << endl;
      cout << "  D             Distort with a twist" << endl; 
      //cout << "  h             Make object a texture mapped heightfield (SLOW)" << endl;
-     //cout << "  a             Make object a julia fractal (SLOW!!)" << endl;
+     cout << "  j             Make object a julia fractal (SLOW!!)" << endl;
      cout << "  n             Make object empty" << endl;
      cout << "  Middle Button Translate object x/y" << endl;
      cout << "  Right Button  Translate object z" << endl;
      cout << "  Shift-Left/Mddle/Right Button    Change object x/y/z scaling" << endl;
      cout << "  Ctrl-Left Button Change function scaling" << endl;
+      cout << "Sphere Radius: " << sphereRadius.getValue(0) << endl;
+      cout << "Level: " << level.getValue(0) << endl;
+      cout << "Graph scale: " << graphScale << endl; 
+      cout << "Epsilon : " << eps.getValue(0) << " Trace Epsilon: " << traceEps.getValue(0) << endl;
+      cout << "Trace Extra : " << traceDiff.getValue(0) << endl;
+      cout << "Loop Cutoff : " << loop_cutoff.getValue(0) << endl;
+      cout << "Loop Highlight: " << loop_highlight.getValue(0) << endl;
+      cout << "Arithmetic Type : " << RangeModeName[rangeMode] << endl; 
+      break;
   }
 
 
@@ -682,14 +1004,6 @@ void TracerFrame::OnCharAll(wxKeyEvent& event)
       }
     }
   }
-  cout << "Sphere Radius: " << sphereRadius.getValue(0) << endl;
-  cout << "Level: " << level.getValue(0) << endl;
-  cout << "Graph scale: " << graphScale << endl; 
-  cout << "Epsilon : " << eps.getValue(0) << " Trace Epsilon: " << traceEps.getValue(0) << endl;
-  cout << "Trace Extra : " << traceDiff.getValue(0) << endl;
-  cout << "Loop Cutoff : " << loop_cutoff.getValue(0) << endl;
-  cout << "Loop Highlight: " << loop_highlight.getValue(0) << endl;
-  cout << "Arithmetic Type : " << RangeModeName[rangeMode] << endl; 
 
   RefreshAll();
 }
@@ -718,14 +1032,19 @@ BEGIN_EVENT_TABLE(TracerGLCanvas, wxGLCanvas)
     EVT_CHAR(TracerGLCanvas::OnChar)
 END_EVENT_TABLE()
 
+int attribList[] = {
+  WX_GL_DOUBLEBUFFER, 1,
+  0
+};
+
 TracerGLCanvas::TracerGLCanvas(DebugMode mode, wxWindow* parent, TracerFrame& tframe, wxWindowID id,
     const wxPoint& pos, const wxSize& size, long style, const wxString& name)
-    : wxGLCanvas(parent, id, pos, size, style|wxFULL_REPAINT_ON_RESIZE, name),
+    : wxGLCanvas(parent, id, pos, size, style|wxFULL_REPAINT_ON_RESIZE, name, attribList),
       debugMode(mode), do_init(true), m_tframe(tframe),
       m_context(Context::createContext())
 {
   //m_context->disable_optimization("propagation");
-  //m_context->optimization(1);
+  //m_context->optimization(0);
 }
 
 TracerGLCanvas::~TracerGLCanvas()
@@ -734,6 +1053,8 @@ TracerGLCanvas::~TracerGLCanvas()
 
 void TracerGLCanvas::OnPaint( wxPaintEvent& WXUNUSED(event) )
 {
+    static int frameCount = 0;
+
     /* must always be here */
     wxPaintDC dc(this);
 
@@ -750,9 +1071,10 @@ void TracerGLCanvas::OnPaint( wxPaintEvent& WXUNUSED(event) )
     }
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glFinish();
 
-    startTimer("Rendering");
-    cout << "Debug mode=" << DebugModeName[debugMode] << endl;
+    startTimer("render");
+    //cout << "Debug mode=" << DebugModeName[debugMode] << endl;
     if(debugMode == TRACE || debugMode == PLOT) {
       glBegin(GL_QUADS);
         glNormal3f(0.0f, 0.0f, 1.0f);
@@ -775,10 +1097,77 @@ void TracerGLCanvas::OnPaint( wxPaintEvent& WXUNUSED(event) )
     }
 
     glFinish();
+    if(testMode2 || testMode) {
+      if(testFrame == 0) {
+        cout << "timing:render_headers,case,framecount,objCount,bumpCount,twistCount,GFLOPS,avg_loops" << fsh_stats.header() << firsthit_stats.header() << tracer_stats.header() << ",shape,arithmetic,time,fps" << endl;
+      }
+    }
+    double elapsed = getElapsed();
+    double fps = 1.0 / elapsed;
+    double gflops = 0.0;
+    float savedLoops = 0;
+    if(savedLoopCount.find(caseName) != savedLoopCount.end() && (m_tframe.rangeMode == AAUC || m_tframe.rangeMode == AA)) {
+      savedLoops = savedLoopCount[caseName];
+      int instr_count = savedLoops * firsthit_stats.scalar_instr_count + (fsh_stats.scalar_instr_count - firsthit_stats.scalar_instr_count); 
+      gflops = fps * testSize * testSize * instr_count; 
+      gflops /= 1e9; 
+    }
+    cout << "timing:render," << caseName << "," << frameCount++ << "," << objCount << "," << bumpCount << "," << twistCount 
+         << "," << gflops << "," << savedLoops 
+         << fsh_stats.csv() << firsthit_stats.csv() << tracer_stats.csv()
+         << "," << timingCase << "," << arithmeticName << "," << elapsed << "," <<  (1.0 / elapsed) << endl; 
   
     // Swap
     SwapBuffers();
-    printElapsed("Done Render");
+
+    if(testMode) {
+      testFpsTotal += 1.0 / elapsed;
+      if(++testFrame == numTestFrames) { /* next case */ 
+        //cout << "avg_timing:render," << timingCase << "," << arithmeticName << "," << instr_count << "," << scalar_instr_count << "," << (testFpsTotal / numTestFrames) << "," << temps << "," << scalar_temps << endl; 
+        testFrame = 0;
+        testFpsTotal = 0;
+        if(testRange == IA) { /* next preset */
+          testRange = AAUC;
+          if(++testCase > Preset_H2O) {
+            if(++testRun >= numRuns) {
+              testMode = false;
+            } else {
+              testCase = Preset_Sphere1;
+              wxCommandEvent evt(0, testCase);
+              m_tframe.OnPreset(evt);
+            }
+          } else {
+            wxCommandEvent evt(0, testCase);
+            m_tframe.OnPreset(evt);
+          }
+        } else { /* next arithmetic mode */
+          testRange++; 
+        }
+        m_tframe.rangeMode = static_cast<RangeMode>(testRange);
+        arithmeticName = RangeModeShortName[m_tframe.rangeMode]; 
+        InitShaders();
+      } 
+      m_tframe.RefreshAll();
+    }
+    if(testMode2) {
+      if(++testFrame == numTestFrames) {
+        testFrame = 0;
+        if(++testRange > IA) {  
+          m_tframe.Close(true);
+        } else {
+          m_tframe.rangeMode = static_cast<RangeMode>(testRange);
+          arithmeticName = RangeModeShortName[m_tframe.rangeMode]; 
+          InitShaders();
+        }
+      }
+      m_tframe.RefreshAll();
+    }
+    if(screenCap && testFrame++ == 1) {
+      ostringstream cmdout;
+      cmdout << "/usr/bin/import -window shimpl " << caseName << ".png";
+      system(cmdout.str().c_str()); 
+      m_tframe.Close(true);
+    }
 }
 
 void TracerGLCanvas::OnSize(wxSizeEvent& event)
@@ -873,6 +1262,7 @@ void TracerGLCanvas::InitGL()
 {
     Context::setContext(m_context);
     if(!do_init) return;
+    setBackend(defaultBackend);
     do_init = false;
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_VERTEX_PROGRAM_ARB);
@@ -903,8 +1293,9 @@ void TracerGLCanvas::InitShaders()
     GrabContext();
     bool use_aa = (m_tframe.rangeMode != IA);
 
-    startTimer("Building Shaders");
+    Context::current()->set_flag("aa_disable_debug", !showAaDebug);
 
+    startTimer("build_vsh");
     if(debugMode == TRACE || debugMode == PLOT) {
       Matrix4x4f id;
       vsh = KernelLib::vsh(id, id);
@@ -914,7 +1305,7 @@ void TracerGLCanvas::InitShaders()
       vsh = vsh << extract("lightPos") << m_tframe.lightPos;
     }
 
-    printElapsed("Build vsh");
+    printElapsed("build_vsh");
 
     Color3f SH_DECL(ks) = Color3f(0.3, 0.3, 0.3);
     Attrib1f SH_DECL(specexp) = 64.0f;
@@ -924,8 +1315,8 @@ void TracerGLCanvas::InitShaders()
 
     /* Set flags */
     switch(m_tframe.rangeMode) {
-      case AA: Context::current()->set_flag("aa_enable_um", true); break; 
-      case AA_NOUC: Context::current()->set_flag("aa_enable_um", false); break; 
+      case AAUC: Context::current()->set_flag("aa_enable_um", true); break; 
+      case AA: Context::current()->set_flag("aa_enable_um", false); break; 
       case IA: Context::current()->set_flag("aa_enable_um", true); break; 
     }
 
@@ -937,14 +1328,28 @@ void TracerGLCanvas::InitShaders()
       }
     }
 
+    string shapeName = plotfunc->name(); 
+    if(caseName != "") {
+      shapeName = caseName;
+    } else if(timingCase != "") {
+      shapeName = timingCase;
+    }
+
     Program func = plotfunc->funcProgram("posm");
-    func.name(plotfunc->name());
-    Program gradient = plotfunc->gradProgram("posm");
+    func.name(shapeName);
+    Program gradient;
+    if(showGradient) {
+      gradient = plotfunc->gradProgram("posm");
+    } else {
+      gradient = plotfunc->nullProgram("posm", ConstAttrib3f(0, 0, 1)); 
+    }
     Program colorFunc = plotfunc->colorProgram("posm");
 
-    printElapsed("Build plot functions (function, gradient, color)");
+    printElapsed("build_plotfunc");
 
     Color3f SH_DECL(lightColor) = ConstAttrib3f(0.75, .75, .75);
+
+    Program tracer, hitter;
 
     fsh = SH_BEGIN_FRAGMENT_PROGRAM {
       InputPoint3f SH_DECL(posm);
@@ -975,21 +1380,13 @@ void TracerGLCanvas::InitShaders()
       } 
 
       cout << "Building tracer" << endl;
-      Program tracer = trace(func)(m_tframe.eyeposm, dir);
+      tracer = trace(func)(m_tframe.eyeposm, dir);
       tracer = add<Attrib1f>() << -m_tframe.level << tracer;
-      tracer.name("tracer_" + plotfunc->name());
-      if(showAaDebug) {
-        tracer.node()->dump("tracer_" + plotfunc->name());
-      }
-      Program foo = affine_inclusion_syms(tracer);
-      foo.name("aa_tracer_" + plotfunc->name());
-      placeAaSyms(foo.node(), true);
-      if(showAaDebug) {
-        foo.node()->dump("aa_tracer_" + plotfunc->name());
-      }
+      tracer.name("tracer_" + shapeName);
+
 
       cout << "Building firsthit" << endl;
-      Program hitter = firsthit(tracer, use_aa, debugMode, m_tframe, texcoord);
+      hitter = firsthit(tracer, use_aa, debugMode, m_tframe, texcoord);
 
       Attrib1f SH_DECL(trace_start); 
       Attrib1f SH_DECL(trace_end) = dist + 2.0  * (dir | -posm) + m_tframe.traceDiff;
@@ -1007,7 +1404,7 @@ void TracerGLCanvas::InitShaders()
 
 
       if(debugMode == NORMAL) {
-        if(showAaDebug) {
+        if(showDot) {
           kill(!hashit && !inDbg);
         } else {
           kill(!hashit); 
@@ -1020,7 +1417,8 @@ void TracerGLCanvas::InitShaders()
         normal = gradient(hitp);
         normal = m_tframe.mv | normal;
         normal = normalize(normal);
-        lightVec = m_tframe.mv | (m_tframe.lightPos - hitp); 
+        //lightVec = m_tframe.mv | (m_tframe.lightPos - hitp); 
+        lightVec = m_tframe.lightPos - (m_tframe.mv | hitp); 
         lightVec = normalize(lightVec);
         viewVec = normalize(viewVec);
         halfVec = normalize(lightVec + viewVec);
@@ -1029,7 +1427,7 @@ void TracerGLCanvas::InitShaders()
         normal = faceforward(lightVec, normal); 
 
         OutputColor3f SH_DECL(kd) = colorFunc(hitp);
-        if(showAaDebug) {
+        if(showDot) {
           kd = lerp(inDbg, TufteOrange, kd);
           normal = lerp(inDbg, lightVec, normal);
         }
@@ -1067,7 +1465,8 @@ void TracerGLCanvas::InitShaders()
           case LOOP:
           case CUTOFF:
             {
-              color = lerp(hashit, lerp(hit, lowColor, highColor), ConstColor3f(0.5, 0.5, 0.5));
+              //color = lerp(hashit, lerp(hit, lowColor, highColor), ConstColor3f(0.5, 0.5, 0.5));
+              color = hit(0,0,0);
             }
             break;
 
@@ -1095,16 +1494,38 @@ void TracerGLCanvas::InitShaders()
     }
 
     switch(m_tframe.rangeMode) {
-      case AA: fsh.name("fsh_aa"); break;
-      case AA_NOUC: fsh.name("fsh_aa_nouc"); break;
-      case IA: fsh.name("fsh_ia"); break;
+      case AAUC: fsh.name("fsh_aa_" + shapeName); break;
+      case AA: fsh.name("fsh_aa_nouc_" + shapeName); break;
+      case IA: fsh.name("fsh_ia_" + shapeName); break;
     }
-    printElapsed("Build fsh");
+    printElapsed("build_fsh" + fsh.name());
 
     vsh = namedAlign(vsh, fsh);
     vsh.name("vsh");
 
-    if(showAaDebug) {
+    /* dump out various pieces */
+    if(showAaDebug || testMode2) {
+      tracer.node()->dump("tracer_" + shapeName);
+      Program foo;
+      if(m_tframe.rangeMode == AAUC || m_tframe.rangeMode == AA) {
+          foo = affine_inclusion_syms(tracer.clone(true));
+          string fooName = (m_tframe.rangeMode == AAUC ? "aa_tracer_" : "aa_nouc_tracer") + shapeName;
+          foo.name(fooName);
+          foo.node()->dump(fooName);
+          compile(foo, "gpu:fragment");
+      } else {
+          foo = inclusion(tracer.clone(true));
+          foo.name("ia_tracer_" + shapeName);
+          foo.node()->dump("ia_tracer_" + shapeName);
+          compile(foo, "gpu:fragment");
+      }
+      tracer_stats.update();
+
+      foo = hitter.clone(true);
+      foo.node()->dump("firsthit_" + shapeName);
+      compile(foo, "gpu:fragment");
+      firsthit_stats.update();
+
       dump(fsh, fsh.name());
       dump(vsh, "vsh");
     }
@@ -1114,7 +1535,8 @@ void TracerGLCanvas::InitShaders()
     lock_in_uniforms(fsh);
     shaders = new ProgramSet(vsh, fsh);
     bind(*shaders);
-    printElapsed("Bind vsh, fsh");
+    fsh_stats.update();
+    printElapsed("bind_shaders");
   } catch(const Exception &e) {
     cout << "Error: " << e.message() << endl;
   } catch(...) {

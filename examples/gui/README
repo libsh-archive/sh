@@ -1,0 +1,45 @@
+uish notes
+
+Wanted OpenGL based widget library that could support
+  -unusual layouts of widgets
+    -graph layouts
+    -(sort of) arbitrary transformations btw parent and widget
+  -support for mixing 3D elements in 2D widgets (eg. for previews, or error viz
+  -customizable widget styles (user-specified opengl rendering code)
+    -shader support on widgets (same problems though as how to integrate shaders
+    into scene graphs)
+    (most of the existing widget kits look like crap)
+
+Available options glgooey, GLUI, GLOW not flexible enough (or not documented 
+enough to modify) 
+
+@todo
+  -event processing sucks
+    -mouse press, motion issues
+    (may want to use picking?)
+    -make sure invariants for the events satisfied
+  -modularity sucks
+    -refine uishBase
+    -make sure only functions that should be virtual are virtual
+
+  -containers
+    -box should expose internal dimensions (without border)
+  -convert functions to use Sh types (e.g. width/heights, bounding boxes, etc.)
+
+  -should have begin_render, end_render so that things in borders don't have to
+  deal with border width themselves
+
+
+Widgets
+
+Container Widgets
+  uishBase        - OpenGL root widget (can only hold one child widget, which is
+                    resized to fill the whole opengl canvas)
+  uishFrame       - OpenGL frame that holds one child and resizes to fit child's size
+  uishFixedFrame  - OpenGL frame that scales one child to fit its size
+  uishGraphLayout - graph layout of fixed size children with edges between them 
+  uishPackLayout  - pack layout that may stretch children to meet requested size
+                    and expand to fit children
+
+uishLabel     - text label
+uishBox       - box with border

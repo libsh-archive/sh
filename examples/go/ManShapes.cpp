@@ -25,6 +25,12 @@ Man m_normal2d(const Man& curve) {
          .name("m_normal2d(" + curve.name() + ")"); 
 }
 
+/* Offset curve at a given radius to another curve */
+Man m_offset2d(const Man& curve, const Man& radius) {
+  Man normal = m_normal2d(curve);
+  return (curve + radius * normal).name("m_offset2d(" + curve.name() + "," + radius.name());
+}
+
 /* Normalized 3D normal to a surface */
 Man m_normal3d(const Man& surface) {
   Man d0 = m_differentiate(surface, 0);
@@ -104,3 +110,147 @@ Man m_uniform_concat(std::vector<Man>& ms, int dim) {
   return result.name("m_uniform_concat(...)"); 
 }
 
+Man m_add_noise(const Man& base, const Man& scale) {
+  Man both = m_combine(base, scale);
+
+  size_t bsize = base.output_size();
+  size_t ssize = scale.output_size();
+  int* base_swiz = new int[bsize];
+  int* scale_swiz = new int[ssize];
+  for(size_t i = 0; i < bsize; ++i) {
+    base_swiz[i] = i;
+  }
+
+  for(size_t i = 0; i < ssize; ++i) {
+    scale_swiz[i] = i + bsize; 
+  }
+
+  Program f = SH_BEGIN_PROGRAM() {
+    Variable in = both.outsize_var(SH_INPUT); 
+    Variable out = base.outsize_var(SH_OUTPUT);
+
+    Variable in_base = in(Swizzle(bsize + ssize, bsize, base_swiz)); 
+    Variable in_scale = in(Swizzle(bsize + ssize, ssize, scale_swiz)); 
+
+    switch(base.output_size()) {
+      case 1: { Attrib1f p; shASN(p, in_base); shMAD(p, in_scale, snoise<1>(p, false), p); shASN(out, p); break; } 
+      case 2: { Attrib2f p; shASN(p, in_base); shMAD(p, in_scale, snoise<2>(p, false), p); shASN(out, p); break; } 
+      case 3: { Attrib3f p; shASN(p, in_base); shMAD(p, in_scale, snoise<3>(p, false), p); shASN(out, p); break; } 
+      default:
+        assert(false);
+    }
+  } SH_END;
+  Man result(f << both);
+
+  delete[] base_swiz; 
+  delete[] scale_swiz;
+  return result.name("m_add_noise(" + base.name() + "," + scale.name() + ")"); 
+}
+
+Man m_rotatex(const Man& m, const Man& angle) {
+  Man mf = m_resize_inputs(m, angle).fill(3); 
+  Man anglef  = m_resize_inputs(angle, m); 
+  Program p = SH_BEGIN_PROGRAM() {
+    Variable in_m = mf.outsize_var(SH_INPUT);
+    Variable in_angle = angle.outsize_var(SH_INPUT);
+    Variable out = mf.outsize_var(SH_OUTPUT); 
+    Attrib1f c, s; 
+    shCOS(c, in_angle);
+    shSIN(s, in_angle);
+    shASN(out, in_m);
+    Variable out1(out(1));
+    Variable out2(out(2));
+    shMUL(out1, c, in_m(1));
+    shMAD(out1, s, in_m(2), out1);
+    shMUL(out2, -s, in_m(1));
+    shMAD(out2, c, in_m(2), out2);
+  } SH_END;
+  Man result = p << (mf & anglef) << SH::dup(); 
+  return result.name("m_rotatex(" + m.name() + "," + angle.name() + ")");
+}
+
+Man m_rotatey(const Man& m, const Man& angle) {
+  Man mf = m_resize_inputs(m, angle).fill(3); 
+  Man anglef  = m_resize_inputs(angle, m); 
+  Program p = SH_BEGIN_PROGRAM() {
+    Variable in_m = mf.outsize_var(SH_INPUT);
+    Variable in_angle = angle.outsize_var(SH_INPUT);
+    Variable out = mf.outsize_var(SH_OUTPUT); 
+    Attrib1f c, s; 
+    shCOS(c, in_angle);
+    shSIN(s, in_angle);
+    shASN(out, in_m);
+    Variable out0(out(0));
+    Variable out2(out(2));
+    shMUL(out0, c, in_m(0));
+    shMAD(out0, -s, in_m(2), out0);
+    shMUL(out2, s, in_m(0));
+    shMAD(out2, c, in_m(2), out2);
+  } SH_END;
+  Man result = p << (mf & anglef) << SH::dup(); 
+  return result.name("m_rotatey(" + m.name() + "," + angle.name() + ")");
+}
+
+Man m_rotatez(const Man& m, const Man& angle) {
+  Man mf = m_resize_inputs(m, angle);
+  if(mf.output_size() < 2) mf = mf.fill(2);
+  Man anglef  = m_resize_inputs(angle, m); 
+  Program p = SH_BEGIN_PROGRAM() {
+    Variable in_m = mf.outsize_var(SH_INPUT);
+    Variable in_angle = angle.outsize_var(SH_INPUT);
+    Variable out = mf.outsize_var(SH_OUTPUT); 
+    Attrib1f c, s; 
+    shCOS(c, in_angle);
+    shSIN(s, in_angle);
+    shASN(out, in_m);
+    Variable out0(out(0));
+    Variable out1(out(1));
+    shMUL(out0, c, in_m(0));
+    shMAD(out0, s, in_m(1), out0);
+    shMUL(out1, -s, in_m(0));
+    shMAD(out1, c, in_m(1), out1);
+  } SH_END;
+  Man result = p << (mf & anglef) << SH::dup(); 
+  return result.name("m_rotatez(" + m.name() + "," + angle.name() + ")");
+}
+
+Man m_translatex(const Man& m, const Man& t) {
+  Man mf = m_resize_inputs(m, t);
+  Man tf = m_resize_inputs(t, m);
+  Program p = SH_BEGIN_PROGRAM() {
+    Variable mval = mf.outsize_var(SH_INOUT);
+    Variable in_t = tf.outsize_var(SH_INPUT);
+    Variable mval0 = mval(0);
+    shADD(mval0, mval(0), in_t);
+  } SH_END;
+  Man result = p << (mf & tf) << SH::dup(); 
+  return result.name("m_translatex(" + m.name() + "," + t.name() + ")");
+}
+
+Man m_translatey(const Man& m, const Man& t) {
+  Man mf = m_resize_inputs(m, t);
+  if(mf.output_size() < 2) mf = mf.fill(2);
+  Man tf = m_resize_inputs(t, m);
+  Program p = SH_BEGIN_PROGRAM() {
+    Variable mval = mf.outsize_var(SH_INOUT);
+    Variable in_t = tf.outsize_var(SH_INPUT);
+    Variable mval1 = mval(1);
+    shADD(mval1, mval(1), in_t);
+  } SH_END;
+  Man result = p << (mf & tf) << SH::dup(); 
+  return result.name("m_translatey(" + m.name() + "," + t.name() + ")");
+}
+
+Man m_translatez(const Man& m, const Man& t) {
+  Man mf = m_resize_inputs(m, t);
+  if(mf.output_size() < 3) mf = mf.fill(3);
+  Man tf = m_resize_inputs(t, m);
+  Program p = SH_BEGIN_PROGRAM() {
+    Variable mval = mf.outsize_var(SH_INOUT);
+    Variable in_t = tf.outsize_var(SH_INPUT);
+    Variable mval2 = mval(2);
+    shADD(mval2, mval(2), in_t);
+  } SH_END;
+  Man result = p << (mf & tf) << SH::dup(); 
+  return result.name("m_translatez(" + m.name() + "," + t.name() + ")");
+}

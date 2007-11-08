@@ -1,0 +1,5 @@
+runall generates
+  * loop counts
+  * timing statistics
+  * tagged csv dumps (tagging each floating point op with role in an AA computation) 
+  * screen caps
