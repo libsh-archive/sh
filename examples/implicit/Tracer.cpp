@@ -811,10 +811,26 @@ void TracerFrame::OnCharAll(wxKeyEvent& event)
      }
      break;
 
+    case 'A':
+     if(selected > 0) {
+       int idx = selected - 1;
+       pfs[idx] = new SinPF(pfs[idx], 0, 0.2, 4);  
+       reinit = true;
+     }
+     break;
+
     case 'S':
      if(selected > 0) {
        int idx = selected - 1;
-       pfs[idx] = new SinPF(pfs[idx], 1, 0.1, 4);  
+       pfs[idx] = new SinPF(pfs[idx], 1, 0.2, 4);  
+       reinit = true;
+     }
+     break;
+
+    case 'D':
+     if(selected > 0) {
+       int idx = selected - 1;
+       pfs[idx] = new SinPF(pfs[idx], 2, 0.2, 4);  
        reinit = true;
      }
      break;

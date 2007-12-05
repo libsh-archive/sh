@@ -130,15 +130,15 @@ void GlslCode::generate()
   //transform.texd_to_texlod();
 
   //SH_DEBUG_PRINT("glsl done before opt stmtcount: " << m_shader->statement_count());
-  m_shader->csvdump("glslcode_" + m_originalShader->name() + "_tags.csv", 
-    combine(getTagCsvData(m_shader), getLiveVarCsvData(m_shader)));  
+  //m_shader->csvdump("glslcode_" + m_originalShader->name() + "_tags.csv", 
+  //  combine(getTagCsvData(m_shader), getLiveVarCsvData(m_shader)));  
 
   if(transform.changed()) {
     optimize(m_shader);
   }
 
-  m_shader->csvdump("glslcode_" + m_originalShader->name() + "_part_opt_tags.csv",
-    combine(getTagCsvData(m_shader), getLiveVarCsvData(m_shader)));  
+  //m_shader->csvdump("glslcode_" + m_originalShader->name() + "_part_opt_tags.csv",
+  //  combine(getTagCsvData(m_shader), getLiveVarCsvData(m_shader)));  
 
   Context::current()->enable_optimization("forward substitution");
   //Context::current()->enable_optimization("forward placement");
@@ -154,8 +154,8 @@ void GlslCode::generate()
 
   //SH_DEBUG_PRINT("glsl done partial opt stmtcount: " << m_shader->statement_count());
   LiveVarCsvDataPtr lvcd = shref_dynamic_cast<LiveVarCsvData>(getLiveVarCsvData(m_shader));
-  m_shader->csvdump("glslcode_" + m_originalShader->name() + "_optimized_tags.csv", 
-    combine(getTagCsvData(m_shader), lvcd)); 
+  //m_shader->csvdump("glslcode_" + m_originalShader->name() + "_optimized_tags.csv", 
+  //  combine(getTagCsvData(m_shader), lvcd)); 
   Context::current()->set_stat("glsl_instr_count", m_shader->statement_count());
   Context::current()->set_stat("glsl_scalar_instr_count", m_shader->scalar_statement_count());
   Context::current()->set_stat("glsl_num_live", lvcd->max_live);

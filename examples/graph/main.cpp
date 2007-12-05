@@ -335,8 +335,8 @@ void initShaders() {
     Color3f SH_DECL(inrangeColor) = ConstAttrib3f(0, 0, 0);
     Color3f SH_DECL(edgeColor) = ConstAttrib3f(0.5,0.5,0.5);
 
-    Color3f SH_DECL(aaColor) = ColorFinder::color(ColorFinder::Dark2, 3, 0); 
-    Color3f SH_DECL(iaColor) = ColorFinder::color(ColorFinder::Dark2, 3, 1); 
+    Color3f SH_DECL(aaColor) = ColorFinder::color(ColorFinder::Set2, 8, 1); 
+    Color3f SH_DECL(iaColor) = ColorFinder::color(ColorFinder::Set2, 8, 2); 
 
     // take plot function, find if there's an intersection,
     // kill if no isct

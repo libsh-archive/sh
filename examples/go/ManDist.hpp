@@ -25,6 +25,8 @@
 
 #define DUMP_COUNT 100000
 
+#define COLORDIST false
+
 template<int N>
 struct Minimizer {
   typedef SH::Attrib<N, SH::SH_TEMP, float> InType;
@@ -250,19 +252,25 @@ struct distance_graph_updater: public nearest_points_updater<A, B, N> {
         result(0, 2) = in(0,1) - 0.5f;
         result(1) = val * 0.1f; 
       }
+#if COLORDIST
       minVal = this->objective(this->minparms);
       maxVal = this->objective(this->maxparms);
       valRatio = (val - minVal) / (maxVal - minVal);
       result(3) = valRatio;
+#else
+      result(3) = 0.5;
+#endif
     } SH_END;
     maximizer = Minimizer<A + B>(-this->objective, domain_eps * 10, use_aa);
   }
 
   /* updates the nearest points by running the global optimization again */
   virtual void update(SH::Program& p) {
+#if COLORDIST 
     nearest_points_updater<A, B, N>::update(p);
     maxparms = maximizer.doit();
     std::cout << "maximize result = " << maxparms << std::endl;
+#endif
   };
 };
 

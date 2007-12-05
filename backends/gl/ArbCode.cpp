@@ -245,14 +245,14 @@ void ArbCode::generate()
   dump(m_shader, "arbcode_start");
   transform.handleDbgOps();
   dump(m_shader, "arbcode_dbg");
-  //dump(m_shader, "arbcode_io");
+  dump(m_shader, "arbcode_io");
   // Record changes that the transformer makes to the input/output variables
   // so that we have a mapping from the changed ones back to the originals.
   transform.convertInputOutput(&m_originalVarsMap);
   transform.convertTextureLookups();
-  //dump(m_shader, "arbcode_tex");
+  dump(m_shader, "arbcode_tex");
   transform.convertAffineTypes();
-  //dump(m_shader, "arbcode_a_conv");
+  dump(m_shader, "arbcode_a_conv");
   transform.convertIntervalTypes();
   dump(m_shader, "arbcode_i_conv");
   transform.convertTextureLookups(); // @todo range - do again in case IA/AA tex lookups need some extra care
@@ -267,15 +267,15 @@ void ArbCode::generate()
 
   //SH_DEBUG_PRINT("arb done before opt stmtcount: " << m_shader->statement_count());
 
-  m_shader->csvdump("arbcode_" + m_originalShader->name() + "_tags.csv", 
-    combine(getTagCsvData(m_shader), getLiveVarCsvData(m_shader)));  
+  //m_shader->csvdump("arbcode_" + m_originalShader->name() + "_tags.csv", 
+  //  combine(getTagCsvData(m_shader), getLiveVarCsvData(m_shader)));  
   if(transform.changed()) {
     optimize(m_shader);
   }
 
   //SH_DEBUG_PRINT("arb done partial opt stmtcount: " << m_shader->statement_count());
-  m_shader->csvdump("arbcode_" + m_originalShader->name() + "_part_opt_tags.csv",
-    combine(getTagCsvData(m_shader), getLiveVarCsvData(m_shader)));  
+  //m_shader->csvdump("arbcode_" + m_originalShader->name() + "_part_opt_tags.csv",
+  //  combine(getTagCsvData(m_shader), getLiveVarCsvData(m_shader)));  
 
   Context::current()->enable_optimization("forward substitution");
   //Context::current()->enable_optimization("forward placement");
@@ -296,8 +296,8 @@ void ArbCode::generate()
   Context::current()->set_stat("arb_scalar_instr_count", m_shader->scalar_statement_count());
   //SH_DEBUG_PRINT("arb done after opt stmtcount: " << m_shader->statement_count());
   LiveVarCsvDataPtr lvcd = shref_dynamic_cast<LiveVarCsvData>(getLiveVarCsvData(m_shader));
-  m_shader->csvdump("arbcode_" + m_originalShader->name() + "_optimized_tags.csv", 
-    combine(getTagCsvData(m_shader), lvcd)); 
+  //m_shader->csvdump("arbcode_" + m_originalShader->name() + "_optimized_tags.csv", 
+  //  combine(getTagCsvData(m_shader), lvcd)); 
   Context::current()->set_stat("arb_num_live", lvcd->max_live);
   Context::current()->set_stat("arb_num_scalar_live", lvcd->max_scalar_live);
   Context::current()->set_stat("arb_avg_num_live", lvcd->total_live / static_cast<float>(lvcd->stmt_count));
